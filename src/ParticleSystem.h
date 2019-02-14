@@ -11,18 +11,21 @@ struct Particle
 {
 	Particle(const glm::vec2& position, const glm::vec4& color) :
 		m_Position(position),
-		m_Color(color)
+		m_Color(color),
+		m_Velocity(0.0f,0.0f),
+		isActive(true)
 	{}
 
-	//TODO pass deltaTime here
-	void Update() {
-		m_Position += m_Velocity;
+	void Update(const float& deltaTime) {
+		m_Position += m_Velocity * deltaTime;
 	}
 
 	glm::vec2 m_Position;
 	glm::vec4 m_Color;
 
 	glm::vec2 m_Velocity;
+
+	bool isActive;
 };
 
 class ParticleSystem 
@@ -30,11 +33,13 @@ class ParticleSystem
 public:
 	ParticleSystem();
 
-	//TODO pass deltaTime here
-	void Update();
-
+	void Update(const float& deltaTime);
 	void Draw();
+	void SpawnParticle(const Particle& particle);
+	void ClearParticles();
 
+public:
+	float Scale;
 private:
 	ShaderProgram m_Shader;
 	std::vector<Particle> m_Particles;

@@ -3,14 +3,16 @@
 static unsigned int VBO;
 static unsigned int VAO;
 
-ParticleSystem::ParticleSystem() 
+ParticleSystem::ParticleSystem() :
+	Scale(10)
 {
 	m_Shader.Init("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag");
 	m_Particles.reserve(100);
 
 	for (size_t i = 0; i < 100; i++)
 	{
-		Particle particle(glm::vec2(0.0f,0.0f),glm::vec4(1.0f,1.0f,1.0f,1.0f));
+		Particle particle(glm::vec2(0, 0),glm::vec4(1.0f,1.0f,1.0f,1.0f));
+		particle.isActive = false;
 		m_Particles.push_back(particle);
 	}
 
@@ -46,8 +48,14 @@ ParticleSystem::ParticleSystem()
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1000), static_cast<GLfloat>(1000 * 9 / 16), 0.0f);
 	m_Shader.setUniformMat4("projection", projection);
 
-	glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(2, 2, 2));
+	glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(Scale, Scale, Scale));
 	m_Shader.setUniformMat4("model", model);
+}
+
+void ParticleSystem::Update(const float& deltaTime)
+{
+	for (Particle& particle : m_Particles)
+		particle.Update(deltaTime);
 
 	for (unsigned int i = 0; i < 100; i++)
 	{
@@ -55,14 +63,15 @@ ParticleSystem::ParticleSystem()
 		std::string index;
 		ss << i;
 		index = ss.str();
-		m_Shader.setUniformVec2(("positions[" + index + "]").c_str(), glm::vec2(i * 3,i * 3));
-	}
-}
 
-void ParticleSystem::Update()
-{
-	for (Particle& particle : m_Particles)
-		particle.Update();
+		if(m_Particles[i].isActive)
+			m_Shader.setUniformVec2(("positions[" + index + "]").c_str(), m_Particles[i].m_Position);
+		else
+			m_Shader.setUniformVec2(("positions[" + index + "]").c_str(), glm::vec2(-1000, -1000));
+
+
+
+	}
 }
 
 void ParticleSystem::Draw()
@@ -70,4 +79,25 @@ void ParticleSystem::Draw()
 	glBindVertexArray(VAO);
 	m_Shader.Bind();
 	glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 30, 100);
+}
+
+void ParticleSystem::SpawnParticle(const Particle & particle)
+{
+	for (Particle& m_particle : m_Particles)
+	{
+		if (!m_particle.isActive)
+		{
+			m_particle.m_Position = particle.m_Position;
+			m_particle.m_Color = particle.m_Color;
+			m_particle.m_Velocity = particle.m_Velocity;
+			m_particle.isActive = true;
+			break;
+		}
+	}
+}
+
+void ParticleSystem::ClearParticles()
+{
+	for (Particle& m_particle : m_Particles)
+		m_particle.isActive = false;
 }
