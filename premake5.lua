@@ -8,7 +8,7 @@ project "Core"
     kind ("ConsoleApp")
     cppdialect "C++17"
 
-    files { "src/**.h", "src/**.cpp", "src/**.c" }
+    files { "src/**.h", "src/**.hpp", "src/**.cpp", "src/**.c", "shaders/**.vert", "shaders/**.frag" }
     includedirs { "src"}
 
     links { "OpenGL32.lib" }
