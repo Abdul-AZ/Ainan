@@ -1,12 +1,16 @@
 #include <iostream>
 #include <chrono>
 #include <ctime>
+#include <random>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "ParticleSystem.h"
 
 int main() {
+	std::random_device rd;
+	std::mt19937 mt(rd());
+
 	glfwInit();
 
 	glfwWindowHint(GLFW_VERSION_MAJOR, 4);
@@ -24,6 +28,9 @@ int main() {
 	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 	ParticleSystem Psystem;
+
+	std::cout << glGetError() << std::endl;
+
 
 	std::clock_t timeStart = 0;
 	std::clock_t timeEnd = 0;
@@ -45,11 +52,20 @@ int main() {
 			double xpos, ypos;
 			glfwGetCursorPos(window, &xpos, &ypos);
 
-			Particle particle(glm::vec2(xpos / Psystem.Scale,ypos / Psystem.Scale),glm::vec4(1.0f,1.0f,1.0f,1.0));
+			Particle particle(glm::vec2(xpos ,ypos ),glm::vec4(1.0f,1.0f,1.0f,1.0));
 
-			particle.m_Velocity = glm::vec2((rand() % 21) - 10, (rand() % 21) - 10);
+			std::uniform_real_distribution<float> dist_velocity(-150.0f, 150.0f);
 
+			particle.m_Velocity = glm::vec2(dist_velocity(mt), dist_velocity(mt));
+
+			std::uniform_real_distribution<float> dist_time(0.1f, 3.0f);
+
+			particle.SetLifeTime(dist_time(mt));
+
+			std::uniform_real_distribution<float> dist_scale(8.0f, 15.0f);
+			particle.m_Scale = dist_scale(mt);
 			Psystem.SpawnParticle(particle);
+
 		}
 		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 			Psystem.ClearParticles();

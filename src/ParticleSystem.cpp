@@ -47,9 +47,6 @@ ParticleSystem::ParticleSystem() :
 
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1000), static_cast<GLfloat>(1000 * 9 / 16), 0.0f);
 	m_Shader.setUniformMat4("projection", projection);
-
-	glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(Scale, Scale, Scale));
-	m_Shader.setUniformMat4("model", model);
 }
 
 void ParticleSystem::Update(const float& deltaTime)
@@ -64,13 +61,15 @@ void ParticleSystem::Update(const float& deltaTime)
 		ss << i;
 		index = ss.str();
 
+		glm::mat4 model = glm::mat4(1.0f);
+
+		model = glm::translate(model, glm::vec3(m_Particles[i].m_Position.x, m_Particles[i].m_Position.y, 0.0f));
+		model = glm::scale(model, glm::vec3(m_Particles[i].m_Scale, m_Particles[i].m_Scale, m_Particles[i].m_Scale));
+
 		if(m_Particles[i].isActive)
-			m_Shader.setUniformVec2(("positions[" + index + "]").c_str(), m_Particles[i].m_Position);
+			m_Shader.setUniformMat4(("model[" + index + "]").c_str(), model);
 		else
-			m_Shader.setUniformVec2(("positions[" + index + "]").c_str(), glm::vec2(-1000, -1000));
-
-
-
+			m_Shader.setUniformMat4(("model[" + index + "]").c_str(), glm::mat4(1.0f));
 	}
 }
 
@@ -91,6 +90,8 @@ void ParticleSystem::SpawnParticle(const Particle & particle)
 			m_particle.m_Color = particle.m_Color;
 			m_particle.m_Velocity = particle.m_Velocity;
 			m_particle.isActive = true;
+			m_particle.m_Scale = particle.m_Scale;
+			m_particle.SetLifeTime(particle.m_LifeTime);
 			break;
 		}
 	}
