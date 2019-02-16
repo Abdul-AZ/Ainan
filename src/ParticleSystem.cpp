@@ -44,13 +44,14 @@ ParticleSystem::ParticleSystem() :
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(1000), static_cast<GLfloat>(1000 * 9 / 16), 0.0f);
-	m_Shader.setUniformMat4("projection", projection);
 }
 
 void ParticleSystem::Update(const float& deltaTime)
 {
+	glm::vec2& size = Window::GetSize();
+	glm::mat4 projection = glm::ortho(0.0f, size.x, size.y, 0.0f);
+	m_Shader.setUniformMat4("projection", projection);
+
 	for (Particle& particle : m_Particles)
 		particle.Update(deltaTime);
 

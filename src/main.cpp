@@ -4,23 +4,17 @@
 #include <random>
 
 #include <glad/glad.h>
+#include "Window.h"
 #include <GLFW/glfw3.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
 #include "ParticleSystem.h"
+#include "ParticleCustomizer.h"
 
 int main() {
-	std::random_device rd;
-	std::mt19937 mt(rd());
 
-	glfwInit();
-
-	glfwWindowHint(GLFW_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_VERSION_MINOR, 0);
-
-	GLFWwindow* window = nullptr;
-
-	window = glfwCreateWindow(1000, 1000 * 9 / 16, "Particles", nullptr, nullptr);
-
-	glfwMakeContextCurrent(window);
+	Window::Init();
 
 	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
@@ -29,51 +23,64 @@ int main() {
 
 	ParticleSystem Psystem;
 
-	std::cout << glGetError() << std::endl;
-
-
 	std::clock_t timeStart = 0;
 	std::clock_t timeEnd = 0;
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	while (!glfwWindowShouldClose(window))
+	//setup ImGui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(&Window::GetWindow(), true);
+	ImGui_ImplOpenGL3_Init("#version 130");
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	float particleSpeed = 0.0f;
+
+	Particle Ptemplate;
+
+	ParticleCustomizer customizer;
+
+	while (!glfwWindowShouldClose(&Window::GetWindow()))
 	{
 		timeEnd = clock();
 		float deltaTime = (timeEnd - timeStart) / 1000.0f;
 		timeStart = timeEnd;
 
 		//Update
-		glfwPollEvents();
+		Window::Update();
 		Psystem.Update(deltaTime);
 		
-		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-			double xpos, ypos;
-			glfwGetCursorPos(window, &xpos, &ypos);
-
-			Particle particle(glm::vec2(xpos ,ypos ),glm::vec4(1.0f,1.0f,1.0f,1.0));
-
-			std::uniform_real_distribution<float> dist_velocity(-150.0f, 150.0f);
-
-			particle.m_Velocity = glm::vec2(dist_velocity(mt), dist_velocity(mt));
-
-			std::uniform_real_distribution<float> dist_time(0.1f, 3.0f);
-
-			particle.SetLifeTime(dist_time(mt));
-
-			std::uniform_real_distribution<float> dist_scale(8.0f, 15.0f);
-			particle.m_Scale = dist_scale(mt);
-			Psystem.SpawnParticle(particle);
-
+		if (glfwGetMouseButton(&Window::GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !io.WantCaptureMouse) 
+		{
+			Psystem.SpawnParticle(customizer.GetParticle());
 		}
-		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+		if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS)
 			Psystem.ClearParticles();
+
 		//Render
 		glClear(GL_COLOR_BUFFER_BIT);
 		Psystem.Draw();
-		glfwSwapBuffers(window);
+
+		//Render ImGui
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		customizer.DisplayImGuiCustomizer();
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		Window::Present();
 	}
 	
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+	glfwDestroyWindow(&Window::GetWindow());
 	glfwTerminate();
 }
