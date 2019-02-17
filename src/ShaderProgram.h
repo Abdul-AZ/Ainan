@@ -15,6 +15,7 @@ public:
 	void Unbind() const;
 
 	void setUniformVec2(const char* name, const glm::vec2& value);
+	void setUniformVec4(const char* name, const glm::vec4& value);
 	void setUniformMat4(const char* name, const glm::mat4& value);
 
 private:

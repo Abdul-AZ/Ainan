@@ -3,15 +3,14 @@
 static unsigned int VBO;
 static unsigned int VAO;
 
-ParticleSystem::ParticleSystem() :
-	Scale(10)
+ParticleSystem::ParticleSystem()
 {
 	m_Shader.Init("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag");
 	m_Particles.reserve(100);
 
 	for (size_t i = 0; i < 100; i++)
 	{
-		Particle particle(glm::vec2(0, 0),glm::vec4(1.0f,1.0f,1.0f,1.0f));
+		Particle particle;
 		particle.isActive = false;
 		m_Particles.push_back(particle);
 	}
@@ -54,8 +53,44 @@ void ParticleSystem::Update(const float& deltaTime)
 
 	for (Particle& particle : m_Particles)
 		particle.Update(deltaTime);
+}
 
-	for (unsigned int i = 0; i < 100; i++)
+void ParticleSystem::Draw()
+{
+	glBindVertexArray(VAO);
+	m_Shader.Bind();
+
+	int drawCount = m_Particles.size() / 40;
+
+	for (int i = 0; i < drawCount; i++)
+	{
+		for (unsigned int j = i * 40; j < 40 + i * 40; j++)
+		{
+			std::stringstream ss;
+			std::string index;
+			int i_index = j - i * 40;
+			ss << i_index;
+			index = ss.str();
+
+			glm::mat4 model = glm::mat4(1.0f);
+
+			model = glm::translate(model, glm::vec3(m_Particles[j].m_Position.x, m_Particles[j].m_Position.y, 0.0f));
+			model = glm::scale(model, glm::vec3(m_Particles[j].m_Scale, m_Particles[j].m_Scale, m_Particles[j].m_Scale));
+
+			if (m_Particles[j].isActive) {
+				m_Shader.setUniformMat4(("model[" + index + "]").c_str(), model);
+				m_Shader.setUniformVec4(("colorArr[" + index + "]").c_str(), m_Particles[j].m_Color);
+			}
+			else
+				m_Shader.setUniformMat4(("model[" + index + "]").c_str(), glm::mat4(1.0f));
+
+		}
+		glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 30, 40);
+	}
+
+	int remaining = m_Particles.size() % 40;
+
+	for (unsigned int i = drawCount * 40; i < drawCount * 40 + remaining; i++)
 	{
 		std::stringstream ss;
 		std::string index;
@@ -67,18 +102,14 @@ void ParticleSystem::Update(const float& deltaTime)
 		model = glm::translate(model, glm::vec3(m_Particles[i].m_Position.x, m_Particles[i].m_Position.y, 0.0f));
 		model = glm::scale(model, glm::vec3(m_Particles[i].m_Scale, m_Particles[i].m_Scale, m_Particles[i].m_Scale));
 
-		if(m_Particles[i].isActive)
+		if (m_Particles[i].isActive) {
 			m_Shader.setUniformMat4(("model[" + index + "]").c_str(), model);
+			m_Shader.setUniformVec4(("colorArr[" + index + "]").c_str(), m_Particles[i].m_Color);
+		}
 		else
 			m_Shader.setUniformMat4(("model[" + index + "]").c_str(), glm::mat4(1.0f));
 	}
-}
-
-void ParticleSystem::Draw()
-{
-	glBindVertexArray(VAO);
-	m_Shader.Bind();
-	glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 30, 100);
+	glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 30, remaining);
 }
 
 void ParticleSystem::SpawnParticle(const Particle & particle)

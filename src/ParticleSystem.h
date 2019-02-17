@@ -10,7 +10,15 @@
 
 struct Particle 
 {
-	Particle() {}
+	Particle() :
+		m_Scale(0.0f),
+		m_Position(0.0f,0.0f),
+		m_Color(0.0f,0.0f,0.0f,0.0f),
+		m_Velocity(0.0f, 0.0f),
+		isActive(false),
+		m_LifeTime(0.0f),
+		m_RemainingLifeTime(0.0f)
+		{}
 
 	Particle(const glm::vec2& position, const glm::vec4& color) :
 		m_Position(position),
@@ -61,8 +69,6 @@ public:
 	void SpawnParticle(const Particle& particle);
 	void ClearParticles();
 
-public:
-	float Scale;
 private:
 	ShaderProgram m_Shader;
 	std::vector<Particle> m_Particles;

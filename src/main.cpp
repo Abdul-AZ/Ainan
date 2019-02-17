@@ -13,7 +13,6 @@
 #include "ParticleCustomizer.h"
 
 int main() {
-
 	Window::Init();
 
 	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
@@ -38,11 +37,8 @@ int main() {
 	ImGui_ImplOpenGL3_Init("#version 130");
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-	float particleSpeed = 0.0f;
-
-	Particle Ptemplate;
-
 	ParticleCustomizer customizer;
+
 
 	while (!glfwWindowShouldClose(&Window::GetWindow()))
 	{
@@ -58,6 +54,7 @@ int main() {
 		{
 			Psystem.SpawnParticle(customizer.GetParticle());
 		}
+
 		if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS)
 			Psystem.ClearParticles();
 

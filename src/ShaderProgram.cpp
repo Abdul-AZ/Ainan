@@ -35,10 +35,13 @@ void ShaderProgram::Init(const std::string & vertPath, const std::string & fragP
 	const char* c_fShaderCode = fShaderCode.c_str();
 	glShaderSource(fragment, 1, &c_fShaderCode, NULL);
 	glCompileShader(fragment);
+
+
 	// shader Program
 	m_RendererID = glCreateProgram();
 	glAttachShader(m_RendererID, vertex);
 	glAttachShader(m_RendererID, fragment);
+
 	glLinkProgram(m_RendererID);
 	// delete the shaders as they're linked into our program now and no longer necessery
 	glDeleteShader(vertex);
@@ -62,6 +65,13 @@ void ShaderProgram::setUniformVec2(const char* name, const glm::vec2& value)
 	Bind();
 	int location = glGetUniformLocation(m_RendererID, name);
 	glUniform2f(location, value.x, value.y);
+}
+
+void ShaderProgram::setUniformVec4(const char* name, const glm::vec4& value) 
+{
+	Bind();
+	int location = glGetUniformLocation(m_RendererID, name);
+	glUniform4f(location, value.x, value.y, value.z, value.w);
 }
 
 void ShaderProgram::setUniformMat4(const char * name, const glm::mat4 & value)
