@@ -33,7 +33,7 @@ void ParticleCustomizer::Update()
 	m_Particle.SetLifeTime(m_LifetimeCustomizer.GetLifetime());
 
 
-	m_Particle.m_Scale = m_ScaleCustomizer.GetScale();
+	m_Particle.m_ScaleInterpolator = m_ScaleCustomizer.GetScaleInterpolator();
 }
 
 Particle& ParticleCustomizer::GetParticle()

@@ -6,9 +6,9 @@ static unsigned int VAO;
 ParticleSystem::ParticleSystem()
 {
 	m_Shader.Init("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag");
-	m_Particles.reserve(100);
+	m_Particles.reserve(300);
 
-	for (size_t i = 0; i < 100; i++)
+	for (size_t i = 0; i < 300; i++)
 	{
 		Particle particle;
 		particle.isActive = false;
@@ -75,7 +75,9 @@ void ParticleSystem::Draw()
 			glm::mat4 model = glm::mat4(1.0f);
 
 			model = glm::translate(model, glm::vec3(m_Particles[j].m_Position.x, m_Particles[j].m_Position.y, 0.0f));
-			model = glm::scale(model, glm::vec3(m_Particles[j].m_Scale, m_Particles[j].m_Scale, m_Particles[j].m_Scale));
+			float t = (m_Particles[j].m_LifeTime - m_Particles[j].m_RemainingLifeTime) / m_Particles[j].m_LifeTime;
+			float scale = m_Particles[j].m_ScaleInterpolator.Interpolate(t);
+			model = glm::scale(model, glm::vec3(scale, scale, scale));
 
 			if (m_Particles[j].isActive) {
 				m_Shader.setUniformMat4(("model[" + index + "]").c_str(), model);
@@ -100,7 +102,10 @@ void ParticleSystem::Draw()
 		glm::mat4 model = glm::mat4(1.0f);
 
 		model = glm::translate(model, glm::vec3(m_Particles[i].m_Position.x, m_Particles[i].m_Position.y, 0.0f));
-		model = glm::scale(model, glm::vec3(m_Particles[i].m_Scale, m_Particles[i].m_Scale, m_Particles[i].m_Scale));
+
+		float t = (m_Particles[i].m_LifeTime - m_Particles[i].m_RemainingLifeTime) / m_Particles[i].m_LifeTime;
+		float scale = m_Particles[i].m_ScaleInterpolator.Interpolate(t);
+		model = glm::scale(model, glm::vec3(scale, scale, scale));
 
 		if (m_Particles[i].isActive) {
 			m_Shader.setUniformMat4(("model[" + index + "]").c_str(), model);
@@ -122,7 +127,7 @@ void ParticleSystem::SpawnParticle(const Particle & particle)
 			m_particle.m_Color = particle.m_Color;
 			m_particle.m_Velocity = particle.m_Velocity;
 			m_particle.isActive = true;
-			m_particle.m_Scale = particle.m_Scale;
+			m_particle.m_ScaleInterpolator = particle.m_ScaleInterpolator;
 			m_particle.SetLifeTime(particle.m_LifeTime);
 			break;
 		}
