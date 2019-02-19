@@ -74,9 +74,23 @@ void ShaderProgram::setUniformVec4(const char* name, const glm::vec4& value)
 	glUniform4f(location, value.x, value.y, value.z, value.w);
 }
 
+void ShaderProgram::setUniformVec4s(const char * name, const glm::vec4* const value, const int & count)
+{
+	Bind();
+	int location = glGetUniformLocation(m_RendererID, name);
+	glUniform4fv(location, count, (float*)value);
+}
+
 void ShaderProgram::setUniformMat4(const char * name, const glm::mat4 & value)
 {
 	Bind();
 	int location = glGetUniformLocation(m_RendererID, name);
 	glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
+}
+
+void ShaderProgram::setUniformMat4s(const char * name, const glm::mat4* const value, const int & count)
+{
+	Bind();
+	int location = glGetUniformLocation(m_RendererID, name);
+	glUniformMatrix4fv(location, count, GL_FALSE, (float*)value);
 }

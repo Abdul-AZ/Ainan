@@ -14,11 +14,8 @@ public:
 
 	glm::vec2 m_Position;
 	glm::vec4 m_Color;
-
 	glm::vec2 m_Velocity;
-
 	bool isActive;
-
 
 private:
 	float m_LifeTime;

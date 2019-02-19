@@ -19,7 +19,10 @@ public:
 	void SpawnParticle(const Particle& particle);
 	void ClearParticles();
 
+	~ParticleSystem();
 private:
 	ShaderProgram m_Shader;
 	std::vector<Particle> m_Particles;
+	void* m_ParticleInfoBuffer;
+	unsigned int m_ParticleCount;
 };

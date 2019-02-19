@@ -6,9 +6,14 @@ static unsigned int VAO;
 ParticleSystem::ParticleSystem()
 {
 	m_Shader.Init("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag");
-	m_Particles.reserve(300);
 
-	for (size_t i = 0; i < 300; i++)
+	//TODO pass as a parameter
+	m_ParticleCount = 600;
+	m_ParticleInfoBuffer = malloc((sizeof(glm::mat4) + sizeof(glm::vec4)) * m_ParticleCount);
+	memset(m_ParticleInfoBuffer, 0, (sizeof(glm::mat4) + sizeof(glm::vec4)) * m_ParticleCount);
+
+	m_Particles.reserve(m_ParticleCount);
+	for (size_t i = 0; i < m_ParticleCount; i++)
 	{
 		Particle particle;
 		particle.isActive = false;
@@ -60,75 +65,60 @@ void ParticleSystem::Draw()
 	glBindVertexArray(VAO);
 	m_Shader.Bind();
 
+	glm::mat4* modelBuffer = (glm::mat4*) m_ParticleInfoBuffer;
+	glm::vec4* colorBuffer = (glm::vec4*) ((char*)m_ParticleInfoBuffer + m_ParticleCount * sizeof(glm::mat4));
+
+	for (int i = 0; i < m_ParticleCount; i++)
+	{
+		glm::mat4 model = glm::mat4(1.0f);
+
+		if (m_Particles[i].isActive) {
+
+			model = glm::translate(model, glm::vec3(m_Particles[i].m_Position.x, m_Particles[i].m_Position.y, 0.0f));
+			float t = (m_Particles[i].m_LifeTime - m_Particles[i].m_RemainingLifeTime) / m_Particles[i].m_LifeTime;
+			float scale = m_Particles[i].m_ScaleInterpolator.Interpolate(t);
+			model = glm::scale(model, glm::vec3(scale, scale, scale));
+
+		}
+		else
+		{
+			model = glm::translate(model, glm::vec3(-10000, -10000, 0.0f));
+		}
+
+		modelBuffer[i] = model;
+
+		colorBuffer[i] = m_Particles[i].m_Color;
+	}
+
+
 	int drawCount = m_Particles.size() / 40;
 
 	for (int i = 0; i < drawCount; i++)
 	{
-		for (unsigned int j = i * 40; j < 40 + i * 40; j++)
-		{
-			std::stringstream ss;
-			std::string index;
-			int i_index = j - i * 40;
-			ss << i_index;
-			index = ss.str();
-
-			glm::mat4 model = glm::mat4(1.0f);
-
-			model = glm::translate(model, glm::vec3(m_Particles[j].m_Position.x, m_Particles[j].m_Position.y, 0.0f));
-			float t = (m_Particles[j].m_LifeTime - m_Particles[j].m_RemainingLifeTime) / m_Particles[j].m_LifeTime;
-			float scale = m_Particles[j].m_ScaleInterpolator.Interpolate(t);
-			model = glm::scale(model, glm::vec3(scale, scale, scale));
-
-			if (m_Particles[j].isActive) {
-				m_Shader.setUniformMat4(("model[" + index + "]").c_str(), model);
-				m_Shader.setUniformVec4(("colorArr[" + index + "]").c_str(), m_Particles[j].m_Color);
-			}
-			else
-				m_Shader.setUniformMat4(("model[" + index + "]").c_str(), glm::mat4(1.0f));
-
-		}
+		m_Shader.setUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
+		m_Shader.setUniformMat4s("model", &modelBuffer[i * 40], 40);
 		glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 30, 40);
 	}
 
 	int remaining = m_Particles.size() % 40;
 
-	for (unsigned int i = drawCount * 40; i < drawCount * 40 + remaining; i++)
-	{
-		std::stringstream ss;
-		std::string index;
-		ss << i;
-		index = ss.str();
-
-		glm::mat4 model = glm::mat4(1.0f);
-
-		model = glm::translate(model, glm::vec3(m_Particles[i].m_Position.x, m_Particles[i].m_Position.y, 0.0f));
-
-		float t = (m_Particles[i].m_LifeTime - m_Particles[i].m_RemainingLifeTime) / m_Particles[i].m_LifeTime;
-		float scale = m_Particles[i].m_ScaleInterpolator.Interpolate(t);
-		model = glm::scale(model, glm::vec3(scale, scale, scale));
-
-		if (m_Particles[i].isActive) {
-			m_Shader.setUniformMat4(("model[" + index + "]").c_str(), model);
-			m_Shader.setUniformVec4(("colorArr[" + index + "]").c_str(), m_Particles[i].m_Color);
-		}
-		else
-			m_Shader.setUniformMat4(("model[" + index + "]").c_str(), glm::mat4(1.0f));
-	}
+	m_Shader.setUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
+	m_Shader.setUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
 	glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 30, remaining);
 }
 
 void ParticleSystem::SpawnParticle(const Particle & particle)
 {
-	for (Particle& m_particle : m_Particles)
+	for (int i = 0; i < m_ParticleCount; i++)
 	{
-		if (!m_particle.isActive)
+		if (!m_Particles[i].isActive)
 		{
-			m_particle.m_Position = particle.m_Position;
-			m_particle.m_Color = particle.m_Color;
-			m_particle.m_Velocity = particle.m_Velocity;
-			m_particle.isActive = true;
-			m_particle.m_ScaleInterpolator = particle.m_ScaleInterpolator;
-			m_particle.SetLifeTime(particle.m_LifeTime);
+			m_Particles[i].m_Position = particle.m_Position;
+			m_Particles[i].m_Color = particle.m_Color;
+			m_Particles[i].m_Velocity = particle.m_Velocity;
+			m_Particles[i].isActive = true;
+			m_Particles[i].m_ScaleInterpolator = particle.m_ScaleInterpolator;
+			m_Particles[i].SetLifeTime(particle.m_LifeTime);
 			break;
 		}
 	}
@@ -138,4 +128,9 @@ void ParticleSystem::ClearParticles()
 {
 	for (Particle& m_particle : m_Particles)
 		m_particle.isActive = false;
+}
+
+ParticleSystem::~ParticleSystem()
+{
+	free(m_ParticleInfoBuffer);
 }
