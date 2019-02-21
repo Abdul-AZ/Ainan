@@ -11,6 +11,7 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include "ParticleSystem.h"
 #include "ParticleCustomizer.h"
+#include "GeneralSettingsGUI.h"
 
 int main() {
 	Window::Init();
@@ -37,8 +38,8 @@ int main() {
 	ImGui_ImplOpenGL3_Init("#version 130");
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
+	GeneralSettingsGUI settings;
 	ParticleCustomizer customizer;
-
 
 	while (!glfwWindowShouldClose(&Window::GetWindow()))
 	{
@@ -67,6 +68,7 @@ int main() {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 		customizer.DisplayImGuiCustomizer();
+		settings.DisplayGUI();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

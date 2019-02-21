@@ -16,8 +16,8 @@ void Window::Init()
 	glfwWindowHint(GLFW_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_VERSION_MINOR, 0);
 
-	m_Window = glfwCreateWindow(1000, 1000 * 9 / 16, "Particles", nullptr, nullptr);
-	m_ScreenSize = { 1000, 1000 * 9 / 16 };
+	m_Window = glfwCreateWindow(1500, 1500 * 9 / 16, "Particles", nullptr, nullptr);
+	m_ScreenSize = { 1500, 1500 * 9 / 16 };
 
 	glfwMakeContextCurrent(m_Window);
 

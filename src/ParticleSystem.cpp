@@ -97,14 +97,14 @@ void ParticleSystem::Draw()
 	{
 		m_Shader.setUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
 		m_Shader.setUniformMat4s("model", &modelBuffer[i * 40], 40);
-		glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 30, 40);
+		glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, 40);
 	}
 
 	int remaining = m_Particles.size() % 40;
 
 	m_Shader.setUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
 	m_Shader.setUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
-	glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 30, remaining);
+	glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, remaining);
 }
 
 void ParticleSystem::SpawnParticle(const Particle & particle)
