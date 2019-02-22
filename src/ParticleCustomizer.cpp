@@ -29,7 +29,7 @@ void ParticleCustomizer::Update()
 
 	m_Particle.m_Position = glm::vec2(xpos, ypos);
 	m_Particle.m_Velocity = m_VelocityCustomizer.GetVelocity();
-	m_Particle.m_Color = m_ColorCustomizer.GetColor();
+	m_Particle.m_Color = m_ColorCustomizer.GetColorInterpolator();
 	m_Particle.SetLifeTime(m_LifetimeCustomizer.GetLifetime());
 
 

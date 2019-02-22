@@ -64,14 +64,21 @@ void ScaleCustomizer::DisplayGUI()
 	}
 }
 
-Interpolator<float> ScaleCustomizer::GetScaleInterpolator()
+Interpolator<float>& ScaleCustomizer::GetScaleInterpolator()
 {
 	if (RandomScale) {
 		std::uniform_real_distribution<float> dist_scale(minScale, maxScale);
 
-		return Interpolator<float>(m_Interpolator.Mode, dist_scale(mt), endScale);
+		m_Interpolator.startPoint = dist_scale(mt);
+		m_Interpolator.endPoint = endScale;
+
+		return m_Interpolator;
 	}
 	else {
-		return Interpolator<float>(m_Interpolator.Mode, definedScale, endScale);
+
+		m_Interpolator.startPoint = definedScale;
+		m_Interpolator.endPoint = endScale;
+
+		return m_Interpolator;
 	}
 }

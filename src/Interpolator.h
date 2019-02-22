@@ -46,7 +46,6 @@ public:
 
 	InterpolatorMode Mode;
 
-private:
 	T startPoint;
 	T endPoint;
 };

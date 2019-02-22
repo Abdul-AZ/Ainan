@@ -19,7 +19,6 @@ int main() {
 	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
 	glfwSwapInterval(1);
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
 	ParticleSystem Psystem;
 

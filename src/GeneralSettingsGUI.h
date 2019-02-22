@@ -3,6 +3,7 @@
 
 #include <glad/glad.h>
 #include <imgui/imgui.h>
+#include <glm/glm.hpp>
 
 class GeneralSettingsGUI {
 public:
@@ -11,6 +12,7 @@ public:
 
 private:
 
+	//blending
 	void DisplayAllBlendOptions(GLenum& factor);
 	void DisplayBlendOption(const GLenum& option, GLenum& factor);
 
@@ -18,4 +20,7 @@ private:
 	bool m_GLBlendEnabled;
 	GLenum m_Sfactor = GL_SRC_ALPHA;
 	GLenum m_Dfactor = GL_ONE_MINUS_SRC_ALPHA;
+
+	//background
+	glm::vec4 m_BackgroundColor = { 0,0,0,0 };
 };

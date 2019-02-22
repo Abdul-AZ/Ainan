@@ -70,12 +70,12 @@ void ParticleSystem::Draw()
 
 	for (int i = 0; i < m_ParticleCount; i++)
 	{
+		float t = (m_Particles[i].m_LifeTime - m_Particles[i].m_RemainingLifeTime) / m_Particles[i].m_LifeTime;
 		glm::mat4 model = glm::mat4(1.0f);
 
 		if (m_Particles[i].isActive) {
 
 			model = glm::translate(model, glm::vec3(m_Particles[i].m_Position.x, m_Particles[i].m_Position.y, 0.0f));
-			float t = (m_Particles[i].m_LifeTime - m_Particles[i].m_RemainingLifeTime) / m_Particles[i].m_LifeTime;
 			float scale = m_Particles[i].m_ScaleInterpolator.Interpolate(t);
 			model = glm::scale(model, glm::vec3(scale, scale, scale));
 
@@ -87,7 +87,7 @@ void ParticleSystem::Draw()
 
 		modelBuffer[i] = model;
 
-		colorBuffer[i] = m_Particles[i].m_Color;
+		colorBuffer[i] = m_Particles[i].m_Color.Interpolate(t);
 	}
 
 

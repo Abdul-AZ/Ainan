@@ -11,7 +11,7 @@ public:
 	ScaleCustomizer();
 	void DisplayGUI();
 
-	Interpolator<float> GetScaleInterpolator();
+	Interpolator<float>& GetScaleInterpolator();
 
 private:
 	//starting scale

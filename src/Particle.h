@@ -11,9 +11,9 @@ public:
 	void SetLifeTime(const float& lifeTime);
 
 	Interpolator<float> m_ScaleInterpolator;
+	Interpolator<glm::vec4> m_Color;
 
 	glm::vec2 m_Position;
-	glm::vec4 m_Color;
 	glm::vec2 m_Velocity;
 	bool isActive;
 

@@ -36,6 +36,14 @@ void GeneralSettingsGUI::DisplayGUI()
 		}
 	}
 
+	if (ImGui::TreeNode("Background:"))
+	{
+		if (ImGui::ColorPicker4("Background Color", &m_BackgroundColor.r))
+			glClearColor(m_BackgroundColor.r, m_BackgroundColor.g, m_BackgroundColor.b, m_BackgroundColor.a);
+
+		ImGui::TreePop();
+	}
+
 	ImGui::End();
 }
 
