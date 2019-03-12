@@ -22,6 +22,11 @@ void Window::Init()
 	glfwMakeContextCurrent(m_Window);
 
 	glfwSetFramebufferSizeCallback(m_Window, framebuffer_size_callback);
+
+	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Window::Update()
@@ -33,6 +38,17 @@ void Window::Update()
 void Window::Present()
 {
 	glfwSwapBuffers(m_Window);
+}
+
+void Window::Clear()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void Window::Terminate()
+{
+	glfwDestroyWindow(m_Window);
+	glfwTerminate();
 }
 
 GLFWwindow & Window::GetWindow()

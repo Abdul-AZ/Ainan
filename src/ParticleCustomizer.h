@@ -13,7 +13,7 @@ class ParticleCustomizer
 public:
 	ParticleCustomizer();
 
-	void DisplayImGuiCustomizer();
+	void DisplayGUI();
 	void Update();
 	Particle& GetParticle();
 

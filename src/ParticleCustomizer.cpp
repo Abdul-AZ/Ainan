@@ -6,7 +6,7 @@ ParticleCustomizer::ParticleCustomizer() :
 
 }
 
-void ParticleCustomizer::DisplayImGuiCustomizer()
+void ParticleCustomizer::DisplayGUI()
 {
 	ImGui::Begin("Particle Settings");
 

@@ -13,13 +13,15 @@ class ParticleSystem
 {
 public:
 	ParticleSystem();
+	~ParticleSystem();
 
 	void Update(const float& deltaTime);
 	void Draw();
 	void SpawnParticle(const Particle& particle);
 	void ClearParticles();
 
-	~ParticleSystem();
+	ParticleSystem(const ParticleSystem& Psystem);
+
 private:
 	ShaderProgram m_Shader;
 	std::vector<Particle> m_Particles;

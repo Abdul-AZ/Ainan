@@ -130,6 +130,16 @@ void ParticleSystem::ClearParticles()
 		m_particle.isActive = false;
 }
 
+ParticleSystem::ParticleSystem(const ParticleSystem& Psystem)
+{
+	m_ParticleInfoBuffer = malloc((sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
+	memcpy(m_ParticleInfoBuffer, Psystem.m_ParticleInfoBuffer, (sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
+
+	m_Shader = Psystem.m_Shader;
+	m_Particles = Psystem.m_Particles;
+	m_ParticleCount = Psystem.m_ParticleCount;
+}
+
 ParticleSystem::~ParticleSystem()
 {
 	free(m_ParticleInfoBuffer);

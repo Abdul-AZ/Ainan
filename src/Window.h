@@ -1,5 +1,8 @@
 #pragma once
 
+#define GLFW_INCLUDE_NONE
+
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
@@ -9,6 +12,8 @@ public:
 	static void Init();
 	static void Update();
 	static void Present();
+	static void Clear();
+	static void Terminate();
 
 	static GLFWwindow& GetWindow();
 	static glm::vec2& GetSize();
