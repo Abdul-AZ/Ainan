@@ -6,15 +6,14 @@ ParticleCustomizer::ParticleCustomizer() :
 
 }
 
-void ParticleCustomizer::DisplayGUI()
+void ParticleCustomizer::DisplayGUI(const std::string& windowName)
 {
-	ImGui::Begin("Particle Settings");
+	ImGui::Begin(windowName.c_str());
 
 	m_VelocityCustomizer.DisplayGUI();
 	m_ColorCustomizer.DisplayGUI();
 
 	m_LifetimeCustomizer.DisplayGUI();
-	
 
 	m_ScaleCustomizer.DisplayGUI();
 

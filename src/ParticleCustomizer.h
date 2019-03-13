@@ -13,7 +13,7 @@ class ParticleCustomizer
 public:
 	ParticleCustomizer();
 
-	void DisplayGUI();
+	void DisplayGUI(const std::string& windowName);
 	void Update();
 	Particle& GetParticle();
 

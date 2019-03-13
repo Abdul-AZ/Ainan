@@ -17,8 +17,20 @@
 
 struct ParticleSystemObject 
 {
+	ParticleSystemObject():
+		m_EditorOpen(true) 
+	{
+		static int nameIndextemp = 0;
+		m_Name = "Particle System (" + std::to_string(nameIndextemp) + ")";
+		nameIndextemp++;
+	}
+
 	ParticleSystem m_PS;
 	ParticleCustomizer m_PC;
+	bool m_EditorOpen;
+	std::string m_Name;
+
+	void DisplayGUI();
 };
 
 class Environment 
@@ -31,6 +43,10 @@ public:
 	void Render();
 	void RenderGUI();
 	void HandleInput();
+
+private:
+	void DisplayObjectInspecterGUI();
+
 
 private:
 	std::clock_t timeStart, timeEnd;
