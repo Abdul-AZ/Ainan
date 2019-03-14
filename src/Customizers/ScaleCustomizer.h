@@ -2,7 +2,7 @@
 
 #include <random>
 #include <glm/glm.hpp>
-#include <imgui/imgui.h>
+#include <imgui.h>
 #include <Interpolator.h>
 
 class ScaleCustomizer 

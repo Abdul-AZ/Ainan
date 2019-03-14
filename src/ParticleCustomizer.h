@@ -2,7 +2,7 @@
 
 #include <random>
 #include "ParticleSystem.h"
-#include "imgui/imgui.h"
+#include <imgui.h>
 #include <Customizers/VelocityCustomizer.h>
 #include <Customizers/ColorCustomizer.h>
 #include <Customizers/ScaleCustomizer.h>

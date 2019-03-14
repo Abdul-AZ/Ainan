@@ -8,9 +8,10 @@ Environment::Environment()
 	ImGui::StyleColorsDark();
 
 	ImGui_ImplGlfw_InitForOpenGL(&Window::GetWindow(), true);
-	ImGui_ImplOpenGL3_Init("#version 130");
+	ImGui_ImplOpenGL3_Init("#version 400");
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 
 	timeStart = 0;
 	timeEnd = 0;
@@ -54,12 +55,16 @@ void Environment::RenderGUI()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
+	auto flags = ImGuiDockNodeFlags_PassthruDockspace;
+	ImGui::DockSpaceOverViewport(0, flags, 0);
+
 	settings.DisplayGUI();
 
 	DisplayObjectInspecterGUI();
 
 	for (ParticleSystemObject& obj : m_ParticleSystems)
 		obj.DisplayGUI();
+
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
