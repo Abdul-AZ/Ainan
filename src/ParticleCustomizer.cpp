@@ -8,7 +8,7 @@ ParticleCustomizer::ParticleCustomizer() :
 
 void ParticleCustomizer::DisplayGUI(const std::string& windowName)
 {
-	ImGui::Begin(windowName.c_str());
+	ImGui::Begin((windowName.size() > 0) ? windowName.c_str() : "No Name");
 
 	m_VelocityCustomizer.DisplayGUI();
 	m_ColorCustomizer.DisplayGUI();

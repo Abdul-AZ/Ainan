@@ -104,18 +104,36 @@ void Environment::DisplayObjectInspecterGUI()
 
 	for (int i = 0; i < m_ParticleSystems.size(); i++)
 	{
+		auto& particleSystem = m_ParticleSystems[i];
+
 		ImGui::PushID(i);
-		ImGui::Text(m_ParticleSystems[i].m_Name.c_str());
+		ImGui::Text((particleSystem.m_Name.size() > 0) ? particleSystem.m_Name.c_str() : "No Name");
+
+		ImGui::SameLine();
 		if (ImGui::Button("Edit")) {
-			m_ParticleSystems[i].m_EditorOpen = !m_ParticleSystems[i].m_EditorOpen;
+			particleSystem.m_EditorOpen = !particleSystem.m_EditorOpen;
 		}
 
+		ImGui::SameLine();
 		if (ImGui::Button("Delete")) {
 			m_ParticleSystems.erase(m_ParticleSystems.begin() + i);
 		}
 
+		ImGui::SameLine();
+		if (ImGui::Button("Rename")) {
+			particleSystem.m_RenameTextOpen = !particleSystem.m_RenameTextOpen;
+		}
+
+		ImGui::Spacing();
+		ImGui::Spacing();
 		ImGui::Spacing();
 
+		if (particleSystem.m_RenameTextOpen) {
+			auto flags = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;
+			if (ImGui::InputText("Name", &particleSystem.m_Name, flags)) {
+				particleSystem.m_RenameTextOpen = !particleSystem.m_RenameTextOpen;
+			}
+		}
 		ImGui::PopID();
 	}
 

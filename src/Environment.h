@@ -6,6 +6,7 @@
 #include <random>
 
 #include <imgui.h>
+#include <imgui_stdlib.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
@@ -16,7 +17,8 @@
 struct ParticleSystemObject 
 {
 	ParticleSystemObject():
-		m_EditorOpen(true) 
+		m_EditorOpen(true),
+		m_RenameTextOpen(false)
 	{
 		static int nameIndextemp = 0;
 		m_Name = "Particle System (" + std::to_string(nameIndextemp) + ")";
@@ -25,8 +27,9 @@ struct ParticleSystemObject
 
 	ParticleSystem m_PS;
 	ParticleCustomizer m_PC;
-	bool m_EditorOpen;
 	std::string m_Name;
+	bool m_EditorOpen;
+	bool m_RenameTextOpen;
 
 	void DisplayGUI();
 };
