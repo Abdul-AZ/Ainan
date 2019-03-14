@@ -16,20 +16,14 @@
 
 struct ParticleSystemObject 
 {
-	ParticleSystemObject():
-		m_EditorOpen(true),
-		m_RenameTextOpen(false)
-	{
-		static int nameIndextemp = 0;
-		m_Name = "Particle System (" + std::to_string(nameIndextemp) + ")";
-		nameIndextemp++;
-	}
+	ParticleSystemObject();
 
 	ParticleSystem m_PS;
 	ParticleCustomizer m_PC;
 	std::string m_Name;
 	bool m_EditorOpen;
 	bool m_RenameTextOpen;
+	int m_ID;
 
 	void DisplayGUI();
 };
@@ -47,6 +41,7 @@ public:
 
 private:
 	void DisplayObjectInspecterGUI();
+	void DisplayEnvironmentStatusGUI();
 
 
 private:

@@ -21,10 +21,14 @@ public:
 	void ClearParticles();
 
 	ParticleSystem(const ParticleSystem& Psystem);
+	ParticleSystem operator=(const ParticleSystem& Psystem);
 
+	unsigned int& GetActiveParticleCount() { return m_ActiveParticleCount; }
+
+	void* m_ParticleInfoBuffer;
 private:
 	ShaderProgram m_Shader;
 	std::vector<Particle> m_Particles;
-	void* m_ParticleInfoBuffer;
 	unsigned int m_ParticleCount;
+	unsigned int m_ActiveParticleCount;
 };

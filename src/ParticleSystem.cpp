@@ -56,8 +56,14 @@ void ParticleSystem::Update(const float& deltaTime)
 	glm::mat4 projection = glm::ortho(0.0f, size.x, size.y, 0.0f);
 	m_Shader.setUniformMat4("projection", projection);
 
-	for (Particle& particle : m_Particles)
+	m_ActiveParticleCount = 0;
+	for (Particle& particle : m_Particles) {
 		particle.Update(deltaTime);
+
+		//update active particle count
+		if (particle.isActive)
+			m_ActiveParticleCount++;
+	}
 }
 
 void ParticleSystem::Draw()
@@ -70,6 +76,8 @@ void ParticleSystem::Draw()
 
 	for (int i = 0; i < m_ParticleCount; i++)
 	{
+		if (m_Particles[i].m_LifeTime == 0.0f)
+			m_Particles[i].m_LifeTime = 0.001f;
 		float t = (m_Particles[i].m_LifeTime - m_Particles[i].m_RemainingLifeTime) / m_Particles[i].m_LifeTime;
 		glm::mat4 model = glm::mat4(1.0f);
 
@@ -138,6 +146,11 @@ ParticleSystem::ParticleSystem(const ParticleSystem& Psystem)
 	m_Shader = Psystem.m_Shader;
 	m_Particles = Psystem.m_Particles;
 	m_ParticleCount = Psystem.m_ParticleCount;
+}
+
+ParticleSystem ParticleSystem::operator=(const ParticleSystem & Psystem)
+{
+	return ParticleSystem(Psystem);
 }
 
 ParticleSystem::~ParticleSystem()

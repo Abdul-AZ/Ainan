@@ -61,6 +61,7 @@ void Environment::RenderGUI()
 	settings.DisplayGUI();
 
 	DisplayObjectInspecterGUI();
+	DisplayEnvironmentStatusGUI();
 
 	for (ParticleSystemObject& obj : m_ParticleSystems)
 		obj.DisplayGUI();
@@ -106,7 +107,7 @@ void Environment::DisplayObjectInspecterGUI()
 	{
 		auto& particleSystem = m_ParticleSystems[i];
 
-		ImGui::PushID(i);
+		ImGui::PushID(particleSystem.m_ID);
 		ImGui::Text((particleSystem.m_Name.size() > 0) ? particleSystem.m_Name.c_str() : "No Name");
 
 		ImGui::SameLine();
@@ -134,6 +135,7 @@ void Environment::DisplayObjectInspecterGUI()
 				particleSystem.m_RenameTextOpen = !particleSystem.m_RenameTextOpen;
 			}
 		}
+
 		ImGui::PopID();
 	}
 
@@ -144,6 +146,53 @@ void Environment::DisplayObjectInspecterGUI()
 	}
 
 	ImGui::End();
+}
+
+void Environment::DisplayEnvironmentStatusGUI()
+{
+	ImGui::Begin("Environment Status");
+
+	ImGui::Text("Particle Count :");
+	ImGui::SameLine();
+
+	unsigned int activeParticleCount = 0;
+	for (ParticleSystemObject& pso : m_ParticleSystems)
+		activeParticleCount += pso.m_PS.GetActiveParticleCount();
+
+	ImGui::TextColored({ 0.0f,1.0f,0.0f,1.0f }, std::to_string(activeParticleCount).c_str());
+
+	if (ImGui::TreeNode("Detailed Particle Distribution")) {
+
+		for (auto& pso : m_ParticleSystems) 
+		{
+			if (ImGui::TreeNode(pso.m_Name.c_str())) {
+
+				ImGui::Text("Particle Count :");
+
+				ImGui::SameLine();
+				ImGui::TextColored({ 0.0f,1.0f,0.0f,1.0f }, std::to_string(pso.m_PS.GetActiveParticleCount()).c_str());
+				ImGui::TreePop();
+			}
+
+			ImGui::Spacing();
+		}
+
+		ImGui::TreePop();
+	}
+
+
+	ImGui::End();
+}
+
+//TODO change this
+static int nameIndextemp = 0;
+ParticleSystemObject::ParticleSystemObject() :
+	m_EditorOpen(false),
+	m_RenameTextOpen(false)
+{
+	m_Name = "Particle System (" + std::to_string(nameIndextemp) + ")";
+	m_ID = nameIndextemp;
+	nameIndextemp++;
 }
 
 void ParticleSystemObject::DisplayGUI()
