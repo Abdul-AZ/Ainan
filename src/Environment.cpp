@@ -19,6 +19,8 @@ Environment::Environment()
 	ParticleSystemObject startingPS;
 
 	m_ParticleSystems.push_back(startingPS);
+
+	GaussianBlur::Init();
 }
 
 Environment::~Environment()
@@ -41,12 +43,26 @@ void Environment::Update()
 
 	for(ParticleSystemObject& obj : m_ParticleSystems)
 		obj.m_PS.Update(deltaTime);
+
+	if (lastSize != Window::GetSize())
+		m_FrameBuffer.SetSize(Window::GetSize());
+	lastSize = Window::GetSize();
 }
 
 void Environment::Render()
 {
+	m_FrameBuffer.Bind();
+	glClear(GL_COLOR_BUFFER_BIT);
+
 	for (ParticleSystemObject& obj : m_ParticleSystems)
 		obj.m_PS.Draw();
+
+	m_FrameBuffer.Unbind();
+
+	if(settings.GetBlurEnabled())
+		GaussianBlur::BlurAndRenderToScreen(m_FrameBuffer);
+	else
+		m_FrameBuffer.Render();
 }
 
 void Environment::RenderGUI()

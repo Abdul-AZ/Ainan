@@ -14,6 +14,7 @@ public:
 	void Bind() const;
 	void Unbind() const;
 
+	void setUniform1i(const char* name, int value);
 	void setUniformVec2(const char* name, const glm::vec2& value);
 	void setUniformVec4(const char* name, const glm::vec4& value);
 	void setUniformVec4s(const char* name, const glm::vec4* const value, const int& count);

@@ -9,6 +9,7 @@ class GeneralSettingsGUI {
 public:
 	
 	void DisplayGUI();
+	bool GetBlurEnabled() { return m_BlurEnabled; }
 
 private:
 
@@ -23,4 +24,7 @@ private:
 
 	//background
 	glm::vec4 m_BackgroundColor = { 0,0,0,0 };
+
+	//blur
+	bool m_BlurEnabled = false;
 };

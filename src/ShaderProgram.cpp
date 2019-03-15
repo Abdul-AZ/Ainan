@@ -60,6 +60,13 @@ void ShaderProgram::Unbind() const
 	glUseProgram(0);
 }
 
+void ShaderProgram::setUniform1i(const char * name, int value)
+{
+	Bind();
+	int location = glGetUniformLocation(m_RendererID, name);
+	glUniform1i(location, value);
+}
+
 void ShaderProgram::setUniformVec2(const char* name, const glm::vec2& value)
 {
 	Bind();

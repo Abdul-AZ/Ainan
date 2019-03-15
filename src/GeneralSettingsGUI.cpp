@@ -11,6 +11,8 @@ void GeneralSettingsGUI::DisplayGUI()
 			glDisable(GL_BLEND);
 	}
 
+	ImGui::Checkbox("Blur", &m_BlurEnabled);
+
 	if (m_GLBlendEnabled) {
 
 		if (ImGui::TreeNode("Blend Settings:"))
@@ -35,6 +37,7 @@ void GeneralSettingsGUI::DisplayGUI()
 			ImGui::TreePop();
 		}
 	}
+
 
 	if (ImGui::TreeNode("Background:"))
 	{

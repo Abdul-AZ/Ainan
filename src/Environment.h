@@ -13,6 +13,8 @@
 #include "ParticleSystem.h"
 #include "ParticleCustomizer.h"
 #include "GeneralSettingsGUI.h"
+#include "FrameBuffer.h"
+#include "GaussianBlur.h"
 
 struct ParticleSystemObject 
 {
@@ -48,6 +50,10 @@ private:
 	std::clock_t timeStart, timeEnd;
 	GeneralSettingsGUI settings;
 
+	FrameBuffer m_FrameBuffer;
 	std::vector<ParticleSystemObject> m_ParticleSystems;
 
+	//to keep track of when window gets resized
+	//TODO make it into a callback
+	glm::vec2 lastSize;
 };
