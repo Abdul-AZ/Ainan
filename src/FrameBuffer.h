@@ -20,9 +20,9 @@ public:
 
 	void Bind() const;
 	void Unbind() const;
+	unsigned int m_RendererID;
 private:
 	unsigned int texture;
-	unsigned int m_RendererID;
 	unsigned int vertexArray;
 	unsigned int vertexBuffer;
 	ShaderProgram imageShader;
