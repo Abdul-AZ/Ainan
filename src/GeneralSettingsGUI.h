@@ -9,7 +9,11 @@ class GeneralSettingsGUI {
 public:
 	
 	void DisplayGUI();
+
 	bool GetBlurEnabled() { return m_BlurEnabled; }
+	float GetBlurScale() { return m_BlurScale; }
+	float GetBlurStrength() { return m_BlurStrength; }
+	float GetBlurGaussianSigma() { return m_BlurGaussianSigma; }
 
 private:
 
@@ -27,4 +31,7 @@ private:
 
 	//blur
 	bool m_BlurEnabled = false;
+	float m_BlurScale = 1.5f;
+	float m_BlurStrength = 1.75f;
+	float m_BlurGaussianSigma = 3.0f;
 };

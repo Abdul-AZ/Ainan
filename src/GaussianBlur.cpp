@@ -10,19 +10,25 @@ void GaussianBlur::Init()
 	Vblur5x5.Init("shaders/Image.vert", "shaders/GaussianBlur5x5V.frag");
 }
 
-void GaussianBlur::BlurAndRenderToScreen(FrameBuffer & frameBuffer)
+void GaussianBlur::BlurAndRenderToScreen(FrameBuffer & frameBuffer, const float& scale, const float& blurScale, const float& sigma)
 {
-	//TODO make this changable in GUI
-	float scale = 1.5;
-
 	glm::vec2 normal = { Window::GetSize().x , Window::GetSize().y };
 	glm::vec2 downsampled = { Window::GetSize().x / scale , Window::GetSize().y / scale };
-
 	glViewport(0, 0, downsampled.x, downsampled.y);
+
+	float BlurPixelValues[3];
+	for (int i = 0; i < 3; i++)
+	{
+		BlurPixelValues[i] = GaussianDistribution(i, sigma) * blurScale;
+	}
+	Hblur5x5.setUniform1fs("BlurStrength", BlurPixelValues, 3);
+	Vblur5x5.setUniform1fs("BlurStrength", BlurPixelValues, 3);
+
+
+	//Horizontal blur
 	FrameBuffer tempFB;
 	tempFB.SetSize(downsampled);
 	tempFB.Bind();
-	//Horizontal blur
 	frameBuffer.Render(Hblur5x5);
 	
 	//Vertical blur directly to screen buffer
@@ -32,7 +38,7 @@ void GaussianBlur::BlurAndRenderToScreen(FrameBuffer & frameBuffer)
 	frameBuffer.Render(Vblur5x5);
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, tempFB2.m_RendererID); // READ:  Supersampled
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);               // WRITE: Default
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);					  // WRITE: Default
 
 	// Downsample the supersampled FBO using LINEAR interpolation
 	glBlitFramebuffer(0, 0, downsampled.x, downsampled.y,
@@ -41,4 +47,9 @@ void GaussianBlur::BlurAndRenderToScreen(FrameBuffer & frameBuffer)
 		GL_LINEAR);
 
 	glViewport(0, 0, normal.x, normal.y);
+}
+
+float GaussianBlur::GaussianDistribution(float x, float sigma)
+{
+	return (1 / (sigma * sqrt(2 * M_PI)) * std::exp(-(x * x) / (2 * sigma * sigma)));
 }

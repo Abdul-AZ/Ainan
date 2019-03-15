@@ -11,8 +11,6 @@ void GeneralSettingsGUI::DisplayGUI()
 			glDisable(GL_BLEND);
 	}
 
-	ImGui::Checkbox("Blur", &m_BlurEnabled);
-
 	if (m_GLBlendEnabled) {
 
 		if (ImGui::TreeNode("Blend Settings:"))
@@ -33,6 +31,19 @@ void GeneralSettingsGUI::DisplayGUI()
 				ImGui::EndCombo();
 			}
 
+
+			ImGui::TreePop();
+		}
+	}
+
+	ImGui::Checkbox("Blur", &m_BlurEnabled);
+
+	if (m_BlurEnabled) {
+		if (ImGui::TreeNode("Blur Settings:")) {
+
+			ImGui::SliderFloat("Scale: ", &m_BlurScale, 1.0f, 3.0f);
+			ImGui::SliderFloat("Strength: ", &m_BlurStrength, 1.0f, 5.0f);
+			ImGui::SliderFloat("Gaussian Sigma: ", &m_BlurGaussianSigma, 1.0f, 5.0f);
 
 			ImGui::TreePop();
 		}

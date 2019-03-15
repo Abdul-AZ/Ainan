@@ -9,7 +9,7 @@ void ScaleCustomizer::DisplayGUI()
 {
 	if (ImGui::TreeNode("Scale")) {
 
-		ImGui::Text("Staring Scale");
+		ImGui::Text("Starting Scale");
 
 		ImGui::Checkbox("Random Between 2 Numbers", &RandomScale);
 

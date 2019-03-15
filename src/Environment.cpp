@@ -60,7 +60,7 @@ void Environment::Render()
 	m_FrameBuffer.Unbind();
 
 	if(settings.GetBlurEnabled())
-		GaussianBlur::BlurAndRenderToScreen(m_FrameBuffer);
+		GaussianBlur::BlurAndRenderToScreen(m_FrameBuffer, settings.GetBlurScale(), settings.GetBlurStrength(), settings.GetBlurGaussianSigma());
 	else
 		m_FrameBuffer.Render();
 }
