@@ -15,10 +15,12 @@ project "Core"
       "imgui/*.h", "imgui/*.cpp",
       "imgui/examples/imgui_impl_opengl3.h", "imgui/examples/imgui_impl_opengl3.cpp",
       "imgui/examples/imgui_impl_glfw.h", "imgui/examples/imgui_impl_glfw.cpp",
-      "imgui/misc/cpp/imgui_stdlib.cpp", "imgui/misc/cpp/imgui_stdlib.h"
+      "imgui/misc/cpp/imgui_stdlib.cpp", "imgui/misc/cpp/imgui_stdlib.h",
+      --glm files
+      "glm/glm/**.hpp"
      }
 
-    includedirs { "src", "imgui", "imgui/examples", "imgui/misc/cpp" }
+    includedirs { "src", "imgui", "imgui/examples", "imgui/misc/cpp", "glm" }
 
     defines { "IMGUI_IMPL_OPENGL_LOADER_GLAD", "IMGUI_HAS_DOCK" }
 
