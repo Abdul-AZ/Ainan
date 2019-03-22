@@ -37,6 +37,7 @@ void Environment::Update()
 	timeEnd = clock();
 	float deltaTime = (timeEnd - timeStart) / 1000.0f;
 	timeStart = timeEnd;
+	m_CurrentTimeBetweenFrameCapture -= deltaTime;
 
 	//Update
 	Window::Update();
@@ -60,9 +61,19 @@ void Environment::Render()
 	m_FrameBuffer.Unbind();
 
 	if(settings.GetBlurEnabled())
-		GaussianBlur::BlurAndRenderToScreen(m_FrameBuffer, settings.GetBlurScale(), settings.GetBlurStrength(), settings.GetBlurGaussianSigma());
-	else
-		m_FrameBuffer.Render();
+		GaussianBlur::Blur(m_FrameBuffer, settings.GetBlurScale(), settings.GetBlurStrength(), settings.GetBlurGaussianSigma());
+	
+	m_FrameBuffer.Bind();
+
+	if (m_SaveNextFrameAsImage) {
+		unsigned char* imageData = new unsigned char[m_FrameBuffer.GetSize().x * m_FrameBuffer.GetSize().y * 4];
+		glReadPixels(0, 0, m_FrameBuffer.GetSize().x, m_FrameBuffer.GetSize().y, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+		mkdir("output");
+		stbi_write_png("output/test.png", m_FrameBuffer.GetSize().x, m_FrameBuffer.GetSize().y, 4, imageData, m_FrameBuffer.GetSize().x * 4);
+		delete[] imageData;
+		m_SaveNextFrameAsImage = false;
+	}
+	m_FrameBuffer.RenderToScreen();
 }
 
 void Environment::RenderGUI()
@@ -98,6 +109,11 @@ void Environment::HandleInput()
 	if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS)
 		for (ParticleSystemObject& obj : m_ParticleSystems)
 			obj.m_PS.ClearParticles();
+
+	if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_F11) == GLFW_PRESS && m_CurrentTimeBetweenFrameCapture < 0.0f) {
+		m_SaveNextFrameAsImage = true;
+		m_CurrentTimeBetweenFrameCapture = m_MinTimeBetweenFrameCapture;
+	}
 }
 
 void Environment::DisplayObjectInspecterGUI()

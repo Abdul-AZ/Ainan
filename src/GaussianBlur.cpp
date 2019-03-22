@@ -10,7 +10,7 @@ void GaussianBlur::Init()
 	Vblur5x5.Init("shaders/Image.vert", "shaders/GaussianBlur5x5V.frag");
 }
 
-void GaussianBlur::BlurAndRenderToScreen(FrameBuffer & frameBuffer, const float& scale, const float& blurScale, const float& sigma)
+void GaussianBlur::Blur(FrameBuffer & frameBuffer, const float& scale, const float& blurScale, const float& sigma)
 {
 	glm::vec2 normal = { Window::GetSize().x , Window::GetSize().y };
 	glm::vec2 downsampled = { Window::GetSize().x / scale , Window::GetSize().y / scale };
@@ -37,8 +37,11 @@ void GaussianBlur::BlurAndRenderToScreen(FrameBuffer & frameBuffer, const float&
 	tempFB2.Bind();
 	frameBuffer.Render(Vblur5x5);
 
+	frameBuffer.Bind();
+	glClear(GL_COLOR_BUFFER_BIT);
+
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, tempFB2.m_RendererID); // READ:  Supersampled
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);					  // WRITE: Default
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer.m_RendererID);					  // WRITE: Default
 
 	// Downsample the supersampled FBO using LINEAR interpolation
 	glBlitFramebuffer(0, 0, downsampled.x, downsampled.y,

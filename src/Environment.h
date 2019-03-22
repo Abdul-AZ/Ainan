@@ -4,6 +4,9 @@
 #include <chrono>
 #include <ctime>
 #include <random>
+#include <direct.h>
+
+#include "stb_image_write.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -52,6 +55,11 @@ private:
 
 	FrameBuffer m_FrameBuffer;
 	std::vector<ParticleSystemObject> m_ParticleSystems;
+
+	//TODO abstract this to a seperate class or something
+	bool m_SaveNextFrameAsImage = false;
+	float m_MinTimeBetweenFrameCapture = 2.0f; //2 seconds
+	float m_CurrentTimeBetweenFrameCapture = m_MinTimeBetweenFrameCapture;
 
 	//to keep track of when window gets resized
 	//TODO make it into a callback

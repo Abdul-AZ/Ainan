@@ -1,5 +1,6 @@
 bin
 obj
+output
 .vs
 *.vcxproj
 *.vcxproj.filters

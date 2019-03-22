@@ -7,7 +7,7 @@
 class GaussianBlur {
 public:
 	static void Init();
-	static void BlurAndRenderToScreen(FrameBuffer& frameBuffer, const float& scale, const float& blurScale, const float& sigma);
+	static void Blur(FrameBuffer& frameBuffer, const float& scale, const float& blurScale, const float& sigma);
 
 	static float GaussianDistribution(float x, float sigma);
 private:

@@ -12,7 +12,8 @@ FrameBuffer::FrameBuffer()
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, Window::GetSize().x, Window::GetSize().y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	m_Size = Window::GetSize();
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Size.x, m_Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -69,8 +70,22 @@ void FrameBuffer::Render(ShaderProgram & shader)
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+void FrameBuffer::RenderToScreen()
+{
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_RendererID);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	glBlitFramebuffer(0, 0, m_Size.x, m_Size.y,
+		0, 0, m_Size.x, m_Size.y,
+		GL_COLOR_BUFFER_BIT,
+		GL_LINEAR);
+
+	glViewport(0, 0, Window::GetSize().x, Window::GetSize().y);
+}
+
 void FrameBuffer::SetSize(const glm::vec2 & size)
 {
+	m_Size = size;
 	Bind();
 	glDeleteTextures(1, &texture);
 

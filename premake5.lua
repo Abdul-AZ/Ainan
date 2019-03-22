@@ -26,12 +26,6 @@ project "Core"
 
     links { "OpenGL32.lib", "glfw" }
 
-    --filter "platforms:x64"
-    --  links { "lib/glfw3_64.lib" }
-
-    --filter "platforms:x86"
-    --  links { "lib/glfw3_32.lib" }
-
     filter "configurations:Debug"
       symbols "On"
       optimize "Off"
