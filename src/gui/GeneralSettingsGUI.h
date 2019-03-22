@@ -1,5 +1,7 @@
 #pragma once
 
+#include "file/Image.h"
+
 class GeneralSettingsGUI {
 public:
 	
@@ -9,6 +11,8 @@ public:
 	float GetBlurScale() { return m_BlurScale; }
 	float GetBlurStrength() { return m_BlurStrength; }
 	float GetBlurGaussianSigma() { return m_BlurGaussianSigma; }
+
+	ImageFormat& GetImageFormat() { return m_ImageFormat; }
 
 private:
 
@@ -29,4 +33,7 @@ private:
 	float m_BlurScale = 1.5f;
 	float m_BlurStrength = 1.75f;
 	float m_BlurGaussianSigma = 3.0f;
+
+	//image saving
+	ImageFormat m_ImageFormat = ImageFormat::png;
 };

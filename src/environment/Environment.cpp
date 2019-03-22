@@ -66,12 +66,11 @@ void Environment::Render()
 	
 	m_FrameBuffer.Bind();
 
-	if (m_SaveNextFrameAsImage) {
-		unsigned char* imageData = new unsigned char[m_FrameBuffer.GetSize().x * m_FrameBuffer.GetSize().y * 4];
-		glReadPixels(0, 0, m_FrameBuffer.GetSize().x, m_FrameBuffer.GetSize().y, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+	if (m_SaveNextFrameAsImage) 
+	{
+		Image image = Image::FromFrameBuffer(m_FrameBuffer);
 		mkdir("output");
-		stbi_write_png("output/test.png", m_FrameBuffer.GetSize().x, m_FrameBuffer.GetSize().y, 4, imageData, m_FrameBuffer.GetSize().x * 4);
-		delete[] imageData;
+		image.SaveToFile("output/test", settings.GetImageFormat());
 		m_SaveNextFrameAsImage = false;
 	}
 	m_FrameBuffer.RenderToScreen();

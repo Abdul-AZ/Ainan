@@ -16,7 +16,7 @@ void GeneralSettingsGUI::DisplayGUI()
 
 		if (ImGui::TreeNode("Blend Settings:"))
 		{
-			if (ImGui::BeginCombo("sFactor",GetBlendFuncText(m_Sfactor).c_str())) {
+			if (ImGui::BeginCombo("sFactor", GetBlendFuncText(m_Sfactor).c_str())) {
 
 				DisplayAllBlendOptions(m_Sfactor);
 				glBlendFunc(m_Sfactor, m_Dfactor);
@@ -50,12 +50,41 @@ void GeneralSettingsGUI::DisplayGUI()
 		}
 	}
 
-
 	if (ImGui::TreeNode("Background:"))
 	{
 		if (ImGui::ColorPicker4("Background Color", &m_BackgroundColor.r))
 			glClearColor(m_BackgroundColor.r, m_BackgroundColor.g, m_BackgroundColor.b, m_BackgroundColor.a);
 
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("Image Saving:"))
+	{
+		if (ImGui::BeginCombo("Image Format", Image::GetFormatString(m_ImageFormat).c_str())) 
+		{
+			bool is_png = m_ImageFormat == ImageFormat::png ? true : false;
+			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::png).c_str(), &is_png)) {
+
+				ImGui::SetItemDefaultFocus();
+				m_ImageFormat = ImageFormat::png;
+			}
+
+			bool is_jpeg = m_ImageFormat == ImageFormat::jpeg ? true : false;
+			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::jpeg).c_str(), &is_jpeg)) {
+
+				ImGui::SetItemDefaultFocus();
+				m_ImageFormat = ImageFormat::jpeg;
+			}
+
+			bool is_bmp = m_ImageFormat == ImageFormat::bmp ? true : false;
+			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::bmp).c_str(), &is_bmp)) {
+
+				ImGui::SetItemDefaultFocus();
+				m_ImageFormat = ImageFormat::bmp;
+			}
+
+			ImGui::EndCombo();
+		}
 		ImGui::TreePop();
 	}
 
