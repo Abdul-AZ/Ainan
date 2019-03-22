@@ -1,4 +1,4 @@
-#include <Interpolator.h>
+#include "gui/Interpolator.h"
 
 class Particle
 {

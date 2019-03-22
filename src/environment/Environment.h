@@ -1,12 +1,12 @@
 #pragma once
 
-#include "stb_image_write.h"
+#include "file/stb_image_write.h"
 
 #include "ParticleSystem.h"
-#include "ParticleCustomizer.h"
-#include "GeneralSettingsGUI.h"
-#include "FrameBuffer.h"
-#include "GaussianBlur.h"
+#include "gui/ParticleCustomizer.h"
+#include "gui/GeneralSettingsGUI.h"
+#include "renderer/FrameBuffer.h"
+#include "renderer/GaussianBlur.h"
 
 struct ParticleSystemObject 
 {

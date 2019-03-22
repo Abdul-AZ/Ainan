@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ParticleSystem.h"
-#include <Customizers/VelocityCustomizer.h>
-#include <Customizers/ColorCustomizer.h>
-#include <Customizers/ScaleCustomizer.h>
-#include <Customizers/LifetimeCustomizer.h>
+#include "environment/ParticleSystem.h"
+#include "gui/Customizers/VelocityCustomizer.h"
+#include "gui/Customizers/ColorCustomizer.h"
+#include "gui/Customizers/ScaleCustomizer.h"
+#include "gui/Customizers/LifetimeCustomizer.h"
 
 class ParticleCustomizer 
 {

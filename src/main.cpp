@@ -1,10 +1,7 @@
 #include <pch.h>
 
-#include "Window.h"
-#include "Environment.h"
-
-#include "stb_image.h"
-#include "stb_image_write.h"
+#include "environment/Window.h"
+#include "environment/Environment.h"
 
 int main() {
 	Window::Init();

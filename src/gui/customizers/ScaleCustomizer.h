@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Interpolator.h>
+#include "gui/Interpolator.h"
 
 class ScaleCustomizer 
 {
