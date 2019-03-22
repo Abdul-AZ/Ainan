@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "GeneralSettingsGUI.h"
 
 void GeneralSettingsGUI::DisplayGUI()

@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "ParticleCustomizer.h"
 
 ParticleCustomizer::ParticleCustomizer() :

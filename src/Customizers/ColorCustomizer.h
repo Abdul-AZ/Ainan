@@ -1,9 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <random>
-#include <glm/glm.hpp>
-#include <imgui.h>
 #include "Interpolator.h"
 
 class ColorCustomizer 

@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "GaussianBlur.h"
 
 
@@ -54,5 +55,5 @@ void GaussianBlur::Blur(FrameBuffer & frameBuffer, const float& scale, const flo
 
 float GaussianBlur::GaussianDistribution(float x, float sigma)
 {
-	return (1 / (sigma * sqrt(2 * M_PI)) * std::exp(-(x * x) / (2 * sigma * sigma)));
+	return (1 / (sigma * sqrt(2 * 3.14159265359)) * std::exp(-(x * x) / (2 * sigma * sigma)));
 }

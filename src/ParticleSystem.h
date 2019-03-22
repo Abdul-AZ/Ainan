@@ -1,10 +1,5 @@
 #pragma once
 
-#include <sstream>
-#include <iostream>
-#include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include "ShaderProgram.h"
 #include "Window.h"
 #include "Particle.h"

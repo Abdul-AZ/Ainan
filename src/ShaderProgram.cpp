@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "ShaderProgram.h"
 
 std::string ReadEntireTextFile(const std::string& path) 

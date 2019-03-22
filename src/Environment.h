@@ -1,17 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include <chrono>
-#include <ctime>
-#include <random>
-#include <direct.h>
-
 #include "stb_image_write.h"
-
-#include <imgui.h>
-#include <imgui_stdlib.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
 
 #include "ParticleSystem.h"
 #include "ParticleCustomizer.h"

@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "Window.h"
 
 glm::vec2 Window::m_ScreenSize = { 0,0 };

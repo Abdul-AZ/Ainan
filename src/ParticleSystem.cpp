@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "ParticleSystem.h"
 
 static unsigned int VBO;

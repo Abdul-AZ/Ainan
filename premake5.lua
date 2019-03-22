@@ -7,6 +7,7 @@ project "Core"
 
     kind ("ConsoleApp")
     cppdialect "C++17"
+    compileas "C++"
 
     files { 
       --project files
@@ -19,6 +20,9 @@ project "Core"
       --glm files
       "glm/glm/**.hpp"
      }
+
+    pchheader "pch.h"
+    pchsource "src/pch.cpp"
 
     includedirs { "src", "imgui", "imgui/examples", "imgui/misc/cpp", "glm" }
 

@@ -1,8 +1,6 @@
 #pragma once
 
-#include <random>
 #include "ParticleSystem.h"
-#include <imgui.h>
 #include <Customizers/VelocityCustomizer.h>
 #include <Customizers/ColorCustomizer.h>
 #include <Customizers/ScaleCustomizer.h>

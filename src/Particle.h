@@ -1,4 +1,3 @@
-#include <glm/glm.hpp>
 #include <Interpolator.h>
 
 class Particle

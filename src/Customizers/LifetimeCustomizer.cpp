@@ -1,3 +1,4 @@
+#include <pch.h>
 #include "LifetimeCustomizer.h"
 LifetimeCustomizer::LifetimeCustomizer() :
 	mt(std::random_device{}())

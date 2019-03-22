@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Window.h"
-#include <glad/glad.h>
-
 #include "ShaderProgram.h"
 
 class FrameBuffer {

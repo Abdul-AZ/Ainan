@@ -1,9 +1,4 @@
 #pragma once
-#include <iostream>
-
-#include <glad/glad.h>
-#include <imgui.h>
-#include <glm/glm.hpp>
 
 class GeneralSettingsGUI {
 public:

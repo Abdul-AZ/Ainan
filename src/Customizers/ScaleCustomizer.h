@@ -1,8 +1,5 @@
 #pragma once
 
-#include <random>
-#include <glm/glm.hpp>
-#include <imgui.h>
 #include <Interpolator.h>
 
 class ScaleCustomizer 
