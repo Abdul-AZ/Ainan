@@ -68,7 +68,7 @@ void Environment::Render()
 
 	if (m_SaveNextFrameAsImage) 
 	{
-		Image image = Image::FromFrameBuffer(m_FrameBuffer);
+		Image image = Image::FromFrameBuffer(m_FrameBuffer, settings.GetImageResolution().x, settings.GetImageResolution().y);
 		mkdir("output");
 		image.SaveToFile("output/test", settings.GetImageFormat());
 		m_SaveNextFrameAsImage = false;

@@ -1,6 +1,9 @@
 #include <pch.h>
 #include "GeneralSettingsGUI.h"
 
+
+static const ImU32 ImageResolutionStep = 1;
+
 void GeneralSettingsGUI::DisplayGUI(bool& windowOpen)
 {
 	ImGui::Begin("Settings", &windowOpen);
@@ -85,6 +88,10 @@ void GeneralSettingsGUI::DisplayGUI(bool& windowOpen)
 
 			ImGui::EndCombo();
 		}
+
+		ImGui::Text("Image Resolution");
+		ImGui::InputScalar("width", ImGuiDataType_::ImGuiDataType_U32, &m_ImageResolution.x, &ImageResolutionStep, &ImageResolutionStep);
+		ImGui::InputScalar("height", ImGuiDataType_::ImGuiDataType_U32, &m_ImageResolution.y, &ImageResolutionStep, &ImageResolutionStep);
 		ImGui::TreePop();
 	}
 

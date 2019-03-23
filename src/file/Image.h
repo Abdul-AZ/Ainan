@@ -20,6 +20,7 @@ public:
 
 	static std::string GetFormatString(const ImageFormat& format);
 	static Image FromFrameBuffer(FrameBuffer& framebuffer);
+	static Image FromFrameBuffer(FrameBuffer& framebuffer, const unsigned int& width, const unsigned int& height);
 
 public:
 	//pointer to the image pixel array

@@ -13,6 +13,7 @@ public:
 	float GetBlurGaussianSigma() { return m_BlurGaussianSigma; }
 
 	ImageFormat& GetImageFormat() { return m_ImageFormat; }
+	glm::uvec2& GetImageResolution() { return m_ImageResolution; }
 
 private:
 
@@ -36,4 +37,5 @@ private:
 
 	//image saving
 	ImageFormat m_ImageFormat = ImageFormat::png;
+	glm::uvec2 m_ImageResolution = { 1080, 720 };
 };
