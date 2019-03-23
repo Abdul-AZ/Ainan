@@ -7,6 +7,8 @@
 #include <chrono>
 #include <ctime>
 #include <random>
+#include <iterator>
+#include <filesystem>
 
 //std c
 #include <direct.h>

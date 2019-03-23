@@ -53,6 +53,7 @@ FrameBuffer::~FrameBuffer()
 	glDeleteTextures(1, &texture);
 	glDeleteBuffers(1, &vertexBuffer);
 	glDeleteVertexArrays(1, &vertexArray);
+	imageShader.Terminate();
 }
 
 void FrameBuffer::Render()

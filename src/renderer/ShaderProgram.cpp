@@ -51,6 +51,11 @@ void ShaderProgram::Init(const std::string & vertPath, const std::string & fragP
 	Bind();
 }
 
+void ShaderProgram::Terminate()
+{
+	glDeleteProgram(m_RendererID);
+}
+
 void ShaderProgram::Bind() const
 {
 	glUseProgram(m_RendererID);

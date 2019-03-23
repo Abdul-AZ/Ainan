@@ -5,6 +5,7 @@ class ShaderProgram
 {
 public:
 	void Init(const std::string& vertPath, const std::string& fragPath);
+	void Terminate();
 
 	void Bind() const;
 	void Unbind() const;

@@ -3,8 +3,12 @@
 #include "environment/Window.h"
 #include "environment/Environment.h"
 
-int main() {
+#include "file/FileManager.h"
+
+int main(int argc, const char* argv[]) {
+
 	Window::Init();
+	FileManager::Init(argv[0]);
 	
 	Environment* env = new Environment;
 	
@@ -14,7 +18,7 @@ int main() {
 		env->HandleInput();
 		env->Render();
 		env->RenderGUI();
-	
+
 		Window::Present();
 		Window::Clear();
 	}
