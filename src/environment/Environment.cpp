@@ -1,6 +1,7 @@
 #include <pch.h>
 #include "Environment.h"
 
+
 Environment::Environment()
 {
 	//setup ImGui
@@ -69,8 +70,7 @@ void Environment::Render()
 	if (m_SaveNextFrameAsImage) 
 	{
 		Image image = Image::FromFrameBuffer(m_FrameBuffer, settings.GetImageResolution().x, settings.GetImageResolution().y);
-		mkdir("output");
-		image.SaveToFile("output/test", settings.GetImageFormat());
+		image.SaveToFile(settings.GetImageSaveLocation() + '/' + settings.GetImageName() , settings.GetImageFormat());
 		m_SaveNextFrameAsImage = false;
 	}
 	m_FrameBuffer.RenderToScreen();

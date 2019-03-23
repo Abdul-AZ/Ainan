@@ -1,19 +1,23 @@
 #pragma once
 
 #include "file/Image.h"
+#include "gui/FolderBrowserGUI.h"
 
 class GeneralSettingsGUI {
 public:
-	
 	void DisplayGUI(bool& windowOpen);
 
-	bool GetBlurEnabled() { return m_BlurEnabled; }
-	float GetBlurScale() { return m_BlurScale; }
-	float GetBlurStrength() { return m_BlurStrength; }
-	float GetBlurGaussianSigma() { return m_BlurGaussianSigma; }
+	void DisplayImageSaveLocationBrowser();
+
+	bool& GetBlurEnabled() { return m_BlurEnabled; }
+	float& GetBlurScale() { return m_BlurScale; }
+	float& GetBlurStrength() { return m_BlurStrength; }
+	float& GetBlurGaussianSigma() { return m_BlurGaussianSigma; }
 
 	ImageFormat& GetImageFormat() { return m_ImageFormat; }
 	glm::uvec2& GetImageResolution() { return m_ImageResolution; }
+	std::string& GetImageName() { return m_ImageFileName; }
+	std::string& GetImageSaveLocation() { return m_ImageLocationBrowser.GetChosenFolderPath(); }
 
 private:
 
@@ -38,4 +42,6 @@ private:
 	//image saving
 	ImageFormat m_ImageFormat = ImageFormat::png;
 	glm::uvec2 m_ImageResolution = { 1080, 720 };
+	FolderBrowser m_ImageLocationBrowser;
+	std::string m_ImageFileName = "test";
 };

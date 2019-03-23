@@ -1,10 +1,14 @@
 #pragma once
 
+#include "file/FileManager.h"
 #include "file/stb_image_write.h"
 
 #include "ParticleSystem.h"
+
 #include "gui/ParticleCustomizer.h"
 #include "gui/GeneralSettingsGUI.h"
+#include "gui/FolderBrowserGUI.h"
+
 #include "renderer/FrameBuffer.h"
 #include "renderer/GaussianBlur.h"
 
@@ -57,4 +61,5 @@ private:
 	//to keep track of when window gets resized
 	//TODO make it into a callback
 	glm::vec2 lastSize;
+
 };

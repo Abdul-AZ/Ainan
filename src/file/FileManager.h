@@ -1,4 +1,4 @@
-
+#pragma once
 
 static class FileManager 
 {

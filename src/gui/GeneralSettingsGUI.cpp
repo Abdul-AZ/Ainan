@@ -35,7 +35,6 @@ void GeneralSettingsGUI::DisplayGUI(bool& windowOpen)
 				ImGui::EndCombo();
 			}
 
-
 			ImGui::TreePop();
 		}
 	}
@@ -92,10 +91,23 @@ void GeneralSettingsGUI::DisplayGUI(bool& windowOpen)
 		ImGui::Text("Image Resolution");
 		ImGui::InputScalar("width", ImGuiDataType_::ImGuiDataType_U32, &m_ImageResolution.x, &ImageResolutionStep, &ImageResolutionStep);
 		ImGui::InputScalar("height", ImGuiDataType_::ImGuiDataType_U32, &m_ImageResolution.y, &ImageResolutionStep, &ImageResolutionStep);
+
+		if (ImGui::Button("Change Save Location"))
+			DisplayImageSaveLocationBrowser();
+
+		ImGui::InputText("Image Name", &m_ImageFileName);
+
 		ImGui::TreePop();
 	}
 
 	ImGui::End();
+
+	m_ImageLocationBrowser.DisplayGUI();
+}
+
+void GeneralSettingsGUI::DisplayImageSaveLocationBrowser()
+{
+	m_ImageLocationBrowser.m_WindowOpen = true;
 }
 
 void GeneralSettingsGUI::DisplayAllBlendOptions(GLenum& factor)
