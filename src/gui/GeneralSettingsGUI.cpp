@@ -1,9 +1,9 @@
 #include <pch.h>
 #include "GeneralSettingsGUI.h"
 
-void GeneralSettingsGUI::DisplayGUI()
+void GeneralSettingsGUI::DisplayGUI(bool& windowOpen)
 {
-	ImGui::Begin("Settings");
+	ImGui::Begin("Settings", &windowOpen);
 
 	if(ImGui::Checkbox("Blend", &m_GLBlendEnabled)) {
 		if (m_GLBlendEnabled)

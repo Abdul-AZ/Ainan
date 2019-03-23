@@ -36,7 +36,7 @@ public:
 private:
 	void DisplayObjectInspecterGUI();
 	void DisplayEnvironmentStatusGUI();
-
+	void DisplayMainMenuBarGUI();
 
 private:
 	std::clock_t timeStart, timeEnd;
@@ -44,6 +44,10 @@ private:
 
 	FrameBuffer m_FrameBuffer;
 	std::vector<ParticleSystemObject> m_ParticleSystems;
+
+	bool m_ObjectInspectorWindowOpen = true;
+	bool m_GeneralSettingsWindowOpen = true;
+	bool m_EnvironmentStatusWindowOpen = true;
 
 	//TODO abstract this to a seperate class or something
 	bool m_SaveNextFrameAsImage = false;

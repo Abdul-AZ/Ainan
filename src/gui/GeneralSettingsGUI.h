@@ -5,7 +5,7 @@
 class GeneralSettingsGUI {
 public:
 	
-	void DisplayGUI();
+	void DisplayGUI(bool& windowOpen);
 
 	bool GetBlurEnabled() { return m_BlurEnabled; }
 	float GetBlurScale() { return m_BlurScale; }

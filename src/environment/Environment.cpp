@@ -82,17 +82,19 @@ void Environment::RenderGUI()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	auto flags = ImGuiDockNodeFlags_PassthruDockspace;
-	ImGui::DockSpaceOverViewport(0, flags, 0);
+	DisplayMainMenuBarGUI();
 
-	settings.DisplayGUI();
+	if(m_ObjectInspectorWindowOpen)
+		DisplayObjectInspecterGUI();
 
-	DisplayObjectInspecterGUI();
-	DisplayEnvironmentStatusGUI();
+	if(m_GeneralSettingsWindowOpen)
+		settings.DisplayGUI(m_GeneralSettingsWindowOpen);
+
+	if(m_EnvironmentStatusWindowOpen)
+		DisplayEnvironmentStatusGUI();
 
 	for (ParticleSystemObject& obj : m_ParticleSystems)
 		obj.DisplayGUI();
-
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -118,22 +120,8 @@ void Environment::HandleInput()
 
 void Environment::DisplayObjectInspecterGUI()
 {
-	ImGuiWindowFlags flags = ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar;
-	ImGui::Begin("Particle Systems", nullptr, flags);
-
-	if(ImGui::BeginMenuBar()) {
-
-		if(ImGui::BeginMenu("Edit")) {
-
-			if (ImGui::MenuItem("Clear All")) {
-				m_ParticleSystems.clear();
-			}
-
-			ImGui::EndMenu();
-		}
-
-		ImGui::EndMenuBar();
-	}
+	auto flags = ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysUseWindowPadding;
+	ImGui::Begin("Object Inspector", &m_ObjectInspectorWindowOpen, flags);
 
 	for (int i = 0; i < m_ParticleSystems.size(); i++)
 	{
@@ -182,7 +170,7 @@ void Environment::DisplayObjectInspecterGUI()
 
 void Environment::DisplayEnvironmentStatusGUI()
 {
-	ImGui::Begin("Environment Status");
+	ImGui::Begin("Environment Status", &m_EnvironmentStatusWindowOpen);
 
 	ImGui::Text("Particle Count :");
 	ImGui::SameLine();
@@ -216,6 +204,60 @@ void Environment::DisplayEnvironmentStatusGUI()
 	ImGui::End();
 }
 
+void Environment::DisplayMainMenuBarGUI()
+{
+	int MenuBarHeight = 0;
+	if (ImGui::BeginMainMenuBar()) {
+
+		if (ImGui::BeginMenu("Edit")) {
+
+			if (ImGui::MenuItem("Clear Particle Systems")) {
+				m_ParticleSystems.clear();
+			}
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Window")) {
+
+			if (ImGui::MenuItem("Object Inspector"))
+				m_ObjectInspectorWindowOpen = !m_ObjectInspectorWindowOpen;
+
+			if (ImGui::MenuItem("General Settings"))
+				m_GeneralSettingsWindowOpen = !m_GeneralSettingsWindowOpen;
+
+			if (ImGui::MenuItem("Environment Status"))
+				m_EnvironmentStatusWindowOpen = !m_EnvironmentStatusWindowOpen;
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Editor Style")) {
+
+			if (ImGui::MenuItem("Dark"))
+				ImGui::StyleColorsDark();
+
+			if (ImGui::MenuItem("Light"))
+				ImGui::StyleColorsLight();
+
+			if (ImGui::MenuItem("Classic"))
+				ImGui::StyleColorsClassic();
+
+			ImGui::EndMenu();
+		}
+
+		MenuBarHeight = ImGui::GetWindowSize().y;
+
+		ImGui::EndMainMenuBar();
+	}
+
+	//TODO change this to a seperate function
+	ImGuiViewport viewport;
+	viewport.Size = ImVec2(Window::GetSize().x, Window::GetSize().y);
+	viewport.Pos = ImVec2(0, MenuBarHeight);
+	ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruDockspace, 0);
+}
+
 //TODO change this
 static int nameIndextemp = 0;
 ParticleSystemObject::ParticleSystemObject() :
@@ -230,5 +272,5 @@ ParticleSystemObject::ParticleSystemObject() :
 void ParticleSystemObject::DisplayGUI()
 {
 	if(m_EditorOpen)
-		m_PC.DisplayGUI(m_Name);
+		m_PC.DisplayGUI(m_Name, m_EditorOpen);
 }
