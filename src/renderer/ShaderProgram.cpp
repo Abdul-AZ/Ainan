@@ -1,37 +1,19 @@
 #include <pch.h>
 #include "ShaderProgram.h"
 
-std::string ReadEntireTextFile(const std::string& path) 
-{
-	std::string file_content;
-
-	FILE* file = fopen(path.c_str(), "r");
-
-	fseek(file, 0, SEEK_END);
-	int content_length = ftell(file);
-	file_content.resize(content_length + 1);
-	fseek(file, 0, SEEK_SET);
-
-	fread((void*)file_content.data(), sizeof(char), content_length, file);
-
-	fclose(file);
-
-	return file_content;
-}
-
 
 void ShaderProgram::Init(const std::string & vertPath, const std::string & fragPath)
 {
 	unsigned int vertex, fragment;
 
 	vertex = glCreateShader(GL_VERTEX_SHADER);
-	std::string vShaderCode = ReadEntireTextFile(vertPath);
+	std::string vShaderCode = FileManager::ReadEntireTextFile(vertPath);
 	const char* c_vShaderCode = vShaderCode.c_str();
 	glShaderSource(vertex, 1, &c_vShaderCode, NULL);
 	glCompileShader(vertex);
 
 
-	std::string fShaderCode = ReadEntireTextFile(fragPath);
+	std::string fShaderCode = FileManager::ReadEntireTextFile(fragPath);
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
 	const char* c_fShaderCode = fShaderCode.c_str();
 	glShaderSource(fragment, 1, &c_fShaderCode, NULL);
