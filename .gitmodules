@@ -1,6 +1,6 @@
 [submodule "imgui"]
 	path = imgui
-	url = https://github.com/AbdullrahmanAlzeidi/imgui.git
+	url = https://github.com/ocornut/imgui.git
 	branch = docking
 [submodule "glm"]
 	path = glm

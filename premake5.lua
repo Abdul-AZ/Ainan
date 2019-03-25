@@ -5,3 +5,4 @@ workspace "Simple-OpenGL-Particles"
 
 include "premake/Core.lua"
 include "premake/glfw.lua"
+include "premake/imgui.lua"
