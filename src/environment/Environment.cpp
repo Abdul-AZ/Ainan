@@ -44,8 +44,10 @@ void Environment::Update()
 	//Update
 	Window::Update();
 
-	for(ParticleSystemObject& obj : m_ParticleSystems)
-		obj.m_PS.Update(deltaTime);
+	if (m_Status == EnvironmentStatus::PlayMode) {
+		for (ParticleSystemObject& obj : m_ParticleSystems)
+			obj.m_PS.Update(deltaTime);
+	}
 
 	if (lastSize != Window::GetSize())
 		m_FrameBuffer.SetSize(Window::GetSize());
@@ -54,6 +56,10 @@ void Environment::Update()
 
 void Environment::Render()
 {
+	if (m_Status == EnvironmentStatus::None)
+		return;
+
+	//stuff to only render in play mode
 	m_FrameBuffer.Bind();
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -83,6 +89,7 @@ void Environment::RenderGUI()
 	ImGui::NewFrame();
 
 	DisplayMainMenuBarGUI();
+	DisplayEnvironmentControlsGUI();
 
 	if(m_ObjectInspectorWindowOpen)
 		DisplayObjectInspecterGUI();
@@ -102,10 +109,13 @@ void Environment::RenderGUI()
 
 void Environment::HandleInput()
 {
-	if (glfwGetMouseButton(&Window::GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !ImGui::GetIO().WantCaptureMouse)
-	{
-		for (ParticleSystemObject& obj : m_ParticleSystems)
-			obj.m_PS.SpawnParticle(obj.m_PC.GetParticle());
+	//Playmode specific input :
+	if (m_Status == EnvironmentStatus::PlayMode) {
+		if (glfwGetMouseButton(&Window::GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !ImGui::GetIO().WantCaptureMouse)
+		{
+			for (ParticleSystemObject& obj : m_ParticleSystems)
+				obj.m_PS.SpawnParticle(obj.m_PC.GetParticle());
+		}
 	}
 
 	if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS)
@@ -115,6 +125,13 @@ void Environment::HandleInput()
 	if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_F11) == GLFW_PRESS && m_CurrentTimeBetweenFrameCapture < 0.0f) {
 		m_SaveNextFrameAsImage = true;
 		m_CurrentTimeBetweenFrameCapture = m_MinTimeBetweenFrameCapture;
+	}
+
+	if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_F5) == GLFW_PRESS) {
+		if(m_Status == EnvironmentStatus::None)
+			Play();
+		if (m_Status == EnvironmentStatus::PauseMode)
+			Resume();
 	}
 }
 
@@ -204,6 +221,40 @@ void Environment::DisplayEnvironmentStatusGUI()
 	ImGui::End();
 }
 
+void Environment::DisplayEnvironmentControlsGUI()
+{
+	//return if window is not open
+	if (!m_EnvironmentControlsWindowOpen)
+		return;
+
+
+	ImGui::Begin("Controls", &m_EnvironmentControlsWindowOpen);
+
+	int width = ImGui::GetWindowSize().x;
+	ImGui::SetCursorPosX(width / 2 - 15);
+
+	if (m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode) {
+		if (ImGui::Button("Stop")) {
+			Stop();
+		}
+	} else {
+		if (ImGui::Button("Play")) {
+			Play();
+		}
+	}
+
+	ImGui::SameLine();
+	if (m_Status != EnvironmentStatus::PauseMode) {
+		if (ImGui::Button("Pause"))
+			Pause();
+	} else {
+		if (ImGui::Button("Resume"))
+			Resume();
+	}
+
+	ImGui::End();
+}
+
 void Environment::DisplayMainMenuBarGUI()
 {
 	int MenuBarHeight = 0;
@@ -219,6 +270,9 @@ void Environment::DisplayMainMenuBarGUI()
 		}
 
 		if (ImGui::BeginMenu("Window")) {
+
+			if (ImGui::MenuItem("Environment Controls"))
+				m_EnvironmentControlsWindowOpen = !m_EnvironmentControlsWindowOpen;
 
 			if (ImGui::MenuItem("Object Inspector"))
 				m_ObjectInspectorWindowOpen = !m_ObjectInspectorWindowOpen;
@@ -256,6 +310,34 @@ void Environment::DisplayMainMenuBarGUI()
 	viewport.Size = ImVec2(Window::GetSize().x, Window::GetSize().y);
 	viewport.Pos = ImVec2(0, MenuBarHeight);
 	ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruDockspace, 0);
+}
+
+void Environment::Play()
+{
+	assert(m_Status == EnvironmentStatus::None);
+	m_Status = EnvironmentStatus::PlayMode;
+}
+
+void Environment::Stop()
+{
+	assert(m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode);
+	m_Status = EnvironmentStatus::None;
+
+	for (ParticleSystemObject& obj : m_ParticleSystems) {
+		obj.m_PS.ClearParticles();
+	}
+}
+
+void Environment::Pause()
+{
+	assert(m_Status == EnvironmentStatus::PlayMode);
+	m_Status = EnvironmentStatus::PauseMode;
+}
+
+void Environment::Resume()
+{
+	assert(m_Status == EnvironmentStatus::PauseMode);
+	m_Status = EnvironmentStatus::PlayMode;
 }
 
 //TODO change this

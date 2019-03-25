@@ -37,6 +37,7 @@ project "Core"
       filter "configurations:Release"
       symbols "Off"
       optimize "On"
+	  defines { "NDEBUG" }
 
     filter "system:Windows"
       systemversion ("latest")
