@@ -11,6 +11,7 @@
 
 #include "renderer/FrameBuffer.h"
 #include "renderer/GaussianBlur.h"
+#include "renderer/Texture.h"
 
 struct ParticleSystemObject 
 {
@@ -67,6 +68,11 @@ private:
 	bool m_EnvironmentStatusWindowOpen = true;
 	bool m_EnvironmentControlsWindowOpen = true;
 	EnvironmentStatus m_Status = EnvironmentStatus::None;
+
+	Texture m_PlayButtonTexture;
+	Texture m_PauseButtonTexture;
+	Texture m_ResumeButtonTexture;
+	Texture m_StopButtonTexture;
 
 	//TODO abstract this to a seperate class or something
 	bool m_SaveNextFrameAsImage = false;

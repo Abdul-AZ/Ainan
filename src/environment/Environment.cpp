@@ -1,8 +1,11 @@
 #include <pch.h>
 #include "Environment.h"
 
-
-Environment::Environment()
+Environment::Environment() :
+	m_PlayButtonTexture("res/PlayButton.png"),
+	m_PauseButtonTexture("res/PauseButton.png"),
+	m_ResumeButtonTexture("res/ResumeButton.png"),
+	m_StopButtonTexture("res/StopButton.png")
 {
 	//setup ImGui
 	IMGUI_CHECKVERSION();
@@ -231,24 +234,24 @@ void Environment::DisplayEnvironmentControlsGUI()
 	ImGui::Begin("Controls", &m_EnvironmentControlsWindowOpen);
 
 	int width = ImGui::GetWindowSize().x;
-	ImGui::SetCursorPosX(width / 2 - 15);
+	ImGui::SetCursorPosX(width / 2 - 20);
 
 	if (m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode) {
-		if (ImGui::Button("Stop")) {
+		if (ImGui::ImageButton((ImTextureID)m_StopButtonTexture.GetID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
 			Stop();
 		}
 	} else {
-		if (ImGui::Button("Play")) {
+		if (ImGui::ImageButton((ImTextureID)m_PlayButtonTexture.GetID(), ImVec2(30, 20), ImVec2(0,0), ImVec2(1,1), 1)) {
 			Play();
 		}
 	}
 
 	ImGui::SameLine();
-	if (m_Status != EnvironmentStatus::PauseMode) {
-		if (ImGui::Button("Pause"))
+	if (m_Status == EnvironmentStatus::PlayMode) {
+		if (ImGui::ImageButton((ImTextureID)m_PauseButtonTexture.GetID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 			Pause();
-	} else {
-		if (ImGui::Button("Resume"))
+	} else if (m_Status == EnvironmentStatus::PauseMode) {
+		if (ImGui::ImageButton((ImTextureID)m_ResumeButtonTexture.GetID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 			Resume();
 	}
 
