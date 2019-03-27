@@ -50,6 +50,11 @@ void Environment::Update()
 	if (m_Status == EnvironmentStatus::PlayMode) {
 		for (ParticleSystemObject& obj : m_ParticleSystems)
 			obj.m_PS.Update(deltaTime);
+
+		// spawn particles if it is set to spawn automatically
+		for (ParticleSystemObject& obj : m_ParticleSystems)
+			if (obj.m_PC.m_Mode == SpawnMode::SpawnOnPosition)
+				obj.m_PS.SpawnParticle(obj.m_PC.GetParticle());
 	}
 
 	if (lastSize != Window::GetSize())

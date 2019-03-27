@@ -25,5 +25,5 @@ private:
 	ShaderProgram m_Shader;
 	std::vector<Particle> m_Particles;
 	unsigned int m_ParticleCount;
-	unsigned int m_ActiveParticleCount;
+	unsigned int m_ActiveParticleCount = 0;
 };
