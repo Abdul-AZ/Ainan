@@ -1,4 +1,4 @@
-workspace "Simple-OpenGL-Particles"
+workspace "ALZparticles"
     configurations { "Debug", "Release" }
     platforms { "x64", "x86" }
     startproject "Core"
