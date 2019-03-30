@@ -5,7 +5,9 @@
 enum class InterpolatorMode 
 {
 	Fixed,
-	Linear
+	Linear,
+	Cubic,
+	Smoothstep
 };
 
 template<typename T>
@@ -18,15 +20,33 @@ public:
 		endPoint(end)
 	{}
 
-	T Interpolate(const float& t)
-	{
-		if (Mode == InterpolatorMode::Linear) {
-			T diffrence = endPoint - startPoint;
+	T Interpolate(const float& t){
+		T diffrence = endPoint - startPoint;
+
+		switch (Mode)
+		{
+		case InterpolatorMode::Fixed:
+			return startPoint;
+
+		case InterpolatorMode::Linear:
 			return startPoint + diffrence * t;
-		}
-		else {
+
+		case InterpolatorMode::Cubic:
+			return startPoint + diffrence * t * t * t;
+
+		case InterpolatorMode::Smoothstep:
+			return startPoint + diffrence * Smoothstep(t);
+		default:
 			return startPoint;
 		}
+	}
+
+	float Smoothstep(const float& t) {
+		if (t <= 0)
+			return 0;
+		if (t >= 1)
+			return 1;
+		return 3 * (t * t) - 2 * (t * t * t);
 	}
 
 	std::string InterpolateModeStr(InterpolatorMode mode) {
@@ -34,13 +54,18 @@ public:
 		{
 		case InterpolatorMode::Fixed:
 			return "Fixed";
-			break;
+
 		case InterpolatorMode::Linear:
 			return "Linear";
-			break;
+
+		case InterpolatorMode::Cubic:
+			return "Cubic";
+
+		case InterpolatorMode::Smoothstep:
+			return "Smoothstep";
+
 		default:
 			return "Fixed";
-			break;
 		}
 	}
 

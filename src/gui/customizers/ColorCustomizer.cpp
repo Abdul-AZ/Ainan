@@ -40,10 +40,28 @@ void ColorCustomizer::DisplayGUI()
 				}
 			}
 
+			{
+				bool is_Active = m_Interpolator.Mode == InterpolatorMode::Cubic;
+				if (ImGui::Selectable(m_Interpolator.InterpolateModeStr(InterpolatorMode::Cubic).c_str(), &is_Active)) {
+
+					ImGui::SetItemDefaultFocus();
+					m_Interpolator.Mode = InterpolatorMode::Cubic;
+				}
+			}
+
+			{
+				bool is_Active = m_Interpolator.Mode == InterpolatorMode::Smoothstep;
+				if (ImGui::Selectable(m_Interpolator.InterpolateModeStr(InterpolatorMode::Smoothstep).c_str(), &is_Active)) {
+
+					ImGui::SetItemDefaultFocus();
+					m_Interpolator.Mode = InterpolatorMode::Smoothstep;
+				}
+			}
+
 			ImGui::EndCombo();
 		}
 
-		if (m_Interpolator.Mode == InterpolatorMode::Linear)
+		if (m_Interpolator.Mode != InterpolatorMode::Fixed)
 		{
 			ImGui::ColorPicker4("End Color:", &endColor.r);
 		}
