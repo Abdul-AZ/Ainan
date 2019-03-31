@@ -13,20 +13,6 @@
 #include "renderer/GaussianBlur.h"
 #include "renderer/Texture.h"
 
-struct ParticleSystemObject 
-{
-	ParticleSystemObject();
-
-	ParticleSystem m_PS;
-	ParticleCustomizer m_PC;
-	std::string m_Name;
-	bool m_EditorOpen;
-	bool m_RenameTextOpen;
-	int m_ID;
-
-	void DisplayGUI();
-};
-
 enum class EnvironmentStatus {
 	None,
 	PlayMode,
@@ -61,7 +47,7 @@ private:
 	GeneralSettingsGUI settings;
 
 	FrameBuffer m_FrameBuffer;
-	std::vector<ParticleSystemObject> m_ParticleSystems;
+	std::vector<ParticleSystem> m_ParticleSystems;
 
 	bool m_ObjectInspectorWindowOpen = true;
 	bool m_GeneralSettingsWindowOpen = true;
@@ -73,6 +59,8 @@ private:
 	Texture m_PauseButtonTexture;
 	Texture m_ResumeButtonTexture;
 	Texture m_StopButtonTexture;
+
+	bool m_MousePressedLastFrame = false;
 
 	//TODO abstract this to a seperate class or something
 	bool m_SaveNextFrameAsImage = false;

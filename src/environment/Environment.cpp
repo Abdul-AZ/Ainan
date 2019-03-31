@@ -21,7 +21,7 @@ Environment::Environment() :
 	timeStart = 0;
 	timeEnd = 0;
 
-	ParticleSystemObject startingPS;
+	ParticleSystem startingPS;
 
 	m_ParticleSystems.push_back(startingPS);
 
@@ -44,17 +44,11 @@ void Environment::Update()
 	timeStart = timeEnd;
 	m_CurrentTimeBetweenFrameCapture -= deltaTime;
 
-	//Update
 	Window::Update();
 
 	if (m_Status == EnvironmentStatus::PlayMode) {
-		for (ParticleSystemObject& obj : m_ParticleSystems)
-			obj.m_PS.Update(deltaTime);
-
-		// spawn particles if it is set to spawn automatically
-		for (ParticleSystemObject& obj : m_ParticleSystems)
-			if (obj.m_PC.m_Mode == SpawnMode::SpawnOnPosition)
-				obj.m_PS.SpawnParticle(obj.m_PC.GetParticle());
+		for (ParticleSystem& obj : m_ParticleSystems)
+			obj.Update(deltaTime);
 	}
 
 	if (lastSize != Window::GetSize())
@@ -71,8 +65,8 @@ void Environment::Render()
 	m_FrameBuffer.Bind();
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	for (ParticleSystemObject& obj : m_ParticleSystems)
-		obj.m_PS.Draw();
+	for (ParticleSystem& obj : m_ParticleSystems)
+		obj.Draw();
 
 	m_FrameBuffer.Unbind();
 
@@ -108,7 +102,7 @@ void Environment::RenderGUI()
 	if(m_EnvironmentStatusWindowOpen)
 		DisplayEnvironmentStatusGUI();
 
-	for (ParticleSystemObject& obj : m_ParticleSystems)
+	for (ParticleSystem& obj : m_ParticleSystems)
 		obj.DisplayGUI();
 
 	ImGui::Render();
@@ -121,14 +115,29 @@ void Environment::HandleInput()
 	if (m_Status == EnvironmentStatus::PlayMode) {
 		if (glfwGetMouseButton(&Window::GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !ImGui::GetIO().WantCaptureMouse)
 		{
-			for (ParticleSystemObject& obj : m_ParticleSystems)
-				obj.m_PS.SpawnParticle(obj.m_PC.GetParticle());
+			for (ParticleSystem& obj : m_ParticleSystems) {
+				if (obj.m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition) {
+					if (!m_MousePressedLastFrame)
+						obj.m_TimeTillNextParticleSpawn = 0.0f;
+					obj.m_ShouldSpawnParticles = true;
+				}
+			}
+			m_MousePressedLastFrame = true;
+		}
+		else {
+
+			for (ParticleSystem& obj : m_ParticleSystems) {
+				if (obj.m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition) {
+					obj.m_ShouldSpawnParticles = false;
+				}
+			}
+			m_MousePressedLastFrame = false;
 		}
 	}
 
 	if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS)
-		for (ParticleSystemObject& obj : m_ParticleSystems)
-			obj.m_PS.ClearParticles();
+		for (ParticleSystem& obj : m_ParticleSystems)
+			obj.ClearParticles();
 
 	if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_F11) == GLFW_PRESS && m_CurrentTimeBetweenFrameCapture < 0.0f) {
 		m_SaveNextFrameAsImage = true;
@@ -186,7 +195,7 @@ void Environment::DisplayObjectInspecterGUI()
 
 	if (ImGui::Button("Add Particle System"))
 	{
-		ParticleSystemObject pso;
+		ParticleSystem pso;
 		m_ParticleSystems.push_back(pso);
 	}
 
@@ -201,8 +210,8 @@ void Environment::DisplayEnvironmentStatusGUI()
 	ImGui::SameLine();
 
 	unsigned int activeParticleCount = 0;
-	for (ParticleSystemObject& pso : m_ParticleSystems)
-		activeParticleCount += pso.m_PS.GetActiveParticleCount();
+	for (ParticleSystem& pso : m_ParticleSystems)
+		activeParticleCount += pso.m_ActiveParticleCount;
 
 	ImGui::TextColored({ 0.0f,1.0f,0.0f,1.0f }, std::to_string(activeParticleCount).c_str());
 
@@ -215,7 +224,7 @@ void Environment::DisplayEnvironmentStatusGUI()
 				ImGui::Text("Particle Count :");
 
 				ImGui::SameLine();
-				ImGui::TextColored({ 0.0f,1.0f,0.0f,1.0f }, std::to_string(pso.m_PS.GetActiveParticleCount()).c_str());
+				ImGui::TextColored({ 0.0f,1.0f,0.0f,1.0f }, std::to_string(pso.m_ActiveParticleCount).c_str());
 				ImGui::TreePop();
 			}
 
@@ -331,8 +340,8 @@ void Environment::Stop()
 	assert(m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode);
 	m_Status = EnvironmentStatus::None;
 
-	for (ParticleSystemObject& obj : m_ParticleSystems) {
-		obj.m_PS.ClearParticles();
+	for (ParticleSystem& obj : m_ParticleSystems) {
+		obj.ClearParticles();
 	}
 }
 
@@ -346,21 +355,4 @@ void Environment::Resume()
 {
 	assert(m_Status == EnvironmentStatus::PauseMode);
 	m_Status = EnvironmentStatus::PlayMode;
-}
-
-//TODO change this
-static int nameIndextemp = 0;
-ParticleSystemObject::ParticleSystemObject() :
-	m_EditorOpen(false),
-	m_RenameTextOpen(false)
-{
-	m_Name = "Particle System (" + std::to_string(nameIndextemp) + ")";
-	m_ID = nameIndextemp;
-	nameIndextemp++;
-}
-
-void ParticleSystemObject::DisplayGUI()
-{
-	if(m_EditorOpen)
-		m_PC.DisplayGUI(m_Name, m_EditorOpen);
 }

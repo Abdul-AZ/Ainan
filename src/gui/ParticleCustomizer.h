@@ -1,6 +1,7 @@
 #pragma once
 
-#include "environment/ParticleSystem.h"
+#include "environment/Window.h"
+#include "environment/Particle.h"
 #include "gui/Customizers/VelocityCustomizer.h"
 #include "gui/Customizers/ColorCustomizer.h"
 #include "gui/Customizers/ScaleCustomizer.h"
@@ -21,7 +22,11 @@ public:
 	Particle& GetParticle();
 
 	SpawnMode m_Mode = SpawnMode::SpawnOnMousePosition;
+
+	float GetTimeBetweenParticles() { return 1 / m_ParticlesPerSecond; }
+
 private:
+	float m_ParticlesPerSecond = 100.0f;
 
 	VelocityCustomizer m_VelocityCustomizer;
 	LifetimeCustomizer m_LifetimeCustomizer;

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "gui/Interpolator.h"
 
 class Particle

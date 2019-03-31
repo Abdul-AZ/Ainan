@@ -45,6 +45,13 @@ void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowO
 		ImGui::EndCombo();
 	}
 
+	if (ImGui::TreeNode("Emission")) {
+
+		ImGui::DragFloat("Particles Per Second", &m_ParticlesPerSecond, 1.0f, 0.1f, 1000.0f);
+
+		ImGui::TreePop();
+	}
+
 	if (m_Mode == SpawnMode::SpawnOnPosition) {
 		if (ImGui::TreeNode("Position")) {
 

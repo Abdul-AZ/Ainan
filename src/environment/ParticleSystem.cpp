@@ -4,12 +4,19 @@
 static unsigned int VBO;
 static unsigned int VAO;
 
-ParticleSystem::ParticleSystem()
+static int nameIndextemp = 0;
+ParticleSystem::ParticleSystem() :
+	m_EditorOpen(false),
+	m_RenameTextOpen(false)
 {
+	m_Name = "Particle System (" + std::to_string(nameIndextemp) + ")";
+	m_ID = nameIndextemp;
+	nameIndextemp++;
+
 	m_Shader.Init("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag");
 
 	//TODO pass as a parameter
-	m_ParticleCount = 600;
+	m_ParticleCount = 1000;
 	m_ParticleInfoBuffer = malloc((sizeof(glm::mat4) + sizeof(glm::vec4)) * m_ParticleCount);
 	memset(m_ParticleInfoBuffer, 0, (sizeof(glm::mat4) + sizeof(glm::vec4)) * m_ParticleCount);
 
@@ -56,6 +63,10 @@ void ParticleSystem::Update(const float& deltaTime)
 	glm::vec2& size = Window::GetSize();
 	glm::mat4 projection = glm::ortho(0.0f, size.x, size.y, 0.0f);
 	m_Shader.setUniformMat4("projection", projection);
+
+	if (m_Customizer.m_Mode == SpawnMode::SpawnOnPosition || (m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
+		SpawnAllParticlesOnQue(deltaTime);
+	}
 
 	m_ActiveParticleCount = 0;
 	for (Particle& particle : m_Particles) {
@@ -139,7 +150,8 @@ void ParticleSystem::ClearParticles()
 		m_particle.isActive = false;
 }
 
-ParticleSystem::ParticleSystem(const ParticleSystem& Psystem)
+ParticleSystem::ParticleSystem(const ParticleSystem& Psystem) :
+	m_Customizer(Psystem.m_Customizer)
 {
 	m_ParticleInfoBuffer = malloc((sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
 	memcpy(m_ParticleInfoBuffer, Psystem.m_ParticleInfoBuffer, (sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
@@ -147,11 +159,36 @@ ParticleSystem::ParticleSystem(const ParticleSystem& Psystem)
 	m_Shader = Psystem.m_Shader;
 	m_Particles = Psystem.m_Particles;
 	m_ParticleCount = Psystem.m_ParticleCount;
+	m_Name = Psystem.m_Name;
+	m_EditorOpen = Psystem.m_EditorOpen;
+	m_ID = Psystem.m_ID;
+	m_RenameTextOpen = Psystem.m_RenameTextOpen;
 }
 
 ParticleSystem ParticleSystem::operator=(const ParticleSystem & Psystem)
 {
 	return ParticleSystem(Psystem);
+}
+
+void ParticleSystem::DisplayGUI()
+{
+	if (m_EditorOpen)
+		m_Customizer.DisplayGUI(m_Name, m_EditorOpen);
+}
+
+void ParticleSystem::SpawnAllParticlesOnQue(const float& deltaTime)
+{
+	m_TimeTillNextParticleSpawn -= deltaTime;
+	if (m_TimeTillNextParticleSpawn < 0.0f) {
+		m_TimeTillNextParticleSpawn = abs(m_TimeTillNextParticleSpawn);
+
+		while (m_TimeTillNextParticleSpawn > 0.0f) {
+			SpawnParticle(m_Customizer.GetParticle());
+			m_TimeTillNextParticleSpawn -= m_Customizer.GetTimeBetweenParticles();
+		}
+
+		m_TimeTillNextParticleSpawn = m_Customizer.GetTimeBetweenParticles();
+	}
 }
 
 ParticleSystem::~ParticleSystem()
