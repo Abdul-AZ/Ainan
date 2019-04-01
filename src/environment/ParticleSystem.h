@@ -28,6 +28,7 @@ public:
 	std::string m_Name;
 	bool m_EditorOpen;
 	bool m_RenameTextOpen;
+	bool m_Selected = false;
 	int m_ID;
 	unsigned int m_ActiveParticleCount = 0;
 
@@ -37,5 +38,4 @@ private:
 	ShaderProgram m_Shader;
 	std::vector<Particle> m_Particles;
 	unsigned int m_ParticleCount;
-
 };

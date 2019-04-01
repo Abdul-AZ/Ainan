@@ -17,7 +17,7 @@ pchsource "../src/pch.cpp"
 
 includedirs { "../src", "../imgui", "../imgui/examples", "../imgui/misc/cpp", "../glm" }
 
-defines { "IMGUI_IMPL_OPENGL_LOADER_GLAD", "IMGUI_HAS_DOCK" }
+defines { "_CRT_SECURE_NO_WARNINGS" }
 
 links { "OpenGL32.lib", "glfw", "imgui" }
 

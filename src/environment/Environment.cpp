@@ -157,30 +157,63 @@ void Environment::DisplayObjectInspecterGUI()
 	auto flags = ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysUseWindowPadding;
 	ImGui::Begin("Object Inspector", &m_ObjectInspectorWindowOpen, flags);
 
+	ImGui::PushItemWidth(ImGui::GetWindowWidth());
+	ImGui::ListBoxHeader("##Inspector", -1, 30);
+
+	//show menu when right clicking
+	if (ImGui::BeginPopupContextItem("Inspector Popup"))
+	{
+		if (ImGui::Selectable("Add Particle System")) {
+			ParticleSystem pso;
+			m_ParticleSystems.push_back(pso);
+		}
+		ImGui::EndPopup();
+	}
+	
 	for (int i = 0; i < m_ParticleSystems.size(); i++)
 	{
 		auto& particleSystem = m_ParticleSystems[i];
 
 		ImGui::PushID(particleSystem.m_ID);
-		ImGui::Text((particleSystem.m_Name.size() > 0) ? particleSystem.m_Name.c_str() : "No Name");
 
-		ImGui::SameLine();
-		if (ImGui::Button("Edit")) {
-			particleSystem.m_EditorOpen = !particleSystem.m_EditorOpen;
+		
+		if (ImGui::Selectable((particleSystem.m_Name.size() > 0) ? particleSystem.m_Name.c_str() : "No Name", &particleSystem.m_Selected)) {
+			//if this is selected. deselect all other particle systems
+			for (auto& particle : m_ParticleSystems) {
+				if (particle.m_ID != particleSystem.m_ID)
+					particle.m_Selected = false;
+			}
 		}
 
-		ImGui::SameLine();
-		if (ImGui::Button("Delete")) {
-			m_ParticleSystems.erase(m_ParticleSystems.begin() + i);
+		//show menu when right clicking
+		if (ImGui::BeginPopupContextItem("Object Popup"))
+		{
+			if(ImGui::Selectable("Edit"))
+				particleSystem.m_EditorOpen = !particleSystem.m_EditorOpen;
+		
+			if (ImGui::Selectable("Delete"))
+				m_ParticleSystems.erase(m_ParticleSystems.begin() + i);
+		
+			if (ImGui::Selectable("Rename"))
+				particleSystem.m_RenameTextOpen = !particleSystem.m_RenameTextOpen;
+		
+			ImGui::EndPopup();
 		}
 
-		ImGui::SameLine();
-		if (ImGui::Button("Rename")) {
-			particleSystem.m_RenameTextOpen = !particleSystem.m_RenameTextOpen;
+		//display particle system buttons only if it is selected
+		if (particleSystem.m_Selected) {
+			if (ImGui::Button("Edit")) 
+				particleSystem.m_EditorOpen = !particleSystem.m_EditorOpen;
+
+			ImGui::SameLine();
+			if (ImGui::Button("Delete")) 
+				m_ParticleSystems.erase(m_ParticleSystems.begin() + i);
+
+			ImGui::SameLine();
+			if (ImGui::Button("Rename")) 
+				particleSystem.m_RenameTextOpen = !particleSystem.m_RenameTextOpen;
 		}
 
-		ImGui::Spacing();
-		ImGui::Spacing();
 		ImGui::Spacing();
 
 		if (particleSystem.m_RenameTextOpen) {
@@ -192,6 +225,12 @@ void Environment::DisplayObjectInspecterGUI()
 
 		ImGui::PopID();
 	}
+
+	
+
+	ImGui::ListBoxFooter();
+
+	ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 30.0f);
 
 	if (ImGui::Button("Add Particle System"))
 	{

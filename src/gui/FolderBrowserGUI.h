@@ -14,7 +14,7 @@ public:
 
 	bool m_WindowOpen = false;
 private:
-	std::string m_CurrentFolder;
+	std::string m_CurrentFolder = "not selected";
 	std::string m_WindowName;
 	std::string m_InputFolder;
 };

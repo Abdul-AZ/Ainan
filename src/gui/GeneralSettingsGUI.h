@@ -14,10 +14,10 @@ public:
 	float& GetBlurStrength() { return m_BlurStrength; }
 	float& GetBlurGaussianSigma() { return m_BlurGaussianSigma; }
 
-	ImageFormat& GetImageFormat() { return m_ImageFormat; }
-	glm::uvec2& GetImageResolution() { return m_ImageResolution; }
-	std::string& GetImageName() { return m_ImageFileName; }
-	std::string& GetImageSaveLocation() { return m_ImageLocationBrowser.GetChosenFolderPath(); }
+	ImageFormat GetImageFormat() { return m_ImageFormat; }
+	glm::uvec2 GetImageResolution() { return m_ImageResolution; }
+	std::string GetImageName() { return m_ImageFileName; }
+	std::string GetImageSaveLocation() { return m_ImageLocationBrowser.GetChosenFolderPath(); }
 
 private:
 

@@ -29,4 +29,4 @@ filter "system:Windows"
    "../glfw/src/win32_window.c"
  }
  systemversion ("latest")
- defines { "_GLFW_WIN32" }
+ defines { "_GLFW_WIN32", "_CRT_SECURE_NO_WARNINGS" }
