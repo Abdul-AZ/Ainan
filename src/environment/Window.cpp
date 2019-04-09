@@ -1,11 +1,13 @@
 #include <pch.h>
 #include "Window.h"
 
+bool Window::m_WindowSizeChanged = false;
 glm::vec2 Window::m_ScreenSize = { 0,0 };
 GLFWwindow* Window::m_Window = nullptr;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+	Window::m_WindowSizeChanged = true;
 	Window::m_ScreenSize = { width, height };
 	glViewport(0, 0, width, height);
 }
@@ -32,13 +34,13 @@ void Window::Init()
 
 void Window::Update()
 {
-
 	glfwPollEvents();
 }
 
 void Window::Present()
 {
 	glfwSwapBuffers(m_Window);
+	m_WindowSizeChanged = false;
 }
 
 void Window::Clear()

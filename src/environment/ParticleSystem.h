@@ -3,6 +3,7 @@
 #include "renderer/ShaderProgram.h"
 #include "Window.h"
 #include "Particle.h"
+#include "Camera.h"
 #include "../gui/ParticleCustomizer.h"
 
 class ParticleSystem 
@@ -11,9 +12,9 @@ public:
 	ParticleSystem();
 	~ParticleSystem();
 
-	void Update(const float& deltaTime);
+	void Update(const float& deltaTime, Camera& camera);
 	void Draw();
-	void SpawnAllParticlesOnQue(const float& deltaTime);
+	void SpawnAllParticlesOnQue(const float& deltaTime, Camera& camera);
 	void SpawnParticle(const Particle& particle);
 	void ClearParticles();
 	void DisplayGUI();

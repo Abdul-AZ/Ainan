@@ -4,6 +4,7 @@
 #include "file/stb_image_write.h"
 
 #include "ParticleSystem.h"
+#include "Camera.h"
 
 #include "gui/ParticleCustomizer.h"
 #include "gui/GeneralSettingsGUI.h"
@@ -47,6 +48,7 @@ private:
 	GeneralSettingsGUI settings;
 
 	FrameBuffer m_FrameBuffer;
+	Camera m_Camera;
 	std::vector<ParticleSystem> m_ParticleSystems;
 
 	bool m_ObjectInspectorWindowOpen = true;
@@ -66,8 +68,4 @@ private:
 	bool m_SaveNextFrameAsImage = false;
 	float m_MinTimeBetweenFrameCapture = 2.0f; //2 seconds
 	float m_CurrentTimeBetweenFrameCapture = m_MinTimeBetweenFrameCapture;
-
-	//to keep track of when window gets resized
-	//TODO make it into a callback
-	glm::vec2 lastSize;
 };

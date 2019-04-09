@@ -58,14 +58,14 @@ ParticleSystem::ParticleSystem() :
 	glBindVertexArray(0);
 }
 
-void ParticleSystem::Update(const float& deltaTime)
+void ParticleSystem::Update(const float& deltaTime, Camera& camera)
 {
-	glm::vec2& size = Window::GetSize();
-	glm::mat4 projection = glm::ortho(0.0f, size.x, size.y, 0.0f);
-	m_Shader.setUniformMat4("projection", projection);
+	m_Shader.setUniformMat4("projection", camera.GetProjectionMatrix());
+	m_Shader.setUniformMat4("view", camera.GetViewMatrix());
+	
 
 	if (m_Customizer.m_Mode == SpawnMode::SpawnOnPosition || (m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
-		SpawnAllParticlesOnQue(deltaTime);
+		SpawnAllParticlesOnQue(deltaTime, camera);
 	}
 
 	m_ActiveParticleCount = 0;
@@ -176,14 +176,17 @@ void ParticleSystem::DisplayGUI()
 		m_Customizer.DisplayGUI(m_Name, m_EditorOpen);
 }
 
-void ParticleSystem::SpawnAllParticlesOnQue(const float& deltaTime)
+void ParticleSystem::SpawnAllParticlesOnQue(const float& deltaTime, Camera& camera)
 {
 	m_TimeTillNextParticleSpawn -= deltaTime;
 	if (m_TimeTillNextParticleSpawn < 0.0f) {
 		m_TimeTillNextParticleSpawn = abs(m_TimeTillNextParticleSpawn);
 
 		while (m_TimeTillNextParticleSpawn > 0.0f) {
-			SpawnParticle(m_Customizer.GetParticle());
+			Particle p = m_Customizer.GetParticle();
+			if (m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition)
+				p.m_Position -= glm::vec2(camera.Position.x, camera.Position.y);
+			SpawnParticle(p);
 			m_TimeTillNextParticleSpawn -= m_Customizer.GetTimeBetweenParticles();
 		}
 

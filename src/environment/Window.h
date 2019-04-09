@@ -8,11 +8,13 @@ public:
 	static void Present();
 	static void Clear();
 	static void Terminate();
+	static bool WindowSizeChangedSinceLastFrame() { return m_WindowSizeChanged;};
 
 	static GLFWwindow& GetWindow();
 	static glm::vec2& GetSize();
 
 private:
+	static bool m_WindowSizeChanged;
 	static glm::vec2 m_ScreenSize;
 	static GLFWwindow* m_Window;
 

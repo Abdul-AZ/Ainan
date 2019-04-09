@@ -45,15 +45,15 @@ void Environment::Update()
 	m_CurrentTimeBetweenFrameCapture -= deltaTime;
 
 	Window::Update();
+	m_Camera.Update(deltaTime);
 
 	if (m_Status == EnvironmentStatus::PlayMode) {
 		for (ParticleSystem& obj : m_ParticleSystems)
-			obj.Update(deltaTime);
+			obj.Update(deltaTime, m_Camera);
 	}
 
-	if (lastSize != Window::GetSize())
+	if (Window::WindowSizeChangedSinceLastFrame())
 		m_FrameBuffer.SetSize(Window::GetSize());
-	lastSize = Window::GetSize();
 }
 
 void Environment::Render()
@@ -132,6 +132,22 @@ void Environment::HandleInput()
 				}
 			}
 			m_MousePressedLastFrame = false;
+		}
+	}
+	//TEMPORARY camera input
+	{
+		float speed = 10.0f;
+		if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_W) == GLFW_PRESS) {
+			m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, speed, 0));
+		}
+		if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_S) == GLFW_PRESS) {
+			m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, -speed, 0));
+		}
+		if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_D) == GLFW_PRESS) {
+			m_Camera.SetPosition(m_Camera.Position + glm::vec3(-speed, 0, 0));
+		}
+		if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_A) == GLFW_PRESS) {
+			m_Camera.SetPosition(m_Camera.Position + glm::vec3(speed, 0, 0));
 		}
 	}
 
