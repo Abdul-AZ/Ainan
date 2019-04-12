@@ -16,16 +16,23 @@ void ScaleCustomizer::DisplayGUI()
 
 		if (RandomScale)
 		{
-			if (maxScale < minScale)
-				maxScale = minScale;
-
-			ImGui::SliderFloat("Minimum Scale:", &minScale, 0.1f, 25.0f);
-			ImGui::SliderFloat("Maximum Scale:", &maxScale, 0.1f, 25.0f);
+			ImGui::DragFloat("Minimum Scale:", &minScale, 0.1f);
+			ImGui::DragFloat("Maximum Scale:", &maxScale, 0.1f);
 		}
 		else
 		{
-			ImGui::SliderFloat("Scale:", &definedScale, 0.1f, 25.0f);
+			ImGui::DragFloat("Scale:", &definedScale, 0.1f);
 		}
+		
+		//to make sure scale doesn't go negative
+		if (minScale < 0.0f)
+			minScale = 0.0f;
+		if (maxScale < 0.0f)
+			maxScale = 0.0f;
+		
+		//to make sure max scale is always bigger than minscale
+		if (minScale > maxScale)
+			minScale = maxScale;
 
 		ImGui::Spacing();
 		ImGui::Spacing();
@@ -76,8 +83,11 @@ void ScaleCustomizer::DisplayGUI()
 
 		if (m_Interpolator.Mode != InterpolatorMode::Fixed)
 		{
-			ImGui::SliderFloat("End Scale:", &endScale, 0.1f, 25.0f);
+			ImGui::DragFloat("End Scale:", &endScale, 0.1f);
 		}
+		//to make sure end scale doesn't go lower than 0
+		if (endScale < 0.0f)
+			endScale = 0.0f;
 
 		ImGui::TreePop();
 	}

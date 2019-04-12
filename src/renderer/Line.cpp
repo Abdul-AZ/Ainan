@@ -33,10 +33,13 @@ void Line::SetPoints(glm::vec2 startPoint, glm::vec2 endPoint)
 	UpdateBufferWithPoints();
 }
 
-void Line::Render()
+void Line::Render(Camera& camera)
 {
 	glLineWidth(m_Width);
 	LineShader.setUniformVec4("color", m_Color);
+	LineShader.setUniformMat4("projection", camera.GetProjectionMatrix());
+	LineShader.setUniformMat4("view", camera.GetViewMatrix());
+	LineShader.setUniformMat4("model", camera.GetViewMatrix());
 
 	LineShader.Bind();
 	glBindVertexArray(m_VertexArrayBuffer);
@@ -45,6 +48,31 @@ void Line::Render()
 
 	glBindVertexArray(0);
 	LineShader.Unbind();
+}
+
+float Line::GetSlope()
+{
+	float deltaY = m_EndPoint.y - m_StartPoint.y;
+	float deltaX = m_EndPoint.x - m_StartPoint.x;
+	return deltaY / deltaX;
+}
+
+float Line::GetYIntercept()
+{
+	float slope = GetSlope();
+
+	return m_EndPoint.y - m_EndPoint.x * slope;
+}
+
+glm::vec2 Line::GetPointInLine(const float & t)
+{
+	float slope = GetSlope();
+	float yIntercept = GetYIntercept();
+
+	float x = m_StartPoint.x + t * (m_EndPoint.x - m_StartPoint.x);
+	float y = slope * x + yIntercept;
+
+	return glm::vec2(x, y);
 }
 
 void Line::UpdateBufferWithPoints()

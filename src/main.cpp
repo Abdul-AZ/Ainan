@@ -21,7 +21,6 @@ int main(int argc, const char* argv[]) {
 		env->Render();
 		env->RenderGUI();
 
-
 		Window::Present();
 		Window::Clear();
 	}

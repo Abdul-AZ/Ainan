@@ -97,17 +97,26 @@ void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowO
 
 void ParticleCustomizer::Update()
 {
-	if (m_Mode == SpawnMode::SpawnOnMousePosition) {
+	switch (m_Mode)
+	{
+	case SpawnMode::SpawnOnMousePosition:
 		double xpos, ypos;
 		glfwGetCursorPos(&Window::GetWindow(), &xpos, &ypos);
 		m_Particle.m_Position = glm::vec2(xpos, ypos);
-	} 
-	else if (m_Mode == SpawnMode::SpawnOnPoint) {
+		break;
+
+
+	case SpawnMode::SpawnOnPoint:
 		glm::vec2 spawnPosition = { m_SpawnPosition.x * 1000, 1000 - m_SpawnPosition.y * 1000 };
-
 		m_Particle.m_Position = spawnPosition;
-	}
+		break;
 
+
+	case SpawnMode::SpawnOnLine:
+		std::uniform_real_distribution<float> dest(0.0f, 1.0f);
+		m_Particle.m_Position = m_Line.GetPointInLine(dest(mt));
+		break;
+	}
 
 	m_Particle.m_Velocity = m_VelocityCustomizer.GetVelocity();
 	m_Particle.m_Color = m_ColorCustomizer.GetColorInterpolator();

@@ -17,7 +17,7 @@ public:
 	void SpawnAllParticlesOnQue(const float& deltaTime, Camera& camera);
 	void SpawnParticle(const Particle& particle);
 	void ClearParticles();
-	void DisplayGUI();
+	void DisplayGUI(Camera& camera);
 
 	ParticleSystem(const ParticleSystem& Psystem);
 	ParticleSystem operator=(const ParticleSystem& Psystem);

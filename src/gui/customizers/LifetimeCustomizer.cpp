@@ -15,15 +15,27 @@ void LifetimeCustomizer::DisplayGUI()
 			if (maxLifetime < minLifetime)
 				maxLifetime = minLifetime;
 
-			ImGui::SliderFloat("Minimum Lifetime:", &minLifetime, 0.1f, 5.0f);
-			ImGui::SliderFloat("Maximum Lifetime:", &maxLifetime, 0.1f, 5.0f);
+			ImGui::DragFloat("Minimum Lifetime:", &minLifetime, 0.1f);
+			ImGui::DragFloat("Maximum Lifetime:", &maxLifetime, 0.1f);
 		}
 		else
 		{
-			ImGui::SliderFloat("Lifetime:", &definedLifetime, 0.1f, 5.0f);
+			ImGui::DragFloat("Lifetime:", &definedLifetime, 0.1f);
 		}
 		ImGui::TreePop();
 	}
+
+	//to make sure scale doesn't go negative
+	if (minLifetime < 0.0f)
+		minLifetime = 0.0f;
+	if (maxLifetime < 0.0f)
+		maxLifetime = 0.0f;
+	if (definedLifetime < 0.0f)
+		definedLifetime = 0.0f;
+
+	//to make sure max scale is always bigger than minscale
+	if (minLifetime > maxLifetime)
+		minLifetime = maxLifetime;
 }
 
 float LifetimeCustomizer::GetLifetime()

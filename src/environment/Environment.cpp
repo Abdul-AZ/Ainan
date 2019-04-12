@@ -103,7 +103,7 @@ void Environment::RenderGUI()
 		DisplayEnvironmentStatusGUI();
 
 	for (ParticleSystem& obj : m_ParticleSystems)
-		obj.DisplayGUI();
+		obj.DisplayGUI(m_Camera);
 
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
