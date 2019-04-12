@@ -6,10 +6,12 @@
 #include "gui/Customizers/ColorCustomizer.h"
 #include "gui/Customizers/ScaleCustomizer.h"
 #include "gui/Customizers/LifetimeCustomizer.h"
+#include "renderer/Line.h"
 
 enum class SpawnMode {
 	SpawnOnMousePosition,
-	SpawnOnPosition
+	SpawnOnPoint,
+	SpawnOnLine
 };
 
 class ParticleCustomizer 
@@ -33,12 +35,20 @@ private:
 	ScaleCustomizer m_ScaleCustomizer;
 	ColorCustomizer m_ColorCustomizer;
 
-	//this is on a scale from 0 to 1000
-	glm::vec2 m_SpawnPosition = { 500.0f, 500.0f };
+	//this is on a scale from 0 to 1
+	glm::vec2 m_SpawnPosition = { 0.5f, 0.5f };
 
 	//the particle that is going to be spawned next
 	Particle m_Particle;
 
+	//spawn particle on line option
+	glm::vec2 m_LinePosition = { 0.5f, 0.5f };
+	float m_LineLength = 0.01f;
+	float m_LineAngle = 0.0f; //in degrees
+	Line m_Line;
+
 	//random number generator
 	std::mt19937 mt;
+
+	friend class ParticleSystem;
 };

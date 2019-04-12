@@ -3,7 +3,9 @@
 
 ParticleCustomizer::ParticleCustomizer() :
 	mt(std::random_device{}())
-{}
+{
+	m_Line.SetColor(glm::vec4(0.0f, 0.7f, 0.0f, 0.85f));
+}
 
 static std::string GetAsText(const SpawnMode& mode) 
 {
@@ -12,8 +14,11 @@ static std::string GetAsText(const SpawnMode& mode)
 	case SpawnMode::SpawnOnMousePosition:
 		return "Spawn On Mouse";
 
-	case SpawnMode::SpawnOnPosition:
-		return "Spawn On Specified Position";
+	case SpawnMode::SpawnOnPoint:
+		return "Spawn On Point";
+
+	case SpawnMode::SpawnOnLine:
+		return "Spawn On Line";
 
 	default:
 		return "";
@@ -35,10 +40,18 @@ void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowO
 		}
 
 		{
-			bool is_active = m_Mode == SpawnMode::SpawnOnPosition;
-			if (ImGui::Selectable(GetAsText(SpawnMode::SpawnOnPosition).c_str(), &is_active)) {
+			bool is_active = m_Mode == SpawnMode::SpawnOnPoint;
+			if (ImGui::Selectable(GetAsText(SpawnMode::SpawnOnPoint).c_str(), &is_active)) {
 				ImGui::SetItemDefaultFocus();
-				m_Mode = SpawnMode::SpawnOnPosition;
+				m_Mode = SpawnMode::SpawnOnPoint;
+			}
+		}
+
+		{
+			bool is_active = m_Mode == SpawnMode::SpawnOnLine;
+			if (ImGui::Selectable(GetAsText(SpawnMode::SpawnOnLine).c_str(), &is_active)) {
+				ImGui::SetItemDefaultFocus();
+				m_Mode = SpawnMode::SpawnOnLine;
 			}
 		}
 
@@ -52,14 +65,27 @@ void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowO
 		ImGui::TreePop();
 	}
 
-	if (m_Mode == SpawnMode::SpawnOnPosition) {
+	if (m_Mode == SpawnMode::SpawnOnPoint) {
 		if (ImGui::TreeNode("Position")) {
 
-			ImGui::DragFloat2("Starting Position :", &m_SpawnPosition.x, 1.0f, 0.0f, 1000.0f);
+			ImGui::DragFloat2("Starting Position :", &m_SpawnPosition.x, 0.001f);
 
 			ImGui::TreePop();
 		}
 	}
+
+	if (m_Mode == SpawnMode::SpawnOnLine) 
+	{
+		if (ImGui::TreeNode("Position")) {
+
+			ImGui::DragFloat2("Line Position :", &m_LinePosition.x, 0.001f);
+			ImGui::DragFloat("Line Length :", &m_LineLength, 0.001f);
+			ImGui::DragFloat("Line Rotation :", &m_LineAngle, 1.0f, 0.0f, 360.0f);
+
+			ImGui::TreePop();
+		}
+	}
+
 
 	m_VelocityCustomizer.DisplayGUI();
 	m_ColorCustomizer.DisplayGUI();
@@ -76,10 +102,8 @@ void ParticleCustomizer::Update()
 		glfwGetCursorPos(&Window::GetWindow(), &xpos, &ypos);
 		m_Particle.m_Position = glm::vec2(xpos, ypos);
 	} 
-	else if (m_Mode == SpawnMode::SpawnOnPosition) {
-		glm::vec2& size = Window::GetSize();
-
-		glm::vec2 spawnPosition = { (m_SpawnPosition.x / 1000.0f) * size.x, size.y - (m_SpawnPosition.y / 1000.0f) * size.y };
+	else if (m_Mode == SpawnMode::SpawnOnPoint) {
+		glm::vec2 spawnPosition = { m_SpawnPosition.x * 1000, 1000 - m_SpawnPosition.y * 1000 };
 
 		m_Particle.m_Position = spawnPosition;
 	}

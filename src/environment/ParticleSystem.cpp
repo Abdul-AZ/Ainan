@@ -62,9 +62,8 @@ void ParticleSystem::Update(const float& deltaTime, Camera& camera)
 {
 	m_Shader.setUniformMat4("projection", camera.GetProjectionMatrix());
 	m_Shader.setUniformMat4("view", camera.GetViewMatrix());
-	
 
-	if (m_Customizer.m_Mode == SpawnMode::SpawnOnPosition || (m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
+	if (m_Customizer.m_Mode == SpawnMode::SpawnOnPoint || (m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
 		SpawnAllParticlesOnQue(deltaTime, camera);
 	}
 
@@ -174,6 +173,18 @@ void ParticleSystem::DisplayGUI()
 {
 	if (m_EditorOpen)
 		m_Customizer.DisplayGUI(m_Name, m_EditorOpen);
+
+	//Render editor line
+	if (m_Customizer.m_Mode == SpawnMode::SpawnOnLine && m_Selected)
+	{
+		glm::vec2 pointDispositionFromCenter = m_Customizer.m_LineLength * glm::vec2(cos(m_Customizer.m_LineAngle * 3.14159265 / 180.0f), sin(m_Customizer.m_LineAngle * 3.14159265 / 180.0f));
+
+		glm::vec2 startLinePoint = m_Customizer.m_LinePosition + pointDispositionFromCenter;
+		glm::vec2 endLinePoint = m_Customizer.m_LinePosition - pointDispositionFromCenter;
+
+		m_Customizer.m_Line.SetPoints(startLinePoint, endLinePoint);
+		m_Customizer.m_Line.Render();
+	}
 }
 
 void ParticleSystem::SpawnAllParticlesOnQue(const float& deltaTime, Camera& camera)
