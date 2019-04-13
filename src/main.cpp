@@ -3,9 +3,7 @@
 #include "environment/Window.h"
 #include "environment/Environment.h"
 
-#include "file/FileManager.h"
-
-#include "renderer/Line.h"
+#include "noise/PerlinNoise2D.h"
 
 int main(int argc, const char* argv[]) {
 
@@ -13,6 +11,11 @@ int main(int argc, const char* argv[]) {
 	FileManager::Init(argv[0]);
 	
 	Environment* env = new Environment;
+
+	float loop = 0.0f;
+
+	PerlinNoise2D noise;
+	noise.Init();
 
 	while (!glfwWindowShouldClose(&Window::GetWindow()))
 	{

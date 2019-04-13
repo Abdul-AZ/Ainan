@@ -86,7 +86,7 @@ void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowO
 		}
 	}
 
-
+	m_NoiseCustomizer.DisplayGUI();
 	m_VelocityCustomizer.DisplayGUI();
 	m_ColorCustomizer.DisplayGUI();
 	m_LifetimeCustomizer.DisplayGUI();

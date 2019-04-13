@@ -5,6 +5,7 @@
 #include "Particle.h"
 #include "Camera.h"
 #include "../gui/ParticleCustomizer.h"
+#include "noise/PerlinNoise2D.h"
 
 class ParticleSystem 
 {
@@ -39,4 +40,5 @@ private:
 	ShaderProgram m_Shader;
 	std::vector<Particle> m_Particles;
 	unsigned int m_ParticleCount;
+	PerlinNoise2D m_Noise;
 };

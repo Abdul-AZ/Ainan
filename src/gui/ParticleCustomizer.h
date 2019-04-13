@@ -2,10 +2,11 @@
 
 #include "environment/Window.h"
 #include "environment/Particle.h"
-#include "gui/Customizers/VelocityCustomizer.h"
-#include "gui/Customizers/ColorCustomizer.h"
-#include "gui/Customizers/ScaleCustomizer.h"
-#include "gui/Customizers/LifetimeCustomizer.h"
+#include "Customizers/VelocityCustomizer.h"
+#include "Customizers/ColorCustomizer.h"
+#include "Customizers/ScaleCustomizer.h"
+#include "Customizers/LifetimeCustomizer.h"
+#include "Customizers/NoiseCustomizer.h"
 #include "renderer/Line.h"
 
 enum class SpawnMode {
@@ -31,6 +32,7 @@ private:
 	float m_ParticlesPerSecond = 100.0f;
 
 	VelocityCustomizer m_VelocityCustomizer;
+	NoiseCustomizer m_NoiseCustomizer;
 	LifetimeCustomizer m_LifetimeCustomizer;
 	ScaleCustomizer m_ScaleCustomizer;
 	ColorCustomizer m_ColorCustomizer;

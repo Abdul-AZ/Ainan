@@ -14,6 +14,7 @@ ParticleSystem::ParticleSystem() :
 	nameIndextemp++;
 
 	m_Shader.Init("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag");
+	m_Noise.Init();
 
 	//TODO pass as a parameter
 	m_ParticleCount = 1000;
@@ -69,6 +70,12 @@ void ParticleSystem::Update(const float& deltaTime, Camera& camera)
 
 	m_ActiveParticleCount = 0;
 	for (Particle& particle : m_Particles) {
+		
+		if (m_Customizer.m_NoiseCustomizer.NoiseEnabled) {
+			particle.m_Velocity.x += m_Noise.Noise(particle.m_Position.x, particle.m_Position.y) * m_Customizer.m_NoiseCustomizer.NoiseStrength;
+			particle.m_Velocity.y += m_Noise.Noise(particle.m_Position.x + 30, particle.m_Position.y - 30) * m_Customizer.m_NoiseCustomizer.NoiseStrength;
+		}
+
 		particle.Update(deltaTime);
 
 		//update active particle count
@@ -162,6 +169,7 @@ ParticleSystem::ParticleSystem(const ParticleSystem& Psystem) :
 	m_EditorOpen = Psystem.m_EditorOpen;
 	m_ID = Psystem.m_ID;
 	m_RenameTextOpen = Psystem.m_RenameTextOpen;
+	m_Noise.Init();
 }
 
 ParticleSystem ParticleSystem::operator=(const ParticleSystem & Psystem)
