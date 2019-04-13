@@ -7,6 +7,8 @@
 
 int main(int argc, const char* argv[]) {
 
+	using namespace ALZ;
+
 	Window::Init();
 	FileManager::Init(argv[0]);
 	

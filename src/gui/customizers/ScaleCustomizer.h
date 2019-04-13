@@ -1,26 +1,29 @@
 #pragma once
 
-#include "gui/Interpolator.h"
+#include "gui/InterpolationSelector.h"
 
-class ScaleCustomizer 
-{
-public:
-	ScaleCustomizer();
-	void DisplayGUI();
+namespace ALZ {
 
-	Interpolator<float>& GetScaleInterpolator();
+	class ScaleCustomizer
+	{
+	public:
+		ScaleCustomizer();
+		void DisplayGUI();
 
-private:
-	//starting scale
-	bool RandomScale = true;
-	float definedScale = 2.0f;
-	float minScale = 1.0f;
-	float maxScale = 3.0f;
+		InterpolationSelector<float>& GetScaleInterpolator();
 
-	//scale over time
-	Interpolator<float> m_Interpolator;
-	float endScale = definedScale;
+	private:
+		//starting scale
+		bool RandomScale = true;
+		float definedScale = 2.0f;
+		float minScale = 1.0f;
+		float maxScale = 3.0f;
 
-	//random number generator
-	std::mt19937 mt;
-};
+		//scale over time
+		InterpolationSelector<float> m_Interpolator;
+		float endScale = definedScale;
+
+		//random number generator
+		std::mt19937 mt;
+	};
+}

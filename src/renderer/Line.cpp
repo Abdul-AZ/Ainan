@@ -2,85 +2,88 @@
 
 #include "Line.h"
 
-static ShaderProgram LineShader;
-static bool ShaderInitilized = false;
+namespace ALZ {
 
-Line::Line()
-{
-	if (!ShaderInitilized) {
-		LineShader.Init("shaders/Line.vert", "shaders/Line.frag");
-		ShaderInitilized = true;
+	static ShaderProgram LineShader;
+	static bool ShaderInitilized = false;
+
+	Line::Line()
+	{
+		if (!ShaderInitilized) {
+			LineShader.Init("shaders/Line.vert", "shaders/Line.frag");
+			ShaderInitilized = true;
+		}
+
+		glGenVertexArrays(1, &m_VertexArrayBuffer);
+		glBindVertexArray(m_VertexArrayBuffer);
+		glGenBuffers(1, &m_VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 2, 0, GL_DYNAMIC_DRAW);
+
+		glBindVertexArray(0);
 	}
 
-	glGenVertexArrays(1, &m_VertexArrayBuffer);
-	glBindVertexArray(m_VertexArrayBuffer);
-	glGenBuffers(1, &m_VertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+	void Line::SetPoints(glm::vec2 startPoint, glm::vec2 endPoint)
+	{
+		m_StartPoint = startPoint;
+		m_EndPoint = endPoint;
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+		UpdateBufferWithPoints();
+	}
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 2, 0, GL_DYNAMIC_DRAW);
+	void Line::Render(Camera& camera)
+	{
+		glLineWidth(m_Width);
+		LineShader.setUniformVec4("color", m_Color);
+		LineShader.setUniformMat4("projection", camera.GetProjectionMatrix());
+		LineShader.setUniformMat4("view", camera.GetViewMatrix());
+		LineShader.setUniformMat4("model", camera.GetViewMatrix());
 
-	glBindVertexArray(0);
-}
+		LineShader.Bind();
+		glBindVertexArray(m_VertexArrayBuffer);
 
-void Line::SetPoints(glm::vec2 startPoint, glm::vec2 endPoint)
-{
-	m_StartPoint = startPoint;
-	m_EndPoint = endPoint;
+		glDrawArrays(GL_LINES, 0, 2);
 
-	UpdateBufferWithPoints();
-}
+		glBindVertexArray(0);
+		LineShader.Unbind();
+	}
 
-void Line::Render(Camera& camera)
-{
-	glLineWidth(m_Width);
-	LineShader.setUniformVec4("color", m_Color);
-	LineShader.setUniformMat4("projection", camera.GetProjectionMatrix());
-	LineShader.setUniformMat4("view", camera.GetViewMatrix());
-	LineShader.setUniformMat4("model", camera.GetViewMatrix());
+	float Line::GetSlope()
+	{
+		float deltaY = m_EndPoint.y - m_StartPoint.y;
+		float deltaX = m_EndPoint.x - m_StartPoint.x;
+		return deltaY / deltaX;
+	}
 
-	LineShader.Bind();
-	glBindVertexArray(m_VertexArrayBuffer);
+	float Line::GetYIntercept()
+	{
+		float slope = GetSlope();
 
-	glDrawArrays(GL_LINES, 0, 2);
+		return m_EndPoint.y - m_EndPoint.x * slope;
+	}
 
-	glBindVertexArray(0);
-	LineShader.Unbind();
-}
+	glm::vec2 Line::GetPointInLine(const float & t)
+	{
+		float slope = GetSlope();
+		float yIntercept = GetYIntercept();
 
-float Line::GetSlope()
-{
-	float deltaY = m_EndPoint.y - m_StartPoint.y;
-	float deltaX = m_EndPoint.x - m_StartPoint.x;
-	return deltaY / deltaX;
-}
+		float x = m_StartPoint.x + t * (m_EndPoint.x - m_StartPoint.x);
+		float y = slope * x + yIntercept;
 
-float Line::GetYIntercept()
-{
-	float slope = GetSlope();
+		return glm::vec2(x, y);
+	}
 
-	return m_EndPoint.y - m_EndPoint.x * slope;
-}
+	void Line::UpdateBufferWithPoints()
+	{
+		glm::vec2 vertices[] = { m_StartPoint, m_EndPoint };
 
-glm::vec2 Line::GetPointInLine(const float & t)
-{
-	float slope = GetSlope();
-	float yIntercept = GetYIntercept();
+		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 2, vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	float x = m_StartPoint.x + t * (m_EndPoint.x - m_StartPoint.x);
-	float y = slope * x + yIntercept;
-
-	return glm::vec2(x, y);
-}
-
-void Line::UpdateBufferWithPoints()
-{
-	glm::vec2 vertices[] = { m_StartPoint, m_EndPoint };
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 2, vertices);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
+	}
 }

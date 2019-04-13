@@ -1,13 +1,16 @@
 #pragma once
 
-class NoiseCustomizer
-{
-public:
-	void DisplayGUI();
+namespace ALZ {
 
-private:
-	bool NoiseEnabled = false;
-	float NoiseStrength = 1.0f;
+	class NoiseCustomizer
+	{
+	public:
+		void DisplayGUI();
 
-	friend class ParticleSystem;
-};
+	private:
+		bool NoiseEnabled = false;
+		float NoiseStrength = 1.0f;
+
+		friend class ParticleSystem;
+	};
+}

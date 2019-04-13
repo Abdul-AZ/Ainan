@@ -1,19 +1,22 @@
 #pragma once
 
-class VelocityCustomizer 
-{
-public:
-	VelocityCustomizer();
-	void DisplayGUI();
+namespace ALZ {
 
-	glm::vec2 GetVelocity();
+	class VelocityCustomizer
+	{
+	public:
+		VelocityCustomizer();
+		void DisplayGUI();
 
-private:
-	bool RandomVelocity = true;
-	glm::vec2 minVelocity = { -100, -100 };
-	glm::vec2 maxVelocity = { 100, 100 };
-	glm::vec2 definedVelocity = { 100, -100 };
+		glm::vec2 GetVelocity();
 
-	//random number generator
-	std::mt19937 mt;
-};
+	private:
+		bool RandomVelocity = true;
+		glm::vec2 minVelocity = { -100, -100 };
+		glm::vec2 maxVelocity = { 100, 100 };
+		glm::vec2 definedVelocity = { 100, -100 };
+
+		//random number generator
+		std::mt19937 mt;
+	};
+}

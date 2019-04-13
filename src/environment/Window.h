@@ -1,22 +1,25 @@
 #pragma once
 
-static class Window 
-{
-public:
-	static void Init();
-	static void Update();
-	static void Present();
-	static void Clear();
-	static void Terminate();
-	static bool WindowSizeChangedSinceLastFrame() { return m_WindowSizeChanged;};
+namespace ALZ {
 
-	static GLFWwindow& GetWindow();
-	static glm::vec2& GetSize();
+	static class Window
+	{
+	public:
+		static void Init();
+		static void Update();
+		static void Present();
+		static void Clear();
+		static void Terminate();
+		static bool WindowSizeChangedSinceLastFrame() { return m_WindowSizeChanged; };
 
-private:
-	static bool m_WindowSizeChanged;
-	static glm::vec2 m_ScreenSize;
-	static GLFWwindow* m_Window;
+		static GLFWwindow& GetWindow();
+		static glm::vec2& GetSize();
 
-	friend void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-};
+	private:
+		static bool m_WindowSizeChanged;
+		static glm::vec2 m_ScreenSize;
+		static GLFWwindow* m_Window;
+
+		friend void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+	};
+}

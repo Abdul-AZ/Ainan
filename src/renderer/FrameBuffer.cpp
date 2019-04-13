@@ -1,115 +1,118 @@
 #include <pch.h>
 #include "FrameBuffer.h"
 
-FrameBuffer::FrameBuffer()
-{
-	glGenFramebuffers(1, &m_RendererID);
+namespace ALZ {
 
-	imageShader.Init("shaders/Image.vert", "shaders/Image.frag");
-	imageShader.setUniform1i("screenTexture", 0);
+	FrameBuffer::FrameBuffer()
+	{
+		glGenFramebuffers(1, &m_RendererID);
 
-	Bind();
+		imageShader.Init("shaders/Image.vert", "shaders/Image.frag");
+		imageShader.setUniform1i("screenTexture", 0);
 
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+		Bind();
 
-	m_Size = Window::GetSize();
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Size.x, m_Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
+		m_Size = Window::GetSize();
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Size.x, m_Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
-	glGenVertexArrays(1, &vertexArray);
-	glBindVertexArray(vertexArray);
-	glGenBuffers(1, &vertexBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 
-	float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-		// positions   // texCoords
-		-1.0f,  1.0f,  0.0f, 1.0f,
-		-1.0f, -1.0f,  0.0f, 0.0f,
-		 1.0f, -1.0f,  1.0f, 0.0f,
+		glGenVertexArrays(1, &vertexArray);
+		glBindVertexArray(vertexArray);
+		glGenBuffers(1, &vertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 
-		-1.0f,  1.0f,  0.0f, 1.0f,
-		 1.0f, -1.0f,  1.0f, 0.0f,
-		 1.0f,  1.0f,  1.0f, 1.0f
-	};
+		float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+			// positions   // texCoords
+			-1.0f,  1.0f,  0.0f, 1.0f,
+			-1.0f, -1.0f,  0.0f, 0.0f,
+			 1.0f, -1.0f,  1.0f, 0.0f,
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+			-1.0f,  1.0f,  0.0f, 1.0f,
+			 1.0f, -1.0f,  1.0f, 0.0f,
+			 1.0f,  1.0f,  1.0f, 1.0f
+		};
 
-	Unbind();
-}
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-FrameBuffer::~FrameBuffer()
-{
-	glDeleteFramebuffers(1, &m_RendererID);
-	glDeleteTextures(1, &texture);
-	glDeleteBuffers(1, &vertexBuffer);
-	glDeleteVertexArrays(1, &vertexArray);
-	imageShader.Terminate();
-}
+		Unbind();
+	}
 
-void FrameBuffer::Render()
-{
-	glBindVertexArray(vertexArray);
-	imageShader.Bind();
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
+	FrameBuffer::~FrameBuffer()
+	{
+		glDeleteFramebuffers(1, &m_RendererID);
+		glDeleteTextures(1, &texture);
+		glDeleteBuffers(1, &vertexBuffer);
+		glDeleteVertexArrays(1, &vertexArray);
+		imageShader.Terminate();
+	}
 
-void FrameBuffer::Render(ShaderProgram & shader)
-{
-	glBindVertexArray(vertexArray);
-	shader.Bind();
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
+	void FrameBuffer::Render()
+	{
+		glBindVertexArray(vertexArray);
+		imageShader.Bind();
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
 
-void FrameBuffer::RenderToScreen()
-{
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, m_RendererID);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	void FrameBuffer::Render(ShaderProgram & shader)
+	{
+		glBindVertexArray(vertexArray);
+		shader.Bind();
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
 
-	glBlitFramebuffer(0, 0, m_Size.x, m_Size.y,
-		0, 0, m_Size.x, m_Size.y,
-		GL_COLOR_BUFFER_BIT,
-		GL_LINEAR);
+	void FrameBuffer::RenderToScreen()
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_RendererID);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-	glViewport(0, 0, Window::GetSize().x, Window::GetSize().y);
-}
+		glBlitFramebuffer(0, 0, m_Size.x, m_Size.y,
+			0, 0, m_Size.x, m_Size.y,
+			GL_COLOR_BUFFER_BIT,
+			GL_LINEAR);
 
-void FrameBuffer::SetSize(const glm::vec2 & size)
-{
-	m_Size = size;
-	Bind();
-	glDeleteTextures(1, &texture);
+		glViewport(0, 0, Window::GetSize().x, Window::GetSize().y);
+	}
 
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	void FrameBuffer::SetSize(const glm::vec2 & size)
+	{
+		m_Size = size;
+		Bind();
+		glDeleteTextures(1, &texture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-	Unbind();
-}
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
-void FrameBuffer::Bind() const
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
-}
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		Unbind();
+	}
 
-void FrameBuffer::Unbind() const
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	void FrameBuffer::Bind() const
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
+	}
+
+	void FrameBuffer::Unbind() const
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
 }

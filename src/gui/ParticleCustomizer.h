@@ -9,48 +9,51 @@
 #include "Customizers/NoiseCustomizer.h"
 #include "renderer/Line.h"
 
-enum class SpawnMode {
-	SpawnOnMousePosition,
-	SpawnOnPoint,
-	SpawnOnLine
-};
+namespace ALZ {
 
-class ParticleCustomizer 
-{
-public:
-	ParticleCustomizer();
+	enum class SpawnMode {
+		SpawnOnMousePosition,
+		SpawnOnPoint,
+		SpawnOnLine
+	};
 
-	void DisplayGUI(const std::string& windowName, bool& windowOpen);
-	void Update();
-	Particle& GetParticle();
+	class ParticleCustomizer
+	{
+	public:
+		ParticleCustomizer();
 
-	SpawnMode m_Mode = SpawnMode::SpawnOnMousePosition;
+		void DisplayGUI(const std::string& windowName, bool& windowOpen);
+		void Update();
+		Particle& GetParticle();
 
-	float GetTimeBetweenParticles() { return 1 / m_ParticlesPerSecond; }
+		SpawnMode m_Mode = SpawnMode::SpawnOnMousePosition;
 
-private:
-	float m_ParticlesPerSecond = 100.0f;
+		float GetTimeBetweenParticles() { return 1 / m_ParticlesPerSecond; }
 
-	VelocityCustomizer m_VelocityCustomizer;
-	NoiseCustomizer m_NoiseCustomizer;
-	LifetimeCustomizer m_LifetimeCustomizer;
-	ScaleCustomizer m_ScaleCustomizer;
-	ColorCustomizer m_ColorCustomizer;
+	private:
+		float m_ParticlesPerSecond = 100.0f;
 
-	//this is on a scale from 0 to 1
-	glm::vec2 m_SpawnPosition = { 0.5f, 0.5f };
+		VelocityCustomizer m_VelocityCustomizer;
+		NoiseCustomizer m_NoiseCustomizer;
+		LifetimeCustomizer m_LifetimeCustomizer;
+		ScaleCustomizer m_ScaleCustomizer;
+		ColorCustomizer m_ColorCustomizer;
 
-	//the particle that is going to be spawned next
-	Particle m_Particle;
+		//this is on a scale from 0 to 1
+		glm::vec2 m_SpawnPosition = { 0.5f, 0.5f };
 
-	//spawn particle on line option
-	glm::vec2 m_LinePosition = { 0.5f, 0.5f };
-	float m_LineLength = 0.01f;
-	float m_LineAngle = 0.0f; //in degrees
-	Line m_Line;
+		//the particle that is going to be spawned next
+		Particle m_Particle;
 
-	//random number generator
-	std::mt19937 mt;
+		//spawn particle on line option
+		glm::vec2 m_LinePosition = { 0.5f, 0.5f };
+		float m_LineLength = 0.01f;
+		float m_LineAngle = 0.0f; //in degrees
+		Line m_Line;
 
-	friend class ParticleSystem;
-};
+		//random number generator
+		std::mt19937 mt;
+
+		friend class ParticleSystem;
+	};
+}

@@ -3,28 +3,31 @@
 #include "environment/Window.h"
 #include "ShaderProgram.h"
 
-class FrameBuffer {
-public:
-	FrameBuffer();
-	~FrameBuffer();
+namespace ALZ {
 
-	FrameBuffer(const FrameBuffer&) = delete;
-	FrameBuffer operator=(const FrameBuffer&) = delete;
+	class FrameBuffer {
+	public:
+		FrameBuffer();
+		~FrameBuffer();
 
-	void Render();
-	void Render(ShaderProgram& shader);
-	void RenderToScreen();
+		FrameBuffer(const FrameBuffer&) = delete;
+		FrameBuffer operator=(const FrameBuffer&) = delete;
 
-	void SetSize(const glm::vec2& size);
-	glm::vec2& GetSize() { return m_Size; }
+		void Render();
+		void Render(ShaderProgram& shader);
+		void RenderToScreen();
 
-	void Bind() const;
-	void Unbind() const;
-	unsigned int m_RendererID;
-private:
-	unsigned int texture;
-	unsigned int vertexArray;
-	unsigned int vertexBuffer;
-	ShaderProgram imageShader;
-	glm::vec2 m_Size;
-};
+		void SetSize(const glm::vec2& size);
+		glm::vec2& GetSize() { return m_Size; }
+
+		void Bind() const;
+		void Unbind() const;
+		unsigned int m_RendererID;
+	private:
+		unsigned int texture;
+		unsigned int vertexArray;
+		unsigned int vertexBuffer;
+		ShaderProgram imageShader;
+		glm::vec2 m_Size;
+	};
+}

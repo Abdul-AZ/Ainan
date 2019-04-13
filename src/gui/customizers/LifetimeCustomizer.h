@@ -1,19 +1,22 @@
 #pragma once
 
-class LifetimeCustomizer 
-{
-public:
-	LifetimeCustomizer();
-	void DisplayGUI();
+namespace ALZ {
 
-	float GetLifetime();
+	class LifetimeCustomizer
+	{
+	public:
+		LifetimeCustomizer();
+		void DisplayGUI();
 
-private:
-	bool RandomLifetime = true;
-	float definedLifetime = 2.0f;
-	float minLifetime = 1.0f;
-	float maxLifetime = 3.0f;
-	
-	//random number generator
-	std::mt19937 mt;
-};
+		float GetLifetime();
+
+	private:
+		bool RandomLifetime = true;
+		float definedLifetime = 2.0f;
+		float minLifetime = 1.0f;
+		float maxLifetime = 3.0f;
+
+		//random number generator
+		std::mt19937 mt;
+	};
+}

@@ -1,65 +1,68 @@
 #include <pch.h>
 #include "Window.h"
 
-bool Window::m_WindowSizeChanged = false;
-glm::vec2 Window::m_ScreenSize = { 0,0 };
-GLFWwindow* Window::m_Window = nullptr;
+namespace ALZ {
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-	Window::m_WindowSizeChanged = true;
-	Window::m_ScreenSize = { width, height };
-	glViewport(0, 0, width, height);
-}
+	bool Window::m_WindowSizeChanged = false;
+	glm::vec2 Window::m_ScreenSize = { 0,0 };
+	GLFWwindow* Window::m_Window = nullptr;
 
-void Window::Init()
-{
-	glfwInit();
+	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+	{
+		Window::m_WindowSizeChanged = true;
+		Window::m_ScreenSize = { width, height };
+		glViewport(0, 0, width, height);
+	}
 
-	glfwWindowHint(GLFW_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_VERSION_MINOR, 0);
+	void Window::Init()
+	{
+		glfwInit();
 
-	m_Window = glfwCreateWindow(1500, 1500 * 9 / 16, "Particles", nullptr, nullptr);
-	m_ScreenSize = { 1500, 1500 * 9 / 16 };
+		glfwWindowHint(GLFW_VERSION_MAJOR, 4);
+		glfwWindowHint(GLFW_VERSION_MINOR, 0);
 
-	glfwMakeContextCurrent(m_Window);
+		m_Window = glfwCreateWindow(1500, 1500 * 9 / 16, "Particles", nullptr, nullptr);
+		m_ScreenSize = { 1500, 1500 * 9 / 16 };
 
-	glfwSetFramebufferSizeCallback(m_Window, framebuffer_size_callback);
+		glfwMakeContextCurrent(m_Window);
 
-	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		glfwSetFramebufferSizeCallback(m_Window, framebuffer_size_callback);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-}
+		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
-void Window::Update()
-{
-	glfwPollEvents();
-}
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
 
-void Window::Present()
-{
-	glfwSwapBuffers(m_Window);
-	m_WindowSizeChanged = false;
-}
+	void Window::Update()
+	{
+		glfwPollEvents();
+	}
 
-void Window::Clear()
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-}
+	void Window::Present()
+	{
+		glfwSwapBuffers(m_Window);
+		m_WindowSizeChanged = false;
+	}
 
-void Window::Terminate()
-{
-	glfwDestroyWindow(m_Window);
-	glfwTerminate();
-}
+	void Window::Clear()
+	{
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
 
-GLFWwindow & Window::GetWindow()
-{
-	return *m_Window;
-}
+	void Window::Terminate()
+	{
+		glfwDestroyWindow(m_Window);
+		glfwTerminate();
+	}
 
-glm::vec2 & Window::GetSize()
-{
-	return m_ScreenSize;
+	GLFWwindow & Window::GetWindow()
+	{
+		return *m_Window;
+	}
+
+	glm::vec2 & Window::GetSize()
+	{
+		return m_ScreenSize;
+	}
 }

@@ -1,79 +1,45 @@
 #include <pch.h>
+
 #include "VelocityCustomizer.h"
 #include "ColorCustomizer.h"
-ColorCustomizer::ColorCustomizer() :
-	mt(std::random_device{}()),
-	m_Interpolator(InterpolatorMode::Fixed, glm::vec4(0,0,0,0), glm::vec4(0, 0, 0, 0))
-{}
 
-void ColorCustomizer::DisplayGUI()
-{
-	if (ImGui::TreeNode("Color")) {
+namespace ALZ {
 
-		ImGui::Text("Staring Color");
+	ColorCustomizer::ColorCustomizer() :
+		mt(std::random_device{}()),
+		m_Interpolator(InterpolationType::Fixed, glm::vec4(0, 0, 0, 0), glm::vec4(0, 0, 0, 0))
+	{}
 
-		ImGui::ColorPicker4("Color:", &definedColor.r);
+	void ColorCustomizer::DisplayGUI()
+	{
+		if (ImGui::TreeNode("Color")) {
 
-		ImGui::Spacing();
-		ImGui::Spacing();
-		ImGui::Spacing();
+			ImGui::Text("Staring Color");
 
-		ImGui::Text("Color Over Time");
+			ImGui::ColorPicker4("Color:", &definedColor.r);
 
-		if (ImGui::BeginCombo("Color Over Time Mode", m_Interpolator.InterpolateModeStr(m_Interpolator.Mode).c_str())) {
+			ImGui::Spacing();
+			ImGui::Spacing();
+			ImGui::Spacing();
 
+			ImGui::Text("Color Over Time");
+
+			m_Interpolator.DisplayGUI("Color Over Time Mode");
+
+			if (m_Interpolator.Type != InterpolationType::Fixed)
 			{
-				bool is_Active = m_Interpolator.Mode == InterpolatorMode::Fixed;
-				if (ImGui::Selectable(m_Interpolator.InterpolateModeStr(InterpolatorMode::Fixed).c_str(), &is_Active)) {
-
-					ImGui::SetItemDefaultFocus();
-					m_Interpolator.Mode = InterpolatorMode::Fixed;
-				}
+				ImGui::ColorPicker4("End Color:", &endColor.r);
 			}
 
-			{
-				bool is_Active = m_Interpolator.Mode == InterpolatorMode::Linear;
-				if (ImGui::Selectable(m_Interpolator.InterpolateModeStr(InterpolatorMode::Linear).c_str(), &is_Active)) {
-
-					ImGui::SetItemDefaultFocus();
-					m_Interpolator.Mode = InterpolatorMode::Linear;
-				}
-			}
-
-			{
-				bool is_Active = m_Interpolator.Mode == InterpolatorMode::Cubic;
-				if (ImGui::Selectable(m_Interpolator.InterpolateModeStr(InterpolatorMode::Cubic).c_str(), &is_Active)) {
-
-					ImGui::SetItemDefaultFocus();
-					m_Interpolator.Mode = InterpolatorMode::Cubic;
-				}
-			}
-
-			{
-				bool is_Active = m_Interpolator.Mode == InterpolatorMode::Smoothstep;
-				if (ImGui::Selectable(m_Interpolator.InterpolateModeStr(InterpolatorMode::Smoothstep).c_str(), &is_Active)) {
-
-					ImGui::SetItemDefaultFocus();
-					m_Interpolator.Mode = InterpolatorMode::Smoothstep;
-				}
-			}
-
-			ImGui::EndCombo();
+			ImGui::TreePop();
 		}
-
-		if (m_Interpolator.Mode != InterpolatorMode::Fixed)
-		{
-			ImGui::ColorPicker4("End Color:", &endColor.r);
-		}
-
-		ImGui::TreePop();
 	}
-}
 
-Interpolator<glm::vec4>& ColorCustomizer::GetColorInterpolator()
-{
-	m_Interpolator.startPoint = definedColor;
-	m_Interpolator.endPoint = endColor;
+	InterpolationSelector<glm::vec4>& ColorCustomizer::GetColorInterpolator()
+	{
+		m_Interpolator.startPoint = definedColor;
+		m_Interpolator.endPoint = endColor;
 
-	return m_Interpolator;
+		return m_Interpolator;
+	}
 }

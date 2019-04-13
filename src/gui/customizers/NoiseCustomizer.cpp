@@ -2,16 +2,19 @@
 
 #include "NoiseCustomizer.h"
 
-void NoiseCustomizer::DisplayGUI()
-{
-	if (ImGui::TreeNode("Noise")) {
-		
-		ImGui::Checkbox("Enabled :", &NoiseEnabled);
-		if (NoiseEnabled) 
-		{
-			ImGui::DragFloat("Strength :", &NoiseStrength, 0.5f, 0.0f);
-		}
+namespace ALZ {
 
-		ImGui::TreePop();
+	void NoiseCustomizer::DisplayGUI()
+	{
+		if (ImGui::TreeNode("Noise")) {
+
+			ImGui::Checkbox("Enabled :", &NoiseEnabled);
+			if (NoiseEnabled)
+			{
+				ImGui::DragFloat("Strength :", &NoiseStrength, 0.5f, 0.0f);
+			}
+
+			ImGui::TreePop();
+		}
 	}
 }

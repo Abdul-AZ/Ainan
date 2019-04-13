@@ -2,19 +2,22 @@
 
 #include "file/FileManager.h"
 
-class FolderBrowser 
-{
-public:
-	FolderBrowser(const std::string& startingFolder, const std::string& windowName = "Folder Browser");
-	FolderBrowser();
+namespace ALZ {
 
-	void DisplayGUI();
+	class FolderBrowser
+	{
+	public:
+		FolderBrowser(const std::string& startingFolder, const std::string& windowName = "Folder Browser");
+		FolderBrowser();
 
-	std::string GetChosenFolderPath() { return m_CurrentFolder; }
+		void DisplayGUI();
 
-	bool m_WindowOpen = false;
-private:
-	std::string m_CurrentFolder = "not selected";
-	std::string m_WindowName;
-	std::string m_InputFolder;
-};
+		std::string GetChosenFolderPath() { return m_CurrentFolder; }
+
+		bool m_WindowOpen = false;
+	private:
+		std::string m_CurrentFolder = "not selected";
+		std::string m_WindowName;
+		std::string m_InputFolder;
+	};
+}

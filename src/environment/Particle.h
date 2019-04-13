@@ -1,27 +1,30 @@
 #pragma once
 
-#include "gui/Interpolator.h"
+#include "gui/InterpolationSelector.h"
 
-class Particle
-{
-public:
-	Particle();
+namespace ALZ {
 
-	void Update(const float& deltaTime);
+	class Particle
+	{
+	public:
+		Particle();
 
-	void SetLifeTime(const float& lifeTime);
+		void Update(const float& deltaTime);
 
-	Interpolator<float> m_ScaleInterpolator;
-	Interpolator<glm::vec4> m_Color;
+		void SetLifeTime(const float& lifeTime);
 
-	glm::vec2 m_Position;
-	glm::vec2 m_Velocity;
-	bool isActive;
+		InterpolationSelector<float> m_ScaleInterpolator;
+		InterpolationSelector<glm::vec4> m_Color;
 
-private:
-	float m_LifeTime;
-	float m_RemainingLifeTime;
+		glm::vec2 m_Position;
+		glm::vec2 m_Velocity;
+		bool isActive;
 
-	friend class ParticleSystem;
-	friend class ParticleCustomizer;
-};
+	private:
+		float m_LifeTime;
+		float m_RemainingLifeTime;
+
+		friend class ParticleSystem;
+		friend class ParticleCustomizer;
+	};
+}

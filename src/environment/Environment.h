@@ -14,58 +14,61 @@
 #include "renderer/GaussianBlur.h"
 #include "renderer/Texture.h"
 
-enum class EnvironmentStatus {
-	None,
-	PlayMode,
-	PauseMode
-};
+namespace ALZ {
 
-class Environment 
-{
-public:
-	Environment();
-	~Environment();
+	enum class EnvironmentStatus {
+		None,
+		PlayMode,
+		PauseMode
+	};
 
-	void Update();
-	void Render();
-	void RenderGUI();
-	void HandleInput();
+	class Environment
+	{
+	public:
+		Environment();
+		~Environment();
 
-private:
-	//helper functions to spread code around
-	void DisplayObjectInspecterGUI();
-	void DisplayEnvironmentStatusGUI();
-	void DisplayEnvironmentControlsGUI();
-	void DisplayMainMenuBarGUI();
+		void Update();
+		void Render();
+		void RenderGUI();
+		void HandleInput();
 
-	void Play();
-	void Stop();
-	void Pause();
-	void Resume();
+	private:
+		//helper functions to spread code around
+		void DisplayObjectInspecterGUI();
+		void DisplayEnvironmentStatusGUI();
+		void DisplayEnvironmentControlsGUI();
+		void DisplayMainMenuBarGUI();
 
-private:
-	std::clock_t timeStart, timeEnd;
-	GeneralSettingsGUI settings;
+		void Play();
+		void Stop();
+		void Pause();
+		void Resume();
 
-	FrameBuffer m_FrameBuffer;
-	Camera m_Camera;
-	std::vector<ParticleSystem> m_ParticleSystems;
+	private:
+		std::clock_t timeStart, timeEnd;
+		GeneralSettingsGUI settings;
 
-	bool m_ObjectInspectorWindowOpen = true;
-	bool m_GeneralSettingsWindowOpen = true;
-	bool m_EnvironmentStatusWindowOpen = true;
-	bool m_EnvironmentControlsWindowOpen = true;
-	EnvironmentStatus m_Status = EnvironmentStatus::None;
+		FrameBuffer m_FrameBuffer;
+		Camera m_Camera;
+		std::vector<ParticleSystem> m_ParticleSystems;
 
-	Texture m_PlayButtonTexture;
-	Texture m_PauseButtonTexture;
-	Texture m_ResumeButtonTexture;
-	Texture m_StopButtonTexture;
+		bool m_ObjectInspectorWindowOpen = true;
+		bool m_GeneralSettingsWindowOpen = true;
+		bool m_EnvironmentStatusWindowOpen = true;
+		bool m_EnvironmentControlsWindowOpen = true;
+		EnvironmentStatus m_Status = EnvironmentStatus::None;
 
-	bool m_MousePressedLastFrame = false;
+		Texture m_PlayButtonTexture;
+		Texture m_PauseButtonTexture;
+		Texture m_ResumeButtonTexture;
+		Texture m_StopButtonTexture;
 
-	//TODO abstract this to a seperate class or something
-	bool m_SaveNextFrameAsImage = false;
-	float m_MinTimeBetweenFrameCapture = 2.0f; //2 seconds
-	float m_CurrentTimeBetweenFrameCapture = m_MinTimeBetweenFrameCapture;
-};
+		bool m_MousePressedLastFrame = false;
+
+		//TODO abstract this to a seperate class or something
+		bool m_SaveNextFrameAsImage = false;
+		float m_MinTimeBetweenFrameCapture = 2.0f; //2 seconds
+		float m_CurrentTimeBetweenFrameCapture = m_MinTimeBetweenFrameCapture;
+	};
+}

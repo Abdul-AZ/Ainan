@@ -1,22 +1,25 @@
 #pragma once
 
-#include "gui/Interpolator.h"
+#include "gui/InterpolationSelector.h"
 
-class ColorCustomizer 
-{
-public:
-	ColorCustomizer();
-	void DisplayGUI();
+namespace ALZ {
 
-	Interpolator<glm::vec4>& GetColorInterpolator();
+	class ColorCustomizer
+	{
+	public:
+		ColorCustomizer();
+		void DisplayGUI();
 
-private:
-	glm::vec4 definedColor = { 1.0f,1.0f,1.0f,1.0f };
+		InterpolationSelector<glm::vec4>& GetColorInterpolator();
 
-	//scale over time
-	Interpolator<glm::vec4> m_Interpolator;
-	glm::vec4 endColor = definedColor;
+	private:
+		glm::vec4 definedColor = { 1.0f,1.0f,1.0f,1.0f };
 
-	//random number generator
-	std::mt19937 mt;
-};
+		//scale over time
+		InterpolationSelector<glm::vec4> m_Interpolator;
+		glm::vec4 endColor = definedColor;
+
+		//random number generator
+		std::mt19937 mt;
+	};
+}

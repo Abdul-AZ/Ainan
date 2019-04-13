@@ -1,14 +1,18 @@
+#pragma once
 
-class FileBrowser 
-{
-public:
-	FileBrowser(const std::string& startingFolder, const std::string& windowName = "File Browser");
+namespace ALZ {
 
-	void DisplayGUI();
+	class FileBrowser
+	{
+	public:
+		FileBrowser(const std::string& startingFolder, const std::string& windowName = "File Browser");
 
-private:
-	std::string m_CurrentFolder;
-	std::string m_WindowName;
-	std::string m_CurrentselectedFilePath;
-	std::string m_InputFolder;
-};
+		void DisplayGUI();
+
+	private:
+		std::string m_CurrentFolder;
+		std::string m_WindowName;
+		std::string m_CurrentselectedFilePath;
+		std::string m_InputFolder;
+	};
+}
