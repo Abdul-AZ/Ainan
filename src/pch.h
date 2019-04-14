@@ -9,6 +9,7 @@
 #include <random>
 #include <iterator>
 #include <filesystem>
+#include <functional>
 
 //std c
 #include <direct.h>

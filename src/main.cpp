@@ -3,8 +3,6 @@
 #include "environment/Window.h"
 #include "environment/Environment.h"
 
-#include "noise/PerlinNoise2D.h"
-
 int main(int argc, const char* argv[]) {
 
 	using namespace ALZ;
@@ -13,11 +11,6 @@ int main(int argc, const char* argv[]) {
 	FileManager::Init(argv[0]);
 	
 	Environment* env = new Environment;
-
-	float loop = 0.0f;
-
-	PerlinNoise2D noise;
-	noise.Init();
 
 	while (!glfwWindowShouldClose(&Window::GetWindow()))
 	{

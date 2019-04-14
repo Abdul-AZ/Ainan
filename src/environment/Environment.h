@@ -14,6 +14,8 @@
 #include "renderer/GaussianBlur.h"
 #include "renderer/Texture.h"
 
+#include "input/InputManager.h"
+
 namespace ALZ {
 
 	enum class EnvironmentStatus {
@@ -44,6 +46,7 @@ namespace ALZ {
 		void Stop();
 		void Pause();
 		void Resume();
+		void RegisterEnvironmentInputKeys();
 
 	private:
 		std::clock_t timeStart, timeEnd;
@@ -51,10 +54,10 @@ namespace ALZ {
 
 		FrameBuffer m_FrameBuffer;
 		Camera m_Camera;
+		InputManager m_InputManager;
 		std::vector<ParticleSystem> m_ParticleSystems;
 
 		bool m_ObjectInspectorWindowOpen = true;
-		bool m_GeneralSettingsWindowOpen = true;
 		bool m_EnvironmentStatusWindowOpen = true;
 		bool m_EnvironmentControlsWindowOpen = true;
 		EnvironmentStatus m_Status = EnvironmentStatus::None;

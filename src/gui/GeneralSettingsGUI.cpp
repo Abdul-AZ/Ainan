@@ -5,9 +5,12 @@ namespace ALZ {
 
 	static const ImU32 ImageResolutionStep = 1;
 
-	void GeneralSettingsGUI::DisplayGUI(bool& windowOpen)
+	void GeneralSettingsGUI::DisplayGUI()
 	{
-		ImGui::Begin("Settings", &windowOpen);
+		if (!GeneralSettingsWindowOpen)
+			return;
+
+		ImGui::Begin("Settings", &GeneralSettingsWindowOpen);
 
 		if (ImGui::Checkbox("Blend", &m_GLBlendEnabled)) {
 			if (m_GLBlendEnabled)

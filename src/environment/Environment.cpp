@@ -28,6 +28,7 @@ namespace ALZ {
 		m_ParticleSystems.push_back(startingPS);
 
 		GaussianBlur::Init();
+		RegisterEnvironmentInputKeys();
 	}
 
 	Environment::~Environment()
@@ -94,18 +95,14 @@ namespace ALZ {
 
 		DisplayMainMenuBarGUI();
 		DisplayEnvironmentControlsGUI();
-
-		if (m_ObjectInspectorWindowOpen)
-			DisplayObjectInspecterGUI();
-
-		if (m_GeneralSettingsWindowOpen)
-			settings.DisplayGUI(m_GeneralSettingsWindowOpen);
-
-		if (m_EnvironmentStatusWindowOpen)
-			DisplayEnvironmentStatusGUI();
+		DisplayObjectInspecterGUI();
+		settings.DisplayGUI();
+		DisplayEnvironmentStatusGUI();
 
 		for (ParticleSystem& obj : m_ParticleSystems)
 			obj.DisplayGUI(m_Camera);
+
+		m_InputManager.DisplayGUI();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -113,65 +110,14 @@ namespace ALZ {
 
 	void Environment::HandleInput()
 	{
-		//Playmode specific input :
-		if (m_Status == EnvironmentStatus::PlayMode) {
-			if (glfwGetMouseButton(&Window::GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && !ImGui::GetIO().WantCaptureMouse)
-			{
-				for (ParticleSystem& obj : m_ParticleSystems) {
-					if (obj.m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition) {
-						if (!m_MousePressedLastFrame)
-							obj.m_TimeTillNextParticleSpawn = 0.0f;
-						obj.m_ShouldSpawnParticles = true;
-					}
-				}
-				m_MousePressedLastFrame = true;
-			}
-			else {
-
-				for (ParticleSystem& obj : m_ParticleSystems) {
-					if (obj.m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition) {
-						obj.m_ShouldSpawnParticles = false;
-					}
-				}
-				m_MousePressedLastFrame = false;
-			}
-		}
-		//TEMPORARY camera input
-		{
-			float speed = 10.0f;
-			if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_W) == GLFW_PRESS) {
-				m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, speed, 0));
-			}
-			if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_S) == GLFW_PRESS) {
-				m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, -speed, 0));
-			}
-			if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_D) == GLFW_PRESS) {
-				m_Camera.SetPosition(m_Camera.Position + glm::vec3(-speed, 0, 0));
-			}
-			if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_A) == GLFW_PRESS) {
-				m_Camera.SetPosition(m_Camera.Position + glm::vec3(speed, 0, 0));
-			}
-		}
-
-		if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_SPACE) == GLFW_PRESS)
-			for (ParticleSystem& obj : m_ParticleSystems)
-				obj.ClearParticles();
-
-		if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_F11) == GLFW_PRESS && m_CurrentTimeBetweenFrameCapture < 0.0f) {
-			m_SaveNextFrameAsImage = true;
-			m_CurrentTimeBetweenFrameCapture = m_MinTimeBetweenFrameCapture;
-		}
-
-		if (glfwGetKey(&Window::GetWindow(), GLFW_KEY_F5) == GLFW_PRESS) {
-			if (m_Status == EnvironmentStatus::None)
-				Play();
-			if (m_Status == EnvironmentStatus::PauseMode)
-				Resume();
-		}
+		m_InputManager.HandleInput();	
 	}
 
 	void Environment::DisplayObjectInspecterGUI()
 	{
+		if (!m_ObjectInspectorWindowOpen)
+			return;
+
 		auto flags = ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysUseWindowPadding;
 		ImGui::Begin("Object Inspector", &m_ObjectInspectorWindowOpen, flags);
 
@@ -244,8 +190,6 @@ namespace ALZ {
 			ImGui::PopID();
 		}
 
-
-
 		ImGui::ListBoxFooter();
 
 		ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 30.0f);
@@ -261,6 +205,9 @@ namespace ALZ {
 
 	void Environment::DisplayEnvironmentStatusGUI()
 	{
+		if (!m_EnvironmentStatusWindowOpen)
+			return;
+
 		ImGui::Begin("Environment Status", &m_EnvironmentStatusWindowOpen);
 
 		ImGui::Text("Particle Count :");
@@ -354,7 +301,7 @@ namespace ALZ {
 					m_ObjectInspectorWindowOpen = !m_ObjectInspectorWindowOpen;
 
 				if (ImGui::MenuItem("General Settings"))
-					m_GeneralSettingsWindowOpen = !m_GeneralSettingsWindowOpen;
+					settings.GeneralSettingsWindowOpen = !settings.GeneralSettingsWindowOpen;
 
 				if (ImGui::MenuItem("Environment Status"))
 					m_EnvironmentStatusWindowOpen = !m_EnvironmentStatusWindowOpen;
@@ -373,6 +320,15 @@ namespace ALZ {
 				if (ImGui::MenuItem("Classic"))
 					ImGui::StyleColorsClassic();
 
+				ImGui::EndMenu();
+			}
+
+
+			if (ImGui::BeginMenu("Help")) {
+
+				if (ImGui::MenuItem("Controls"))
+					m_InputManager.ControlsWindowOpen = !m_InputManager.ControlsWindowOpen;
+					
 				ImGui::EndMenu();
 			}
 
@@ -414,5 +370,75 @@ namespace ALZ {
 	{
 		assert(m_Status == EnvironmentStatus::PauseMode);
 		m_Status = EnvironmentStatus::PlayMode;
+	}
+
+	void Environment::RegisterEnvironmentInputKeys()
+	{
+		m_InputManager.RegisterKey(GLFW_KEY_F5, "Play/Resume", [this]() {
+			if (m_Status == EnvironmentStatus::None)
+				Play();
+			if (m_Status == EnvironmentStatus::PauseMode)
+				Resume();
+		});
+
+		m_InputManager.RegisterKey(GLFW_KEY_F11, "Capture Screenshot", [this]() 
+		{
+			m_SaveNextFrameAsImage = true;
+			m_CurrentTimeBetweenFrameCapture = m_MinTimeBetweenFrameCapture;
+		});
+
+		m_InputManager.RegisterKey(GLFW_KEY_SPACE, "Clear All Particles", [this]()
+		{
+			for (ParticleSystem& obj : m_ParticleSystems)
+				obj.ClearParticles();
+		});
+
+		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, 10.0f, 0)); });
+		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, -10.0f, 0)); });
+		m_InputManager.RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(-10.0f, 0, 0)); });
+		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(10.0f, 0, 0)); });
+
+		m_InputManager.RegisterMouseKey(GLFW_MOUSE_BUTTON_LEFT, "Spawn Particles If Spawn Particles On Mouse Mode Is Selected", [this]() {
+			if (m_Status == EnvironmentStatus::PlayMode) 
+			{
+				if (!ImGui::GetIO().WantCaptureMouse) 
+				{
+					for (ParticleSystem& obj : m_ParticleSystems) {
+						if (obj.m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition) {
+							if (!m_MousePressedLastFrame)
+								obj.m_TimeTillNextParticleSpawn = 0.0f;
+							obj.m_ShouldSpawnParticles = true;
+						}
+					}
+					m_MousePressedLastFrame = true;
+				}
+				else 
+				{
+					for (ParticleSystem& obj : m_ParticleSystems) {
+						if (obj.m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition) {
+							obj.m_ShouldSpawnParticles = false;
+						}
+					}
+					m_MousePressedLastFrame = false;
+				}
+			}
+		});
+
+		//stop spawning particles when mouse key is released
+		//NOTE: no description means it won't be displayed in the controls window
+		m_InputManager.RegisterMouseKey(GLFW_MOUSE_BUTTON_LEFT, "", [this]() {
+			if (m_Status == EnvironmentStatus::PlayMode)
+			{
+				if (!ImGui::GetIO().WantCaptureMouse)
+				{
+					for (ParticleSystem& obj : m_ParticleSystems) {
+						if (obj.m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition) {
+							obj.m_ShouldSpawnParticles = false;
+						}
+					}
+					m_MousePressedLastFrame = false;
+				}
+			}
+		}, GLFW_RELEASE);
 	}
 }

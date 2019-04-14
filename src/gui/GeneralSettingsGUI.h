@@ -7,7 +7,7 @@ namespace ALZ {
 
 	class GeneralSettingsGUI {
 	public:
-		void DisplayGUI(bool& windowOpen);
+		void DisplayGUI();
 
 		void DisplayImageSaveLocationBrowser();
 
@@ -21,8 +21,11 @@ namespace ALZ {
 		std::string GetImageName() { return m_ImageFileName; }
 		std::string GetImageSaveLocation() { return m_ImageLocationBrowser.GetChosenFolderPath(); }
 
-	private:
+	public:
+		bool GeneralSettingsWindowOpen = true;
 
+
+	private:
 		//blending
 		void DisplayAllBlendOptions(GLenum& factor);
 		void DisplayBlendOption(const GLenum& option, GLenum& factor);
