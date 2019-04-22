@@ -57,6 +57,7 @@ namespace ALZ {
 		InputManager m_InputManager;
 		std::vector<ParticleSystem> m_ParticleSystems;
 
+		bool m_HideGUI = false;
 		bool m_ObjectInspectorWindowOpen = true;
 		bool m_EnvironmentStatusWindowOpen = true;
 		bool m_EnvironmentControlsWindowOpen = true;
@@ -69,9 +70,6 @@ namespace ALZ {
 
 		bool m_MousePressedLastFrame = false;
 
-		//TODO abstract this to a seperate class or something
 		bool m_SaveNextFrameAsImage = false;
-		float m_MinTimeBetweenFrameCapture = 2.0f; //2 seconds
-		float m_CurrentTimeBetweenFrameCapture = m_MinTimeBetweenFrameCapture;
 	};
 }

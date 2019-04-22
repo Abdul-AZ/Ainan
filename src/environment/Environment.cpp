@@ -45,7 +45,6 @@ namespace ALZ {
 		timeEnd = clock();
 		float deltaTime = (timeEnd - timeStart) / 1000.0f;
 		timeStart = timeEnd;
-		m_CurrentTimeBetweenFrameCapture -= deltaTime;
 
 		Window::Update();
 		m_Camera.Update(deltaTime);
@@ -89,6 +88,9 @@ namespace ALZ {
 
 	void Environment::RenderGUI()
 	{
+		if (m_HideGUI)
+			return;
+
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -381,10 +383,11 @@ namespace ALZ {
 				Resume();
 		});
 
+		m_InputManager.RegisterKey(GLFW_KEY_F1, "Hide Menus", [this]() { m_HideGUI = !m_HideGUI; });
+
 		m_InputManager.RegisterKey(GLFW_KEY_F11, "Capture Screenshot", [this]() 
 		{
 			m_SaveNextFrameAsImage = true;
-			m_CurrentTimeBetweenFrameCapture = m_MinTimeBetweenFrameCapture;
 		});
 
 		m_InputManager.RegisterKey(GLFW_KEY_SPACE, "Clear All Particles", [this]()
@@ -393,10 +396,10 @@ namespace ALZ {
 				obj.ClearParticles();
 		});
 
-		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, 10.0f, 0)); });
-		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, -10.0f, 0)); });
-		m_InputManager.RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(-10.0f, 0, 0)); });
-		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(10.0f, 0, 0)); });
+		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, 10.0f, 0)); }           , GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, -10.0f, 0)); }        , GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(-10.0f, 0, 0)); }, GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(10.0f, 0, 0)); }  , GLFW_REPEAT);
 
 		m_InputManager.RegisterMouseKey(GLFW_MOUSE_BUTTON_LEFT, "Spawn Particles If Spawn Particles On Mouse Mode Is Selected", [this]() {
 			if (m_Status == EnvironmentStatus::PlayMode) 

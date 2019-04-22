@@ -7,6 +7,7 @@ namespace ALZ {
 	void InputManager::RegisterKey(int glfwKeyCode, std::string description, std::function<void()> func, int eventTrigger)
 	{
 		m_Keys.push_back({ glfwKeyCode, description, func, eventTrigger });
+		m_KeyStates[glfwKeyCode] = 0;
 	}
 
 	void InputManager::RegisterMouseKey(int glfwMouseKeyCode, std::string description, std::function<void()> func, int eventTrigger)
@@ -22,7 +23,27 @@ namespace ALZ {
 	void InputManager::HandleInput()
 	{
 		for (RegisteredKey& key : m_Keys)
-			if (glfwGetKey(&Window::GetWindow(), key.GLFWKeyCode) == key.EventTrigger)
+		{
+			int state = glfwGetKey(&Window::GetWindow(), key.GLFWKeyCode);
+
+			int& currentState = m_KeyStates[key.GLFWKeyCode];
+
+			if (state == GLFW_RELEASE)
+				currentState = GLFW_RELEASE;
+			else if (state == GLFW_PRESS)
+			{
+				if (currentState == GLFW_PRESS)
+					currentState = GLFW_REPEAT;
+
+				else if (currentState != GLFW_PRESS && currentState != GLFW_REPEAT)
+					currentState = GLFW_PRESS;
+			}
+			else
+				currentState = state;
+		}
+
+		for (RegisteredKey& key : m_Keys)
+			if (m_KeyStates[key.GLFWKeyCode] == key.EventTrigger)
 				key.OnClickFunction();
 
 		for (RegisteredKey& key : m_MouseKeys)
