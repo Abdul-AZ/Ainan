@@ -4,16 +4,8 @@
 
 namespace ALZ {
 
-	static ShaderProgram LineShader;
-	static bool ShaderInitilized = false;
-
 	Line::Line()
 	{
-		if (!ShaderInitilized) {
-			LineShader.Init("shaders/Line.vert", "shaders/Line.frag");
-			ShaderInitilized = true;
-		}
-
 		glGenVertexArrays(1, &m_VertexArrayBuffer);
 		glBindVertexArray(m_VertexArrayBuffer);
 		glGenBuffers(1, &m_VertexBuffer);
@@ -38,6 +30,7 @@ namespace ALZ {
 	void Line::Render(Camera& camera)
 	{
 		glLineWidth(m_Width);
+		ShaderProgram& LineShader = ShaderProgram::GetLineShader();
 		LineShader.setUniformVec4("color", m_Color);
 		LineShader.setUniformMat4("projection", camera.GetProjectionMatrix());
 		LineShader.setUniformMat4("view", camera.GetViewMatrix());

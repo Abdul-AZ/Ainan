@@ -22,6 +22,7 @@ namespace ALZ {
 		void setUniformMat4(const char* name, const glm::mat4& value);
 		void setUniformMat4s(const char* name, const glm::mat4* const value, const int& count);
 
+		static ShaderProgram& GetLineShader();
 	private:
 		unsigned int m_RendererID;
 	};

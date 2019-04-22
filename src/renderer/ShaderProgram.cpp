@@ -3,6 +3,10 @@
 
 namespace ALZ {
 
+	static ShaderProgram LineShader;
+	static bool LineShaderInitilized = false;
+
+
 	void ShaderProgram::Init(const std::string & vertPath, const std::string & fragPath)
 	{
 		unsigned int vertex, fragment;
@@ -103,5 +107,16 @@ namespace ALZ {
 		Bind();
 		int location = glGetUniformLocation(m_RendererID, name);
 		glUniformMatrix4fv(location, count, GL_FALSE, (float*)value);
+	}
+
+	ShaderProgram& ShaderProgram::GetLineShader()
+	{
+		if (!LineShaderInitilized)
+		{
+			LineShader.Init("shaders/Line.vert", "shaders/Line.frag");
+			LineShaderInitilized = true;
+		}
+
+		return LineShader;
 	}
 }
