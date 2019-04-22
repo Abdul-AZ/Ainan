@@ -5,6 +5,7 @@ namespace ALZ {
 
 	static unsigned int VBO;
 	static unsigned int VAO;
+	static bool InitilizedCircleVertices = false;
 
 	static int nameIndextemp = 0;
 	ParticleSystem::ParticleSystem() :
@@ -31,34 +32,40 @@ namespace ALZ {
 			m_Particles.push_back(particle);
 		}
 
-		glGenVertexArrays(1, &VAO);
-		glBindVertexArray(VAO);
+		//initilize the vertices only the first time a particle system is created
+		if (!InitilizedCircleVertices) {
 
-		glGenBuffers(1, &VBO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			glGenVertexArrays(1, &VAO);
+			glBindVertexArray(VAO);
 
-		const int VertexCountPerCicle = 30;
+			glGenBuffers(1, &VBO);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-		glm::vec2 vertices[VertexCountPerCicle];
+			const int VertexCountPerCicle = 30;
 
-		vertices[0].x = 0.0f;
-		vertices[0].y = 0.0f;
-		float degreesBetweenVertices = 360.0f / (VertexCountPerCicle - 6);
+			glm::vec2 vertices[VertexCountPerCicle];
 
-		const float PI = 3.1415f;
+			vertices[0].x = 0.0f;
+			vertices[0].y = 0.0f;
+			float degreesBetweenVertices = 360.0f / (VertexCountPerCicle - 6);
 
-		for (size_t i = 1; i < VertexCountPerCicle; i++)
-		{
-			float angle = i * degreesBetweenVertices;
-			vertices[i].x = cos(angle * (PI / 180.0));
-			vertices[i].y = sin(angle * (PI / 180.0));
+			const float PI = 3.1415f;
+
+			for (size_t i = 1; i < VertexCountPerCicle; i++)
+			{
+				float angle = i * degreesBetweenVertices;
+				vertices[i].x = cos(angle * (PI / 180.0));
+				vertices[i].y = sin(angle * (PI / 180.0));
+			}
+
+			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * VertexCountPerCicle, vertices, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
+
+			InitilizedCircleVertices = true;
 		}
-
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * VertexCountPerCicle, vertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
 	}
 
 	void ParticleSystem::Update(const float& deltaTime, Camera& camera)
