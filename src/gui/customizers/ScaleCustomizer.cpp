@@ -14,27 +14,27 @@ namespace ALZ {
 
 			ImGui::Text("Starting Scale");
 
-			ImGui::Checkbox("Random Between 2 Numbers", &RandomScale);
+			ImGui::Checkbox("Random Between 2 Numbers", &m_RandomScale);
 
-			if (RandomScale)
+			if (m_RandomScale)
 			{
-				ImGui::DragFloat("Minimum Scale:", &minScale, 0.1f);
-				ImGui::DragFloat("Maximum Scale:", &maxScale, 0.1f);
+				ImGui::DragFloat("Minimum Scale:", &m_MinScale, 0.1f);
+				ImGui::DragFloat("Maximum Scale:", &m_MaxScale, 0.1f);
 			}
 			else
 			{
-				ImGui::DragFloat("Scale:", &definedScale, 0.1f);
+				ImGui::DragFloat("Scale:", &m_DefinedScale, 0.1f);
 			}
 
 			//to make sure scale doesn't go negative
-			if (minScale < 0.0f)
-				minScale = 0.0f;
-			if (maxScale < 0.0f)
-				maxScale = 0.0f;
+			if (m_MinScale < 0.0f)
+				m_MinScale = 0.0f;
+			if (m_MaxScale < 0.0f)
+				m_MaxScale = 0.0f;
 
 			//to make sure max scale is always bigger than minscale
-			if (minScale > maxScale)
-				minScale = maxScale;
+			if (m_MinScale > m_MaxScale)
+				m_MinScale = m_MaxScale;
 
 			ImGui::Spacing();
 			ImGui::Spacing();
@@ -46,11 +46,11 @@ namespace ALZ {
 
 			if (m_Interpolator.Type != InterpolationType::Fixed)
 			{
-				ImGui::DragFloat("End Scale:", &endScale, 0.1f);
+				ImGui::DragFloat("End Scale:", &m_EndScale, 0.1f);
 			}
 			//to make sure end scale doesn't go lower than 0
-			if (endScale < 0.0f)
-				endScale = 0.0f;
+			if (m_EndScale < 0.0f)
+				m_EndScale = 0.0f;
 
 			ImGui::TreePop();
 		}
@@ -58,18 +58,18 @@ namespace ALZ {
 
 	InterpolationSelector<float>& ScaleCustomizer::GetScaleInterpolator()
 	{
-		if (RandomScale) {
-			std::uniform_real_distribution<float> dist_scale(minScale, maxScale);
+		if (m_RandomScale) {
+			std::uniform_real_distribution<float> dist_scale(m_MinScale, m_MaxScale);
 
 			m_Interpolator.startPoint = dist_scale(mt);
-			m_Interpolator.endPoint = endScale;
+			m_Interpolator.endPoint = m_EndScale;
 
 			return m_Interpolator;
 		}
 		else {
 
-			m_Interpolator.startPoint = definedScale;
-			m_Interpolator.endPoint = endScale;
+			m_Interpolator.startPoint = m_DefinedScale;
+			m_Interpolator.endPoint = m_EndScale;
 
 			return m_Interpolator;
 		}

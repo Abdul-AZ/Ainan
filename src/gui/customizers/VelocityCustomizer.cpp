@@ -11,22 +11,22 @@ namespace ALZ {
 	{
 		if (ImGui::TreeNode("Starting Velocity")) {
 
-			ImGui::Checkbox("Random Between 2 Numbers", &RandomVelocity);
+			ImGui::Checkbox("Random Between 2 Numbers", &m_RandomVelocity);
 
-			if (RandomVelocity)
+			if (m_RandomVelocity)
 			{
-				if (maxVelocity.x < minVelocity.x)
-					maxVelocity.x = minVelocity.x;
+				if (m_MaxVelocity.x < m_MinVelocity.x)
+					m_MaxVelocity.x = m_MinVelocity.x;
 
-				if (maxVelocity.y < minVelocity.y)
-					maxVelocity.y = minVelocity.y;
+				if (m_MaxVelocity.y < m_MinVelocity.y)
+					m_MaxVelocity.y = m_MinVelocity.y;
 
-				ImGui::DragFloat2("Minimum Velocity:", &minVelocity.x);
-				ImGui::DragFloat2("Maximum Velocity:", &maxVelocity.x);
+				ImGui::DragFloat2("Minimum Velocity:", &m_MinVelocity.x);
+				ImGui::DragFloat2("Maximum Velocity:", &m_MaxVelocity.x);
 			}
 			else
 			{
-				ImGui::DragFloat2("Velocity:", &definedVelocity.x);
+				ImGui::DragFloat2("Velocity:", &m_DefinedVelocity.x);
 			}
 
 			ImGui::TreePop();
@@ -36,17 +36,17 @@ namespace ALZ {
 	glm::vec2 VelocityCustomizer::GetVelocity()
 	{
 
-		if (RandomVelocity) {
-			if (minVelocity.x > maxVelocity.x)
-				minVelocity.x = maxVelocity.x;
-			if (minVelocity.y > maxVelocity.y)
-				minVelocity.y = maxVelocity.y;
+		if (m_RandomVelocity) {
+			if (m_MinVelocity.x > m_MaxVelocity.x)
+				m_MinVelocity.x = m_MaxVelocity.x;
+			if (m_MinVelocity.y > m_MaxVelocity.y)
+				m_MinVelocity.y = m_MaxVelocity.y;
 
-			std::uniform_real_distribution<float> dist_velocity_x(minVelocity.x, maxVelocity.x);
-			std::uniform_real_distribution<float> dist_velocity_y(minVelocity.y, maxVelocity.y);
+			std::uniform_real_distribution<float> dist_velocity_x(m_MinVelocity.x, m_MaxVelocity.x);
+			std::uniform_real_distribution<float> dist_velocity_y(m_MinVelocity.y, m_MaxVelocity.y);
 			return glm::vec2(dist_velocity_x(mt), dist_velocity_y(mt));
 		}
 		else
-			return definedVelocity;
+			return m_DefinedVelocity;
 	}
 }

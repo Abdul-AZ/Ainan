@@ -26,9 +26,11 @@ namespace ALZ {
 		void Update();
 		Particle& GetParticle();
 
-		SpawnMode m_Mode = SpawnMode::SpawnOnMousePosition;
 
 		float GetTimeBetweenParticles() { return 1 / m_ParticlesPerSecond; }
+
+	public:
+		SpawnMode Mode = SpawnMode::SpawnOnMousePosition;
 
 	private:
 		float m_ParticlesPerSecond = 100.0f;

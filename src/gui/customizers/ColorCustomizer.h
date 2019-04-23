@@ -13,11 +13,11 @@ namespace ALZ {
 		InterpolationSelector<glm::vec4>& GetColorInterpolator();
 
 	private:
-		glm::vec4 definedColor = { 1.0f,1.0f,1.0f,1.0f };
+		glm::vec4 m_DefinedColor = { 1.0f,1.0f,1.0f,1.0f };
 
 		//scale over time
 		InterpolationSelector<glm::vec4> m_Interpolator;
-		glm::vec4 endColor = definedColor;
+		glm::vec4 m_EndColor = m_DefinedColor;
 
 		//random number generator
 		std::mt19937 mt;

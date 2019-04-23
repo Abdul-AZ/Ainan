@@ -22,12 +22,15 @@ namespace ALZ {
 
 		void Bind() const;
 		void Unbind() const;
-		unsigned int m_RendererID;
+
+	public:
+		unsigned int RendererID;
+	
 	private:
-		unsigned int texture;
-		unsigned int vertexArray;
-		unsigned int vertexBuffer;
-		ShaderProgram imageShader;
+		unsigned int m_Texture;
+		unsigned int m_VertexArray;
+		unsigned int m_VertexBuffer;
+		ShaderProgram m_ImageShader;
 		glm::vec2 m_Size;
 	};
 }

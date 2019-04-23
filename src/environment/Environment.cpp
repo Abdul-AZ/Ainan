@@ -407,7 +407,7 @@ namespace ALZ {
 				if (!ImGui::GetIO().WantCaptureMouse) 
 				{
 					for (ParticleSystem& obj : m_ParticleSystems) {
-						if (obj.m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition) {
+						if (obj.m_Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
 							if (!m_MousePressedLastFrame)
 								obj.m_TimeTillNextParticleSpawn = 0.0f;
 							obj.m_ShouldSpawnParticles = true;
@@ -418,7 +418,7 @@ namespace ALZ {
 				else 
 				{
 					for (ParticleSystem& obj : m_ParticleSystems) {
-						if (obj.m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition) {
+						if (obj.m_Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
 							obj.m_ShouldSpawnParticles = false;
 						}
 					}
@@ -435,7 +435,7 @@ namespace ALZ {
 				if (!ImGui::GetIO().WantCaptureMouse)
 				{
 					for (ParticleSystem& obj : m_ParticleSystems) {
-						if (obj.m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition) {
+						if (obj.m_Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
 							obj.m_ShouldSpawnParticles = false;
 						}
 					}

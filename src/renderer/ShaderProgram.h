@@ -24,6 +24,7 @@ namespace ALZ {
 
 		static ShaderProgram& GetLineShader();
 		static ShaderProgram& GetCircleInstancedShader();
+
 	private:
 		unsigned int m_RendererID;
 	};

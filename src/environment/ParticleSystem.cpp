@@ -74,16 +74,16 @@ namespace ALZ {
 		CircleShader.setUniformMat4("projection", camera.GetProjectionMatrix());
 		CircleShader.setUniformMat4("view", camera.GetViewMatrix());
 
-		if (m_Customizer.m_Mode == SpawnMode::SpawnOnPoint || m_Customizer.m_Mode == SpawnMode::SpawnOnLine || (m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
+		if (m_Customizer.Mode == SpawnMode::SpawnOnPoint || m_Customizer.Mode == SpawnMode::SpawnOnLine || (m_Customizer.Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
 			SpawnAllParticlesOnQue(deltaTime, camera);
 		}
 
 		m_ActiveParticleCount = 0;
 		for (Particle& particle : m_Particles) {
 
-			if (m_Customizer.m_NoiseCustomizer.NoiseEnabled) {
-				particle.m_Velocity.x += m_Noise.Noise(particle.m_Position.x, particle.m_Position.y) * m_Customizer.m_NoiseCustomizer.NoiseStrength;
-				particle.m_Velocity.y += m_Noise.Noise(particle.m_Position.x + 30, particle.m_Position.y - 30) * m_Customizer.m_NoiseCustomizer.NoiseStrength;
+			if (m_Customizer.m_NoiseCustomizer.m_NoiseEnabled) {
+				particle.m_Velocity.x += m_Noise.Noise(particle.m_Position.x, particle.m_Position.y) * m_Customizer.m_NoiseCustomizer.m_NoiseStrength;
+				particle.m_Velocity.y += m_Noise.Noise(particle.m_Position.x + 30, particle.m_Position.y - 30) * m_Customizer.m_NoiseCustomizer.m_NoiseStrength;
 			}
 
 			particle.Update(deltaTime);
@@ -193,7 +193,7 @@ namespace ALZ {
 			m_Customizer.DisplayGUI(m_Name, m_EditorOpen);
 
 		//update editor line 
-		if (m_Customizer.m_Mode == SpawnMode::SpawnOnLine && m_Selected)
+		if (m_Customizer.Mode == SpawnMode::SpawnOnLine && m_Selected)
 		{
 			glm::vec2 pointDispositionFromCenter = m_Customizer.m_LineLength * glm::vec2(cos(m_Customizer.m_LineAngle * 3.14159265 / 180.0f), sin(m_Customizer.m_LineAngle * 3.14159265 / 180.0f));
 
@@ -213,7 +213,7 @@ namespace ALZ {
 
 			while (m_TimeTillNextParticleSpawn > 0.0f) {
 				Particle p = m_Customizer.GetParticle();
-				if (m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition)
+				if (m_Customizer.Mode == SpawnMode::SpawnOnMousePosition)
 					p.m_Position -= glm::vec2(camera.Position.x, camera.Position.y);
 				SpawnParticle(p);
 				m_TimeTillNextParticleSpawn -= m_Customizer.GetTimeBetweenParticles();

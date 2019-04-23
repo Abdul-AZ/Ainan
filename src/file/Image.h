@@ -24,7 +24,7 @@ namespace ALZ {
 		static Image FromFrameBuffer(FrameBuffer& framebuffer);
 		static Image FromFrameBuffer(FrameBuffer& framebuffer, const unsigned int& width, const unsigned int& height);
 
-	public:
+	private:
 		//pointer to the image pixel array
 		unsigned char* m_Data = nullptr;
 

@@ -16,11 +16,11 @@ namespace ALZ {
 		InterpolationSelector<float> m_ScaleInterpolator;
 		InterpolationSelector<glm::vec4> m_Color;
 
-		glm::vec2 m_Position;
-		glm::vec2 m_Velocity;
 		bool isActive;
 
 	private:
+		glm::vec2 m_Position;
+		glm::vec2 m_Velocity;
 		float m_LifeTime;
 		float m_RemainingLifeTime;
 

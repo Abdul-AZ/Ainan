@@ -14,7 +14,9 @@ namespace ALZ {
 
 		std::string GetChosenFolderPath() { return m_CurrentFolder; }
 
-		bool m_WindowOpen = false;
+	public:
+		bool WindowOpen = false;
+
 	private:
 		std::string m_CurrentFolder = "not selected";
 		std::string m_WindowName;

@@ -8,10 +8,10 @@ namespace ALZ {
 	{
 		if (ImGui::TreeNode("Noise")) {
 
-			ImGui::Checkbox("Enabled :", &NoiseEnabled);
-			if (NoiseEnabled)
+			ImGui::Checkbox("Enabled :", &m_NoiseEnabled);
+			if (m_NoiseEnabled)
 			{
-				ImGui::DragFloat("Strength :", &NoiseStrength, 0.5f, 0.0f);
+				ImGui::DragFloat("Strength :", &m_NoiseStrength, 0.5f, 0.0f);
 			}
 
 			ImGui::TreePop();

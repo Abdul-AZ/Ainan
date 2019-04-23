@@ -19,19 +19,11 @@ namespace ALZ {
 
 		float Noise(float x, float y);
 
-
-	public:
-		InterpolationSelector<float> m_Selector;
-
 	private:
 		float DotGridGradient(int ix, int iy, float x, float y);
 
-		//TODO make this customizable
-		float lerp(float a0, float a1, float w) {
-			return (1.0f - w)*a0 + w * a1;
-		};
-
 	private:
+		InterpolationSelector<float> m_Selector;
 		glm::ivec2 m_GradientSize = { 0,0 };
 		glm::vec2** m_VectorGradient = nullptr; //2D array
 	};

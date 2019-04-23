@@ -20,10 +20,10 @@ namespace ALZ {
 
 	void FolderBrowser::DisplayGUI()
 	{
-		if (!m_WindowOpen)
+		if (!WindowOpen)
 			return;
 
-		ImGui::Begin(m_WindowName.c_str(), &m_WindowOpen);
+		ImGui::Begin(m_WindowName.c_str(), &WindowOpen);
 
 		ImGui::Text("Current Directory :");
 		auto flags = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;

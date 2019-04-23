@@ -8,8 +8,8 @@ namespace ALZ {
 		void DisplayGUI();
 
 	private:
-		bool NoiseEnabled = false;
-		float NoiseStrength = 1.0f;
+		bool m_NoiseEnabled = false;
+		float m_NoiseStrength = 1.0f;
 
 		friend class ParticleSystem;
 	};

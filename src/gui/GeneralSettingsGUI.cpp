@@ -111,7 +111,7 @@ namespace ALZ {
 
 	void GeneralSettingsGUI::DisplayImageSaveLocationBrowser()
 	{
-		m_ImageLocationBrowser.m_WindowOpen = true;
+		m_ImageLocationBrowser.WindowOpen = true;
 	}
 
 	void GeneralSettingsGUI::DisplayAllBlendOptions(GLenum& factor)

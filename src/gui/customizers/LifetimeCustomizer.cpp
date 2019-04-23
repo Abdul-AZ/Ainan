@@ -12,43 +12,43 @@ namespace ALZ {
 	{
 		if (ImGui::TreeNode("Starting Lifetime")) {
 
-			ImGui::Checkbox("Random Between 2 Numbers", &RandomLifetime);
+			ImGui::Checkbox("Random Between 2 Numbers", &m_RandomLifetime);
 
-			if (RandomLifetime)
+			if (m_RandomLifetime)
 			{
-				if (maxLifetime < minLifetime)
-					maxLifetime = minLifetime;
+				if (m_MaxLifetime < m_MinLifetime)
+					m_MaxLifetime = m_MinLifetime;
 
-				ImGui::DragFloat("Minimum Lifetime:", &minLifetime, 0.1f);
-				ImGui::DragFloat("Maximum Lifetime:", &maxLifetime, 0.1f);
+				ImGui::DragFloat("Minimum Lifetime:", &m_MinLifetime, 0.1f);
+				ImGui::DragFloat("Maximum Lifetime:", &m_MaxLifetime, 0.1f);
 			}
 			else
 			{
-				ImGui::DragFloat("Lifetime:", &definedLifetime, 0.1f);
+				ImGui::DragFloat("Lifetime:", &m_DefinedLifetime, 0.1f);
 			}
 			ImGui::TreePop();
 		}
 
 		//to make sure scale doesn't go negative
-		if (minLifetime < 0.0f)
-			minLifetime = 0.0f;
-		if (maxLifetime < 0.0f)
-			maxLifetime = 0.0f;
-		if (definedLifetime < 0.0f)
-			definedLifetime = 0.0f;
+		if (m_MinLifetime < 0.0f)
+			m_MinLifetime = 0.0f;
+		if (m_MaxLifetime < 0.0f)
+			m_MaxLifetime = 0.0f;
+		if (m_DefinedLifetime < 0.0f)
+			m_DefinedLifetime = 0.0f;
 
 		//to make sure max scale is always bigger than minscale
-		if (minLifetime > maxLifetime)
-			minLifetime = maxLifetime;
+		if (m_MinLifetime > m_MaxLifetime)
+			m_MinLifetime = m_MaxLifetime;
 	}
 
 	float LifetimeCustomizer::GetLifetime()
 	{
-		if (RandomLifetime) {
-			std::uniform_real_distribution<float> dist_time(minLifetime, maxLifetime);
+		if (m_RandomLifetime) {
+			std::uniform_real_distribution<float> dist_time(m_MinLifetime, m_MaxLifetime);
 			return dist_time(mt);
 		}
 		else
-			return definedLifetime;
+			return m_DefinedLifetime;
 	}
 }

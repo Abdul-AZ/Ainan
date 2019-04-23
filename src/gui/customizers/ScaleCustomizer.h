@@ -14,14 +14,14 @@ namespace ALZ {
 
 	private:
 		//starting scale
-		bool RandomScale = true;
-		float definedScale = 2.0f;
-		float minScale = 1.0f;
-		float maxScale = 3.0f;
+		bool m_RandomScale = true;
+		float m_DefinedScale = 2.0f;
+		float m_MinScale = 1.0f;
+		float m_MaxScale = 3.0f;
 
 		//scale over time
 		InterpolationSelector<float> m_Interpolator;
-		float endScale = definedScale;
+		float m_EndScale = m_DefinedScale;
 
 		//random number generator
 		std::mt19937 mt;

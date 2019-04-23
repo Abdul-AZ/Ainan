@@ -31,29 +31,29 @@ namespace ALZ {
 	{
 		ImGui::Begin((windowName.size() > 0) ? windowName.c_str() : "No Name", &windowOpen);
 
-		if (ImGui::BeginCombo("Spawn Mode", GetAsText(m_Mode).c_str())) {
+		if (ImGui::BeginCombo("Spawn Mode", GetAsText(Mode).c_str())) {
 
 			{
-				bool is_active = m_Mode == SpawnMode::SpawnOnMousePosition;
+				bool is_active = Mode == SpawnMode::SpawnOnMousePosition;
 				if (ImGui::Selectable(GetAsText(SpawnMode::SpawnOnMousePosition).c_str(), &is_active)) {
 					ImGui::SetItemDefaultFocus();
-					m_Mode = SpawnMode::SpawnOnMousePosition;
+					Mode = SpawnMode::SpawnOnMousePosition;
 				}
 			}
 
 			{
-				bool is_active = m_Mode == SpawnMode::SpawnOnPoint;
+				bool is_active = Mode == SpawnMode::SpawnOnPoint;
 				if (ImGui::Selectable(GetAsText(SpawnMode::SpawnOnPoint).c_str(), &is_active)) {
 					ImGui::SetItemDefaultFocus();
-					m_Mode = SpawnMode::SpawnOnPoint;
+					Mode = SpawnMode::SpawnOnPoint;
 				}
 			}
 
 			{
-				bool is_active = m_Mode == SpawnMode::SpawnOnLine;
+				bool is_active = Mode == SpawnMode::SpawnOnLine;
 				if (ImGui::Selectable(GetAsText(SpawnMode::SpawnOnLine).c_str(), &is_active)) {
 					ImGui::SetItemDefaultFocus();
-					m_Mode = SpawnMode::SpawnOnLine;
+					Mode = SpawnMode::SpawnOnLine;
 				}
 			}
 
@@ -67,7 +67,7 @@ namespace ALZ {
 			ImGui::TreePop();
 		}
 
-		if (m_Mode == SpawnMode::SpawnOnPoint) {
+		if (Mode == SpawnMode::SpawnOnPoint) {
 			if (ImGui::TreeNode("Position")) {
 
 				ImGui::DragFloat2("Starting Position :", &m_SpawnPosition.x, 0.001f);
@@ -76,7 +76,7 @@ namespace ALZ {
 			}
 		}
 
-		if (m_Mode == SpawnMode::SpawnOnLine)
+		if (Mode == SpawnMode::SpawnOnLine)
 		{
 			if (ImGui::TreeNode("Position")) {
 
@@ -99,7 +99,7 @@ namespace ALZ {
 
 	void ParticleCustomizer::Update()
 	{
-		switch (m_Mode)
+		switch (Mode)
 		{
 		case SpawnMode::SpawnOnMousePosition:
 			double xpos, ypos;

@@ -102,8 +102,8 @@ namespace ALZ {
 
 		FrameBuffer tempFrameBuffer;
 		tempFrameBuffer.SetSize(glm::vec2(width, height));
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer.m_RendererID);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tempFrameBuffer.m_RendererID);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer.RendererID);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tempFrameBuffer.RendererID);
 
 		glBlitFramebuffer(0, 0, framebuffer.GetSize().x, framebuffer.GetSize().y, 0, 0, tempFrameBuffer.GetSize().x, tempFrameBuffer.GetSize().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 

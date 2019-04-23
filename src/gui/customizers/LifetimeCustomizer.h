@@ -11,10 +11,10 @@ namespace ALZ {
 		float GetLifetime();
 
 	private:
-		bool RandomLifetime = true;
-		float definedLifetime = 2.0f;
-		float minLifetime = 1.0f;
-		float maxLifetime = 3.0f;
+		bool m_RandomLifetime = true;
+		float m_DefinedLifetime = 2.0f;
+		float m_MinLifetime = 1.0f;
+		float m_MaxLifetime = 3.0f;
 
 		//random number generator
 		std::mt19937 mt;

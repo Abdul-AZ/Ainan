@@ -42,8 +42,8 @@ namespace ALZ {
 		frameBuffer.Bind();
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, tempFB2.m_RendererID); // READ:  Supersampled
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer.m_RendererID);					  // WRITE: Default
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, tempFB2.RendererID); // READ:  Supersampled
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer.RendererID);					  // WRITE: Default
 
 		// Downsample the supersampled FBO using LINEAR interpolation
 		glBlitFramebuffer(0, 0, downsampled.x, downsampled.y,

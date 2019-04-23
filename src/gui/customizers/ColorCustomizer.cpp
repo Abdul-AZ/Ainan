@@ -16,7 +16,7 @@ namespace ALZ {
 
 			ImGui::Text("Staring Color");
 
-			ImGui::ColorPicker4("Color:", &definedColor.r);
+			ImGui::ColorPicker4("Color:", &m_DefinedColor.r);
 
 			ImGui::Spacing();
 			ImGui::Spacing();
@@ -28,7 +28,7 @@ namespace ALZ {
 
 			if (m_Interpolator.Type != InterpolationType::Fixed)
 			{
-				ImGui::ColorPicker4("End Color:", &endColor.r);
+				ImGui::ColorPicker4("End Color:", &m_EndColor.r);
 			}
 
 			ImGui::TreePop();
@@ -37,8 +37,8 @@ namespace ALZ {
 
 	InterpolationSelector<glm::vec4>& ColorCustomizer::GetColorInterpolator()
 	{
-		m_Interpolator.startPoint = definedColor;
-		m_Interpolator.endPoint = endColor;
+		m_Interpolator.startPoint = m_DefinedColor;
+		m_Interpolator.endPoint = m_EndColor;
 
 		return m_Interpolator;
 	}
