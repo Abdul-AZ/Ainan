@@ -5,6 +5,8 @@
 [submodule "glm"]
 	path = glm
 	url = https://github.com/g-truc/glm.git
+	branch = stable
 [submodule "glfw"]
 	path = glfw
 	url = https://github.com/glfw/glfw.git
+	branch = 3.3-stable

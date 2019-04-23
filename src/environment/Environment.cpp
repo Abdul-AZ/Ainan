@@ -343,7 +343,7 @@ namespace ALZ {
 		ImGuiViewport viewport;
 		viewport.Size = ImVec2(Window::GetSize().x, Window::GetSize().y);
 		viewport.Pos = ImVec2(0, MenuBarHeight);
-		ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruDockspace, 0);
+		ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
 	}
 
 	void Environment::Play()
