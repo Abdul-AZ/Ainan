@@ -71,8 +71,8 @@ namespace ALZ {
 	{
 		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
 
-		CircleShader.setUniformMat4("projection", camera.GetProjectionMatrix());
-		CircleShader.setUniformMat4("view", camera.GetViewMatrix());
+		CircleShader.SetUniformMat4("projection", camera.GetProjectionMatrix());
+		CircleShader.SetUniformMat4("view", camera.GetViewMatrix());
 
 		if (m_Customizer.Mode == SpawnMode::SpawnOnPoint || m_Customizer.Mode == SpawnMode::SpawnOnLine || (m_Customizer.Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
 			SpawnAllParticlesOnQue(deltaTime, camera);
@@ -132,15 +132,15 @@ namespace ALZ {
 
 		for (int i = 0; i < drawCount; i++)
 		{
-			CircleShader.setUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
-			CircleShader.setUniformMat4s("model", &modelBuffer[i * 40], 40);
+			CircleShader.SetUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
+			CircleShader.SetUniformMat4s("model", &modelBuffer[i * 40], 40);
 			glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, 40);
 		}
 
 		int remaining = m_Particles.size() % 40;
 
-		CircleShader.setUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
-		CircleShader.setUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
+		CircleShader.SetUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
+		CircleShader.SetUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
 		glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, remaining);
 	}
 

@@ -31,10 +31,10 @@ namespace ALZ {
 	{
 		glLineWidth(m_Width);
 		ShaderProgram& LineShader = ShaderProgram::GetLineShader();
-		LineShader.setUniformVec4("color", m_Color);
-		LineShader.setUniformMat4("projection", camera.GetProjectionMatrix());
-		LineShader.setUniformMat4("view", camera.GetViewMatrix());
-		LineShader.setUniformMat4("model", camera.GetViewMatrix());
+		LineShader.SetUniformVec4("color", m_Color);
+		LineShader.SetUniformMat4("projection", camera.GetProjectionMatrix());
+		LineShader.SetUniformMat4("view", camera.GetViewMatrix());
+		LineShader.SetUniformMat4("model", camera.GetViewMatrix());
 
 		LineShader.Bind();
 		glBindVertexArray(m_VertexArrayBuffer);

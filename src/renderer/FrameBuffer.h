@@ -30,7 +30,6 @@ namespace ALZ {
 		unsigned int m_Texture;
 		unsigned int m_VertexArray;
 		unsigned int m_VertexBuffer;
-		ShaderProgram m_ImageShader;
 		glm::vec2 m_Size;
 	};
 }

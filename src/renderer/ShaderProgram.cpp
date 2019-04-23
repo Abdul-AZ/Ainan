@@ -9,6 +9,9 @@ namespace ALZ {
 	static ShaderProgram CircleInstancedShader;
 	static bool CircleInstancedShaderInitilized = false;
 
+	static ShaderProgram ImageShader;
+	static bool ImageShaderInitilized = false;
+
 	void ShaderProgram::Init(const std::string & vertPath, const std::string & fragPath)
 	{
 		unsigned int vertex, fragment;
@@ -55,56 +58,56 @@ namespace ALZ {
 		glUseProgram(0);
 	}
 
-	void ShaderProgram::setUniform1i(const char * name, const int& value)
+	void ShaderProgram::SetUniform1i(const char * name, const int& value)
 	{
 		Bind();
 		int location = glGetUniformLocation(m_RendererID, name);
 		glUniform1i(location, value);
 	}
 
-	void ShaderProgram::setUniform1f(const char * name, const float& value)
+	void ShaderProgram::SetUniform1f(const char * name, const float& value)
 	{
 		Bind();
 		int location = glGetUniformLocation(m_RendererID, name);
 		glUniform1f(location, value);
 	}
 
-	void ShaderProgram::setUniform1fs(const char * name, float * value, const int & count)
+	void ShaderProgram::SetUniform1fs(const char * name, float * value, const int & count)
 	{
 		Bind();
 		int location = glGetUniformLocation(m_RendererID, name);
 		glUniform1fv(location, count, value);
 	}
 
-	void ShaderProgram::setUniformVec2(const char* name, const glm::vec2& value)
+	void ShaderProgram::SetUniformVec2(const char* name, const glm::vec2& value)
 	{
 		Bind();
 		int location = glGetUniformLocation(m_RendererID, name);
 		glUniform2f(location, value.x, value.y);
 	}
 
-	void ShaderProgram::setUniformVec4(const char* name, const glm::vec4& value)
+	void ShaderProgram::SetUniformVec4(const char* name, const glm::vec4& value)
 	{
 		Bind();
 		int location = glGetUniformLocation(m_RendererID, name);
 		glUniform4f(location, value.x, value.y, value.z, value.w);
 	}
 
-	void ShaderProgram::setUniformVec4s(const char * name, const glm::vec4* const value, const int & count)
+	void ShaderProgram::SetUniformVec4s(const char * name, const glm::vec4* const value, const int & count)
 	{
 		Bind();
 		int location = glGetUniformLocation(m_RendererID, name);
 		glUniform4fv(location, count, (float*)value);
 	}
 
-	void ShaderProgram::setUniformMat4(const char * name, const glm::mat4 & value)
+	void ShaderProgram::SetUniformMat4(const char * name, const glm::mat4 & value)
 	{
 		Bind();
 		int location = glGetUniformLocation(m_RendererID, name);
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
-	void ShaderProgram::setUniformMat4s(const char * name, const glm::mat4* const value, const int & count)
+	void ShaderProgram::SetUniformMat4s(const char * name, const glm::mat4* const value, const int & count)
 	{
 		Bind();
 		int location = glGetUniformLocation(m_RendererID, name);
@@ -131,5 +134,16 @@ namespace ALZ {
 		}
 
 		return CircleInstancedShader;
+	}
+
+	ShaderProgram& ShaderProgram::GetImageShader()
+	{
+		if (!ImageShaderInitilized)
+		{
+			ImageShader.Init("shaders/Image.vert", "shaders/Image.frag");
+			ImageShaderInitilized = true;
+		}
+
+		return ImageShader;
 	}
 }

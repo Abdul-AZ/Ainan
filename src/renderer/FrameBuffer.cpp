@@ -7,9 +7,6 @@ namespace ALZ {
 	{
 		glGenFramebuffers(1, &RendererID);
 
-		m_ImageShader.Init("shaders/Image.vert", "shaders/Image.frag");
-		m_ImageShader.setUniform1i("screenTexture", 0);
-
 		Bind();
 
 		glGenTextures(1, &m_Texture);
@@ -55,13 +52,14 @@ namespace ALZ {
 		glDeleteTextures(1, &m_Texture);
 		glDeleteBuffers(1, &m_VertexBuffer);
 		glDeleteVertexArrays(1, &m_VertexArray);
-		m_ImageShader.Terminate();
 	}
 
 	void FrameBuffer::Render()
 	{
 		glBindVertexArray(m_VertexArray);
-		m_ImageShader.Bind();
+		ShaderProgram& ImageShader = ShaderProgram::GetImageShader();
+		ImageShader.SetUniform1i("screenTexture", 0);
+		ImageShader.Bind();
 		glBindTexture(GL_TEXTURE_2D, m_Texture);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}

@@ -23,8 +23,8 @@ namespace ALZ {
 		{
 			BlurPixelValues[i] = GaussianDistribution(i, sigma) * blurScale;
 		}
-		Hblur5x5.setUniform1fs("BlurStrength", BlurPixelValues, 3);
-		Vblur5x5.setUniform1fs("BlurStrength", BlurPixelValues, 3);
+		Hblur5x5.SetUniform1fs("BlurStrength", BlurPixelValues, 3);
+		Vblur5x5.SetUniform1fs("BlurStrength", BlurPixelValues, 3);
 
 
 		//Horizontal blur
