@@ -16,7 +16,6 @@ namespace ALZ {
 		m_ID = nameIndextemp;
 		nameIndextemp++;
 
-		m_Shader.Init("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag");
 		m_Noise.Init();
 
 		//TODO pass as a parameter
@@ -70,8 +69,10 @@ namespace ALZ {
 
 	void ParticleSystem::Update(const float& deltaTime, Camera& camera)
 	{
-		m_Shader.setUniformMat4("projection", camera.GetProjectionMatrix());
-		m_Shader.setUniformMat4("view", camera.GetViewMatrix());
+		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
+
+		CircleShader.setUniformMat4("projection", camera.GetProjectionMatrix());
+		CircleShader.setUniformMat4("view", camera.GetViewMatrix());
 
 		if (m_Customizer.m_Mode == SpawnMode::SpawnOnPoint || m_Customizer.m_Mode == SpawnMode::SpawnOnLine || (m_Customizer.m_Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
 			SpawnAllParticlesOnQue(deltaTime, camera);
@@ -96,7 +97,8 @@ namespace ALZ {
 	void ParticleSystem::Draw()
 	{
 		glBindVertexArray(VAO);
-		m_Shader.Bind();
+		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
+		CircleShader.Bind();
 
 		glm::mat4* modelBuffer = (glm::mat4*) m_ParticleInfoBuffer;
 		glm::vec4* colorBuffer = (glm::vec4*) ((char*)m_ParticleInfoBuffer + m_ParticleCount * sizeof(glm::mat4));
@@ -130,15 +132,15 @@ namespace ALZ {
 
 		for (int i = 0; i < drawCount; i++)
 		{
-			m_Shader.setUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
-			m_Shader.setUniformMat4s("model", &modelBuffer[i * 40], 40);
+			CircleShader.setUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
+			CircleShader.setUniformMat4s("model", &modelBuffer[i * 40], 40);
 			glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, 40);
 		}
 
 		int remaining = m_Particles.size() % 40;
 
-		m_Shader.setUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
-		m_Shader.setUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
+		CircleShader.setUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
+		CircleShader.setUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
 		glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, remaining);
 	}
 
@@ -171,7 +173,6 @@ namespace ALZ {
 		m_ParticleInfoBuffer = malloc((sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
 		memcpy(m_ParticleInfoBuffer, Psystem.m_ParticleInfoBuffer, (sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
 
-		m_Shader = Psystem.m_Shader;
 		m_Particles = Psystem.m_Particles;
 		m_ParticleCount = Psystem.m_ParticleCount;
 		m_Name = Psystem.m_Name;

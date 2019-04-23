@@ -6,6 +6,8 @@ namespace ALZ {
 	static ShaderProgram LineShader;
 	static bool LineShaderInitilized = false;
 
+	static ShaderProgram CircleInstancedShader;
+	static bool CircleInstancedShaderInitilized = false;
 
 	void ShaderProgram::Init(const std::string & vertPath, const std::string & fragPath)
 	{
@@ -118,5 +120,16 @@ namespace ALZ {
 		}
 
 		return LineShader;
+	}
+
+	ShaderProgram& ShaderProgram::GetCircleInstancedShader()
+	{
+		if (!CircleInstancedShaderInitilized)
+		{
+			CircleInstancedShader.Init("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag");
+			CircleInstancedShaderInitilized = true;
+		}
+
+		return CircleInstancedShader;
 	}
 }

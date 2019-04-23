@@ -39,7 +39,6 @@ namespace ALZ {
 		//only for spawning on mouse press
 		bool m_ShouldSpawnParticles;
 	private:
-		ShaderProgram m_Shader;
 		std::vector<Particle> m_Particles;
 		unsigned int m_ParticleCount;
 		PerlinNoise2D m_Noise;

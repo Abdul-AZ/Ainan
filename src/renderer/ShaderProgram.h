@@ -23,6 +23,7 @@ namespace ALZ {
 		void setUniformMat4s(const char* name, const glm::mat4* const value, const int& count);
 
 		static ShaderProgram& GetLineShader();
+		static ShaderProgram& GetCircleInstancedShader();
 	private:
 		unsigned int m_RendererID;
 	};
