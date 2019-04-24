@@ -74,7 +74,7 @@ namespace ALZ {
 		CircleShader.SetUniformMat4("projection", camera.GetProjectionMatrix());
 		CircleShader.SetUniformMat4("view", camera.GetViewMatrix());
 
-		if (m_Customizer.Mode == SpawnMode::SpawnOnPoint || m_Customizer.Mode == SpawnMode::SpawnOnLine || (m_Customizer.Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
+		if (m_Customizer.Mode == SpawnMode::SpawnOnPoint || m_Customizer.Mode == SpawnMode::SpawnOnLine || m_Customizer.Mode == SpawnMode::SpawnOnCircle ||(m_Customizer.Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
 			SpawnAllParticlesOnQue(deltaTime, camera);
 		}
 
@@ -202,6 +202,10 @@ namespace ALZ {
 
 			m_Customizer.m_Line.SetPoints(startLinePoint * (float)1000, endLinePoint * (float)1000);
 			m_Customizer.m_Line.Render(camera);
+		}
+		else if (m_Customizer.Mode == SpawnMode::SpawnOnCircle && m_Selected) 
+		{
+			m_Customizer.m_CircleOutline.Render(camera);
 		}
 	}
 

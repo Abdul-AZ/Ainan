@@ -13,6 +13,7 @@
 #include "renderer/FrameBuffer.h"
 #include "renderer/GaussianBlur.h"
 #include "renderer/Texture.h"
+#include "renderer/CircleOutline.h"
 
 #include "input/InputManager.h"
 

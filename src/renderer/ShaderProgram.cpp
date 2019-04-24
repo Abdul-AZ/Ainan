@@ -9,6 +9,9 @@ namespace ALZ {
 	static ShaderProgram CircleInstancedShader;
 	static bool CircleInstancedShaderInitilized = false;
 
+	static ShaderProgram CircleOutlineShader;
+	static bool CircleOutlineShaderInitilized = false;
+
 	static ShaderProgram ImageShader;
 	static bool ImageShaderInitilized = false;
 
@@ -134,6 +137,17 @@ namespace ALZ {
 		}
 
 		return CircleInstancedShader;
+	}
+
+	ShaderProgram& ShaderProgram::GetCircleOutlineShader()
+	{
+		if (!CircleOutlineShaderInitilized)
+		{
+			CircleOutlineShader.Init("shaders/CircleOutline.vert", "shaders/CircleOutline.frag");
+			CircleOutlineShaderInitilized = true;
+		}
+
+		return CircleOutlineShader;
 	}
 
 	ShaderProgram& ShaderProgram::GetImageShader()

@@ -8,13 +8,15 @@
 #include "Customizers/LifetimeCustomizer.h"
 #include "Customizers/NoiseCustomizer.h"
 #include "renderer/Line.h"
+#include "renderer/CircleOutline.h"
 
 namespace ALZ {
 
 	enum class SpawnMode {
 		SpawnOnMousePosition,
 		SpawnOnPoint,
-		SpawnOnLine
+		SpawnOnLine,
+		SpawnOnCircle
 	};
 
 	class ParticleCustomizer
@@ -49,9 +51,12 @@ namespace ALZ {
 
 		//spawn particle on line option
 		glm::vec2 m_LinePosition = { 0.5f, 0.5f };
-		float m_LineLength = 0.01f;
+		float m_LineLength = 0.2f;
 		float m_LineAngle = 0.0f; //in degrees
 		Line m_Line;
+
+		//spawn particle on circle option
+		CircleOutline m_CircleOutline;
 
 		//random number generator
 		std::mt19937 mt;

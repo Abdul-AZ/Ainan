@@ -6,7 +6,8 @@ namespace ALZ {
 	ParticleCustomizer::ParticleCustomizer() :
 		mt(std::random_device{}())
 	{
-		m_Line.SetColor(glm::vec4(0.0f, 0.7f, 0.0f, 0.85f));
+		m_Line.Color = glm::vec4(0.0f, 0.7f, 0.0f, 0.85f);
+		m_CircleOutline.Color = glm::vec4(0.0f, 0.7f, 0.0f, 0.85f);
 	}
 
 	static std::string GetAsText(const SpawnMode& mode)
@@ -21,6 +22,9 @@ namespace ALZ {
 
 		case SpawnMode::SpawnOnLine:
 			return "Spawn On Line";
+
+		case SpawnMode::SpawnOnCircle:
+			return "Spawn On Circle";
 
 		default:
 			return "";
@@ -57,6 +61,14 @@ namespace ALZ {
 				}
 			}
 
+			{
+				bool is_active = Mode == SpawnMode::SpawnOnCircle;
+				if (ImGui::Selectable(GetAsText(SpawnMode::SpawnOnCircle).c_str(), &is_active)) {
+					ImGui::SetItemDefaultFocus();
+					Mode = SpawnMode::SpawnOnCircle;
+				}
+			}
+
 			ImGui::EndCombo();
 		}
 
@@ -75,14 +87,25 @@ namespace ALZ {
 				ImGui::TreePop();
 			}
 		}
-
-		if (Mode == SpawnMode::SpawnOnLine)
+		else if (Mode == SpawnMode::SpawnOnLine)
 		{
 			if (ImGui::TreeNode("Position")) {
 
 				ImGui::DragFloat2("Line Position :", &m_LinePosition.x, 0.001f);
 				ImGui::DragFloat("Line Length :", &m_LineLength, 0.001f);
 				ImGui::DragFloat("Line Rotation :", &m_LineAngle, 1.0f, 0.0f, 360.0f);
+
+				ImGui::TreePop();
+			}
+		}
+		else if (Mode == SpawnMode::SpawnOnCircle)
+		{
+			if (ImGui::TreeNode("Position")) {
+
+				ImGui::DragFloat2("Circle Position :", &m_CircleOutline.Position.x, 0.001f);
+				ImGui::DragFloat("Circle Radius :", &m_CircleOutline.Radius, 0.001f);
+
+				m_CircleOutline.Radius = std::clamp(m_CircleOutline.Radius, 0.001f, 10000.0f);
 
 				ImGui::TreePop();
 			}
@@ -101,23 +124,31 @@ namespace ALZ {
 	{
 		switch (Mode)
 		{
-		case SpawnMode::SpawnOnMousePosition:
+		case SpawnMode::SpawnOnMousePosition: {
 			double xpos, ypos;
 			glfwGetCursorPos(&Window::GetWindow(), &xpos, &ypos);
 			m_Particle.m_Position = glm::vec2(xpos, ypos);
 			break;
+		}
 
-
-		case SpawnMode::SpawnOnPoint:
+		case SpawnMode::SpawnOnPoint: {
 			glm::vec2 spawnPosition = { m_SpawnPosition.x * 1000, 1000 - m_SpawnPosition.y * 1000 };
 			m_Particle.m_Position = spawnPosition;
 			break;
+		}
 
-
-		case SpawnMode::SpawnOnLine:
+		case SpawnMode::SpawnOnLine: {
 			std::uniform_real_distribution<float> dest(0.0f, 1.0f);
 			m_Particle.m_Position = m_Line.GetPointInLine(dest(mt));
 			break;
+		}
+
+		case SpawnMode::SpawnOnCircle: {
+			//random angle between 0 and 2pi (360 degrees)
+			std::uniform_real_distribution<float> dest(0.0f, 2 * 3.14159);
+			m_Particle.m_Position = m_CircleOutline.GetPointByAngle(dest(mt));
+			break;
+		}
 		}
 
 		m_Particle.m_Velocity = m_VelocityCustomizer.GetVelocity();

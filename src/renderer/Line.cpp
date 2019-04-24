@@ -4,19 +4,28 @@
 
 namespace ALZ {
 
+	static bool LineBufferInitilized = false;
+	static unsigned int VBO = 0;
+	static unsigned int VAO = 0;
+
 	Line::Line()
 	{
-		glGenVertexArrays(1, &m_VertexArrayBuffer);
-		glBindVertexArray(m_VertexArrayBuffer);
-		glGenBuffers(1, &m_VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+		if (!LineBufferInitilized) {
 
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+			glGenVertexArrays(1, &VAO);
+			glBindVertexArray(VAO);
+			glGenBuffers(1, &VBO);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 2, 0, GL_DYNAMIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
 
-		glBindVertexArray(0);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 2, 0, GL_DYNAMIC_DRAW);
+
+			glBindVertexArray(0);
+
+			LineBufferInitilized = true;
+		}
 	}
 
 	void Line::SetPoints(glm::vec2 startPoint, glm::vec2 endPoint)
@@ -29,15 +38,15 @@ namespace ALZ {
 
 	void Line::Render(Camera& camera)
 	{
-		glLineWidth(m_Width);
+		glLineWidth(Width);
 		ShaderProgram& LineShader = ShaderProgram::GetLineShader();
-		LineShader.SetUniformVec4("color", m_Color);
+		LineShader.SetUniformVec4("color", Color);
 		LineShader.SetUniformMat4("projection", camera.GetProjectionMatrix());
 		LineShader.SetUniformMat4("view", camera.GetViewMatrix());
 		LineShader.SetUniformMat4("model", camera.GetViewMatrix());
 
 		LineShader.Bind();
-		glBindVertexArray(m_VertexArrayBuffer);
+		glBindVertexArray(VAO);
 
 		glDrawArrays(GL_LINES, 0, 2);
 
@@ -74,9 +83,8 @@ namespace ALZ {
 	{
 		glm::vec2 vertices[] = { m_StartPoint, m_EndPoint };
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 2, vertices);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	}
 }
