@@ -6,21 +6,22 @@
 #include "Camera.h"
 #include "../gui/ParticleCustomizer.h"
 #include "noise/PerlinNoise2D.h"
+#include "InspectorInterface.h"
 
 namespace ALZ {
 
-	class ParticleSystem
+	class ParticleSystem : public InspectorInterface
 	{
 	public:
 		ParticleSystem();
 		~ParticleSystem();
 
-		void Update(const float& deltaTime, Camera& camera);
-		void Draw();
+		void Update(const float& deltaTime, Camera& camera) override;
+		void Render(Camera& camera) override;
 		void SpawnAllParticlesOnQue(const float& deltaTime, Camera& camera);
 		void SpawnParticle(const Particle& particle);
 		void ClearParticles();
-		void DisplayGUI(Camera& camera);
+		void DisplayGUI(Camera& camera) override;
 
 		ParticleSystem(const ParticleSystem& Psystem);
 		ParticleSystem operator=(const ParticleSystem& Psystem);
@@ -29,11 +30,6 @@ namespace ALZ {
 		void* m_ParticleInfoBuffer;
 		float m_TimeTillNextParticleSpawn = 0.0f;
 		ParticleCustomizer m_Customizer;
-		std::string m_Name;
-		bool m_EditorOpen;
-		bool m_RenameTextOpen;
-		bool m_Selected = false;
-		int m_ID;
 		unsigned int m_ActiveParticleCount = 0;
 
 		//only for spawning on mouse press

@@ -15,6 +15,9 @@ namespace ALZ {
 	static ShaderProgram ImageShader;
 	static bool ImageShaderInitilized = false;
 
+	static ShaderProgram BackgroundShader;
+	static bool BackgroundShaderInitilized = false;
+
 	void ShaderProgram::Init(const std::string & vertPath, const std::string & fragPath)
 	{
 		unsigned int vertex, fragment;
@@ -89,6 +92,13 @@ namespace ALZ {
 		glUniform2f(location, value.x, value.y);
 	}
 
+	void ShaderProgram::SetUniformVec2s(const char * name, const glm::vec2 * const value, const int & count)
+	{
+		Bind();
+		int location = glGetUniformLocation(m_RendererID, name);
+		glUniform2fv(location, count, (float*)value);
+	}
+
 	void ShaderProgram::SetUniformVec4(const char* name, const glm::vec4& value)
 	{
 		Bind();
@@ -159,5 +169,16 @@ namespace ALZ {
 		}
 
 		return ImageShader;
+	}
+
+	ShaderProgram& ShaderProgram::GetBackgroundShader()
+	{
+		if (!BackgroundShaderInitilized)
+		{
+			BackgroundShader.Init("shaders/Background.vert", "shaders/Background.frag");
+			BackgroundShaderInitilized = true;
+		}
+
+		return BackgroundShader;
 	}
 }

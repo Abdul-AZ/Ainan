@@ -8,10 +8,10 @@ namespace ALZ {
 	static bool InitilizedCircleVertices = false;
 
 	static int nameIndextemp = 0;
-	ParticleSystem::ParticleSystem() :
-		m_EditorOpen(false),
-		m_RenameTextOpen(false)
+	ParticleSystem::ParticleSystem()
 	{
+		Type = InspectorObjectType::ParticleSystemType;
+
 		m_Name = "Particle System (" + std::to_string(nameIndextemp) + ")";
 		m_ID = nameIndextemp;
 		nameIndextemp++;
@@ -94,7 +94,7 @@ namespace ALZ {
 		}
 	}
 
-	void ParticleSystem::Draw()
+	void ParticleSystem::Render(Camera& camera)
 	{
 		glBindVertexArray(VAO);
 		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();

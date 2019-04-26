@@ -43,14 +43,14 @@ namespace ALZ {
 			}
 		}
 
-		ImGui::Checkbox("Blur", &m_BlurEnabled);
+		ImGui::Checkbox("Blur", &BlurEnabled);
 
-		if (m_BlurEnabled) {
+		if (BlurEnabled) {
 			if (ImGui::TreeNode("Blur Settings:")) {
 
-				ImGui::SliderFloat("Scale: ", &m_BlurScale, 1.0f, 3.0f);
-				ImGui::SliderFloat("Strength: ", &m_BlurStrength, 1.0f, 5.0f);
-				ImGui::SliderFloat("Gaussian Sigma: ", &m_BlurGaussianSigma, 1.0f, 5.0f);
+				ImGui::SliderFloat("Scale: ", &BlurScale, 1.0f, 3.0f);
+				ImGui::SliderFloat("Strength: ", &BlurStrength, 1.0f, 5.0f);
+				ImGui::SliderFloat("Gaussian Sigma: ", &BlurGaussianSigma, 1.0f, 5.0f);
 
 				ImGui::TreePop();
 			}
@@ -58,60 +58,61 @@ namespace ALZ {
 
 		if (ImGui::TreeNode("Background:"))
 		{
-			if (ImGui::ColorPicker4("Background Color", &m_BackgroundColor.r))
-				glClearColor(m_BackgroundColor.r, m_BackgroundColor.g, m_BackgroundColor.b, m_BackgroundColor.a);
+			ImGui::DragFloat("Base Background Light", &BaseBackgroundLight, 0.01f);
+			BaseBackgroundLight = std::clamp(BaseBackgroundLight, 0.0f, 1.0f);
+			ImGui::ColorPicker4("Background Color", &BackgroundColor.r);
 
 			ImGui::TreePop();
 		}
 
 		if (ImGui::TreeNode("Image Saving:"))
 		{
-			if (ImGui::BeginCombo("Image Format", Image::GetFormatString(m_ImageFormat).c_str()))
+			if (ImGui::BeginCombo("Image Format", Image::GetFormatString(ImageFormat).c_str()))
 			{
-				bool is_png = m_ImageFormat == ImageFormat::png ? true : false;
+				bool is_png = ImageFormat == ImageFormat::png ? true : false;
 				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::png).c_str(), &is_png)) {
 
 					ImGui::SetItemDefaultFocus();
-					m_ImageFormat = ImageFormat::png;
+					ImageFormat = ImageFormat::png;
 				}
 
-				bool is_jpeg = m_ImageFormat == ImageFormat::jpeg ? true : false;
+				bool is_jpeg = ImageFormat == ImageFormat::jpeg ? true : false;
 				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::jpeg).c_str(), &is_jpeg)) {
 
 					ImGui::SetItemDefaultFocus();
-					m_ImageFormat = ImageFormat::jpeg;
+					ImageFormat = ImageFormat::jpeg;
 				}
 
-				bool is_bmp = m_ImageFormat == ImageFormat::bmp ? true : false;
+				bool is_bmp = ImageFormat == ImageFormat::bmp ? true : false;
 				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::bmp).c_str(), &is_bmp)) {
 
 					ImGui::SetItemDefaultFocus();
-					m_ImageFormat = ImageFormat::bmp;
+					ImageFormat = ImageFormat::bmp;
 				}
 
 				ImGui::EndCombo();
 			}
 
 			ImGui::Text("Image Resolution");
-			ImGui::InputScalar("width", ImGuiDataType_::ImGuiDataType_U32, &m_ImageResolution.x, &ImageResolutionStep, &ImageResolutionStep);
-			ImGui::InputScalar("height", ImGuiDataType_::ImGuiDataType_U32, &m_ImageResolution.y, &ImageResolutionStep, &ImageResolutionStep);
+			ImGui::InputScalar("width", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.x, &ImageResolutionStep, &ImageResolutionStep);
+			ImGui::InputScalar("height", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.y, &ImageResolutionStep, &ImageResolutionStep);
 
 			if (ImGui::Button("Change Save Location"))
 				DisplayImageSaveLocationBrowser();
 
-			ImGui::InputText("Image Name", &m_ImageFileName);
+			ImGui::InputText("Image Name", &ImageFileName);
 
 			ImGui::TreePop();
 		}
 
 		ImGui::End();
 
-		m_ImageLocationBrowser.DisplayGUI();
+		ImageLocationBrowser.DisplayGUI();
 	}
 
 	void GeneralSettingsGUI::DisplayImageSaveLocationBrowser()
 	{
-		m_ImageLocationBrowser.WindowOpen = true;
+		ImageLocationBrowser.WindowOpen = true;
 	}
 
 	void GeneralSettingsGUI::DisplayAllBlendOptions(GLenum& factor)

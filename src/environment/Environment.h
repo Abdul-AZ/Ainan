@@ -14,6 +14,7 @@
 #include "renderer/GaussianBlur.h"
 #include "renderer/Texture.h"
 #include "renderer/CircleOutline.h"
+#include "renderer/Background.h"
 
 #include "input/InputManager.h"
 
@@ -24,6 +25,8 @@ namespace ALZ {
 		PlayMode,
 		PauseMode
 	};
+
+	using Inspector_obj_ptr = std::unique_ptr<InspectorInterface>;
 
 	class Environment
 	{
@@ -49,6 +52,9 @@ namespace ALZ {
 		void Resume();
 		void RegisterEnvironmentInputKeys();
 
+		void AddPS();
+		void AddRadialLight();
+
 	private:
 		std::clock_t timeStart, timeEnd;
 		GeneralSettingsGUI settings;
@@ -56,7 +62,7 @@ namespace ALZ {
 		FrameBuffer m_FrameBuffer;
 		Camera m_Camera;
 		InputManager m_InputManager;
-		std::vector<ParticleSystem> m_ParticleSystems;
+		std::vector<std::unique_ptr<InspectorInterface>> InspectorObjects;
 
 		bool m_HideGUI = false;
 		bool m_ObjectInspectorWindowOpen = true;
@@ -72,5 +78,7 @@ namespace ALZ {
 		bool m_MousePressedLastFrame = false;
 
 		bool m_SaveNextFrameAsImage = false;
+
+		Background m_Background;
 	};
 }
