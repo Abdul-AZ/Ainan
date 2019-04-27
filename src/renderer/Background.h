@@ -25,10 +25,9 @@ namespace ALZ {
 
 		unsigned int m_RadialLightSubmissionCount = 0;
 		glm::vec2 m_RadialLightPositionBuffer[MAX_NUM_RADIAL_LIGHTS];
-		glm::vec4 m_RadialLightColorBuffer[MAX_NUM_RADIAL_LIGHTS];
+		glm::vec3 m_RadialLightColorBuffer[MAX_NUM_RADIAL_LIGHTS];
 		float m_RadialLightConstantBuffer[MAX_NUM_RADIAL_LIGHTS];
 		float m_RadialLightLinearBuffer[MAX_NUM_RADIAL_LIGHTS];
 		float m_RadialLightQuadraticBuffer[MAX_NUM_RADIAL_LIGHTS];
-
 	};
 }

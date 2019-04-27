@@ -66,13 +66,13 @@ namespace ALZ {
 			m_RadialLightQuadraticBuffer[i] = 1000.0f;
 		}
 		
-		BackgroundShader.SetUniformVec4("baseColor", BaseColor);
+		BackgroundShader.SetUniformVec3("baseColor", BaseColor);
 		BackgroundShader.SetUniformMat4("projection", camera.GetProjectionMatrix());
 		BackgroundShader.SetUniformMat4("view", camera.GetViewMatrix());
 		BackgroundShader.SetUniform1f("baseLight", BaseLight);
 
 		BackgroundShader.SetUniformVec2s("radialLights.Position", m_RadialLightPositionBuffer, MAX_NUM_RADIAL_LIGHTS);
-		BackgroundShader.SetUniformVec4s("radialLights.Color", m_RadialLightColorBuffer, MAX_NUM_RADIAL_LIGHTS);
+		BackgroundShader.SetUniformVec3s("radialLights.Color", m_RadialLightColorBuffer, MAX_NUM_RADIAL_LIGHTS);
 		BackgroundShader.SetUniform1fs("radialLights.Constant", m_RadialLightConstantBuffer, MAX_NUM_RADIAL_LIGHTS);
 		BackgroundShader.SetUniform1fs("radialLights.Linear", m_RadialLightLinearBuffer, MAX_NUM_RADIAL_LIGHTS);
 		BackgroundShader.SetUniform1fs("radialLights.Quadratic", m_RadialLightQuadraticBuffer, MAX_NUM_RADIAL_LIGHTS);

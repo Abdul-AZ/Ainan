@@ -99,6 +99,20 @@ namespace ALZ {
 		glUniform2fv(location, count, (float*)value);
 	}
 
+	void ShaderProgram::SetUniformVec3(const char * name, const glm::vec3& value)
+	{
+		Bind();
+		int location = glGetUniformLocation(m_RendererID, name);
+		glUniform3f(location, value.x, value.y, value.z);
+	}
+
+	void ShaderProgram::SetUniformVec3s(const char * name, const glm::vec3 * const value, const int & count)
+	{
+		Bind();
+		int location = glGetUniformLocation(m_RendererID, name);
+		glUniform3fv(location, count, (float*)value);
+	}
+
 	void ShaderProgram::SetUniformVec4(const char* name, const glm::vec4& value)
 	{
 		Bind();
