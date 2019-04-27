@@ -67,77 +67,77 @@ namespace ALZ {
 	void ShaderProgram::SetUniform1i(const char * name, const int& value)
 	{
 		Bind();
-		int location = glGetUniformLocation(m_RendererID, name);
+		int& location = GetUniformLocation(name);
 		glUniform1i(location, value);
 	}
 
 	void ShaderProgram::SetUniform1f(const char * name, const float& value)
 	{
 		Bind();
-		int location = glGetUniformLocation(m_RendererID, name);
+		int& location = GetUniformLocation(name);
 		glUniform1f(location, value);
 	}
 
 	void ShaderProgram::SetUniform1fs(const char * name, float * value, const int & count)
 	{
 		Bind();
-		int location = glGetUniformLocation(m_RendererID, name);
+		int& location = GetUniformLocation(name);
 		glUniform1fv(location, count, value);
 	}
 
 	void ShaderProgram::SetUniformVec2(const char* name, const glm::vec2& value)
 	{
 		Bind();
-		int location = glGetUniformLocation(m_RendererID, name);
+		int& location = GetUniformLocation(name);
 		glUniform2f(location, value.x, value.y);
 	}
 
 	void ShaderProgram::SetUniformVec2s(const char * name, const glm::vec2 * const value, const int & count)
 	{
 		Bind();
-		int location = glGetUniformLocation(m_RendererID, name);
+		int& location = GetUniformLocation(name);
 		glUniform2fv(location, count, (float*)value);
 	}
 
 	void ShaderProgram::SetUniformVec3(const char * name, const glm::vec3& value)
 	{
 		Bind();
-		int location = glGetUniformLocation(m_RendererID, name);
+		int& location = GetUniformLocation(name);
 		glUniform3f(location, value.x, value.y, value.z);
 	}
 
 	void ShaderProgram::SetUniformVec3s(const char * name, const glm::vec3 * const value, const int & count)
 	{
 		Bind();
-		int location = glGetUniformLocation(m_RendererID, name);
+		int& location = GetUniformLocation(name);
 		glUniform3fv(location, count, (float*)value);
 	}
 
 	void ShaderProgram::SetUniformVec4(const char* name, const glm::vec4& value)
 	{
 		Bind();
-		int location = glGetUniformLocation(m_RendererID, name);
+		int& location = GetUniformLocation(name);
 		glUniform4f(location, value.x, value.y, value.z, value.w);
 	}
 
 	void ShaderProgram::SetUniformVec4s(const char * name, const glm::vec4* const value, const int & count)
 	{
 		Bind();
-		int location = glGetUniformLocation(m_RendererID, name);
+		int& location = GetUniformLocation(name);
 		glUniform4fv(location, count, (float*)value);
 	}
 
 	void ShaderProgram::SetUniformMat4(const char * name, const glm::mat4 & value)
 	{
 		Bind();
-		int location = glGetUniformLocation(m_RendererID, name);
+		int& location = GetUniformLocation(name);
 		glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 	}
 
 	void ShaderProgram::SetUniformMat4s(const char * name, const glm::mat4* const value, const int & count)
 	{
 		Bind();
-		int location = glGetUniformLocation(m_RendererID, name);
+		int& location = GetUniformLocation(name);
 		glUniformMatrix4fv(location, count, GL_FALSE, (float*)value);
 	}
 
@@ -194,5 +194,14 @@ namespace ALZ {
 		}
 
 		return BackgroundShader;
+	}
+
+	int& ShaderProgram::GetUniformLocation(const char * name)
+	{
+		if (m_UniformLocationMap.find(name) != m_UniformLocationMap.end())
+			return m_UniformLocationMap[name];
+
+		m_UniformLocationMap[name] = glGetUniformLocation(m_RendererID, name);
+		return m_UniformLocationMap[name];
 	}
 }

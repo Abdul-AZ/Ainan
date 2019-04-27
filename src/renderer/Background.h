@@ -18,7 +18,7 @@ namespace ALZ {
 		void Render(Camera& camera);
 
 	public:
-		glm::vec4 BaseColor;
+		glm::vec3 BaseColor;
 		float BaseLight = 0.2f;
 
 	private:

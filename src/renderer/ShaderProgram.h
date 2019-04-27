@@ -32,6 +32,12 @@ namespace ALZ {
 		static ShaderProgram& GetBackgroundShader();
 
 	private:
+		int& GetUniformLocation(const char* name);
+
+	private:
 		unsigned int m_RendererID;
+
+		//this is to avoid getting uniform location repeatedly which is not very performant
+		std::unordered_map<std::string, int> m_UniformLocationMap;
 	};
 }

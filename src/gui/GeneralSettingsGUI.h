@@ -15,7 +15,7 @@ namespace ALZ {
 	public:
 		bool GeneralSettingsWindowOpen = true;
 
-		glm::vec4 BackgroundColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec3 BackgroundColor = glm::vec3(1.0f, 1.0f, 1.0f);
 		float BaseBackgroundLight = 0.2f;
 
 		//blur

@@ -5,6 +5,7 @@
 
 #include "ParticleSystem.h"
 #include "Camera.h"
+#include "EditorStyles.h"
 
 #include "gui/ParticleCustomizer.h"
 #include "gui/GeneralSettingsGUI.h"

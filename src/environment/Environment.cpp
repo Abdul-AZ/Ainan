@@ -12,7 +12,7 @@ namespace ALZ {
 		//setup ImGui
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
-		ImGui::StyleColorsDark();
+		SetEditorStyle(EditorStyle::Dark_Gray);
 
 		ImGui_ImplGlfw_InitForOpenGL(&Window::GetWindow(), true);
 		ImGui_ImplOpenGL3_Init("#version 400");
@@ -353,14 +353,20 @@ namespace ALZ {
 
 			if (ImGui::BeginMenu("Editor Style")) {
 
+				if (ImGui::MenuItem("Dark(Transparent)"))
+					SetEditorStyle(EditorStyle::DarkTransparent);
+
+				if (ImGui::MenuItem("Dark/Gray(default)"))
+					SetEditorStyle(EditorStyle::Dark_Gray);
+
 				if (ImGui::MenuItem("Dark"))
-					ImGui::StyleColorsDark();
+					SetEditorStyle(EditorStyle::Dark);
 
 				if (ImGui::MenuItem("Light"))
-					ImGui::StyleColorsLight();
+					SetEditorStyle(EditorStyle::Light);
 
 				if (ImGui::MenuItem("Classic"))
-					ImGui::StyleColorsClassic();
+					SetEditorStyle(EditorStyle::Classic);
 
 				ImGui::EndMenu();
 			}
