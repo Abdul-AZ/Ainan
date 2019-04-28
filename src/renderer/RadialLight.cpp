@@ -20,7 +20,7 @@ namespace ALZ {
 
 		ImGui::Begin(m_Name.c_str(), &m_EditorOpen);
 
-		ImGui::DragFloat2("Position", &Position.x, 0.01f);
+		ImGui::DragFloat2("Position", &Position.x, 0.001f);
 		ImGui::ColorEdit3("Color", &Color.r);
 		ImGui::Spacing();
 		ImGui::Text("Light Strength :");

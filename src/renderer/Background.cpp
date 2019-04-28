@@ -41,7 +41,7 @@ namespace ALZ {
 
 	void Background::SubmitLight(const RadialLight& light)
 	{
-		m_RadialLightPositionBuffer[m_RadialLightSubmissionCount] = light.Position;
+		m_RadialLightPositionBuffer[m_RadialLightSubmissionCount] = glm::vec2(light.Position.x, 1.0f / 100.0f - light.Position.y);
 		m_RadialLightColorBuffer[m_RadialLightSubmissionCount] = light.Color;
 		m_RadialLightConstantBuffer[m_RadialLightSubmissionCount] = light.Constant;
 		m_RadialLightLinearBuffer[m_RadialLightSubmissionCount] = light.Linear;
