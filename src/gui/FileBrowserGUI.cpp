@@ -5,15 +5,28 @@ namespace ALZ {
 
 	namespace fs = std::filesystem;
 
-	FileBrowser::FileBrowser(const std::string & startingFolder, const std::string& windowName) :
-		m_CurrentFolder(startingFolder),
+	FileBrowser::FileBrowser(const std::string& startingFolder, const std::string& windowName) :
+		m_CurrentFolder(FileManager::ApplicationFolder),
 		m_WindowName(windowName),
-		m_InputFolder(startingFolder)
+		m_InputFolder(FileManager::ApplicationFolder)
 	{}
 
-	void FileBrowser::DisplayGUI()
+	void FileBrowser::OpenWindow()
 	{
-		ImGui::Begin(m_WindowName.c_str());
+		m_WindowOpen = true;
+	}
+
+	void FileBrowser::CloseWindow()
+	{
+		m_WindowOpen = false;
+	}
+
+	void FileBrowser::DisplayGUI(const std::function<void(const std::string&)>& func)
+	{
+		if (!m_WindowOpen)
+			return;
+
+		ImGui::Begin(m_WindowName.c_str(), &m_WindowOpen);
 
 		ImGui::Text("Current Directory :");
 		ImGui::SameLine();
@@ -52,12 +65,30 @@ namespace ALZ {
 
 		for (const auto & entry : fs::directory_iterator(m_CurrentFolder)) {
 			if (entry.status().type() != fs::file_type::directory) {
+
+				bool inFilter = false;
+				for (std::string& str : Filter) {
+					if (entry.path().extension() == str) {
+						inFilter = true;
+						break;
+					}
+				}
+				if (!inFilter)
+					continue;
+
 				bool is_selected = (m_CurrentselectedFilePath == entry.path().u8string());
 				if (ImGui::Selectable(entry.path().filename().u8string().c_str(), &is_selected))
 					m_CurrentselectedFilePath = entry.path().u8string();
 			}
 		}
 		ImGui::ListBoxFooter();
+
+		if (ImGui::Button("Select"))
+		{
+			if(func != nullptr)
+				func(m_CurrentselectedFilePath);
+			m_WindowOpen = false;
+		}
 
 		ImGui::End();
 	}

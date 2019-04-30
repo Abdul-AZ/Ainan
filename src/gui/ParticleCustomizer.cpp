@@ -72,6 +72,8 @@ namespace ALZ {
 			ImGui::EndCombo();
 		}
 
+		m_TextureCustomizer.DisplayGUI();
+
 		if (ImGui::TreeNode("Emission")) {
 
 			ImGui::DragFloat("Particles Per Second", &m_ParticlesPerSecond, 1.0f, 0.1f, 1000.0f);

@@ -8,6 +8,9 @@ namespace ALZ {
 	static bool InitilizedCircleVertices = false;
 
 	static int nameIndextemp = 0;
+
+	Texture DefaultTexture;
+
 	ParticleSystem::ParticleSystem()
 	{
 		Type = InspectorObjectType::ParticleSystemType;
@@ -34,35 +37,36 @@ namespace ALZ {
 		//initilize the vertices only the first time a particle system is created
 		if (!InitilizedCircleVertices) {
 
+			std::cout << glGetError() << std::endl;
+
 			glGenVertexArrays(1, &VAO);
 			glBindVertexArray(VAO);
 
 			glGenBuffers(1, &VBO);
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-			const int VertexCountPerCicle = 30;
+			//						 Position				  Texture Coordinates
+			glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0),
+									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 1.0),
+									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 0.0),
 
-			glm::vec2 vertices[VertexCountPerCicle];
+									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
+									 glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
+									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 1.0) };
 
-			vertices[0].x = 0.0f;
-			vertices[0].y = 0.0f;
-			float degreesBetweenVertices = 360.0f / (VertexCountPerCicle - 6);
-
-			const float PI = 3.1415f;
-
-			for (size_t i = 1; i < VertexCountPerCicle; i++)
-			{
-				float angle = i * degreesBetweenVertices;
-				vertices[i].x = cos(angle * (PI / 180.0));
-				vertices[i].y = sin(angle * (PI / 180.0));
-			}
-
-			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * VertexCountPerCicle, vertices, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
 
+
+			DefaultTexture.Init("res/Circle.png", 4);
+			glBindTexture(GL_TEXTURE_2D, DefaultTexture.TextureID);
+
+			std::cout << glGetError() << std::endl;
 			InitilizedCircleVertices = true;
 		}
 	}
@@ -70,6 +74,11 @@ namespace ALZ {
 	void ParticleSystem::Update(const float& deltaTime, Camera& camera)
 	{
 		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
 		CircleShader.SetUniformMat4("projection", camera.GetProjectionMatrix());
 		CircleShader.SetUniformMat4("view", camera.GetViewMatrix());
@@ -99,6 +108,11 @@ namespace ALZ {
 		glBindVertexArray(VAO);
 		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
 		CircleShader.Bind();
+		CircleShader.SetUniform1i("particleTexture", 0);
+		if (m_Customizer.m_TextureCustomizer.UseDefaultTexture)
+			DefaultTexture.Bind(0);
+		else
+			m_Customizer.m_TextureCustomizer.ParticleTexture.Bind(0);
 
 		glm::mat4* modelBuffer = (glm::mat4*) m_ParticleInfoBuffer;
 		glm::vec4* colorBuffer = (glm::vec4*) ((char*)m_ParticleInfoBuffer + m_ParticleCount * sizeof(glm::mat4));

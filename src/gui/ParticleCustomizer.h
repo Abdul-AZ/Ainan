@@ -2,11 +2,12 @@
 
 #include "environment/Window.h"
 #include "environment/Particle.h"
-#include "Customizers/VelocityCustomizer.h"
-#include "Customizers/ColorCustomizer.h"
-#include "Customizers/ScaleCustomizer.h"
-#include "Customizers/LifetimeCustomizer.h"
-#include "Customizers/NoiseCustomizer.h"
+#include "customizers/TextureCustomizer.h"
+#include "customizers/VelocityCustomizer.h"
+#include "customizers/ColorCustomizer.h"
+#include "customizers/ScaleCustomizer.h"
+#include "customizers/LifetimeCustomizer.h"
+#include "customizers/NoiseCustomizer.h"
 #include "renderer/Line.h"
 #include "renderer/CircleOutline.h"
 
@@ -42,6 +43,7 @@ namespace ALZ {
 		LifetimeCustomizer m_LifetimeCustomizer;
 		ScaleCustomizer m_ScaleCustomizer;
 		ColorCustomizer m_ColorCustomizer;
+		TextureCustomizer m_TextureCustomizer;
 
 		//this is on a scale from 0 to 1
 		glm::vec2 m_SpawnPosition = { 0.5f, 0.5f };

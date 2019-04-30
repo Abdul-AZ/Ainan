@@ -3,12 +3,14 @@
 
 namespace ALZ {
 
-	Environment::Environment() :
-		m_PlayButtonTexture("res/PlayButton.png"),
-		m_PauseButtonTexture("res/PauseButton.png"),
-		m_ResumeButtonTexture("res/ResumeButton.png"),
-		m_StopButtonTexture("res/StopButton.png")
+	Environment::Environment()
 	{
+		m_PlayButtonTexture.Init("res/PlayButton.png", 3);
+		m_PauseButtonTexture.Init("res/PauseButton.png", 3);
+		m_ResumeButtonTexture.Init("res/ResumeButton.png", 3);
+		m_StopButtonTexture.Init("res/StopButton.png", 3);
+
+
 		//setup ImGui
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -297,23 +299,23 @@ namespace ALZ {
 		ImGui::SetCursorPosX(width / 2 - 20);
 
 		if (m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode) {
-			if (ImGui::ImageButton((ImTextureID)m_StopButtonTexture.GetID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
+			if (ImGui::ImageButton((ImTextureID)m_StopButtonTexture.TextureID, ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
 				Stop();
 			}
 		}
 		else {
-			if (ImGui::ImageButton((ImTextureID)m_PlayButtonTexture.GetID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
+			if (ImGui::ImageButton((ImTextureID)m_PlayButtonTexture.TextureID, ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
 				Play();
 			}
 		}
 
 		ImGui::SameLine();
 		if (m_Status == EnvironmentStatus::PlayMode) {
-			if (ImGui::ImageButton((ImTextureID)m_PauseButtonTexture.GetID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
+			if (ImGui::ImageButton((ImTextureID)m_PauseButtonTexture.TextureID, ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 				Pause();
 		}
 		else if (m_Status == EnvironmentStatus::PauseMode) {
-			if (ImGui::ImageButton((ImTextureID)m_ResumeButtonTexture.GetID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
+			if (ImGui::ImageButton((ImTextureID)m_ResumeButtonTexture.TextureID, ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 				Resume();
 		}
 
