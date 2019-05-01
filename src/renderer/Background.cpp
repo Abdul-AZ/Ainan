@@ -41,7 +41,7 @@ namespace ALZ {
 
 	void Background::SubmitLight(const RadialLight& light)
 	{
-		m_RadialLightPositionBuffer[m_RadialLightSubmissionCount] = glm::vec2(light.Position.x, 1.0f / 100.0f - light.Position.y);
+		m_RadialLightPositionBuffer[m_RadialLightSubmissionCount] = glm::vec2(light.Position.x, light.Position.y);
 		m_RadialLightColorBuffer[m_RadialLightSubmissionCount] = light.Color;
 		m_RadialLightConstantBuffer[m_RadialLightSubmissionCount] = light.Constant;
 		m_RadialLightLinearBuffer[m_RadialLightSubmissionCount] = light.Linear;
@@ -67,8 +67,8 @@ namespace ALZ {
 		}
 		
 		BackgroundShader.SetUniformVec3("baseColor", BaseColor);
-		BackgroundShader.SetUniformMat4("projection", camera.GetProjectionMatrix());
-		BackgroundShader.SetUniformMat4("view", camera.GetViewMatrix());
+		BackgroundShader.SetUniformMat4("projection", camera.ProjectionMatrix);
+		BackgroundShader.SetUniformMat4("view", camera.ViewMatrix);
 		BackgroundShader.SetUniform1f("baseLight", BaseLight);
 
 		BackgroundShader.SetUniformVec2s("radialLights.Position", m_RadialLightPositionBuffer, MAX_NUM_RADIAL_LIGHTS);

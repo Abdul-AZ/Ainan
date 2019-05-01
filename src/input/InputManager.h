@@ -18,6 +18,7 @@ namespace ALZ {
 		//eventTrigger is either GLFW_PRESS, GLFW_REPEAT or GLFW_RELEASE.
 		void RegisterKey(int glfwKeyCode, std::string description, std::function<void()> func, int eventTrigger = GLFW_PRESS);
 		void RegisterMouseKey(int glfwMouseKeyCode, std::string description, std::function<void()> func, int eventTrigger = GLFW_PRESS);
+		void RegisterScrollWheelFunc(std::function<void(const double&)> func);
 		void ClearKeys();
 		void HandleInput();
 		void DisplayGUI();

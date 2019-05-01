@@ -41,9 +41,9 @@ namespace ALZ {
 		glLineWidth(Width);
 		ShaderProgram& LineShader = ShaderProgram::GetLineShader();
 		LineShader.SetUniformVec4("color", Color);
-		LineShader.SetUniformMat4("projection", camera.GetProjectionMatrix());
-		LineShader.SetUniformMat4("view", camera.GetViewMatrix());
-		LineShader.SetUniformMat4("model", camera.GetViewMatrix());
+		LineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
+		LineShader.SetUniformMat4("view", camera.ViewMatrix);
+		LineShader.SetUniformMat4("model", camera.ViewMatrix);
 
 		LineShader.Bind();
 		glBindVertexArray(VAO);

@@ -451,8 +451,8 @@ namespace ALZ {
 			}
 		});
 
-		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, 10.0f, 0)); }           , GLFW_REPEAT);
-		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, -10.0f, 0)); }        , GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, -10.0f, 0)); }           , GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, 10.0f, 0)); }        , GLFW_REPEAT);
 		m_InputManager.RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(-10.0f, 0, 0)); }, GLFW_REPEAT);
 		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(10.0f, 0, 0)); }  , GLFW_REPEAT);
 

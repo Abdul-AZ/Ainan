@@ -69,8 +69,8 @@ namespace ALZ {
 
 		CircleOutlineShader.Bind();
 		CircleOutlineShader.SetUniformMat4("model", model);
-		CircleOutlineShader.SetUniformMat4("view", camera.GetViewMatrix());
-		CircleOutlineShader.SetUniformMat4("projection", camera.GetProjectionMatrix());
+		CircleOutlineShader.SetUniformMat4("view", camera.ViewMatrix);
+		CircleOutlineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
 		CircleOutlineShader.SetUniformVec4("color", Color);
 		glBindVertexArray(VAO);
 

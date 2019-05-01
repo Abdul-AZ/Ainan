@@ -129,12 +129,12 @@ namespace ALZ {
 		case SpawnMode::SpawnOnMousePosition: {
 			double xpos, ypos;
 			glfwGetCursorPos(&Window::GetWindow(), &xpos, &ypos);
-			m_Particle.m_Position = glm::vec2(xpos, ypos);
+			m_Particle.m_Position = glm::vec2(xpos, Window::GetSize().y - ypos);
 			break;
 		}
 
 		case SpawnMode::SpawnOnPoint: {
-			glm::vec2 spawnPosition = { m_SpawnPosition.x * 1000, 1000 - m_SpawnPosition.y * 1000 };
+			glm::vec2 spawnPosition = { m_SpawnPosition.x * 1000, m_SpawnPosition.y * 1000 };
 			m_Particle.m_Position = spawnPosition;
 			break;
 		}

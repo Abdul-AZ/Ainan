@@ -17,17 +17,14 @@ namespace ALZ {
 		Camera(CameraMode mode = CameraMode::Orthographic);
 
 		void Update(const float& deltaTime);
-
 		void SetPosition(const glm::vec3& newPos);
-		glm::mat4& GetViewMatrix() { return m_ViewMatrix; }
-		glm::mat4& GetProjectionMatrix() { return m_ProjectionMatrix; }
 
 	public:
-		glm::vec3 Position = { 0, 0, 0 };
+		glm::vec3 Position = glm::vec3(0.0f, 0.0f, 0.0f);
+		glm::mat4 ViewMatrix;
+		glm::mat4 ProjectionMatrix;
 
 	private:
 		CameraMode m_Mode;
-		glm::mat4 m_ViewMatrix;
-		glm::mat4 m_ProjectionMatrix;
 	};
 }

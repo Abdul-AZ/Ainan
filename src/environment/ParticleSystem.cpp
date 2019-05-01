@@ -80,8 +80,8 @@ namespace ALZ {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-		CircleShader.SetUniformMat4("projection", camera.GetProjectionMatrix());
-		CircleShader.SetUniformMat4("view", camera.GetViewMatrix());
+		CircleShader.SetUniformMat4("projection", camera.ProjectionMatrix);
+		CircleShader.SetUniformMat4("view", camera.ViewMatrix);
 
 		if (m_Customizer.Mode == SpawnMode::SpawnOnPoint || m_Customizer.Mode == SpawnMode::SpawnOnLine || m_Customizer.Mode == SpawnMode::SpawnOnCircle ||(m_Customizer.Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
 			SpawnAllParticlesOnQue(deltaTime, camera);
