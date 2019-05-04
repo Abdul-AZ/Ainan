@@ -30,8 +30,8 @@ namespace ALZ {
 
 	void Line::SetPoints(glm::vec2 startPoint, glm::vec2 endPoint)
 	{
-		m_StartPoint = startPoint;
-		m_EndPoint = endPoint;
+		m_StartPoint = startPoint * GlobalScaleFactor;
+		m_EndPoint = endPoint * GlobalScaleFactor;
 
 		UpdateBufferWithPoints();
 	}
@@ -43,7 +43,6 @@ namespace ALZ {
 		LineShader.SetUniformVec4("color", Color);
 		LineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
 		LineShader.SetUniformMat4("view", camera.ViewMatrix);
-		LineShader.SetUniformMat4("model", camera.ViewMatrix);
 
 		LineShader.Bind();
 		glBindVertexArray(VAO);

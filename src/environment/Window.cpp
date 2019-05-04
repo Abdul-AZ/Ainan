@@ -4,13 +4,13 @@
 namespace ALZ {
 
 	bool Window::m_WindowSizeChanged = false;
-	glm::vec2 Window::m_ScreenSize = { 0,0 };
+	glm::vec2 Window::WindowSize = { 0,0 };
 	GLFWwindow* Window::m_Window = nullptr;
 
 	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	{
 		Window::m_WindowSizeChanged = true;
-		Window::m_ScreenSize = { width, height };
+		Window::WindowSize = { width, height };
 		glViewport(0, 0, width, height);
 	}
 
@@ -22,7 +22,7 @@ namespace ALZ {
 		glfwWindowHint(GLFW_VERSION_MINOR, 0);
 
 		m_Window = glfwCreateWindow(1500, 1500 * 9 / 16, "Particles", nullptr, nullptr);
-		m_ScreenSize = { 1500, 1500 * 9 / 16 };
+		WindowSize = { 1500, 1500 * 9 / 16 };
 
 		glfwMakeContextCurrent(m_Window);
 
@@ -59,10 +59,5 @@ namespace ALZ {
 	GLFWwindow & Window::GetWindow()
 	{
 		return *m_Window;
-	}
-
-	glm::vec2 & Window::GetSize()
-	{
-		return m_ScreenSize;
 	}
 }

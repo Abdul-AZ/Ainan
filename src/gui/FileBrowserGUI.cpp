@@ -6,9 +6,9 @@ namespace ALZ {
 	namespace fs = std::filesystem;
 
 	FileBrowser::FileBrowser(const std::string& startingFolder, const std::string& windowName) :
-		m_CurrentFolder(FileManager::ApplicationFolder),
+		m_CurrentFolder(startingFolder),
 		m_WindowName(windowName),
-		m_InputFolder(FileManager::ApplicationFolder)
+		m_InputFolder(startingFolder)
 	{}
 
 	void FileBrowser::OpenWindow()

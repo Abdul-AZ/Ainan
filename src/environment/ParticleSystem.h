@@ -28,14 +28,15 @@ namespace ALZ {
 		ParticleSystem operator=(const ParticleSystem& Psystem);
 
 	public:
-		void* m_ParticleInfoBuffer;
-		float m_TimeTillNextParticleSpawn = 0.0f;
-		ParticleCustomizer m_Customizer;
-		unsigned int m_ActiveParticleCount = 0;
-
+		ParticleCustomizer Customizer;
 		//only for spawning on mouse press
-		bool m_ShouldSpawnParticles;
+		bool ShouldSpawnParticles;
+		float TimeTillNextParticleSpawn = 0.0f;
+		unsigned int ActiveParticleCount = 0;
+
 	private:
+		void* m_ParticleInfoBuffer;
+
 		std::vector<Particle> m_Particles;
 		unsigned int m_ParticleCount;
 		PerlinNoise2D m_Noise;

@@ -23,3 +23,5 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#define PI 3.14159f

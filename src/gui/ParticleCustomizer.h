@@ -35,7 +35,7 @@ namespace ALZ {
 	public:
 		SpawnMode Mode = SpawnMode::SpawnOnMousePosition;
 
-	private:
+	public:
 		float m_ParticlesPerSecond = 100.0f;
 
 		VelocityCustomizer m_VelocityCustomizer;

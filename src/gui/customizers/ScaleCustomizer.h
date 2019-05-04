@@ -16,8 +16,8 @@ namespace ALZ {
 		//starting scale
 		bool m_RandomScale = true;
 		float m_DefinedScale = 2.0f;
-		float m_MinScale = 1.0f;
-		float m_MaxScale = 3.0f;
+		float m_MinScale = 20.0f;
+		float m_MaxScale = 25.0f;
 
 		//scale over time
 		InterpolationSelector<float> m_Interpolator;

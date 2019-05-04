@@ -14,8 +14,8 @@ namespace ALZ {
 
 	void GaussianBlur::Blur(FrameBuffer & frameBuffer, const float& scale, const float& blurScale, const float& sigma)
 	{
-		glm::vec2 normal = { Window::GetSize().x , Window::GetSize().y };
-		glm::vec2 downsampled = { Window::GetSize().x / scale , Window::GetSize().y / scale };
+		glm::vec2 normal = { Window::WindowSize.x , Window::WindowSize.y };
+		glm::vec2 downsampled = { Window::WindowSize.x / scale , Window::WindowSize.y / scale };
 		glViewport(0, 0, downsampled.x, downsampled.y);
 
 		float BlurPixelValues[3];

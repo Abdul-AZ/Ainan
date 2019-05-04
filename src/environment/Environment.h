@@ -55,6 +55,7 @@ namespace ALZ {
 
 		void AddPS();
 		void AddRadialLight();
+		void FocusCameraOnObject(InspectorInterface& object);
 
 	private:
 		std::clock_t timeStart, timeEnd;

@@ -5,7 +5,7 @@
 namespace ALZ {
 
 	TextureCustomizer::TextureCustomizer() :
-		m_FileBrowser("")
+		m_FileBrowser("res/")
 	{
 		m_FileBrowser.Filter.reserve(4);
 		m_FileBrowser.Filter.push_back(".png");

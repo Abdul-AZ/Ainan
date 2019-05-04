@@ -8,6 +8,7 @@ namespace ALZ {
 	{
 		m_Line.Color = glm::vec4(0.0f, 0.7f, 0.0f, 0.85f);
 		m_CircleOutline.Color = glm::vec4(0.0f, 0.7f, 0.0f, 0.85f);
+		m_CircleOutline.Position = { 0.5f, 0.5f };
 	}
 
 	static std::string GetAsText(const SpawnMode& mode)
@@ -129,12 +130,12 @@ namespace ALZ {
 		case SpawnMode::SpawnOnMousePosition: {
 			double xpos, ypos;
 			glfwGetCursorPos(&Window::GetWindow(), &xpos, &ypos);
-			m_Particle.m_Position = glm::vec2(xpos, Window::GetSize().y - ypos);
+			m_Particle.m_Position = glm::vec2(xpos, Window::WindowSize.y - ypos);
 			break;
 		}
 
 		case SpawnMode::SpawnOnPoint: {
-			glm::vec2 spawnPosition = { m_SpawnPosition.x * 1000, m_SpawnPosition.y * 1000 };
+			glm::vec2 spawnPosition = { m_SpawnPosition.x * GlobalScaleFactor, m_SpawnPosition.y * GlobalScaleFactor };
 			m_Particle.m_Position = spawnPosition;
 			break;
 		}

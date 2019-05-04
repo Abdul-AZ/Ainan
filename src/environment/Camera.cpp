@@ -10,10 +10,10 @@ namespace ALZ {
 		switch (m_Mode)
 		{
 		case CameraMode::Orthographic:
-			glm::vec2& size = Window::GetSize();
+			glm::vec2& size = Window::WindowSize;
 			ProjectionMatrix = glm::ortho(0.0f, size.x, 0.0f, size.y);
 			ViewMatrix = glm::mat4(1.0f);
-			ViewMatrix = glm::translate(ViewMatrix, Position);
+			ViewMatrix = glm::translate(ViewMatrix, glm::vec3(Position.x, Position.y, 0.0f));
 			break;
 		}
 	}
@@ -22,15 +22,15 @@ namespace ALZ {
 	{
 		if (Window::WindowSizeChangedSinceLastFrame())
 		{
-			glm::vec2& size = Window::GetSize();
+			glm::vec2& size = Window::WindowSize;
 			ProjectionMatrix = glm::ortho(0.0f, size.x, 0.0f, size.y);
 		}
 	}
 
-	void Camera::SetPosition(const glm::vec3 & newPos)
+	void Camera::SetPosition(const glm::vec2& newPos)
 	{
 		ViewMatrix = glm::mat4(1.0f);
 		Position = newPos;
-		ViewMatrix = glm::translate(ViewMatrix, Position);
+		ViewMatrix = glm::translate(ViewMatrix, glm::vec3(Position.x, Position.y, 0.0f));
 	}
 }

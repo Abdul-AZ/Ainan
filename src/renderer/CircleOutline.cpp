@@ -18,8 +18,6 @@ namespace ALZ {
 			glGenVertexArrays(1, &VAO);
 			glBindVertexArray(VAO);
 
-			const float PI = 3.1415f;
-
 			glm::vec2 vertices[vertexCount];
 			unsigned int indecies[vertexCount * 2 - 2];
 
@@ -64,8 +62,8 @@ namespace ALZ {
 		glLineWidth(3.0f);
 
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(Position.x * 1000, 1000 - Position.y * 1000, 0.0f));
-		model = glm::scale(model, glm::vec3(Radius * 1000, Radius * 1000, Radius * 1000));
+		model = glm::translate(model, glm::vec3(Position.x * GlobalScaleFactor, Position.y * GlobalScaleFactor, 0.0f));
+		model = glm::scale(model, glm::vec3(Radius * GlobalScaleFactor, Radius * GlobalScaleFactor, Radius * GlobalScaleFactor));
 
 		CircleOutlineShader.Bind();
 		CircleOutlineShader.SetUniformMat4("model", model);
@@ -82,8 +80,8 @@ namespace ALZ {
 
 	glm::vec2 CircleOutline::GetPointByAngle(const float & angle_in_radians)
 	{
-		float x = Position.x  * 1000 + Radius * cos(angle_in_radians) * 1000;
-		float y = - Position.y  * 1000 + 1000 - Radius * sin(angle_in_radians) * 1000;
+		float x = Position.x  * GlobalScaleFactor + Radius * cos(angle_in_radians) * GlobalScaleFactor;
+		float y = Position.y  * GlobalScaleFactor + Radius * sin(angle_in_radians) * GlobalScaleFactor;
 
 		return glm::vec2(x, y);
 	}

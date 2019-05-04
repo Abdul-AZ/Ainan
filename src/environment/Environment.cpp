@@ -55,7 +55,7 @@ namespace ALZ {
 		}
 
 		if (Window::WindowSizeChangedSinceLastFrame())
-			m_FrameBuffer.SetSize(Window::GetSize());
+			m_FrameBuffer.SetSize(Window::WindowSize);
 
 		m_Background.BaseColor = settings.BackgroundColor;
 		m_Background.BaseLight = settings.BaseBackgroundLight;
@@ -143,22 +143,11 @@ namespace ALZ {
 		ImGui::PushItemWidth(ImGui::GetWindowWidth());
 		ImGui::ListBoxHeader("##Inspector", -1, 30);
 
-		//show menu when right clicking
-		if (ImGui::BeginPopupContextItem("Inspector Popup"))
-		{
-			if (ImGui::Selectable("Add Particle System")) {
-				AddPS();
-			}
-
-			ImGui::EndPopup();
-		}
-
 		for (int i = 0; i < InspectorObjects.size(); i++)
 		{
 			Inspector_obj_ptr& particleSystem = InspectorObjects[i];
 
 			ImGui::PushID(particleSystem->m_ID);
-
 
 			if (ImGui::Selectable((particleSystem->m_Name.size() > 0) ? particleSystem->m_Name.c_str() : "No Name", &particleSystem->m_Selected)) {
 				//if this is selected. deselect all other particle systems
@@ -175,15 +164,15 @@ namespace ALZ {
 					particleSystem->m_EditorOpen = !particleSystem->m_EditorOpen;
 
 				if (ImGui::Selectable("Delete")) {
-					delete InspectorObjects[i].get();
-					InspectorObjects[i].release();
 					InspectorObjects.erase(InspectorObjects.begin() + i);
+					ImGui::EndPopup();
 					ImGui::PopID();
 					continue;
 				}
 
 				if (ImGui::Selectable("Rename"))
 					particleSystem->m_RenameTextOpen = !particleSystem->m_RenameTextOpen;
+
 
 				ImGui::EndPopup();
 			}
@@ -195,8 +184,6 @@ namespace ALZ {
 
 				ImGui::SameLine();
 				if (ImGui::Button("Delete")) {
-					delete InspectorObjects[i].get();
-					InspectorObjects[i].release();
 					InspectorObjects.erase(InspectorObjects.begin() + i);
 					ImGui::PopID();
 					continue;
@@ -205,6 +192,11 @@ namespace ALZ {
 				ImGui::SameLine();
 				if (ImGui::Button("Rename"))
 					particleSystem->m_RenameTextOpen = !particleSystem->m_RenameTextOpen;
+
+				ImGui::SameLine();
+
+				if (ImGui::Button("Find"))
+					FocusCameraOnObject(*particleSystem);
 			}
 
 			ImGui::Spacing();
@@ -243,7 +235,7 @@ namespace ALZ {
 
 		ImGui::Begin("Environment Status", &m_EnvironmentStatusWindowOpen);
 
-		ImGui::Text("Particle Count :");
+		ImGui::Text("Global Particle Count :");
 		ImGui::SameLine();
 
 		unsigned int activeParticleCount = 0;
@@ -251,37 +243,29 @@ namespace ALZ {
 		{
 			if (pso->Type == InspectorObjectType::ParticleSystemType) {
 				ParticleSystem* ps = static_cast<ParticleSystem*>(pso.get());
-				activeParticleCount += ps->m_ActiveParticleCount;
+				activeParticleCount += ps->ActiveParticleCount;
+			}
+		}
+		ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, std::to_string(activeParticleCount).c_str());
+
+		ImGui::Separator();
+
+		for (Inspector_obj_ptr& pso : InspectorObjects)
+		{
+			if (pso->Type == InspectorObjectType::ParticleSystemType) {
+
+				ParticleSystem* ps = static_cast<ParticleSystem*>(pso.get());
+
+				ImGui::Text((pso->m_Name + ":").c_str());
+				ImGui::SameLine();
+				ImGui::Text("Particle Count = ");
+				ImGui::SameLine();
+				ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, std::to_string(ps->ActiveParticleCount).c_str());
+				ImGui::Separator();
 			}
 
+			ImGui::Spacing();
 		}
-
-		ImGui::TextColored({ 0.0f,1.0f,0.0f,1.0f }, std::to_string(activeParticleCount).c_str());
-
-		if (ImGui::TreeNode("Detailed Particle Distribution")) {
-
-			for (Inspector_obj_ptr& pso : InspectorObjects)
-			{
-				if (pso->Type == InspectorObjectType::ParticleSystemType) {
-
-					ParticleSystem* ps = static_cast<ParticleSystem*>(pso.get());
-
-					if (ImGui::TreeNode(pso->m_Name.c_str())) {
-
-						ImGui::Text("Particle Count :");
-
-						ImGui::SameLine();
-						ImGui::TextColored({ 0.0f,1.0f,0.0f,1.0f }, std::to_string(ps->m_ActiveParticleCount).c_str());
-						ImGui::TreePop();
-					}
-				}
-
-				ImGui::Spacing();
-			}
-
-			ImGui::TreePop();
-		}
-
 
 		ImGui::End();
 	}
@@ -389,7 +373,7 @@ namespace ALZ {
 
 		//TODO change this to a seperate function
 		ImGuiViewport viewport;
-		viewport.Size = ImVec2(Window::GetSize().x, Window::GetSize().y);
+		viewport.Size = ImVec2(Window::WindowSize.x, Window::WindowSize.y);
 		viewport.Pos = ImVec2(0, MenuBarHeight);
 		ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
 	}
@@ -451,10 +435,10 @@ namespace ALZ {
 			}
 		});
 
-		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, -10.0f, 0)); }           , GLFW_REPEAT);
-		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(0, 10.0f, 0)); }        , GLFW_REPEAT);
-		m_InputManager.RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(-10.0f, 0, 0)); }, GLFW_REPEAT);
-		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec3(10.0f, 0, 0)); }  , GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -10.0f)); }           , GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, 10.0f)); }        , GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(-10.0f, 0.0f)); }, GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(10.0f, 0.0f)); }  , GLFW_REPEAT);
 
 		m_InputManager.RegisterMouseKey(GLFW_MOUSE_BUTTON_LEFT, "Spawn Particles If Spawn Particles On Mouse Mode Is Selected", [this]() {
 			if (m_Status == EnvironmentStatus::PlayMode) 
@@ -466,10 +450,10 @@ namespace ALZ {
 						if (obj->Type == InspectorObjectType::ParticleSystemType) {
 
 							ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
-							if (ps->m_Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
+							if (ps->Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
 								if (!m_MousePressedLastFrame)
-									ps->m_TimeTillNextParticleSpawn = 0.0f;
-								ps->m_ShouldSpawnParticles = true;
+									ps->TimeTillNextParticleSpawn = 0.0f;
+								ps->ShouldSpawnParticles = true;
 							}
 
 						}
@@ -484,8 +468,8 @@ namespace ALZ {
 
 							ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
 
-							if (ps->m_Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
-								ps->m_ShouldSpawnParticles = false;
+							if (ps->Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
+								ps->ShouldSpawnParticles = false;
 							}
 						}
 					}
@@ -507,8 +491,8 @@ namespace ALZ {
 
 							ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
 
-							if (ps->m_Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
-								ps->m_ShouldSpawnParticles = false;
+							if (ps->Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
+								ps->ShouldSpawnParticles = false;
 							}
 						}
 					}
@@ -532,5 +516,40 @@ namespace ALZ {
 		Inspector_obj_ptr startingPSi((InspectorInterface*)(startingPS.release()));
 
 		InspectorObjects.push_back(std::move(startingPSi));
+	}
+
+	void Environment::FocusCameraOnObject(InspectorInterface& object)
+	{
+		InspectorObjectType type = object.Type;
+
+		if (type == ALZ::ParticleSystemType) {
+			ParticleSystem& ps = *static_cast<ParticleSystem*>(&object);
+
+			switch (ps.Customizer.Mode)
+			{
+			case SpawnMode::SpawnOnPoint:
+
+				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_SpawnPosition.x * -GlobalScaleFactor, ps.Customizer.m_SpawnPosition.y * -GlobalScaleFactor, 0.0f)
+					+ glm::vec3(Window::WindowSize.x / 2, Window::WindowSize.y / 2, 0.0f));
+				break;
+
+			case SpawnMode::SpawnOnCircle:
+				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_CircleOutline.Position.x, ps.Customizer.m_CircleOutline.Position.y, 0.0f)
+								   + glm::vec3(Window::WindowSize.x / 2, Window::WindowSize.y / 2, 0.0f));
+				break;
+
+			case SpawnMode::SpawnOnLine:
+
+				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_LinePosition.x * -GlobalScaleFactor, ps.Customizer.m_LinePosition.y * -GlobalScaleFactor, 0.0f)
+								   + glm::vec3(Window::WindowSize.x / 2, Window::WindowSize.y / 2, 0.0f));
+				break;
+			}
+		}
+		else if (type == ALZ::RadiaLightType) {
+			RadialLight& ps = *static_cast<RadialLight*>(&object);
+
+			m_Camera.SetPosition(glm::vec3(ps.Position.x, ps.Position.y, 0.0f)
+							   + glm::vec3(Window::WindowSize.x / 2, Window::WindowSize.y / 2, 0.0f));
+		}
 	}
 }

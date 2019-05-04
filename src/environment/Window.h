@@ -2,6 +2,8 @@
 
 namespace ALZ {
 
+	const float GlobalScaleFactor = 1000.0f;
+
 	static class Window
 	{
 	public:
@@ -13,11 +15,10 @@ namespace ALZ {
 		static bool WindowSizeChangedSinceLastFrame() { return m_WindowSizeChanged; };
 
 		static GLFWwindow& GetWindow();
-		static glm::vec2& GetSize();
+		static glm::vec2 WindowSize;
 
 	private:
 		static bool m_WindowSizeChanged;
-		static glm::vec2 m_ScreenSize;
 		static GLFWwindow* m_Window;
 
 		friend void framebuffer_size_callback(GLFWwindow* window, int width, int height);

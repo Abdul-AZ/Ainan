@@ -12,7 +12,7 @@ namespace ALZ {
 		glGenTextures(1, &m_Texture);
 		glBindTexture(GL_TEXTURE_2D, m_Texture);
 
-		m_Size = Window::GetSize();
+		m_Size = Window::WindowSize;
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Size.x, m_Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -82,7 +82,7 @@ namespace ALZ {
 			GL_COLOR_BUFFER_BIT,
 			GL_LINEAR);
 
-		glViewport(0, 0, Window::GetSize().x, Window::GetSize().y);
+		glViewport(0, 0, Window::WindowSize.x, Window::WindowSize.y);
 	}
 
 	void FrameBuffer::SetSize(const glm::vec2 & size)

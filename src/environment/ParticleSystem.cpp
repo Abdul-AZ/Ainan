@@ -83,23 +83,23 @@ namespace ALZ {
 		CircleShader.SetUniformMat4("projection", camera.ProjectionMatrix);
 		CircleShader.SetUniformMat4("view", camera.ViewMatrix);
 
-		if (m_Customizer.Mode == SpawnMode::SpawnOnPoint || m_Customizer.Mode == SpawnMode::SpawnOnLine || m_Customizer.Mode == SpawnMode::SpawnOnCircle ||(m_Customizer.Mode == SpawnMode::SpawnOnMousePosition && m_ShouldSpawnParticles)) {
+		if (Customizer.Mode == SpawnMode::SpawnOnPoint || Customizer.Mode == SpawnMode::SpawnOnLine || Customizer.Mode == SpawnMode::SpawnOnCircle ||(Customizer.Mode == SpawnMode::SpawnOnMousePosition && ShouldSpawnParticles)) {
 			SpawnAllParticlesOnQue(deltaTime, camera);
 		}
 
-		m_ActiveParticleCount = 0;
+		ActiveParticleCount = 0;
 		for (Particle& particle : m_Particles) {
 
-			if (m_Customizer.m_NoiseCustomizer.m_NoiseEnabled) {
-				particle.m_Velocity.x += m_Noise.Noise(particle.m_Position.x, particle.m_Position.y) * m_Customizer.m_NoiseCustomizer.m_NoiseStrength;
-				particle.m_Velocity.y += m_Noise.Noise(particle.m_Position.x + 30, particle.m_Position.y - 30) * m_Customizer.m_NoiseCustomizer.m_NoiseStrength;
+			if (Customizer.m_NoiseCustomizer.m_NoiseEnabled) {
+				particle.m_Velocity.x += m_Noise.Noise(particle.m_Position.x, particle.m_Position.y) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
+				particle.m_Velocity.y += m_Noise.Noise(particle.m_Position.x + 30, particle.m_Position.y - 30) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
 			}
 
 			particle.Update(deltaTime);
 
 			//update active particle count
 			if (particle.isActive)
-				m_ActiveParticleCount++;
+				ActiveParticleCount++;
 		}
 	}
 
@@ -109,10 +109,10 @@ namespace ALZ {
 		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
 		CircleShader.Bind();
 		CircleShader.SetUniform1i("particleTexture", 0);
-		if (m_Customizer.m_TextureCustomizer.UseDefaultTexture)
+		if (Customizer.m_TextureCustomizer.UseDefaultTexture)
 			DefaultTexture.Bind(0);
 		else
-			m_Customizer.m_TextureCustomizer.ParticleTexture.Bind(0);
+			Customizer.m_TextureCustomizer.ParticleTexture.Bind(0);
 
 		glm::mat4* modelBuffer = (glm::mat4*) m_ParticleInfoBuffer;
 		glm::vec4* colorBuffer = (glm::vec4*) ((char*)m_ParticleInfoBuffer + m_ParticleCount * sizeof(glm::mat4));
@@ -182,7 +182,7 @@ namespace ALZ {
 	}
 
 	ParticleSystem::ParticleSystem(const ParticleSystem& Psystem) :
-		m_Customizer(Psystem.m_Customizer)
+		Customizer(Psystem.Customizer)
 	{
 		m_ParticleInfoBuffer = malloc((sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
 		memcpy(m_ParticleInfoBuffer, Psystem.m_ParticleInfoBuffer, (sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
@@ -204,40 +204,40 @@ namespace ALZ {
 	void ParticleSystem::DisplayGUI(Camera& camera)
 	{
 		if (m_EditorOpen)
-			m_Customizer.DisplayGUI(m_Name, m_EditorOpen);
+			Customizer.DisplayGUI(m_Name, m_EditorOpen);
 
 		//update editor line 
-		if (m_Customizer.Mode == SpawnMode::SpawnOnLine && m_Selected)
+		if (Customizer.Mode == SpawnMode::SpawnOnLine && m_Selected)
 		{
-			glm::vec2 pointDispositionFromCenter = m_Customizer.m_LineLength * glm::vec2(cos(m_Customizer.m_LineAngle * 3.14159265 / 180.0f), sin(m_Customizer.m_LineAngle * 3.14159265 / 180.0f));
+			glm::vec2 pointDispositionFromCenter = Customizer.m_LineLength * glm::vec2(cos(Customizer.m_LineAngle * 3.14159265 / 180.0f), sin(Customizer.m_LineAngle * 3.14159265 / 180.0f));
 
-			glm::vec2 startLinePoint = m_Customizer.m_LinePosition + pointDispositionFromCenter;
-			glm::vec2 endLinePoint = m_Customizer.m_LinePosition - pointDispositionFromCenter;
+			glm::vec2 startLinePoint = Customizer.m_LinePosition + pointDispositionFromCenter;
+			glm::vec2 endLinePoint = Customizer.m_LinePosition - pointDispositionFromCenter;
 
-			m_Customizer.m_Line.SetPoints(startLinePoint * (float)1000, endLinePoint * (float)1000);
-			m_Customizer.m_Line.Render(camera);
+			Customizer.m_Line.SetPoints(startLinePoint, endLinePoint);
+			Customizer.m_Line.Render(camera);
 		}
-		else if (m_Customizer.Mode == SpawnMode::SpawnOnCircle && m_Selected) 
+		else if (Customizer.Mode == SpawnMode::SpawnOnCircle && m_Selected) 
 		{
-			m_Customizer.m_CircleOutline.Render(camera);
+			Customizer.m_CircleOutline.Render(camera);
 		}
 	}
 
 	void ParticleSystem::SpawnAllParticlesOnQue(const float& deltaTime, Camera& camera)
 	{
-		m_TimeTillNextParticleSpawn -= deltaTime;
-		if (m_TimeTillNextParticleSpawn < 0.0f) {
-			m_TimeTillNextParticleSpawn = abs(m_TimeTillNextParticleSpawn);
+		TimeTillNextParticleSpawn -= deltaTime;
+		if (TimeTillNextParticleSpawn < 0.0f) {
+			TimeTillNextParticleSpawn = abs(TimeTillNextParticleSpawn);
 
-			while (m_TimeTillNextParticleSpawn > 0.0f) {
-				Particle p = m_Customizer.GetParticle();
-				if (m_Customizer.Mode == SpawnMode::SpawnOnMousePosition)
+			while (TimeTillNextParticleSpawn > 0.0f) {
+				Particle p = Customizer.GetParticle();
+				if (Customizer.Mode == SpawnMode::SpawnOnMousePosition)
 					p.m_Position -= glm::vec2(camera.Position.x, camera.Position.y);
 				SpawnParticle(p);
-				m_TimeTillNextParticleSpawn -= m_Customizer.GetTimeBetweenParticles();
+				TimeTillNextParticleSpawn -= Customizer.GetTimeBetweenParticles();
 			}
 
-			m_TimeTillNextParticleSpawn = m_Customizer.GetTimeBetweenParticles();
+			TimeTillNextParticleSpawn = Customizer.GetTimeBetweenParticles();
 		}
 	}
 
