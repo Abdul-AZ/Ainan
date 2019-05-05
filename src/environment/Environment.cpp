@@ -49,6 +49,12 @@ namespace ALZ {
 		Window::Update();
 		m_Camera.Update(deltaTime);
 
+		for (int i = 0; i < InspectorObjects.size(); i++) {
+			if (InspectorObjects[i]->ToBeDeleted)
+				InspectorObjects.erase(InspectorObjects.begin() + i);
+		}
+
+
 		if (m_Status == EnvironmentStatus::PlayMode) {
 			for (Inspector_obj_ptr& obj : InspectorObjects)
 				obj->Update(deltaTime, m_Camera);
@@ -146,14 +152,14 @@ namespace ALZ {
 		for (int i = 0; i < InspectorObjects.size(); i++)
 		{
 
-			ImGui::PushID(InspectorObjects[i]->m_ID);
+			ImGui::PushID(InspectorObjects[i]->ID);
 
-			if (ImGui::Selectable((InspectorObjects[i]->m_Name.size() > 0) ? InspectorObjects[i]->m_Name.c_str() : "No Name", &InspectorObjects[i]->m_Selected)) {
+			if (ImGui::Selectable((InspectorObjects[i]->m_Name.size() > 0) ? InspectorObjects[i]->m_Name.c_str() : "No Name", &InspectorObjects[i]->Selected)) {
 
 				//if this is selected. deselect all other particle systems
 				for (auto& particle : InspectorObjects) {
-					if (particle->m_ID != InspectorObjects[i]->m_ID)
-						particle->m_Selected = false;
+					if (particle->ID != InspectorObjects[i]->ID)
+						particle->Selected = false;
 				}
 			}
 
@@ -161,13 +167,10 @@ namespace ALZ {
 			if (ImGui::BeginPopupContextItem("Object Popup"))
 			{
 				if (ImGui::Selectable("Edit"))
-					InspectorObjects[i]->m_EditorOpen = !InspectorObjects[i]->m_EditorOpen;
+					InspectorObjects[i]->EditorOpen = !InspectorObjects[i]->EditorOpen;
 
 				if (ImGui::Selectable("Delete")) {
-					InspectorObjects.erase(InspectorObjects.begin() + i);
-					ImGui::EndPopup();
-					ImGui::PopID();
-					continue;
+					InspectorObjects[i]->ToBeDeleted = true;
 				}
 
 				if (ImGui::Selectable("Duplicate")) 
@@ -179,27 +182,24 @@ namespace ALZ {
 				}
 
 				if (ImGui::Selectable("Rename"))
-					InspectorObjects[i]->m_RenameTextOpen = !InspectorObjects[i]->m_RenameTextOpen;
+					InspectorObjects[i]->RenameTextOpen = !InspectorObjects[i]->RenameTextOpen;
 
 
 				ImGui::EndPopup();
 			}
 
 			//display particle system buttons only if it is selected
-			if (InspectorObjects[i]->m_Selected) {
+			if (InspectorObjects[i]->Selected) {
 				if (ImGui::Button("Edit"))
-					InspectorObjects[i]->m_EditorOpen = !InspectorObjects[i]->m_EditorOpen;
+					InspectorObjects[i]->EditorOpen = !InspectorObjects[i]->EditorOpen;
 
 				ImGui::SameLine();
-				if (ImGui::Button("Delete")) {
-					InspectorObjects.erase(InspectorObjects.begin() + i);
-					ImGui::PopID();
-					continue;
-				}
+				if (ImGui::Button("Delete")) 
+					InspectorObjects[i]->ToBeDeleted = true;
 
 				ImGui::SameLine();
 				if (ImGui::Button("Rename"))
-					InspectorObjects[i]->m_RenameTextOpen = !InspectorObjects[i]->m_RenameTextOpen;
+					InspectorObjects[i]->RenameTextOpen = !InspectorObjects[i]->RenameTextOpen;
 
 				ImGui::SameLine();
 
@@ -209,10 +209,10 @@ namespace ALZ {
 
 			ImGui::Spacing();
 
-			if (InspectorObjects[i]->m_RenameTextOpen) {
+			if (InspectorObjects[i]->RenameTextOpen) {
 				auto flags = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;
 				if (ImGui::InputText("Name", &InspectorObjects[i]->m_Name, flags)) {
-					InspectorObjects[i]->m_RenameTextOpen = !InspectorObjects[i]->m_RenameTextOpen;
+					InspectorObjects[i]->RenameTextOpen = !InspectorObjects[i]->RenameTextOpen;
 				}
 			}
 
@@ -295,6 +295,7 @@ namespace ALZ {
 				Stop();
 			}
 		}
+
 		else {
 			if (ImGui::ImageButton((ImTextureID)m_PlayButtonTexture.TextureID, ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
 				Play();
@@ -448,6 +449,19 @@ namespace ALZ {
 		m_InputManager.RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(-10.0f, 0.0f)); }, GLFW_REPEAT);
 		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(10.0f, 0.0f)); }  , GLFW_REPEAT);
 
+		//delete keyboard shortcut
+		m_InputManager.RegisterKey(GLFW_KEY_DELETE, "Delete Object", [this]() {
+		
+			for (int i = 0; i < InspectorObjects.size(); i++)
+			{
+				if (InspectorObjects[i]->Selected) {
+					InspectorObjects[i]->ToBeDeleted = true;
+					break;
+				}
+			}
+		
+		});
+
 		m_InputManager.RegisterMouseKey(GLFW_MOUSE_BUTTON_LEFT, "Spawn Particles If Spawn Particles On Mouse Mode Is Selected", [this]() {
 			if (m_Status == EnvironmentStatus::PlayMode) 
 			{
@@ -535,7 +549,7 @@ namespace ALZ {
 			InspectorObjects.push_back(std::move(startingPSi));
 			*InspectorObjects[InspectorObjects.size() - 1].get() = *static_cast<ParticleSystem*>(&obj);
 			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";
-			InspectorObjects[InspectorObjects.size() - 1]->m_ID++;
+			InspectorObjects[InspectorObjects.size() - 1]->ID++;
 		}
 	}
 

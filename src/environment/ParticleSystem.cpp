@@ -16,7 +16,7 @@ namespace ALZ {
 		Type = InspectorObjectType::ParticleSystemType;
 
 		m_Name = "Particle System (" + std::to_string(nameIndextemp) + ")";
-		m_ID = nameIndextemp;
+		ID = nameIndextemp;
 		nameIndextemp++;
 
 		m_Noise.Init();
@@ -190,9 +190,9 @@ namespace ALZ {
 		m_Particles = Psystem.m_Particles;
 		m_ParticleCount = Psystem.m_ParticleCount;
 		m_Name = Psystem.m_Name;
-		m_EditorOpen = Psystem.m_EditorOpen;
-		m_ID = Psystem.m_ID;
-		m_RenameTextOpen = Psystem.m_RenameTextOpen;
+		EditorOpen = Psystem.EditorOpen;
+		ID = Psystem.ID;
+		RenameTextOpen = Psystem.RenameTextOpen;
 		m_Noise.Init();
 	}
 
@@ -203,11 +203,11 @@ namespace ALZ {
 
 	void ParticleSystem::DisplayGUI(Camera& camera)
 	{
-		if (m_EditorOpen)
-			Customizer.DisplayGUI(m_Name, m_EditorOpen);
+		if (EditorOpen)
+			Customizer.DisplayGUI(m_Name, EditorOpen);
 
 		//update editor line 
-		if (Customizer.Mode == SpawnMode::SpawnOnLine && m_Selected)
+		if (Customizer.Mode == SpawnMode::SpawnOnLine && Selected)
 		{
 			glm::vec2 pointDispositionFromCenter = Customizer.m_LineLength * glm::vec2(cos(Customizer.m_LineAngle * 3.14159265 / 180.0f), sin(Customizer.m_LineAngle * 3.14159265 / 180.0f));
 
@@ -217,7 +217,7 @@ namespace ALZ {
 			Customizer.m_Line.SetPoints(startLinePoint, endLinePoint);
 			Customizer.m_Line.Render(camera);
 		}
-		else if (Customizer.Mode == SpawnMode::SpawnOnCircle && m_Selected) 
+		else if (Customizer.Mode == SpawnMode::SpawnOnCircle && Selected) 
 		{
 			Customizer.m_CircleOutline.Render(camera);
 		}

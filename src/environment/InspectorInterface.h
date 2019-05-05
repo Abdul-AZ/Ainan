@@ -19,10 +19,13 @@ namespace ALZ {
 		virtual ~InspectorInterface() {};
 
 		std::string m_Name;
-		bool m_EditorOpen = false;
-		bool m_RenameTextOpen = false;
-		bool m_Selected = false;
-		int m_ID;
+		bool EditorOpen = false;
+		bool RenameTextOpen = false;
+		bool Selected = false;
+		int ID;
+
+		//set this to true if you want to delete the object because it can't be deleted at certain times
+		bool ToBeDeleted = false;
 
 		InspectorObjectType Type;
 	};

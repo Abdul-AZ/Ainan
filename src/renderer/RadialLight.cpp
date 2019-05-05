@@ -9,16 +9,16 @@ namespace ALZ {
 	{
 		Type = InspectorObjectType::RadiaLightType;
 		m_Name = "Radial Light (" + std::to_string(nameIndextemp) + ")";
-		m_ID = nameIndextemp;
+		ID = nameIndextemp;
 		nameIndextemp++;
 	}
 
 	void RadialLight::DisplayGUI(Camera& camera)
 	{
-		if (!m_EditorOpen)
+		if (!EditorOpen)
 			return;
 
-		ImGui::Begin(m_Name.c_str(), &m_EditorOpen);
+		ImGui::Begin(m_Name.c_str(), &EditorOpen);
 
 		ImGui::DragFloat2("Position", &Position.x, 0.001f);
 		ImGui::ColorEdit3("Color", &Color.r);

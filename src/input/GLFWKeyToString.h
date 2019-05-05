@@ -58,6 +58,7 @@ namespace ALZ {
 			KeyCase(Y)
 			KeyCase(Z)
 			KeyCase(SPACE)
+			KeyCase(DELETE)
 		}
 	}
 
