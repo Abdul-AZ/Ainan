@@ -55,6 +55,7 @@ namespace ALZ {
 
 		void AddPS();
 		void AddRadialLight();
+		void Duplicate(InspectorInterface& obj);
 		void FocusCameraOnObject(InspectorInterface& object);
 
 	private:

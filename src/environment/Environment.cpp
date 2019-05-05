@@ -145,15 +145,14 @@ namespace ALZ {
 
 		for (int i = 0; i < InspectorObjects.size(); i++)
 		{
-			Inspector_obj_ptr& particleSystem = InspectorObjects[i];
 
-			ImGui::PushID(particleSystem->m_ID);
+			ImGui::PushID(InspectorObjects[i]->m_ID);
 
-			if (ImGui::Selectable((particleSystem->m_Name.size() > 0) ? particleSystem->m_Name.c_str() : "No Name", &particleSystem->m_Selected)) {
+			if (ImGui::Selectable((InspectorObjects[i]->m_Name.size() > 0) ? InspectorObjects[i]->m_Name.c_str() : "No Name", &InspectorObjects[i]->m_Selected)) {
 				//if this is selected. deselect all other particle systems
 				for (auto& particle : InspectorObjects) {
-					if (particleSystem->m_ID != particleSystem->m_ID)
-						particleSystem->m_Selected = false;
+					if (InspectorObjects[i]->m_ID != InspectorObjects[i]->m_ID)
+						InspectorObjects[i]->m_Selected = false;
 				}
 			}
 
@@ -161,7 +160,7 @@ namespace ALZ {
 			if (ImGui::BeginPopupContextItem("Object Popup"))
 			{
 				if (ImGui::Selectable("Edit"))
-					particleSystem->m_EditorOpen = !particleSystem->m_EditorOpen;
+					InspectorObjects[i]->m_EditorOpen = !InspectorObjects[i]->m_EditorOpen;
 
 				if (ImGui::Selectable("Delete")) {
 					InspectorObjects.erase(InspectorObjects.begin() + i);
@@ -170,17 +169,25 @@ namespace ALZ {
 					continue;
 				}
 
+				if (ImGui::Selectable("Duplicate")) 
+				{
+					Duplicate(*InspectorObjects[i]);
+					ImGui::EndPopup();
+					ImGui::PopID();
+					continue;
+				}
+
 				if (ImGui::Selectable("Rename"))
-					particleSystem->m_RenameTextOpen = !particleSystem->m_RenameTextOpen;
+					InspectorObjects[i]->m_RenameTextOpen = !InspectorObjects[i]->m_RenameTextOpen;
 
 
 				ImGui::EndPopup();
 			}
 
 			//display particle system buttons only if it is selected
-			if (particleSystem->m_Selected) {
+			if (InspectorObjects[i]->m_Selected) {
 				if (ImGui::Button("Edit"))
-					particleSystem->m_EditorOpen = !particleSystem->m_EditorOpen;
+					InspectorObjects[i]->m_EditorOpen = !InspectorObjects[i]->m_EditorOpen;
 
 				ImGui::SameLine();
 				if (ImGui::Button("Delete")) {
@@ -191,20 +198,20 @@ namespace ALZ {
 
 				ImGui::SameLine();
 				if (ImGui::Button("Rename"))
-					particleSystem->m_RenameTextOpen = !particleSystem->m_RenameTextOpen;
+					InspectorObjects[i]->m_RenameTextOpen = !InspectorObjects[i]->m_RenameTextOpen;
 
 				ImGui::SameLine();
 
 				if (ImGui::Button("Find"))
-					FocusCameraOnObject(*particleSystem);
+					FocusCameraOnObject(*InspectorObjects[i]);
 			}
 
 			ImGui::Spacing();
 
-			if (particleSystem->m_RenameTextOpen) {
+			if (InspectorObjects[i]->m_RenameTextOpen) {
 				auto flags = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;
-				if (ImGui::InputText("Name", &particleSystem->m_Name, flags)) {
-					particleSystem->m_RenameTextOpen = !particleSystem->m_RenameTextOpen;
+				if (ImGui::InputText("Name", &InspectorObjects[i]->m_Name, flags)) {
+					InspectorObjects[i]->m_RenameTextOpen = !InspectorObjects[i]->m_RenameTextOpen;
 				}
 			}
 
@@ -516,6 +523,19 @@ namespace ALZ {
 		Inspector_obj_ptr startingPSi((InspectorInterface*)(startingPS.release()));
 
 		InspectorObjects.push_back(std::move(startingPSi));
+	}
+
+	void Environment::Duplicate(InspectorInterface& obj)
+	{
+		if (obj.Type == InspectorObjectType::ParticleSystemType) {
+			std::unique_ptr<ParticleSystem> startingPS = std::make_unique<ParticleSystem>();
+			Inspector_obj_ptr startingPSi((InspectorInterface*)(startingPS.release()));
+
+			InspectorObjects.push_back(std::move(startingPSi));
+			*InspectorObjects[InspectorObjects.size() - 1].get() = *static_cast<ParticleSystem*>(&obj);
+			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";
+			InspectorObjects[InspectorObjects.size() - 1]->m_ID++;
+		}
 	}
 
 	void Environment::FocusCameraOnObject(InspectorInterface& object)
