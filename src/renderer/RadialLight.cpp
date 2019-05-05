@@ -4,7 +4,7 @@
 
 namespace ALZ {
 
-	static int nameIndextemp = 0;
+	static int nameIndextemp = 10000;
 	RadialLight::RadialLight()
 	{
 		Type = InspectorObjectType::RadiaLightType;

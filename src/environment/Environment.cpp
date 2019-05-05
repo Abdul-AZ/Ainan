@@ -149,10 +149,11 @@ namespace ALZ {
 			ImGui::PushID(InspectorObjects[i]->m_ID);
 
 			if (ImGui::Selectable((InspectorObjects[i]->m_Name.size() > 0) ? InspectorObjects[i]->m_Name.c_str() : "No Name", &InspectorObjects[i]->m_Selected)) {
+
 				//if this is selected. deselect all other particle systems
 				for (auto& particle : InspectorObjects) {
-					if (InspectorObjects[i]->m_ID != InspectorObjects[i]->m_ID)
-						InspectorObjects[i]->m_Selected = false;
+					if (particle->m_ID != InspectorObjects[i]->m_ID)
+						particle->m_Selected = false;
 				}
 			}
 
