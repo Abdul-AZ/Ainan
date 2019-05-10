@@ -15,9 +15,6 @@ namespace ALZ {
 	{
 		switch (mode)
 		{
-		case SpawnMode::SpawnOnMousePosition:
-			return "Spawn On Mouse";
-
 		case SpawnMode::SpawnOnPoint:
 			return "Spawn On Point";
 
@@ -37,14 +34,6 @@ namespace ALZ {
 		ImGui::Begin((windowName.size() > 0) ? windowName.c_str() : "No Name", &windowOpen);
 
 		if (ImGui::BeginCombo("Spawn Mode", GetAsText(Mode).c_str())) {
-
-			{
-				bool is_active = Mode == SpawnMode::SpawnOnMousePosition;
-				if (ImGui::Selectable(GetAsText(SpawnMode::SpawnOnMousePosition).c_str(), &is_active)) {
-					ImGui::SetItemDefaultFocus();
-					Mode = SpawnMode::SpawnOnMousePosition;
-				}
-			}
 
 			{
 				bool is_active = Mode == SpawnMode::SpawnOnPoint;
@@ -127,13 +116,6 @@ namespace ALZ {
 	{
 		switch (Mode)
 		{
-		case SpawnMode::SpawnOnMousePosition: {
-			double xpos, ypos;
-			glfwGetCursorPos(&Window::GetWindow(), &xpos, &ypos);
-			m_Particle.m_Position = glm::vec2(xpos, Window::WindowSize.y - ypos);
-			break;
-		}
-
 		case SpawnMode::SpawnOnPoint: {
 			glm::vec2 spawnPosition = { m_SpawnPosition.x * GlobalScaleFactor, m_SpawnPosition.y * GlobalScaleFactor };
 			m_Particle.m_Position = spawnPosition;

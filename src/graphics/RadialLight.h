@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ShaderProgram.h"
-#include "environment/InspectorInterface.h"
+#include "InspectorInterface.h"
 
 namespace ALZ {
 

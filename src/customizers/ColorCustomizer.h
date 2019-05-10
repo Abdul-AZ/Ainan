@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gui/InterpolationSelector.h"
+#include "InterpolationSelector.h"
 
 namespace ALZ {
 

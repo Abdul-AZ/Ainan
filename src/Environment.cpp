@@ -429,7 +429,7 @@ namespace ALZ {
 
 		m_InputManager.RegisterKey(GLFW_KEY_F1, "Hide Menus", [this]() { m_HideGUI = !m_HideGUI; });
 
-		m_InputManager.RegisterKey(GLFW_KEY_F11, "Capture Screenshot", [this]() 
+		m_InputManager.RegisterKey(GLFW_KEY_F11, "Capture Screenshot", [this]()
 		{
 			m_SaveNextFrameAsImage = true;
 		});
@@ -444,14 +444,14 @@ namespace ALZ {
 			}
 		});
 
-		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -10.0f)); }           , GLFW_REPEAT);
-		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, 10.0f)); }        , GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -10.0f)); }, GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, 10.0f)); }, GLFW_REPEAT);
 		m_InputManager.RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(-10.0f, 0.0f)); }, GLFW_REPEAT);
-		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(10.0f, 0.0f)); }  , GLFW_REPEAT);
+		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(10.0f, 0.0f)); }, GLFW_REPEAT);
 
 		//delete keyboard shortcut
 		m_InputManager.RegisterKey(GLFW_KEY_DELETE, "Delete Object", [this]() {
-		
+
 			for (int i = 0; i < InspectorObjects.size(); i++)
 			{
 				if (InspectorObjects[i]->Selected) {
@@ -459,69 +459,8 @@ namespace ALZ {
 					break;
 				}
 			}
-		
 		});
 
-		m_InputManager.RegisterMouseKey(GLFW_MOUSE_BUTTON_LEFT, "Spawn Particles If Spawn Particles On Mouse Mode Is Selected", [this]() {
-			if (m_Status == EnvironmentStatus::PlayMode) 
-			{
-				if (!ImGui::GetIO().WantCaptureMouse) 
-				{
-					for (Inspector_obj_ptr& obj : InspectorObjects) {
-
-						if (obj->Type == InspectorObjectType::ParticleSystemType) {
-
-							ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
-							if (ps->Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
-								if (!m_MousePressedLastFrame)
-									ps->TimeTillNextParticleSpawn = 0.0f;
-								ps->ShouldSpawnParticles = true;
-							}
-
-						}
-
-					}
-					m_MousePressedLastFrame = true;
-				}
-				else 
-				{
-					for (Inspector_obj_ptr& obj : InspectorObjects) {
-						if (obj->Type == InspectorObjectType::ParticleSystemType) {
-
-							ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
-
-							if (ps->Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
-								ps->ShouldSpawnParticles = false;
-							}
-						}
-					}
-					m_MousePressedLastFrame = false;
-				}
-			}
-		});
-
-		//stop spawning particles when mouse key is released
-		//NOTE: no description means it won't be displayed in the controls window
-		m_InputManager.RegisterMouseKey(GLFW_MOUSE_BUTTON_LEFT, "", [this]() {
-			if (m_Status == EnvironmentStatus::PlayMode)
-			{
-				if (!ImGui::GetIO().WantCaptureMouse)
-				{
-					for (Inspector_obj_ptr& obj : InspectorObjects) {
-
-						if (obj->Type == InspectorObjectType::ParticleSystemType) {
-
-							ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
-
-							if (ps->Customizer.Mode == SpawnMode::SpawnOnMousePosition) {
-								ps->ShouldSpawnParticles = false;
-							}
-						}
-					}
-					m_MousePressedLastFrame = false;
-				}
-			}
-		}, GLFW_RELEASE);
 	}
 
 	void Environment::AddPS()

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "glm/glm.hpp"
-#include "gui/InterpolationSelector.h"
-#include "math/Interpolation.h"
+#include "InterpolationSelector.h"
+#include "Interpolation.h"
 
 namespace ALZ {
 

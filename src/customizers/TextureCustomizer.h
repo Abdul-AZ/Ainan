@@ -1,7 +1,7 @@
 #pragma once
 
-#include "renderer/Texture.h"
-#include "gui/FileBrowserGUI.h"
+#include "graphics/Texture.h"
+#include "FileBrowserGUI.h"
 
 namespace ALZ {
 

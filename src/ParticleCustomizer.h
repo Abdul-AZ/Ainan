@@ -1,20 +1,19 @@
 #pragma once
 
-#include "environment/Window.h"
-#include "environment/Particle.h"
+#include "Window.h"
+#include "Particle.h"
 #include "customizers/TextureCustomizer.h"
 #include "customizers/VelocityCustomizer.h"
 #include "customizers/ColorCustomizer.h"
 #include "customizers/ScaleCustomizer.h"
 #include "customizers/LifetimeCustomizer.h"
 #include "customizers/NoiseCustomizer.h"
-#include "renderer/Line.h"
-#include "renderer/CircleOutline.h"
+#include "graphics/Line.h"
+#include "graphics/CircleOutline.h"
 
 namespace ALZ {
 
 	enum class SpawnMode {
-		SpawnOnMousePosition,
 		SpawnOnPoint,
 		SpawnOnLine,
 		SpawnOnCircle
@@ -33,7 +32,7 @@ namespace ALZ {
 		float GetTimeBetweenParticles() { return 1 / m_ParticlesPerSecond; }
 
 	public:
-		SpawnMode Mode = SpawnMode::SpawnOnMousePosition;
+		SpawnMode Mode = SpawnMode::SpawnOnPoint;
 
 	public:
 		float m_ParticlesPerSecond = 100.0f;

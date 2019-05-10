@@ -1,6 +1,6 @@
 #pragma once
 
-#include "environment/Window.h"
+#include "Window.h"
 #include "GLFWKeyToString.h"
 
 namespace ALZ {

@@ -1,23 +1,23 @@
 #pragma once
 
-#include "file/FileManager.h"
-#include "file/stb_image_write.h"
+#include "FileManager.h"
+#include "stb/stb_image_write.h"
 
 #include "ParticleSystem.h"
 #include "Camera.h"
 #include "EditorStyles.h"
 
-#include "gui/ParticleCustomizer.h"
-#include "gui/GeneralSettingsGUI.h"
-#include "gui/FolderBrowserGUI.h"
+#include "ParticleCustomizer.h"
+#include "GeneralSettingsGUI.h"
+#include "FolderBrowserGUI.h"
 
-#include "renderer/FrameBuffer.h"
-#include "renderer/GaussianBlur.h"
-#include "renderer/Texture.h"
-#include "renderer/CircleOutline.h"
-#include "renderer/Background.h"
+#include "graphics/FrameBuffer.h"
+#include "graphics/GaussianBlur.h"
+#include "graphics/Texture.h"
+#include "graphics/CircleOutline.h"
+#include "graphics/Background.h"
 
-#include "input/InputManager.h"
+#include "InputManager.h"
 
 namespace ALZ {
 

@@ -11,7 +11,7 @@ files {
   "../imgui/misc/cpp/imgui_stdlib.cpp", "../imgui/misc/cpp/imgui_stdlib.h"
  }
 
-includedirs { "../imgui", "../imgui/examples", "../imgui/misc/cpp", "../src" }
+includedirs { "../imgui", "../imgui/examples", "../imgui/misc/cpp", "../src/vendor" }
 
 defines { "IMGUI_IMPL_OPENGL_LOADER_GLAD", "IMGUI_HAS_DOCK" }
 

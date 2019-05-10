@@ -1,7 +1,7 @@
 #include <pch.h>
 
-#include "environment/Window.h"
-#include "environment/Environment.h"
+#include "Window.h"
+#include "Environment.h"
 
 int main(int argc, const char* argv[]) {
 

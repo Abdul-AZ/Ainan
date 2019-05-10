@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ShaderProgram.h"
-#include "environment/Camera.h"
+#include "Camera.h"
 
 namespace ALZ {
 

@@ -1,5 +1,7 @@
-#include "renderer/FrameBuffer.h"
-#include "stb_image_write.h"
+#pragma once
+
+#include "graphics/FrameBuffer.h"
+#include "stb/stb_image_write.h"
 
 namespace ALZ {
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math/Interpolation.h"
+#include "Interpolation.h"
 
 namespace ALZ {
 	

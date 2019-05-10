@@ -1,6 +1,6 @@
 #pragma once
 
-#include "environment/Camera.h"
+#include "Camera.h"
 #include "ShaderProgram.h"
 #include "RadialLight.h"
 

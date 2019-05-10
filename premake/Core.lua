@@ -15,7 +15,7 @@ files {
 pchheader "pch.h"
 pchsource "../src/pch.cpp"
 
-includedirs { "../src", "../imgui", "../imgui/examples", "../imgui/misc/cpp", "../glm" }
+includedirs { "../src", "../imgui", "../imgui/examples", "../imgui/misc/cpp", "../glm", "../src/vendor" }
 
 defines { "_CRT_SECURE_NO_WARNINGS" }
 

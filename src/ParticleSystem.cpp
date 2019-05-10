@@ -83,7 +83,7 @@ namespace ALZ {
 		CircleShader.SetUniformMat4("projection", camera.ProjectionMatrix);
 		CircleShader.SetUniformMat4("view", camera.ViewMatrix);
 
-		if (Customizer.Mode == SpawnMode::SpawnOnPoint || Customizer.Mode == SpawnMode::SpawnOnLine || Customizer.Mode == SpawnMode::SpawnOnCircle ||(Customizer.Mode == SpawnMode::SpawnOnMousePosition && ShouldSpawnParticles)) {
+		if (Customizer.Mode == SpawnMode::SpawnOnPoint || Customizer.Mode == SpawnMode::SpawnOnLine || Customizer.Mode == SpawnMode::SpawnOnCircle) {
 			SpawnAllParticlesOnQue(deltaTime, camera);
 		}
 
@@ -231,8 +231,6 @@ namespace ALZ {
 
 			while (TimeTillNextParticleSpawn > 0.0f) {
 				Particle p = Customizer.GetParticle();
-				if (Customizer.Mode == SpawnMode::SpawnOnMousePosition)
-					p.m_Position -= glm::vec2(camera.Position.x, camera.Position.y);
 				SpawnParticle(p);
 				TimeTillNextParticleSpawn -= Customizer.GetTimeBetweenParticles();
 			}
