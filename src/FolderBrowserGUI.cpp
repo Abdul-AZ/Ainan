@@ -33,7 +33,7 @@ namespace ALZ {
 		}
 
 		ImGui::PushItemWidth(-1);
-		if (ImGui::ListBoxHeader("##empty", 0, std::distance(fs::directory_iterator(m_CurrentFolder), fs::directory_iterator{}) + 5)) {
+		if (ImGui::ListBoxHeader("##empty", 0, (int)std::distance(fs::directory_iterator(m_CurrentFolder), fs::directory_iterator{}) + 5)) {
 
 			//check if we can go back
 			if (std::count(m_CurrentFolder.begin(), m_CurrentFolder.end(), '\\') > 0) {

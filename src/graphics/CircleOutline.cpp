@@ -26,8 +26,8 @@ namespace ALZ {
 			for (int i = 0; i < vertexCount; i++)
 			{
 				float angle = i * degreesBetweenVertices;
-				vertices[i].x = cos(angle * (PI / 180.0));
-				vertices[i].y = sin(angle * (PI / 180.0));
+				vertices[i].x = (float)cos(angle * (PI / 180.0));
+				vertices[i].y = (float)sin(angle * (PI / 180.0));
 
 				if (i == vertexCount - 1)
 					continue;

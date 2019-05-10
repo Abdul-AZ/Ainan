@@ -64,7 +64,7 @@ namespace ALZ {
 
 
 			DefaultTexture.Init("res/Circle.png", 4);
-			glBindTexture(GL_TEXTURE_2D, DefaultTexture.TextureID);
+			glBindTexture(GL_TEXTURE_2D, (GLuint)DefaultTexture.TextureID);
 
 			std::cout << glGetError() << std::endl;
 			InitilizedCircleVertices = true;
@@ -117,7 +117,7 @@ namespace ALZ {
 		glm::mat4* modelBuffer = (glm::mat4*) m_ParticleInfoBuffer;
 		glm::vec4* colorBuffer = (glm::vec4*) ((char*)m_ParticleInfoBuffer + m_ParticleCount * sizeof(glm::mat4));
 
-		for (int i = 0; i < m_ParticleCount; i++)
+		for (unsigned int i = 0; i < m_ParticleCount; i++)
 		{
 			if (m_Particles[i].m_LifeTime == 0.0f)
 				m_Particles[i].m_LifeTime = 0.001f;
@@ -142,7 +142,7 @@ namespace ALZ {
 		}
 
 
-		int drawCount = m_Particles.size() / 40;
+		int drawCount = (int)m_Particles.size() / 40;
 
 		for (int i = 0; i < drawCount; i++)
 		{
@@ -160,7 +160,7 @@ namespace ALZ {
 
 	void ParticleSystem::SpawnParticle(const Particle & particle)
 	{
-		for (int i = 0; i < m_ParticleCount; i++)
+		for (unsigned int i = 0; i < m_ParticleCount; i++)
 		{
 			if (!m_Particles[i].isActive)
 			{

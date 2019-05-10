@@ -12,7 +12,7 @@ namespace ALZ {
 		void Unbind(const int& slot = 0);
 
 	public:
-		unsigned int TextureID = 0;
+		unsigned long long TextureID = 0;
 		bool TextureActive = false;
 	};
 }

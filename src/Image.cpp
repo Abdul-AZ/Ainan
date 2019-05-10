@@ -81,8 +81,8 @@ namespace ALZ {
 	Image Image::FromFrameBuffer(FrameBuffer & framebuffer)
 	{
 		Image image;
-		image.m_Width = framebuffer.GetSize().x;
-		image.m_Height = framebuffer.GetSize().y;
+		image.m_Width  = (unsigned int)framebuffer.GetSize().x;
+		image.m_Height = (unsigned int)framebuffer.GetSize().y;
 		image.m_Data = new unsigned char[image.m_Width * image.m_Height * 4];
 		image.m_Comp = 4;
 
@@ -105,7 +105,7 @@ namespace ALZ {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer.RendererID);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tempFrameBuffer.RendererID);
 
-		glBlitFramebuffer(0, 0, framebuffer.GetSize().x, framebuffer.GetSize().y, 0, 0, tempFrameBuffer.GetSize().x, tempFrameBuffer.GetSize().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, (GLuint)framebuffer.GetSize().x, (GLuint)framebuffer.GetSize().y, 0, 0, (GLuint)tempFrameBuffer.GetSize().x, (GLuint)tempFrameBuffer.GetSize().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 		tempFrameBuffer.Bind();
 		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image.m_Data);

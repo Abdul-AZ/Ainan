@@ -130,7 +130,7 @@ namespace ALZ {
 
 		case SpawnMode::SpawnOnCircle: {
 			//random angle between 0 and 2pi (360 degrees)
-			std::uniform_real_distribution<float> dest(0.0f, 2 * 3.14159);
+			std::uniform_real_distribution<float> dest(0.0f, 2.0f * 3.14159f);
 			m_Particle.m_Position = m_CircleOutline.GetPointByAngle(dest(mt));
 			break;
 		}

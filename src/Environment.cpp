@@ -287,8 +287,8 @@ namespace ALZ {
 
 		ImGui::Begin("Controls", &m_EnvironmentControlsWindowOpen);
 
-		int width = ImGui::GetWindowSize().x;
-		ImGui::SetCursorPosX(width / 2 - 20);
+		int width = (int)ImGui::GetWindowSize().x;
+		ImGui::SetCursorPosX((float)width / 2 - 20);
 
 		if (m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode) {
 			if (ImGui::ImageButton((ImTextureID)m_StopButtonTexture.TextureID, ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
@@ -375,7 +375,7 @@ namespace ALZ {
 				ImGui::EndMenu();
 			}
 
-			MenuBarHeight = ImGui::GetWindowSize().y;
+			MenuBarHeight = (int)ImGui::GetWindowSize().y;
 
 			ImGui::EndMainMenuBar();
 		}
@@ -383,7 +383,7 @@ namespace ALZ {
 		//TODO change this to a seperate function
 		ImGuiViewport viewport;
 		viewport.Size = ImVec2(Window::WindowSize.x, Window::WindowSize.y);
-		viewport.Pos = ImVec2(0, MenuBarHeight);
+		viewport.Pos = ImVec2(0, (float)MenuBarHeight);
 		ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
 	}
 

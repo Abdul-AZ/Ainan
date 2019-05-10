@@ -2,7 +2,7 @@
 
 namespace ALZ {
 
-	static class FileManager
+	class FileManager
 	{
 	public:
 		static void Init(const std::string& executableLocation);

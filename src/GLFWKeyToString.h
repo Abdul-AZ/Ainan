@@ -59,10 +59,13 @@ namespace ALZ {
 			KeyCase(Z)
 			KeyCase(SPACE)
 			KeyCase(DELETE)
+
+		default:
+			return "";
 		}
 	}
 
-#undef KeyCase(x)
+#undef KeyCase
 
 	constexpr const char* GLFWMouseKeyToString(int glfwKey) noexcept
 	{

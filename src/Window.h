@@ -4,7 +4,7 @@ namespace ALZ {
 
 	const float GlobalScaleFactor = 1000.0f;
 
-	static class Window
+	class Window
 	{
 	public:
 		static void Init();

@@ -13,7 +13,7 @@ namespace ALZ {
 		glBindTexture(GL_TEXTURE_2D, m_Texture);
 
 		m_Size = Window::WindowSize;
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Size.x, m_Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, (GLsizei)m_Size.x, (GLsizei)m_Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -77,12 +77,12 @@ namespace ALZ {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, RendererID);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-		glBlitFramebuffer(0, 0, m_Size.x, m_Size.y,
-			0, 0, m_Size.x, m_Size.y,
-			GL_COLOR_BUFFER_BIT,
-			GL_LINEAR);
+		glBlitFramebuffer(0, 0, (GLint)m_Size.x, (GLint)m_Size.y,
+						  0, 0, (GLint)m_Size.x, (GLint)m_Size.y,
+						  GL_COLOR_BUFFER_BIT,
+						  GL_LINEAR);
 
-		glViewport(0, 0, Window::WindowSize.x, Window::WindowSize.y);
+		glViewport(0, 0, (GLsizei)Window::WindowSize.x, (GLsizei)Window::WindowSize.y);
 	}
 
 	void FrameBuffer::SetSize(const glm::vec2 & size)
@@ -94,7 +94,7 @@ namespace ALZ {
 		glGenTextures(1, &m_Texture);
 		glBindTexture(GL_TEXTURE_2D, m_Texture);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, (GLsizei)size.x, (GLsizei)size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);

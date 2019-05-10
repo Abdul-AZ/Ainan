@@ -4,6 +4,7 @@ basedir("../")
 kind ("ConsoleApp")
 cppdialect "C++17"
 compileas "C++"
+ignoredefaultlibraries { "MSVCRT" }
 
 files { 
   --project files
