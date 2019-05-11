@@ -23,6 +23,8 @@ namespace ALZ {
 		glm::vec3 BackgroundColor = glm::vec3(1.0f, 1.0f, 1.0f);
 		float BaseBackgroundLight = 0.2f;
 
+		bool ShowGrid = true;
+
 		//blur
 		bool  BlurEnabled       = false;
 		float BlurScale         = 1.5f;

@@ -63,8 +63,8 @@ namespace ALZ {
 		if (Window::WindowSizeChangedSinceLastFrame())
 			m_FrameBuffer.SetSize(Window::WindowSize);
 
-		m_Background.BaseColor = settings.BackgroundColor;
-		m_Background.BaseLight = settings.BaseBackgroundLight;
+		m_Background.BaseColor = m_Settings.BackgroundColor;
+		m_Background.BaseLight = m_Settings.BaseBackgroundLight;
 	}
 
 	void Environment::Render()
@@ -82,6 +82,9 @@ namespace ALZ {
 
 		m_Background.Render(m_Camera);
 
+		if(m_Settings.ShowGrid)
+			grid.Render(m_Camera);
+
 		if (m_Status == EnvironmentStatus::None) {
 			m_FrameBuffer.RenderToScreen();
 			m_FrameBuffer.Unbind();
@@ -94,15 +97,15 @@ namespace ALZ {
 
 		m_FrameBuffer.Unbind();
 
-		if (settings.BlurEnabled)
-			GaussianBlur::Blur(m_FrameBuffer, settings.BlurScale, settings.BlurStrength, settings.BlurGaussianSigma);
+		if (m_Settings.BlurEnabled)
+			GaussianBlur::Blur(m_FrameBuffer, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
 
 		m_FrameBuffer.Bind();
 
 		if (m_SaveNextFrameAsImage)
 		{
-			Image image = Image::FromFrameBuffer(m_FrameBuffer, settings.ImageResolution.x, settings.ImageResolution.y);
-			image.SaveToFile(settings.GetImageSaveLocation() + '/' + settings.ImageFileName, settings.ImageFormat);
+			Image image = Image::FromFrameBuffer(m_FrameBuffer, m_Settings.ImageResolution.x, m_Settings.ImageResolution.y);
+			image.SaveToFile(m_Settings.GetImageSaveLocation() + '/' + m_Settings.ImageFileName, m_Settings.ImageFormat);
 			m_SaveNextFrameAsImage = false;
 		}
 		m_FrameBuffer.RenderToScreen();
@@ -121,7 +124,7 @@ namespace ALZ {
 		DisplayMainMenuBarGUI();
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
-		settings.DisplayGUI();
+		m_Settings.DisplayGUI();
 		DisplayEnvironmentStatusGUI();
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
@@ -338,7 +341,7 @@ namespace ALZ {
 					m_ObjectInspectorWindowOpen = !m_ObjectInspectorWindowOpen;
 
 				if (ImGui::MenuItem("General Settings"))
-					settings.GeneralSettingsWindowOpen = !settings.GeneralSettingsWindowOpen;
+					m_Settings.GeneralSettingsWindowOpen = !m_Settings.GeneralSettingsWindowOpen;
 
 				if (ImGui::MenuItem("Environment Status"))
 					m_EnvironmentStatusWindowOpen = !m_EnvironmentStatusWindowOpen;

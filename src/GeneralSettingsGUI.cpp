@@ -47,6 +47,7 @@ namespace ALZ {
 			ImGui::TreePop();
 		}
 
+		ImGui::Checkbox("Show Grid", &ShowGrid);
 		ImGui::Checkbox("Blur", &BlurEnabled);
 
 		if (BlurEnabled) {

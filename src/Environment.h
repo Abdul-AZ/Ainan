@@ -16,6 +16,7 @@
 #include "graphics/Texture.h"
 #include "graphics/CircleOutline.h"
 #include "graphics/Background.h"
+#include "graphics/Grid.h"
 
 #include "InputManager.h"
 
@@ -60,11 +61,12 @@ namespace ALZ {
 
 	private:
 		std::clock_t timeStart, timeEnd;
-		GeneralSettingsGUI settings;
+		GeneralSettingsGUI m_Settings;
 
 		FrameBuffer m_FrameBuffer;
 		Camera m_Camera;
 		InputManager m_InputManager;
+		Grid grid;
 		std::vector<std::unique_ptr<InspectorInterface>> InspectorObjects;
 
 		bool m_HideGUI = false;
