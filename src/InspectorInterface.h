@@ -12,7 +12,10 @@ namespace ALZ {
 	class InspectorInterface
 	{
 	public:
-		virtual void Update(const float& deltaTime, Camera& camera) {};
+		//this function does no graphics works (no OpenGL calls)
+		virtual void Update(const float& deltaTime) {};
+		//this function updates uniform buffers (does OpenGL calls)
+		virtual void UpdateUniforms(Camera& camera) {};
 		virtual void Render(Camera& camera) {};
 		virtual void DisplayGUI(Camera& camera) {};
 

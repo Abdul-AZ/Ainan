@@ -71,20 +71,10 @@ namespace ALZ {
 		}
 	}
 
-	void ParticleSystem::Update(const float& deltaTime, Camera& camera)
+	void ParticleSystem::Update(const float& deltaTime)
 	{
-		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-		CircleShader.SetUniformMat4("projection", camera.ProjectionMatrix);
-		CircleShader.SetUniformMat4("view", camera.ViewMatrix);
-
 		if (Customizer.Mode == SpawnMode::SpawnOnPoint || Customizer.Mode == SpawnMode::SpawnOnLine || Customizer.Mode == SpawnMode::SpawnOnCircle) {
-			SpawnAllParticlesOnQue(deltaTime, camera);
+			SpawnAllParticlesOnQue(deltaTime);
 		}
 
 		ActiveParticleCount = 0;
@@ -101,6 +91,19 @@ namespace ALZ {
 			if (particle.isActive)
 				ActiveParticleCount++;
 		}
+	}
+
+	void ParticleSystem::UpdateUniforms(Camera & camera)
+	{
+		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+		CircleShader.SetUniformMat4("projection", camera.ProjectionMatrix);
+		CircleShader.SetUniformMat4("view", camera.ViewMatrix);
 	}
 
 	void ParticleSystem::Render(Camera& camera)
@@ -223,7 +226,7 @@ namespace ALZ {
 		}
 	}
 
-	void ParticleSystem::SpawnAllParticlesOnQue(const float& deltaTime, Camera& camera)
+	void ParticleSystem::SpawnAllParticlesOnQue(const float& deltaTime)
 	{
 		TimeTillNextParticleSpawn -= deltaTime;
 		if (TimeTillNextParticleSpawn < 0.0f) {

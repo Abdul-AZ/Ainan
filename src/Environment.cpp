@@ -10,21 +10,7 @@ namespace ALZ {
 		m_ResumeButtonTexture.Init("res/ResumeButton.png", 3);
 		m_StopButtonTexture.Init("res/StopButton.png", 3);
 
-
-		//setup ImGui
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		SetEditorStyle(EditorStyle::Dark_Gray);
-
-		ImGui_ImplGlfw_InitForOpenGL(&Window::GetWindow(), true);
-		ImGui_ImplOpenGL3_Init("#version 400");
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-
-		timeStart = 0;
-		timeEnd = 0;
-
+		ImGuiWrapper::Init();
 		AddPS();
 
 		GaussianBlur::Init();
@@ -34,10 +20,7 @@ namespace ALZ {
 	Environment::~Environment()
 	{
 		InspectorObjects.clear();
-
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
+		ImGuiWrapper::Terminate();
 	}
 
 	void Environment::Update()
@@ -55,9 +38,10 @@ namespace ALZ {
 		}
 
 
-		if (m_Status == EnvironmentStatus::PlayMode) {
-			for (Inspector_obj_ptr& obj : InspectorObjects)
-				obj->Update(deltaTime, m_Camera);
+		for (Inspector_obj_ptr& obj : InspectorObjects) {
+			if(m_Status == EnvironmentStatus::PlayMode)
+				obj->Update(deltaTime);
+			obj->UpdateUniforms(m_Camera);
 		}
 
 		if (Window::WindowSizeChangedSinceLastFrame())
@@ -82,8 +66,8 @@ namespace ALZ {
 
 		m_Background.Render(m_Camera);
 
-		if(m_Settings.ShowGrid)
-			grid.Render(m_Camera);
+		if(m_Settings.ShowGrid && m_Status != EnvironmentStatus::PlayMode)
+			m_Grid.Render(m_Camera);
 
 		if (m_Status == EnvironmentStatus::None) {
 			m_FrameBuffer.RenderToScreen();
@@ -102,12 +86,12 @@ namespace ALZ {
 
 		m_FrameBuffer.Bind();
 
-		if (m_SaveNextFrameAsImage)
-		{
+		if (m_SaveNextFrameAsImage) {
 			Image image = Image::FromFrameBuffer(m_FrameBuffer, m_Settings.ImageResolution.x, m_Settings.ImageResolution.y);
 			image.SaveToFile(m_Settings.GetImageSaveLocation() + '/' + m_Settings.ImageFileName, m_Settings.ImageFormat);
 			m_SaveNextFrameAsImage = false;
 		}
+
 		m_FrameBuffer.RenderToScreen();
 	}
 
@@ -116,10 +100,7 @@ namespace ALZ {
 		if (m_HideGUI)
 			return;
 
-
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		ImGuiWrapper::NewFrame();
 
 		DisplayMainMenuBarGUI();
 		DisplayEnvironmentControlsGUI();
@@ -132,8 +113,7 @@ namespace ALZ {
 
 		m_InputManager.DisplayGUI();
 
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		ImGuiWrapper::Render();
 	}
 
 	void Environment::HandleInput()
