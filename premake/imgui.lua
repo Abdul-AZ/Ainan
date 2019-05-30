@@ -6,8 +6,6 @@ cppdialect "C++17"
 
 files { 
   "../imgui/*.h", "../imgui/*.cpp",
-  "../imgui/examples/imgui_impl_opengl3.h", "../imgui/examples/imgui_impl_opengl3.cpp",
-  "../imgui/examples/imgui_impl_glfw.h", "../imgui/examples/imgui_impl_glfw.cpp",
   "../imgui/misc/cpp/imgui_stdlib.cpp", "../imgui/misc/cpp/imgui_stdlib.h"
  }
 
