@@ -27,11 +27,6 @@ Still to be made, I'm planning to slowly build it through time. It will be avail
 # Contribute
 Every contribution is welcome even if it is not planned but we will have a discussion about it to see if it fits the project or you can chose something from the To Do list [here](https://github.com/AbdullrahmanAlzeidi/ALZparticles/projects) and work on it (you don't havet to notify me however it would be prefered so we don't have more than 1 guy working on something).
 
-But I'm especially looking for testers on mac and linux. The first step is to get the project buildable on those systems.
-To do that you have to only work with changing the premake5.lua file and no code changes required (probably) see [Premake](https://github.com/premake/premake-core) to learn how to do that.
-
-This shouldn't be too hard and is a good first contribution, looking forward to it.
-
 Issues are more than welcome aswell.
 
 # Libraries used
