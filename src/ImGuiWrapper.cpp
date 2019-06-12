@@ -21,12 +21,12 @@ namespace ALZ {
 	static bool                 MouseJustPressed[5] = { false, false, false, false, false };
 	static GLFWcursor*          MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
 	static bool                 WantUpdateMonitors = true;
-	static char         GlslVersionString[32] = "";
-	static GLuint       FontTexture = 0;
-	static GLuint       ShaderHandle = 0, VertHandle = 0, FragHandle = 0;
-	static int          AttribLocationTex = 0, AttribLocationProjMtx = 0;                                // Uniforms location
-	static int          AttribLocationVtxPos = 0, AttribLocationVtxUV = 0, AttribLocationVtxColor = 0; // Vertex attributes location
-	static unsigned int VboHandle = 0, ElementsHandle = 0;
+	static char					GlslVersionString[32] = "";
+	static GLuint				FontTexture = 0;
+	static GLuint				ShaderHandle = 0, VertHandle = 0, FragHandle = 0;
+	static int					AttribLocationTex = 0, AttribLocationProjMtx = 0;                                // Uniforms location
+	static int					AttribLocationVtxPos = 0, AttribLocationVtxUV = 0, AttribLocationVtxColor = 0; // Vertex attributes location
+	static unsigned int			VboHandle = 0, ElementsHandle = 0;
 
 	// Chain GLFW callbacks for main viewport: our callbacks will call the user's previously installed callbacks, if any.
 	static GLFWmousebuttonfun   PrevUserCallbackMousebutton = NULL;
@@ -37,39 +37,40 @@ namespace ALZ {
 
 	//forward declarations
 	//these functions are all static and not defined in the header file because they should not be used outside of this cpp file
-	static void ImGui_ImplGlfw_CreateWindow(ImGuiViewport* viewport);
-	static void ImGui_ImplGlfw_DestroyWindow(ImGuiViewport* viewport);
-	static bool ImGui_ImplGlfw_GetWindowFocus(ImGuiViewport* viewport);
-	static bool ImGui_ImplGlfw_GetWindowMinimized(ImGuiViewport* viewport);
-	static ImVec2 ImGui_ImplGlfw_GetWindowPos(ImGuiViewport* viewport);
-	static ImVec2 ImGui_ImplGlfw_GetWindowSize(ImGuiViewport* viewport);
-	static void ImGui_ImplGlfw_ShowWindow(ImGuiViewport* viewport);
-	static void ImGui_ImplGlfw_ShutdownPlatformInterface();
-	static void ImGui_ImplGlfw_SwapBuffers(ImGuiViewport* viewport, void*);
-	static void ImGui_ImplGlfw_UpdateMonitors();
-	static void ImGui_ImplGlfw_MonitorCallback(GLFWmonitor*, int);
-	static void ImGui_ImplGlfw_RenderWindow(ImGuiViewport* viewport, void*);
-	static void ImGui_ImplGlfw_SetWindowFocus(ImGuiViewport* viewport);
-	static void ImGui_ImplGlfw_InitPlatformInterface();
-	static void ImGui_ImplGlfw_SetWindowPos(ImGuiViewport* viewport, ImVec2 pos);
-	static void ImGui_ImplGlfw_SetWindowSize(ImGuiViewport* viewport, ImVec2 size);
-	static void ImGui_ImplGlfw_SetWindowTitle(ImGuiViewport* viewport, const char* title);
-	static void ImGui_ImplWin32_SetImeInputPos(ImGuiViewport* viewport, ImVec2 pos);
 	static bool ImGuiInit(const char*);
-	static void ImGui_ImplGlfw_SetClipboardText(void* user_data, const char* text);
-	static const char* ImGui_ImplGlfw_GetClipboardText(void* user_data);
-	static void ImGui_ImplOpenGL3_InitPlatformInterface();
-	static void ImGui_ImplOpenGL3_RenderWindow(ImGuiViewport* viewport, void*);
-	static void ImGui_ImplOpenGL3_NewFrame();
-	static void ImGui_ImplGlfw_CharCallback(GLFWwindow* window, unsigned int c);
-	static void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-	static void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-	static void ImGui_ImplGlfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-	static bool ImGui_ImplOpenGL3_CreateDeviceObjects();
-	static void ImGui_ImplOpenGL3_DestroyDeviceObjects();
-	static void ImGui_ImplGlfw_NewFrame();
-	static void ImGui_ImplGlfw_Shutdown();
-	static void ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data);
+	static void Glfw_CreateWindow(ImGuiViewport* viewport);
+	static void Glfw_DestroyWindow(ImGuiViewport* viewport);
+	static bool Glfw_GetWindowFocus(ImGuiViewport* viewport);
+	static bool Glfw_GetWindowMinimized(ImGuiViewport* viewport);
+	static ImVec2 Glfw_GetWindowPos(ImGuiViewport* viewport);
+	static ImVec2 Glfw_GetWindowSize(ImGuiViewport* viewport);
+	static void Glfw_ShowWindow(ImGuiViewport* viewport);
+	static void Glfw_ShutdownPlatformInterface();
+	static void Glfw_SwapBuffers(ImGuiViewport* viewport, void*);
+	static void Glfw_UpdateMonitors();
+	static void Glfw_MonitorCallback(GLFWmonitor*, int);
+	static void Glfw_RenderWindow(ImGuiViewport* viewport, void*);
+	static void Glfw_SetWindowFocus(ImGuiViewport* viewport);
+	static void Glfw_InitPlatformInterface();
+	static void Glfw_SetWindowPos(ImGuiViewport* viewport, ImVec2 pos);
+	static void Glfw_SetWindowSize(ImGuiViewport* viewport, ImVec2 size);
+	static void Glfw_SetWindowTitle(ImGuiViewport* viewport, const char* title);
+	static void Win32_SetImeInputPos(ImGuiViewport* viewport, ImVec2 pos);
+	static void Glfw_SetClipboardText(void* user_data, const char* text);
+	static const char* Glfw_GetClipboardText(void* user_data);
+	static void InitPlatformInterface();
+	static void RenderWindow(ImGuiViewport* viewport, void*);
+	static void CharCallback(GLFWwindow* window, unsigned int c);
+	static void Glfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+	static void Glfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+	static bool CreateDeviceObjects();
+	static void DestroyDeviceObjects();
+	static void Glfw_Shutdown();
+	static void RenderDrawData(ImDrawData* draw_data);
+	static void UpdateMousePosAndButtons();
+	static void UpdateMouseCursor();
+	static void UpdateGamepads();
 
 	struct ImGuiViewportDataGlfw
 	{
@@ -95,22 +96,49 @@ namespace ALZ {
 	void ImGuiWrapper::Terminate()
 	{
 		ImGui::DestroyPlatformWindows();
-		ImGui_ImplOpenGL3_DestroyDeviceObjects();
-		ImGui_ImplGlfw_Shutdown();
+		DestroyDeviceObjects();
+		Glfw_Shutdown();
 		ImGui::DestroyContext();
 	}
 
 	void ImGuiWrapper::NewFrame()
 	{
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
+		if (!FontTexture)
+			CreateDeviceObjects();
+
+		ImGuiIO& io = ImGui::GetIO();
+		IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end."
+										"Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
+
+		// Setup display size (every frame to accommodate for window resizing)
+		int w, h;
+		int display_w, display_h;
+		glfwGetWindowSize(&Window::GetWindow(), &w, &h);
+		glfwGetFramebufferSize(&Window::GetWindow(), &display_w, &display_h);
+		io.DisplaySize = ImVec2((float)w, (float)h);
+		if (w > 0 && h > 0)
+			io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
+		if (WantUpdateMonitors)
+			Glfw_UpdateMonitors();
+
+		// Setup time step
+		double current_time = glfwGetTime();
+		io.DeltaTime = Time > 0.0 ? (float)(current_time - Time) : (float)(1.0f / 60.0f);
+		Time = current_time;
+
+		UpdateMousePosAndButtons();
+		UpdateMouseCursor();
+
+		// Gamepad navigation mapping
+		UpdateGamepads();
+		
 		ImGui::NewFrame();
 	}
 
 	void ImGuiWrapper::Render()
 	{
 		ImGui::Render();
-		ALZ::ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		ALZ::RenderDrawData(ImGui::GetDrawData());
 	}
 
 	static bool ImGuiInit(const char* glsl_version)
@@ -150,8 +178,8 @@ namespace ALZ {
 		io.KeyMap[ImGuiKey_Y] = GLFW_KEY_Y;
 		io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
 
-		io.SetClipboardTextFn = ImGui_ImplGlfw_SetClipboardText;
-		io.GetClipboardTextFn = ImGui_ImplGlfw_GetClipboardText;
+		io.SetClipboardTextFn = Glfw_SetClipboardText;
+		io.GetClipboardTextFn = Glfw_GetClipboardText;
 		io.ClipboardUserData = (void*)&Window::GetWindow();
 
 		MouseCursors[ImGuiMouseCursor_Arrow] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
@@ -168,16 +196,16 @@ namespace ALZ {
 		PrevUserCallbackScroll = NULL;
 		PrevUserCallbackKey = NULL;
 		PrevUserCallbackChar = NULL;
-		PrevUserCallbackMousebutton = glfwSetMouseButtonCallback(&Window::GetWindow(), ImGui_ImplGlfw_MouseButtonCallback);
-		PrevUserCallbackScroll = glfwSetScrollCallback(&Window::GetWindow(), ImGui_ImplGlfw_ScrollCallback);
-		PrevUserCallbackKey = glfwSetKeyCallback(&Window::GetWindow(), ImGui_ImplGlfw_KeyCallback);
-		PrevUserCallbackChar = glfwSetCharCallback(&Window::GetWindow(), ImGui_ImplGlfw_CharCallback);
+		PrevUserCallbackMousebutton = glfwSetMouseButtonCallback(&Window::GetWindow(), MouseButtonCallback);
+		PrevUserCallbackScroll = glfwSetScrollCallback(&Window::GetWindow(), Glfw_ScrollCallback);
+		PrevUserCallbackKey = glfwSetKeyCallback(&Window::GetWindow(), Glfw_KeyCallback);
+		PrevUserCallbackChar = glfwSetCharCallback(&Window::GetWindow(), CharCallback);
 
 		// Our mouse update function expect PlatformHandle to be filled for the main viewport
 		ImGuiViewport* main_viewport = ImGui::GetMainViewport();
 		main_viewport->PlatformHandle = (void*)&Window::GetWindow();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-			ImGui_ImplGlfw_InitPlatformInterface();
+			Glfw_InitPlatformInterface();
 		//return true;
 
 		// Setup back-end capabilities flags
@@ -185,16 +213,6 @@ namespace ALZ {
 		io.BackendRendererName = "imgui_impl_opengl3";
 
 		// Store GLSL version string so we can refer to it later in case we recreate shaders. Note: GLSL version is NOT the same as GL version. Leave this to NULL if unsure.
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-		if (glsl_version == NULL)
-			glsl_version = "#version 100";
-#elif defined(IMGUI_IMPL_OPENGL_ES3)
-		if (glsl_version == NULL)
-			glsl_version = "#version 300 es";
-#else
-		if (glsl_version == NULL)
-			glsl_version = "#version 130";
-#endif
 		IM_ASSERT((int)strlen(glsl_version) + 2 < IM_ARRAYSIZE(GlslVersionString));
 		strcpy(GlslVersionString, glsl_version);
 		strcat(GlslVersionString, "\n");
@@ -206,48 +224,48 @@ namespace ALZ {
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture);
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-			ImGui_ImplOpenGL3_InitPlatformInterface();
+			InitPlatformInterface();
 
 		return true;
 	}
 
-	static void ImGui_ImplGlfw_SetClipboardText(void* user_data, const char* text)
+	static void Glfw_SetClipboardText(void* user_data, const char* text)
 	{
 		glfwSetClipboardString((GLFWwindow*)user_data, text);
 	}
 
-	static const char* ImGui_ImplGlfw_GetClipboardText(void* user_data)
+	static const char* Glfw_GetClipboardText(void* user_data)
 	{
 		return glfwGetClipboardString((GLFWwindow*)user_data);
 	}
 
-	static void ImGui_ImplGlfw_InitPlatformInterface()
+	static void Glfw_InitPlatformInterface()
 	{
 		// Register platform interface (will be coupled with a renderer interface)
 		ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-		platform_io.Platform_CreateWindow = ImGui_ImplGlfw_CreateWindow;
-		platform_io.Platform_DestroyWindow = ImGui_ImplGlfw_DestroyWindow;
-		platform_io.Platform_ShowWindow = ImGui_ImplGlfw_ShowWindow;
-		platform_io.Platform_SetWindowPos = ImGui_ImplGlfw_SetWindowPos;
-		platform_io.Platform_GetWindowPos = ImGui_ImplGlfw_GetWindowPos;
-		platform_io.Platform_SetWindowSize = ImGui_ImplGlfw_SetWindowSize;
-		platform_io.Platform_GetWindowSize = ImGui_ImplGlfw_GetWindowSize;
-		platform_io.Platform_SetWindowFocus = ImGui_ImplGlfw_SetWindowFocus;
-		platform_io.Platform_GetWindowFocus = ImGui_ImplGlfw_GetWindowFocus;
-		platform_io.Platform_GetWindowMinimized = ImGui_ImplGlfw_GetWindowMinimized;
-		platform_io.Platform_SetWindowTitle = ImGui_ImplGlfw_SetWindowTitle;
-		platform_io.Platform_RenderWindow = ImGui_ImplGlfw_RenderWindow;
-		platform_io.Platform_SwapBuffers = ImGui_ImplGlfw_SwapBuffers;
+		platform_io.Platform_CreateWindow = Glfw_CreateWindow;
+		platform_io.Platform_DestroyWindow = Glfw_DestroyWindow;
+		platform_io.Platform_ShowWindow = Glfw_ShowWindow;
+		platform_io.Platform_SetWindowPos = Glfw_SetWindowPos;
+		platform_io.Platform_GetWindowPos = Glfw_GetWindowPos;
+		platform_io.Platform_SetWindowSize = Glfw_SetWindowSize;
+		platform_io.Platform_GetWindowSize = Glfw_GetWindowSize;
+		platform_io.Platform_SetWindowFocus = Glfw_SetWindowFocus;
+		platform_io.Platform_GetWindowFocus = Glfw_GetWindowFocus;
+		platform_io.Platform_GetWindowMinimized = Glfw_GetWindowMinimized;
+		platform_io.Platform_SetWindowTitle = Glfw_SetWindowTitle;
+		platform_io.Platform_RenderWindow = Glfw_RenderWindow;
+		platform_io.Platform_SwapBuffers = Glfw_SwapBuffers;
 #if GLFW_HAS_WINDOW_ALPHA
 		platform_io.Platform_SetWindowAlpha = ImGui_ImplGlfw_SetWindowAlpha;
 #endif
 #if HAS_WIN32_IME
-		platform_io.Platform_SetImeInputPos = ImGui_ImplWin32_SetImeInputPos;
+		platform_io.Platform_SetImeInputPos = Win32_SetImeInputPos;
 #endif
 
 		// Note: monitor callback are broken GLFW 3.2 and earlier (see github.com/glfw/glfw/issues/784)
-		ImGui_ImplGlfw_UpdateMonitors();
-		glfwSetMonitorCallback(ImGui_ImplGlfw_MonitorCallback);
+		Glfw_UpdateMonitors();
+		glfwSetMonitorCallback(Glfw_MonitorCallback);
 
 		// Register main window handle (which is owned by the main application, not by us)
 		ImGuiViewport* main_viewport = ImGui::GetMainViewport();
@@ -258,7 +276,7 @@ namespace ALZ {
 		main_viewport->PlatformHandle = (void*)&Window::GetWindow();
 	}
 
-	static void ImGui_ImplGlfw_UpdateMousePosAndButtons()
+	static void UpdateMousePosAndButtons()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		const ImVec2 mouse_pos_backup = io.MousePos;
@@ -289,7 +307,7 @@ namespace ALZ {
 			{
 				if (io.WantSetMousePos)
 				{
-					glfwSetCursorPos(window, (double)(mouse_pos_backup.x - viewport->Pos.x), (double)(mouse_pos_backup.y - viewport->Pos.y));
+					glfwSetCursorPos(window, ((double)mouse_pos_backup.x - (double)viewport->Pos.x), ((double)mouse_pos_backup.y - (double)viewport->Pos.y));
 				}
 				else
 				{
@@ -327,7 +345,7 @@ namespace ALZ {
 		}
 	}
 
-	static void ImGui_ImplGlfw_UpdateMouseCursor()
+	static void UpdateMouseCursor()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		if ((io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) || glfwGetInputMode(&Window::GetWindow(), GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
@@ -353,7 +371,7 @@ namespace ALZ {
 		}
 	}
 
-	static void ImGui_ImplGlfw_UpdateGamepads()
+	static void UpdateGamepads()
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		memset(io.NavInputs, 0, sizeof(io.NavInputs));
@@ -414,7 +432,7 @@ namespace ALZ {
 			viewport->PlatformRequestResize = true;
 	}
 
-	static void ImGui_ImplGlfw_CreateWindow(ImGuiViewport* viewport)
+	static void Glfw_CreateWindow(ImGuiViewport* viewport)
 	{
 		ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
 		viewport->PlatformUserData = data;
@@ -433,10 +451,10 @@ namespace ALZ {
 		glfwSetWindowPos(data->Window, (int)viewport->Pos.x, (int)viewport->Pos.y);
 
 		// Install callbacks for secondary viewports
-		glfwSetMouseButtonCallback(data->Window, ImGui_ImplGlfw_MouseButtonCallback);
-		glfwSetScrollCallback(data->Window, ImGui_ImplGlfw_ScrollCallback);
-		glfwSetKeyCallback(data->Window, ImGui_ImplGlfw_KeyCallback);
-		glfwSetCharCallback(data->Window, ImGui_ImplGlfw_CharCallback);
+		glfwSetMouseButtonCallback(data->Window, MouseButtonCallback);
+		glfwSetScrollCallback(data->Window, Glfw_ScrollCallback);
+		glfwSetKeyCallback(data->Window, Glfw_KeyCallback);
+		glfwSetCharCallback(data->Window, CharCallback);
 		glfwSetWindowCloseCallback(data->Window, ImGui_ImplGlfw_WindowCloseCallback);
 		glfwSetWindowPosCallback(data->Window, ImGui_ImplGlfw_WindowPosCallback);
 		glfwSetWindowSizeCallback(data->Window, ImGui_ImplGlfw_WindowSizeCallback);
@@ -444,7 +462,7 @@ namespace ALZ {
 		glfwSwapInterval(0);
 	}
 
-	static void ImGui_ImplGlfw_DestroyWindow(ImGuiViewport* viewport)
+	static void Glfw_DestroyWindow(ImGuiViewport* viewport)
 	{
 		if (ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData)
 		{
@@ -481,7 +499,7 @@ namespace ALZ {
 	}
 #endif
 
-	static void ImGui_ImplGlfw_ShowWindow(ImGuiViewport* viewport)
+	static void Glfw_ShowWindow(ImGuiViewport* viewport)
 	{
 		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
 
@@ -518,7 +536,7 @@ namespace ALZ {
 		glfwShowWindow(data->Window);
 	}
 
-	static ImVec2 ImGui_ImplGlfw_GetWindowPos(ImGuiViewport* viewport)
+	static ImVec2 Glfw_GetWindowPos(ImGuiViewport* viewport)
 	{
 		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
 		int x = 0, y = 0;
@@ -526,13 +544,13 @@ namespace ALZ {
 		return ImVec2((float)x, (float)y);
 	}
 
-	static void ImGui_ImplGlfw_SetWindowPos(ImGuiViewport* viewport, ImVec2 pos)
+	static void Glfw_SetWindowPos(ImGuiViewport* viewport, ImVec2 pos)
 	{
 		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
 		glfwSetWindowPos(data->Window, (int)pos.x, (int)pos.y);
 	}
 
-	static ImVec2 ImGui_ImplGlfw_GetWindowSize(ImGuiViewport* viewport)
+	static ImVec2 Glfw_GetWindowSize(ImGuiViewport* viewport)
 	{
 		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
 		int w = 0, h = 0;
@@ -540,19 +558,19 @@ namespace ALZ {
 		return ImVec2((float)w, (float)h);
 	}
 
-	static void ImGui_ImplGlfw_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
+	static void Glfw_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
 	{
 		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
 		glfwSetWindowSize(data->Window, (int)size.x, (int)size.y);
 	}
 
-	static void ImGui_ImplGlfw_SetWindowTitle(ImGuiViewport* viewport, const char* title)
+	static void Glfw_SetWindowTitle(ImGuiViewport* viewport, const char* title)
 	{
 		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
 		glfwSetWindowTitle(data->Window, title);
 	}
 
-	static void ImGui_ImplGlfw_SetWindowFocus(ImGuiViewport* viewport)
+	static void Glfw_SetWindowFocus(ImGuiViewport* viewport)
 	{
 #if 1
 		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
@@ -563,13 +581,13 @@ namespace ALZ {
 #endif
 	}
 
-	static bool ImGui_ImplGlfw_GetWindowFocus(ImGuiViewport* viewport)
+	static bool Glfw_GetWindowFocus(ImGuiViewport* viewport)
 	{
 		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
 		return glfwGetWindowAttrib(data->Window, GLFW_FOCUSED) != 0;
 	}
 
-	static bool ImGui_ImplGlfw_GetWindowMinimized(ImGuiViewport* viewport)
+	static bool Glfw_GetWindowMinimized(ImGuiViewport* viewport)
 	{
 		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
 		return glfwGetWindowAttrib(data->Window, GLFW_ICONIFIED) != 0;
@@ -583,13 +601,13 @@ namespace ALZ {
 	}
 #endif
 
-	static void ImGui_ImplGlfw_RenderWindow(ImGuiViewport* viewport, void*)
+	static void Glfw_RenderWindow(ImGuiViewport* viewport, void*)
 	{
 		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
 		glfwMakeContextCurrent(data->Window);
 	}
 
-	static void ImGui_ImplGlfw_SwapBuffers(ImGuiViewport* viewport, void*)
+	static void Glfw_SwapBuffers(ImGuiViewport* viewport, void*)
 	{
 		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
 		glfwMakeContextCurrent(data->Window);
@@ -597,7 +615,7 @@ namespace ALZ {
 	}
 
 	// FIXME-PLATFORM: GLFW doesn't export monitor work area (see https://github.com/glfw/glfw/pull/989)
-	static void ImGui_ImplGlfw_UpdateMonitors()
+	static void Glfw_UpdateMonitors()
 	{
 		ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
 		int monitors_count = 0;
@@ -622,12 +640,12 @@ namespace ALZ {
 		WantUpdateMonitors = false;
 	}
 
-	static void ImGui_ImplGlfw_MonitorCallback(GLFWmonitor*, int)
+	static void Glfw_MonitorCallback(GLFWmonitor*, int)
 	{
 		WantUpdateMonitors = true;
 	}
 
-	static void ImGui_ImplGlfw_ShutdownPlatformInterface()
+	static void Glfw_ShutdownPlatformInterface()
 	{
 	}
 	// We provide a Win32 implementation because this is such a common issue for IME users
@@ -638,7 +656,7 @@ namespace ALZ {
 #pragma comment(lib, "imm32")
 #endif
 
-	static void ImGui_ImplWin32_SetImeInputPos(ImGuiViewport* viewport, ImVec2 pos)
+	static void Win32_SetImeInputPos(ImGuiViewport* viewport, ImVec2 pos)
 	{
 		COMPOSITIONFORM cf = { CFS_FORCE_POSITION, { (LONG)(pos.x - viewport->Pos.x), (LONG)(pos.y - viewport->Pos.y) }, { 0, 0, 0, 0 } };
 		if (ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData)
@@ -653,13 +671,13 @@ namespace ALZ {
 #define HAS_WIN32_IME   0
 #endif
 
-	static void ImGui_ImplOpenGL3_InitPlatformInterface()
+	static void InitPlatformInterface()
 	{
 		ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-		platform_io.Renderer_RenderWindow = ImGui_ImplOpenGL3_RenderWindow;
+		platform_io.Renderer_RenderWindow = RenderWindow;
 	}
 
-	static void ImGui_ImplOpenGL3_RenderWindow(ImGuiViewport* viewport, void*)
+	static void RenderWindow(ImGuiViewport* viewport, void*)
 	{
 		if (!(viewport->Flags & ImGuiViewportFlags_NoRendererClear))
 		{
@@ -667,7 +685,7 @@ namespace ALZ {
 			glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 			glClear(GL_COLOR_BUFFER_BIT);
 		}
-		ALZ::ImGui_ImplOpenGL3_RenderDrawData(viewport->DrawData);
+		ALZ::RenderDrawData(viewport->DrawData);
 	}
 
 	static bool ImGui_ImplOpenGL3_CreateFontsTexture()
@@ -700,14 +718,7 @@ namespace ALZ {
 		return true;
 	}
 
-	static void ImGui_ImplOpenGL3_NewFrame()
-	{
-		using namespace ALZ;
-		if (!FontTexture)
-			ImGui_ImplOpenGL3_CreateDeviceObjects();
-	}
-
-	static void ImGui_ImplGlfw_MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
 		using namespace ALZ;
 		if (PrevUserCallbackMousebutton != NULL && window == &Window::GetWindow())
@@ -717,7 +728,7 @@ namespace ALZ {
 			MouseJustPressed[button] = true;
 	}
 	
-	static void ImGui_ImplGlfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+	static void Glfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
 		using namespace ALZ;
 		if (PrevUserCallbackScroll != NULL && window == &Window::GetWindow())
@@ -728,7 +739,7 @@ namespace ALZ {
 		io.MouseWheel += (float)yoffset;
 	}
 	
-	static void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+	static void Glfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		using namespace ALZ;
 		if (PrevUserCallbackKey != NULL && window == &Window::GetWindow())
@@ -747,7 +758,7 @@ namespace ALZ {
 		io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
 	}
 	
-	void ImGui_ImplGlfw_CharCallback(GLFWwindow* window, unsigned int c)
+	void CharCallback(GLFWwindow* window, unsigned int c)
 	{
 		using namespace ALZ;
 		if (PrevUserCallbackChar != NULL && window == &Window::GetWindow())
@@ -767,7 +778,7 @@ namespace ALZ {
 		glGetShaderiv(handle, GL_COMPILE_STATUS, &status);
 		glGetShaderiv(handle, GL_INFO_LOG_LENGTH, &log_length);
 		if ((GLboolean)status == GL_FALSE)
-			fprintf(stderr, "ERROR: ImGui_ImplOpenGL3_CreateDeviceObjects: failed to compile %s!\n", desc);
+			fprintf(stderr, "ERROR: CreateDeviceObjects: failed to compile %s!\n", desc);
 		if (log_length > 0)
 		{
 			ImVector<char> buf;
@@ -787,7 +798,7 @@ namespace ALZ {
 		glGetProgramiv(handle, GL_LINK_STATUS, &status);
 		glGetProgramiv(handle, GL_INFO_LOG_LENGTH, &log_length);
 		if ((GLboolean)status == GL_FALSE)
-			fprintf(stderr, "ERROR: ImGui_ImplOpenGL3_CreateDeviceObjects: failed to link %s! (with GLSL '%s')\n", desc, GlslVersionString);
+			fprintf(stderr, "ERROR: CreateDeviceObjects: failed to link %s! (with GLSL '%s')\n", desc, GlslVersionString);
 		if (log_length > 0)
 		{
 			ImVector<char> buf;
@@ -810,7 +821,7 @@ namespace ALZ {
 		}
 	}
 
-	static bool ImGui_ImplOpenGL3_CreateDeviceObjects()
+	static bool CreateDeviceObjects()
 	{
 		using namespace ALZ;
 
@@ -818,114 +829,128 @@ namespace ALZ {
 		GLint last_texture, last_array_buffer;
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
 		glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
-#ifndef IMGUI_IMPL_OPENGL_ES2
-		GLint last_vertex_array;
-		glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array);
-#endif
 
 		// Parse GLSL version string
 		int glsl_version = 130;
-		sscanf(GlslVersionString, "#version %d", &glsl_version);
+		assert(sscanf(GlslVersionString, "#version %d", &glsl_version));
 
-		const GLchar* vertex_shader_glsl_120 =
-			"uniform mat4 ProjMtx;\n"
-			"attribute vec2 Position;\n"
-			"attribute vec2 UV;\n"
-			"attribute vec4 Color;\n"
-			"varying vec2 Frag_UV;\n"
-			"varying vec4 Frag_Color;\n"
-			"void main()\n"
-			"{\n"
-			"    Frag_UV = UV;\n"
-			"    Frag_Color = Color;\n"
-			"    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
-			"}\n";
+		const GLchar* vertex_shader_glsl_120 = 
+			R"(
+			uniform mat4 ProjMtx;
+			attribute vec2 Position;
+			attribute vec2 UV;
+			attribute vec4 Color;
+			varying vec2 Frag_UV;
+			varying vec4 Frag_Color;
+
+			void main()
+			{
+			    Frag_UV = UV;
+			    Frag_Color = Color;
+			    gl_Position = ProjMtx * vec4(Position.xy,0,1);
+			}
+			)";
 
 		const GLchar* vertex_shader_glsl_130 =
-			"uniform mat4 ProjMtx;\n"
-			"in vec2 Position;\n"
-			"in vec2 UV;\n"
-			"in vec4 Color;\n"
-			"out vec2 Frag_UV;\n"
-			"out vec4 Frag_Color;\n"
-			"void main()\n"
-			"{\n"
-			"    Frag_UV = UV;\n"
-			"    Frag_Color = Color;\n"
-			"    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
-			"}\n";
+			R"(
+			uniform mat4 ProjMtx;
+			in vec2 Position;
+			in vec2 UV;
+			in vec4 Color;
+			out vec2 Frag_UV;
+			out vec4 Frag_Color;
+
+			void main()
+			{
+			    Frag_UV = UV;
+			    Frag_Color = Color;
+			    gl_Position = ProjMtx * vec4(Position.xy,0,1);
+			}
+			)";
 
 		const GLchar* vertex_shader_glsl_300_es =
-			"precision mediump float;\n"
-			"layout (location = 0) in vec2 Position;\n"
-			"layout (location = 1) in vec2 UV;\n"
-			"layout (location = 2) in vec4 Color;\n"
-			"uniform mat4 ProjMtx;\n"
-			"out vec2 Frag_UV;\n"
-			"out vec4 Frag_Color;\n"
-			"void main()\n"
-			"{\n"
-			"    Frag_UV = UV;\n"
-			"    Frag_Color = Color;\n"
-			"    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
-			"}\n";
+			R"(
+			precision mediump float;
+			layout (location = 0) in vec2 Position;
+			layout (location = 1) in vec2 UV;
+			layout (location = 2) in vec4 Color;
+			uniform mat4 ProjMtx;
+			out vec2 Frag_UV;
+			out vec4 Frag_Color;
+
+			void main()
+			{
+			    Frag_UV = UV;
+			    Frag_Color = Color;
+			    gl_Position = ProjMtx * vec4(Position.xy,0,1);
+			})";
 
 		const GLchar* vertex_shader_glsl_410_core =
-			"layout (location = 0) in vec2 Position;\n"
-			"layout (location = 1) in vec2 UV;\n"
-			"layout (location = 2) in vec4 Color;\n"
-			"uniform mat4 ProjMtx;\n"
-			"out vec2 Frag_UV;\n"
-			"out vec4 Frag_Color;\n"
-			"void main()\n"
-			"{\n"
-			"    Frag_UV = UV;\n"
-			"    Frag_Color = Color;\n"
-			"    gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
-			"}\n";
+			R"(
+			layout (location = 0) in vec2 Position;
+			layout (location = 1) in vec2 UV;
+			layout (location = 2) in vec4 Color;
+			uniform mat4 ProjMtx;
+			out vec2 Frag_UV;
+			out vec4 Frag_Color;
+
+			void main()
+			{
+			    Frag_UV = UV;
+			    Frag_Color = Color;
+			    gl_Position = ProjMtx * vec4(Position.xy,0,1);
+			})";
 
 		const GLchar* fragment_shader_glsl_120 =
-			"#ifdef GL_ES\n"
-			"    precision mediump float;\n"
-			"#endif\n"
-			"uniform sampler2D Texture;\n"
-			"varying vec2 Frag_UV;\n"
-			"varying vec4 Frag_Color;\n"
-			"void main()\n"
-			"{\n"
-			"    gl_FragColor = Frag_Color * texture2D(Texture, Frag_UV.st);\n"
-			"}\n";
+			R"(
+			#ifdef GL_ES
+			    precision mediump float;
+			#endif
+			uniform sampler2D Texture;
+			varying vec2 Frag_UV;
+			varying vec4 Frag_Color;
+
+			void main()
+			{
+			    gl_FragColor = Frag_Color * texture2D(Texture, Frag_UV.st);
+			})";
 
 		const GLchar* fragment_shader_glsl_130 =
-			"uniform sampler2D Texture;\n"
-			"in vec2 Frag_UV;\n"
-			"in vec4 Frag_Color;\n"
-			"out vec4 Out_Color;\n"
-			"void main()\n"
-			"{\n"
-			"    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
-			"}\n";
+			R"(
+			uniform sampler2D Texture;
+			in vec2 Frag_UV;
+			in vec4 Frag_Color;
+			out vec4 Out_Color;
+
+			void main()
+			{
+			    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);
+			})";
 
 		const GLchar* fragment_shader_glsl_300_es =
-			"precision mediump float;\n"
-			"uniform sampler2D Texture;\n"
-			"in vec2 Frag_UV;\n"
-			"in vec4 Frag_Color;\n"
-			"layout (location = 0) out vec4 Out_Color;\n"
-			"void main()\n"
-			"{\n"
-			"    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
-			"}\n";
+			R"(
+			precision mediump float;
+			uniform sampler2D Texture;
+			in vec2 Frag_UV;
+			in vec4 Frag_Color;
+			layout (location = 0) out vec4 Out_Color;
+
+			void main()
+			{
+			    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);
+			})";
 
 		const GLchar* fragment_shader_glsl_410_core =
-			"in vec2 Frag_UV;\n"
-			"in vec4 Frag_Color;\n"
-			"uniform sampler2D Texture;\n"
-			"layout (location = 0) out vec4 Out_Color;\n"
-			"void main()\n"
-			"{\n"
-			"    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);\n"
-			"}\n";
+			R"(
+			in vec2 Frag_UV;
+			in vec4 Frag_Color;
+			uniform sampler2D Texture;
+			layout (location = 0) out vec4 Out_Color;
+
+			void main()
+			{
+			    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);
+			})";
 
 		// Select shaders matching our GLSL versions
 		const GLchar* vertex_shader = NULL;
@@ -985,14 +1010,11 @@ namespace ALZ {
 		// Restore modified GL state
 		glBindTexture(GL_TEXTURE_2D, last_texture);
 		glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
-#ifndef IMGUI_IMPL_OPENGL_ES2
-		glBindVertexArray(last_vertex_array);
-#endif
 
 		return true;
 	}
 
-	static void ImGui_ImplOpenGL3_DestroyDeviceObjects()
+	static void DestroyDeviceObjects()
 	{
 		using namespace ALZ;
 		if (VboHandle) glDeleteBuffers(1, &VboHandle);
@@ -1013,39 +1035,10 @@ namespace ALZ {
 		ALZ::ImGui_ImplOpenGL3_DestroyFontsTexture();
 	}
 
-	static void ImGui_ImplGlfw_NewFrame()
+	static void Glfw_Shutdown()
 	{
 		using namespace ALZ;
-		ImGuiIO& io = ImGui::GetIO();
-		IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end. Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
-
-		// Setup display size (every frame to accommodate for window resizing)
-		int w, h;
-		int display_w, display_h;
-		glfwGetWindowSize(&Window::GetWindow(), &w, &h);
-		glfwGetFramebufferSize(&Window::GetWindow(), &display_w, &display_h);
-		io.DisplaySize = ImVec2((float)w, (float)h);
-		if (w > 0 && h > 0)
-			io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
-		if (WantUpdateMonitors)
-			ImGui_ImplGlfw_UpdateMonitors();
-
-		// Setup time step
-		double current_time = glfwGetTime();
-		io.DeltaTime = Time > 0.0 ? (float)(current_time - Time) : (float)(1.0f / 60.0f);
-		Time = current_time;
-
-		ImGui_ImplGlfw_UpdateMousePosAndButtons();
-		ImGui_ImplGlfw_UpdateMouseCursor();
-
-		// Gamepad navigation mapping
-		ImGui_ImplGlfw_UpdateGamepads();
-	}
-
-	static void ImGui_ImplGlfw_Shutdown()
-	{
-		using namespace ALZ;
-		ImGui_ImplGlfw_ShutdownPlatformInterface();
+		Glfw_ShutdownPlatformInterface();
 
 		for (ImGuiMouseCursor cursor_n = 0; cursor_n < ImGuiMouseCursor_COUNT; cursor_n++)
 		{
@@ -1058,7 +1051,7 @@ namespace ALZ {
 	// OpenGL3 Render function.
 	// (this used to be set in io.RenderDrawListsFn and called by ImGui::Render(), but you can now call this directly from your main loop)
 	// Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly, in order to be able to run within any OpenGL engine that doesn't do so.
-	static void ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
+	static void RenderDrawData(ImDrawData* draw_data)
 	{
 		using namespace ALZ;
 
@@ -1077,9 +1070,6 @@ namespace ALZ {
 		GLint last_sampler; glGetIntegerv(GL_SAMPLER_BINDING, &last_sampler);
 #endif
 		GLint last_array_buffer; glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
-#ifndef IMGUI_IMPL_OPENGL_ES2
-		GLint last_vertex_array_object; glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array_object);
-#endif
 #ifdef GL_POLYGON_MODE
 		GLint last_polygon_mode[2]; glGetIntegerv(GL_POLYGON_MODE, last_polygon_mode);
 #endif
@@ -1134,13 +1124,9 @@ namespace ALZ {
 		glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 #endif
 
-	// Recreate the VAO every time (this is to easily allow multiple GL contexts to be rendered to. VAO are not shared among GL contexts)
-	// The renderer would actually work without any VAO bound, but then our VertexAttrib calls would overwrite the default one currently bound.
-#ifndef IMGUI_IMPL_OPENGL_ES2
 		GLuint vertex_array_object = 0;
 		glGenVertexArrays(1, &vertex_array_object);
 		glBindVertexArray(vertex_array_object);
-#endif
 
 		// Bind vertex/index buffers and setup attributes for ImDrawVert
 		glBindBuffer(GL_ARRAY_BUFFER, VboHandle);
@@ -1201,9 +1187,7 @@ namespace ALZ {
 		}
 
 		// Destroy the temporary VAO
-#ifndef IMGUI_IMPL_OPENGL_ES2
 		glDeleteVertexArrays(1, &vertex_array_object);
-#endif
 
 		// Restore modified GL state
 		glUseProgram(last_program);
@@ -1212,9 +1196,6 @@ namespace ALZ {
 		glBindSampler(0, last_sampler);
 #endif
 		glActiveTexture(last_active_texture);
-#ifndef IMGUI_IMPL_OPENGL_ES2
-		glBindVertexArray(last_vertex_array_object);
-#endif
 		glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
 		glBlendEquationSeparate(last_blend_equation_rgb, last_blend_equation_alpha);
 		glBlendFuncSeparate(last_blend_src_rgb, last_blend_dst_rgb, last_blend_src_alpha, last_blend_dst_alpha);
