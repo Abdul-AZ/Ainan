@@ -21,8 +21,9 @@ namespace ALZ {
 		glfwWindowHint(GLFW_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_VERSION_MINOR, 0);
 
-		m_Window = glfwCreateWindow(500, 500 * 9 / 16, "Particles", nullptr, nullptr);
-		WindowSize = { 500, 500 * 9 / 16 };
+		m_Window = glfwCreateWindow(WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16, "ALZ Particles", nullptr, nullptr);
+		WindowSize = { WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 };
+		CenterWindow();
 
 		glfwMakeContextCurrent(m_Window);
 
@@ -54,6 +55,27 @@ namespace ALZ {
 	{
 		glfwDestroyWindow(m_Window);
 		glfwTerminate();
+	}
+
+	void Window::CenterWindow()
+	{
+		int count;
+		GLFWmonitor* monitor = glfwGetMonitors(&count)[0];
+		int monitorX, monitorY;
+		glfwGetMonitorPos(monitor, &monitorX, &monitorY);
+
+		int windowWidth, windowHeight;
+		glfwGetWindowSize(&Window::GetWindow(), &windowWidth, &windowHeight);
+
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+		glfwSetWindowPos(&Window::GetWindow(),
+			monitorX + (mode->width - windowWidth) / 2,
+			monitorY + (mode->height - windowHeight) / 2);
+	}
+
+	void Window::SetWindowLaunchSize()
+	{
+		glfwSetWindowSize(&Window::GetWindow(), WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
 	}
 
 	GLFWwindow & Window::GetWindow()

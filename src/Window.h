@@ -1,5 +1,7 @@
 #pragma once
 
+#define WINDOW_SIZE_FACTOR_ON_LAUNCH 500
+
 namespace ALZ {
 
 	const float GlobalScaleFactor = 1000.0f;
@@ -12,6 +14,8 @@ namespace ALZ {
 		static void Present();
 		static void Clear();
 		static void Terminate();
+		static void CenterWindow();
+		static void SetWindowLaunchSize();
 		static bool WindowSizeChangedSinceLastFrame() { return m_WindowSizeChanged; };
 
 		static GLFWwindow& GetWindow();

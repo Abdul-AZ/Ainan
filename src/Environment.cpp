@@ -19,6 +19,9 @@ namespace ALZ {
 	Environment::~Environment()
 	{
 		InspectorObjects.clear();
+		glfwRestoreWindow(&Window::GetWindow());
+		Window::SetWindowLaunchSize();
+		Window::CenterWindow();
 	}
 
 	void Environment::Update()

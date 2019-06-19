@@ -12,6 +12,7 @@ int main(int argc, const char* argv[]) {
 	FileManager::Init(argv[0]);
 	
 	ImGuiWrapper::Init();
+	SetEditorStyle(EditorStyle::Dark_Gray);
 
 	Environment* env = nullptr;
 	StartMenu startMenu;
