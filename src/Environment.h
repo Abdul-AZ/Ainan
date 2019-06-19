@@ -61,6 +61,9 @@ namespace ALZ {
 		void Duplicate(InspectorInterface& obj);
 		void FocusCameraOnObject(InspectorInterface& object);
 
+	public:
+		bool ShouldDelete = false;
+
 	private:
 		std::clock_t timeStart = 0, timeEnd = 0;
 		GeneralSettingsGUI m_Settings;

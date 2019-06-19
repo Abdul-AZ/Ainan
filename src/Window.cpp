@@ -21,8 +21,8 @@ namespace ALZ {
 		glfwWindowHint(GLFW_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_VERSION_MINOR, 0);
 
-		m_Window = glfwCreateWindow(1500, 1500 * 9 / 16, "Particles", nullptr, nullptr);
-		WindowSize = { 1500, 1500 * 9 / 16 };
+		m_Window = glfwCreateWindow(500, 500 * 9 / 16, "Particles", nullptr, nullptr);
+		WindowSize = { 500, 500 * 9 / 16 };
 
 		glfwMakeContextCurrent(m_Window);
 

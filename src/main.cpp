@@ -2,6 +2,7 @@
 
 #include "Window.h"
 #include "Environment.h"
+#include "StartMenu.h"
 
 int main(int argc, const char* argv[]) {
 
@@ -10,20 +11,34 @@ int main(int argc, const char* argv[]) {
 	Window::Init();
 	FileManager::Init(argv[0]);
 	
-	Environment* env = new Environment;
+	ImGuiWrapper::Init();
+
+	Environment* env = nullptr;
+	StartMenu startMenu;
 
 	while (!glfwWindowShouldClose(&Window::GetWindow()))
 	{
-		env->Update();
-		env->HandleInput();
-		env->Render();
-		env->RenderGUI();
+		if (env) {
+			env->Update();
+			env->HandleInput();
+			env->Render();
+			env->RenderGUI();
+
+			if (env->ShouldDelete) {
+				delete env;
+				env = nullptr;
+			}
+		}
+		else
+			startMenu.Update(env);
 
 		Window::Present();
 		Window::Clear();
 	}
 	
-	delete env;
-	
+
+	if(env)
+		delete env;
+	ImGuiWrapper::Terminate();
 	Window::Terminate();
 }

@@ -10,7 +10,6 @@ namespace ALZ {
 		m_ResumeButtonTexture.Init("res/ResumeButton.png", 3);
 		m_StopButtonTexture.Init("res/StopButton.png", 3);
 
-		ImGuiWrapper::Init();
 		AddPS();
 
 		GaussianBlur::Init();
@@ -20,7 +19,6 @@ namespace ALZ {
 	Environment::~Environment()
 	{
 		InspectorObjects.clear();
-		ImGuiWrapper::Terminate();
 	}
 
 	void Environment::Update()
@@ -302,6 +300,15 @@ namespace ALZ {
 	{
 		int MenuBarHeight = 0;
 		if (ImGui::BeginMainMenuBar()) {
+
+			if (ImGui::BeginMenu("File")) {
+
+				if (ImGui::MenuItem("Close Environment")) {
+					ShouldDelete = true;
+				}
+
+				ImGui::EndMenu();
+			}
 
 			if (ImGui::BeginMenu("Edit")) {
 
