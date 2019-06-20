@@ -49,7 +49,6 @@ namespace ALZ {
 			m_FrameBuffer.SetSize(Window::WindowSize);
 
 		m_Background.BaseColor = m_Settings.BackgroundColor;
-		m_Background.BaseLight = m_Settings.BaseBackgroundLight;
 	}
 
 	void Environment::Render()
@@ -308,6 +307,11 @@ namespace ALZ {
 
 				if (ImGui::MenuItem("Close Environment")) {
 					ShouldDelete = true;
+				}
+
+				if (ImGui::MenuItem("Save")) {
+					//TODO work on adding GUI for chosing path
+					SaveEnvironment(*this, "");
 				}
 
 				ImGui::EndMenu();

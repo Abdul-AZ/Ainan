@@ -63,8 +63,6 @@ namespace ALZ {
 
 		if (ImGui::TreeNode("Background:"))
 		{
-			ImGui::DragFloat("Base Background Light", &BaseBackgroundLight, 0.01f);
-			BaseBackgroundLight = std::clamp(BaseBackgroundLight, 0.0f, 1.0f);
 			ImGui::ColorPicker4("Background Color", &BackgroundColor.r);
 
 			ImGui::TreePop();

@@ -2,8 +2,7 @@
 
 out vec4 FragColor;
 
-uniform vec3 baseColor;
-uniform float baseLight;
+uniform vec4 baseColor;
 
 in vec2 FragPos;
 
@@ -22,10 +21,10 @@ uniform RadialLights radialLights;
 
 void main()
 {
-	FragColor = baseLight * vec4(baseColor, 1.0);
+	FragColor = baseColor;
 	for(int i = 0; i < MAX_NUM_RADIAL_LIGHTS; i++) {
 		float distance    = length(radialLights.Position[i] - FragPos);
 		float attenuation = 1.0 / (radialLights.Constant[i] + radialLights.Linear[i] * distance +  radialLights.Quadratic[i] * (distance * distance)); 
-		FragColor += vec4(baseColor, 1.0) * vec4(radialLights.Color[i], 1.0) * attenuation;
+		FragColor += vec4(radialLights.Color[i], 1.0) * attenuation;
 	}
 }

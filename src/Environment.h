@@ -90,5 +90,11 @@ namespace ALZ {
 		bool m_SaveNextFrameAsImage = false;
 
 		Background m_Background;
+
+		friend bool SaveEnvironment(const Environment& env, std::string path);
 	};
+
+
+	//defined in EnvSave.cpp
+	bool SaveEnvironment(const Environment& env, std::string path);
 }
