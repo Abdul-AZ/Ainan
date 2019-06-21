@@ -113,6 +113,8 @@ namespace ALZ {
 
 		m_InputManager.DisplayGUI();
 
+		m_EnvironmentSaveBrowser.DisplayGUI();
+
 		ImGuiWrapper::Render();
 	}
 
@@ -309,9 +311,15 @@ namespace ALZ {
 					ShouldDelete = true;
 				}
 
+				//This is temporary until we have a better GUI design
+				if (ImGui::MenuItem("Set Save Location")) {
+					m_EnvironmentSaveBrowser.WindowOpen = true;
+				}
+
 				if (ImGui::MenuItem("Save")) {
-					//TODO work on adding GUI for chosing path
-					SaveEnvironment(*this, "");
+					if(std::filesystem::is_directory(m_EnvironmentSaveBrowser.GetChosenFolderPath()))
+						//TODO add changing name of file
+						SaveEnvironment(*this, m_EnvironmentSaveBrowser.GetChosenFolderPath() + "ALZenvironment.env");
 				}
 
 				ImGui::EndMenu();

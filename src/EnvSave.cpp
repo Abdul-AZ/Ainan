@@ -6,18 +6,14 @@
 using json = nlohmann::json;
 
 #define VEC4_TO_JSON_ARRAY(vec) { vec.x, vec.y, vec.z, vec.w }
+#define VEC3_TO_JSON_ARRAY(vec) { vec.x, vec.y, vec.z }
 #define VEC2_TO_JSON_ARRAY(vec) { vec.x, vec.y }
 
 namespace ALZ {
 
-	struct ps_data {
-		std::string d;
-		std::string d1;
-	};
-
 	//forward declarations
 	static void toJson(json& j, const ParticleSystem& ps, const int& objectOrder);
-	static void toJson(json& j, const RadialLight& ps, const int& objectOrder);
+	static void toJson(json& j, const RadialLight& light, const int& objectOrder);
 	static void toJson(json& j, const GeneralSettingsGUI& settings);
 
 	bool SaveEnvironment(const Environment& env, std::string path)
@@ -43,8 +39,16 @@ namespace ALZ {
 		}
 		toJson(data, env.m_Settings);
 
-		std::cout << data.dump(4);
+		std::string jsonString = data.dump(4);
 
+		//std::cout << jsonString;
+
+		FILE* file = fopen(path.c_str(), "w");
+
+		fwrite(jsonString.c_str(), 1, jsonString.size(), file);
+
+		fclose(file);
+		
 		return true;
 	}
 
@@ -55,9 +59,13 @@ namespace ALZ {
 		j[id + "Type"] = "Particle System";
 		j[id + "Name"] = ps.m_Name;
 		j[id + "Mode"] = GetModeAsText(ps.Customizer.Mode);
+		j[id + "ParticlesPerSecond"] = ps.Customizer.m_ParticlesPerSecond;
 		j[id + "SpawnPosition"] = { ps.Customizer.m_SpawnPosition.x, ps.Customizer.m_SpawnPosition.y };
 		j[id + "LinePosition"] = { ps.Customizer.m_LinePosition.x, ps.Customizer.m_LinePosition.y };
-		j[id + "ParticlesPerSecond"] = ps.Customizer.m_ParticlesPerSecond;
+		j[id + "LineLength"] = ps.Customizer.m_LineLength;
+		j[id + "LineAngle"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_LinePosition);
+		j[id + "CirclePosition"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_CircleOutline.Position);
+		j[id + "CircleRadius"] = ps.Customizer.m_CircleOutline.Radius;
 
 		//Scale data
 		j[id + "MinScale"] = ps.Customizer.m_ScaleCustomizer.m_MinScale;
@@ -90,14 +98,30 @@ namespace ALZ {
 		j[id + "TexturePath"] = ps.Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath;
 	}
 
-	void toJson(json& j, const RadialLight& ps, const int& objectOrder)
+	void toJson(json& j, const RadialLight& light, const int& objectOrder)
 	{
+		std::string id = "obj" + std::to_string(objectOrder) + "_";
+
+		j[id + "Type"] = "Radial Light";
+		j[id + "Name"] = light.m_Name;
+		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
+		j[id + "Color"] = VEC3_TO_JSON_ARRAY(light.Color);
+		j[id + "Constant"] = light.Constant;
+		j[id + "Linear"] = light.Linear;
+		j[id + "Quadratic"] = light.Quadratic;
 	}
 
 	void toJson(json& j, const GeneralSettingsGUI& settings)
 	{
+		j["BlurEnabled"] = settings.BlurEnabled;
+		j["BlurScale"] = settings.BlurScale;
+		j["BlurStrength"] = settings.BlurStrength;
+		j["BlurGaussianSigma"] = settings.BlurGaussianSigma;
+
+		j["ShowGrid"] = settings.ShowGrid;
 	}
 }
 
 #undef VEC4_TO_JSON_ARRAY
+#undef VEC3_TO_JSON_ARRAY
 #undef VEC2_TO_JSON_ARRAY

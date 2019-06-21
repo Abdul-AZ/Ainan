@@ -91,6 +91,7 @@ namespace ALZ {
 
 		Background m_Background;
 
+		FolderBrowser m_EnvironmentSaveBrowser;
 		friend bool SaveEnvironment(const Environment& env, std::string path);
 	};
 
