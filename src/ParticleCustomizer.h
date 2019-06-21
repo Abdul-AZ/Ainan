@@ -19,6 +19,8 @@ namespace ALZ {
 		SpawnOnCircle
 	};
 
+	std::string GetModeAsText(const SpawnMode& mode);
+
 	class ParticleCustomizer
 	{
 	public:

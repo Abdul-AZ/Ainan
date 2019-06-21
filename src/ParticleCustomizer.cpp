@@ -11,7 +11,7 @@ namespace ALZ {
 		m_CircleOutline.Position = { 0.5f, 0.5f };
 	}
 
-	static std::string GetAsText(const SpawnMode& mode)
+	std::string GetModeAsText(const SpawnMode& mode)
 	{
 		switch (mode)
 		{
@@ -33,11 +33,11 @@ namespace ALZ {
 	{
 		ImGui::Begin((windowName.size() > 0) ? windowName.c_str() : "No Name", &windowOpen);
 
-		if (ImGui::BeginCombo("Spawn Mode", GetAsText(Mode).c_str())) {
+		if (ImGui::BeginCombo("Spawn Mode", GetModeAsText(Mode).c_str())) {
 
 			{
 				bool is_active = Mode == SpawnMode::SpawnOnPoint;
-				if (ImGui::Selectable(GetAsText(SpawnMode::SpawnOnPoint).c_str(), &is_active)) {
+				if (ImGui::Selectable(GetModeAsText(SpawnMode::SpawnOnPoint).c_str(), &is_active)) {
 					ImGui::SetItemDefaultFocus();
 					Mode = SpawnMode::SpawnOnPoint;
 				}
@@ -45,7 +45,7 @@ namespace ALZ {
 
 			{
 				bool is_active = Mode == SpawnMode::SpawnOnLine;
-				if (ImGui::Selectable(GetAsText(SpawnMode::SpawnOnLine).c_str(), &is_active)) {
+				if (ImGui::Selectable(GetModeAsText(SpawnMode::SpawnOnLine).c_str(), &is_active)) {
 					ImGui::SetItemDefaultFocus();
 					Mode = SpawnMode::SpawnOnLine;
 				}
@@ -53,7 +53,7 @@ namespace ALZ {
 
 			{
 				bool is_active = Mode == SpawnMode::SpawnOnCircle;
-				if (ImGui::Selectable(GetAsText(SpawnMode::SpawnOnCircle).c_str(), &is_active)) {
+				if (ImGui::Selectable(GetModeAsText(SpawnMode::SpawnOnCircle).c_str(), &is_active)) {
 					ImGui::SetItemDefaultFocus();
 					Mode = SpawnMode::SpawnOnCircle;
 				}

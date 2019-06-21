@@ -1,5 +1,11 @@
 #pragma once
 
+//for declaring friend to json serializer
+#include "json/json_fwd.hpp"
+namespace ALZ {
+	class ParticleSystem;
+}
+
 #include "InterpolationSelector.h"
 
 namespace ALZ {
@@ -21,5 +27,7 @@ namespace ALZ {
 
 		//random number generator
 		std::mt19937 mt;
+
+		friend void toJson(nlohmann::json& j, const ParticleSystem& ps, const int& objectOrder);
 	};
 }
