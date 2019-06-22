@@ -28,6 +28,8 @@ namespace ALZ {
 		if (!m_WindowOpen)
 			return;
 
+		ImGui::SetNextWindowSizeConstraints(ImVec2(BROWSER_WINDOW_WIDTH, BROWSER_MIN_WINDOW_HEIGHT), ImVec2(1000, 1000), BrowserWindowSizeCallback);
+
 		ImGui::Begin(m_WindowName.c_str(), &m_WindowOpen);
 
 		ImGui::Text("Current Directory :");
@@ -42,7 +44,7 @@ namespace ALZ {
 		ImGui::SameLine();
 		ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), m_CurrentselectedFilePath.c_str());
 		ImGui::PushItemWidth(-1);
-		if (ImGui::ListBoxHeader("##empty", 0, (int)std::distance(fs::directory_iterator(m_CurrentFolder), fs::directory_iterator{}) + 5)) {
+		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetWindowSize().y - 100))) {
 
 			//check if we can go back
 			if (std::count(m_CurrentFolder.begin(), m_CurrentFolder.end(), '\\') > 0) {

@@ -1,5 +1,9 @@
 #pragma once
 
+#define BROWSER_LIST_BOX_HEIGHT    15
+#define BROWSER_WINDOW_WIDTH   400
+#define BROWSER_MIN_WINDOW_HEIGHT  350
+
 namespace ALZ {
 
 	class FileManager
@@ -10,4 +14,6 @@ namespace ALZ {
 
 		static std::string ApplicationFolder;
 	};
+
+	void BrowserWindowSizeCallback(ImGuiSizeCallbackData* data);
 }
