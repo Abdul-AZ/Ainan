@@ -41,8 +41,6 @@ namespace ALZ {
 
 		std::string jsonString = data.dump(4);
 
-		//std::cout << jsonString;
-
 		FILE* file = fopen(path.c_str(), "w");
 
 		fwrite(jsonString.c_str(), 1, jsonString.size(), file);

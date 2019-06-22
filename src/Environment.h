@@ -10,6 +10,7 @@
 #include "ParticleCustomizer.h"
 #include "GeneralSettingsGUI.h"
 #include "FolderBrowserGUI.h"
+#include "SaveItemGUI.h"
 
 #include "ImGuiWrapper.h"
 
@@ -92,7 +93,8 @@ namespace ALZ {
 
 		Background m_Background;
 
-		FolderBrowser m_EnvironmentSaveBrowser;
+		SaveItemGUI m_EnvironmentSaveBrowser;
+		bool m_SaveLocationSelected = false;
 
 
 		//expose private parameters for environment serilization (saving and loading environments)

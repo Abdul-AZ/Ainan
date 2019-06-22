@@ -1,29 +1,29 @@
 #include <pch.h>
 
-#include "FileBrowserGUI.h"
+#include "SaveItemGUI.h"
 
 namespace ALZ {
 
 	namespace fs = std::filesystem;
 
-	FileBrowser::FileBrowser(const std::string& startingFolder, const std::string& windowName) :
+	SaveItemGUI::SaveItemGUI(const std::string& startingFolder, const std::string& windowName) :
 		m_CurrentFolder(startingFolder),
 		m_WindowName(windowName),
 		m_InputFolder(startingFolder)
 	{}
 
-	void FileBrowser::OpenWindow()
+	void SaveItemGUI::OpenWindow()
 	{
 		m_WindowOpen = true;
 		m_LastWindowState = true;
 	}
 
-	void FileBrowser::CloseWindow()
+	void SaveItemGUI::CloseWindow()
 	{
 		m_WindowOpen = false;
 	}
 
-	void FileBrowser::DisplayGUI(const std::function<void(const std::string&)>& func)
+	void SaveItemGUI::DisplayGUI(const std::function<void(const std::string&)>& func)
 	{
 		if (!m_WindowOpen)
 			return;
@@ -33,14 +33,11 @@ namespace ALZ {
 		ImGui::Text("Current Directory :");
 		ImGui::SameLine();
 		auto flags = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;
-		if (ImGui::InputText("##empty", &m_InputFolder, flags)) {
+		if (ImGui::InputText("##FolderPath", &m_InputFolder, flags)) {
 			if (fs::exists(m_InputFolder))
 				m_CurrentFolder = m_InputFolder;
 		}
 
-		ImGui::Text("Current Chosen File :");
-		ImGui::SameLine();
-		ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), m_CurrentselectedFilePath.c_str());
 		ImGui::PushItemWidth(-1);
 		if (ImGui::ListBoxHeader("##empty", 0, (int)std::distance(fs::directory_iterator(m_CurrentFolder), fs::directory_iterator{}) + 5)) {
 
@@ -65,33 +62,33 @@ namespace ALZ {
 				}
 			}
 
-			for (const auto& entry : fs::directory_iterator(m_CurrentFolder)) {
-				if (entry.status().type() != fs::file_type::directory) {
-
-					bool inFilter = false;
-					for (std::string& str : Filter) {
-						if (entry.path().extension() == str) {
-							inFilter = true;
-							break;
-						}
-					}
-					if (!inFilter)
-						continue;
-
-					bool is_selected = (m_CurrentselectedFilePath == entry.path().u8string());
-					if (ImGui::Selectable(entry.path().filename().u8string().c_str(), &is_selected))
-						m_CurrentselectedFilePath = entry.path().u8string();
-				}
-			}
-
 			ImGui::ListBoxFooter();
 		}
 
-		if (ImGui::Button("Select"))
+
+		ImGui::PushItemWidth(500);
+
+		if (ImGui::InputText("##FileName", &m_FileName, flags)) {
+			if (m_FileName.size() > 0)
+				m_FileNameChosen = true;
+			else
+				m_FileNameChosen = false;
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Save"))
 		{
-			if(func != nullptr)
-				func(m_CurrentselectedFilePath);
-			m_WindowOpen = false;
+			if (func != nullptr && m_FileNameChosen) {
+				func(GetSelectedSavePath());
+				m_WindowOpen = false;
+			}
+		}
+
+		if (m_FileName.find(".") != std::string::npos)
+		{
+			m_FileNameChosen = false;
+			ImGui::TextColored(ImVec4(0.8f, 0.0f, 0.0f, 1.0f), "Do not include file format!");
 		}
 
 		ImGui::End();
@@ -102,5 +99,10 @@ namespace ALZ {
 				OnCloseWindow();
 			m_LastWindowState = false;
 		}
+	}
+
+	std::string SaveItemGUI::GetSelectedSavePath()
+	{
+		return m_CurrentFolder + '\\' + m_FileName;
 	}
 }

@@ -3,7 +3,8 @@
 
 namespace ALZ {
 
-	Environment::Environment()
+	Environment::Environment() : 
+		m_EnvironmentSaveBrowser(FileManager::ApplicationFolder, "Save Environment")
 	{
 		m_PlayButtonTexture.Init("res/PlayButton.png", 3);
 		m_PauseButtonTexture.Init("res/PauseButton.png", 3);
@@ -113,7 +114,10 @@ namespace ALZ {
 
 		m_InputManager.DisplayGUI();
 
-		m_EnvironmentSaveBrowser.DisplayGUI();
+		m_EnvironmentSaveBrowser.DisplayGUI([this](const std::string& path) {
+			SaveEnvironment(*this, path + ".env");
+			m_SaveLocationSelected = true;
+			});
 
 		ImGuiWrapper::Render();
 	}
@@ -306,20 +310,27 @@ namespace ALZ {
 		if (ImGui::BeginMainMenuBar()) {
 
 			if (ImGui::BeginMenu("File")) {
+				if (ImGui::MenuItem("Save"))
+				{
+					if (m_SaveLocationSelected)
+						SaveEnvironment(*this, m_EnvironmentSaveBrowser.GetSelectedSavePath() + ".env");
+					else
+						m_EnvironmentSaveBrowser.OpenWindow();
+				}
 
-				if (ImGui::MenuItem("Close Environment")) {
+				if (ImGui::MenuItem("Save As"))
+				{
+					m_EnvironmentSaveBrowser.OpenWindow();
+				}
+
+				if (ImGui::MenuItem("Close Environment")) 
+				{
 					ShouldDelete = true;
 				}
 
-				//This is temporary until we have a better GUI design
-				if (ImGui::MenuItem("Set Save Location")) {
-					m_EnvironmentSaveBrowser.WindowOpen = true;
-				}
-
-				if (ImGui::MenuItem("Save")) {
-					if(std::filesystem::is_directory(m_EnvironmentSaveBrowser.GetChosenFolderPath()))
-						//TODO add changing name of file
-						SaveEnvironment(*this, m_EnvironmentSaveBrowser.GetChosenFolderPath() + "ALZenvironment.env");
+				if (ImGui::MenuItem("Exit"))
+				{
+					exit(0);
 				}
 
 				ImGui::EndMenu();
