@@ -15,11 +15,14 @@ namespace ALZ {
 
 		std::vector<std::string> Filter;
 		std::string m_CurrentselectedFilePath;
+		std::function<void()> OnCloseWindow = nullptr;
 
 	private:
 		std::string m_CurrentFolder;
 		std::string m_WindowName;
 		std::string m_InputFolder;
 		bool m_WindowOpen = false;
+		//to check if window closed last frame
+		bool m_LastWindowState = false;
 	};
 }

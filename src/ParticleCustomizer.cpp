@@ -29,6 +29,20 @@ namespace ALZ {
 		}
 	}
 
+	SpawnMode GetTextAsMode(const std::string& mode)
+	{
+		if (mode == "Spawn On Point")
+			return SpawnMode::SpawnOnPoint;
+		else if (mode == "Spawn On Line")
+			return SpawnMode::SpawnOnLine;
+		else if (mode == "Spawn On Circle")
+			return SpawnMode::SpawnOnCircle;
+		else {
+			assert(false);
+			return SpawnMode::SpawnOnPoint;
+		}
+	}
+
 	void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowOpen)
 	{
 		ImGui::Begin((windowName.size() > 0) ? windowName.c_str() : "No Name", &windowOpen);

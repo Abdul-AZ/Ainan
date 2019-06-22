@@ -52,6 +52,16 @@ namespace ALZ {
 		return true;
 	}
 
+	void toJson(json& j, const GeneralSettingsGUI& settings)
+	{
+		j["BlurEnabled"] = settings.BlurEnabled;
+		j["BlurScale"] = settings.BlurScale;
+		j["BlurStrength"] = settings.BlurStrength;
+		j["BlurGaussianSigma"] = settings.BlurGaussianSigma;
+
+		j["ShowGrid"] = settings.ShowGrid;
+	}
+
 	void toJson(json& j, const ParticleSystem& ps, const int& objectOrder)
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
@@ -60,10 +70,10 @@ namespace ALZ {
 		j[id + "Name"] = ps.m_Name;
 		j[id + "Mode"] = GetModeAsText(ps.Customizer.Mode);
 		j[id + "ParticlesPerSecond"] = ps.Customizer.m_ParticlesPerSecond;
-		j[id + "SpawnPosition"] = { ps.Customizer.m_SpawnPosition.x, ps.Customizer.m_SpawnPosition.y };
-		j[id + "LinePosition"] = { ps.Customizer.m_LinePosition.x, ps.Customizer.m_LinePosition.y };
+		j[id + "SpawnPosition"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_SpawnPosition);
+		j[id + "LinePosition"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_LinePosition);
 		j[id + "LineLength"] = ps.Customizer.m_LineLength;
-		j[id + "LineAngle"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_LinePosition);
+		j[id + "LineAngle"] = ps.Customizer.m_LineAngle;
 		j[id + "CirclePosition"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_CircleOutline.Position);
 		j[id + "CircleRadius"] = ps.Customizer.m_CircleOutline.Radius;
 
@@ -111,15 +121,6 @@ namespace ALZ {
 		j[id + "Quadratic"] = light.Quadratic;
 	}
 
-	void toJson(json& j, const GeneralSettingsGUI& settings)
-	{
-		j["BlurEnabled"] = settings.BlurEnabled;
-		j["BlurScale"] = settings.BlurScale;
-		j["BlurStrength"] = settings.BlurStrength;
-		j["BlurGaussianSigma"] = settings.BlurGaussianSigma;
-
-		j["ShowGrid"] = settings.ShowGrid;
-	}
 }
 
 #undef VEC4_TO_JSON_ARRAY

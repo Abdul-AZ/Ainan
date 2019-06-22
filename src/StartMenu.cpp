@@ -6,10 +6,26 @@
 #define START_MENU_BUTTON_HEIGHT 75
 
 namespace ALZ {
+	
+	StartMenu::StartMenu() :
+	LoadEnvironmentPath(FileManager::ApplicationFolder, "Load Environment")
+	{
+		LoadEnvironmentPath.Filter.push_back(".env");
+		LoadEnvironmentPath.OnCloseWindow = []() {
+			glfwSetWindowSize(&Window::GetWindow(), WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
+			Window::CenterWindow();
+		};
+	}
 
 	void StartMenu::Update(Environment*& currentEnv)
 	{
 		assert(!currentEnv);
+
+		if(LoadEnvironmentPath.OnCloseWindow == nullptr)
+			LoadEnvironmentPath.OnCloseWindow = []() {
+			glfwSetWindowSize(&Window::GetWindow(), WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
+			Window::CenterWindow();
+		};
 
 		Window::Update();
 
@@ -34,6 +50,15 @@ namespace ALZ {
 
 		ImGui::SetCursorPosX(screenSizeX / 2 - START_MENU_BUTTON_WIDTH / 2);
 
+		if (ImGui::Button("Load Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		{
+			glfwSetWindowSize(&Window::GetWindow(), WINDOW_SIZE_FACTOR_ON_LAUNCH * 3, WINDOW_SIZE_FACTOR_ON_LAUNCH * 3 * 9 / 16);
+			Window::CenterWindow();
+			LoadEnvironmentPath.OpenWindow();
+		}
+
+		ImGui::SetCursorPosX(screenSizeX / 2 - START_MENU_BUTTON_WIDTH / 2);
+
 		if (ImGui::Button("Exit App", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
 			glfwSetWindowShouldClose(&Window::GetWindow(), true);
@@ -41,6 +66,17 @@ namespace ALZ {
 
 		ImGui::End();
 
+		LoadEnvironmentPath.DisplayGUI([&currentEnv, this](const std::string& path)
+			{
+				//check if file is selected
+				if (path.find(".env") != std::string::npos) {
+					//remove minimizing event on file browser window close
+					LoadEnvironmentPath.OnCloseWindow = nullptr;
+					glfwMaximizeWindow(&Window::GetWindow());
+					currentEnv = LoadEnvironment(path);
+				}
+			});
+		 
 		ImGuiWrapper::Render();
 	}
 }

@@ -47,6 +47,7 @@ namespace ALZ {
 					m_InputFolder = m_CurrentFolder;
 				}
 			}
+
 			for (const auto & entry : fs::directory_iterator(m_CurrentFolder)) {
 				if (entry.status().type() == fs::file_type::directory) {
 					if (ImGui::Button(entry.path().filename().u8string().c_str())) {

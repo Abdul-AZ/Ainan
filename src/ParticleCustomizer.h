@@ -20,6 +20,7 @@ namespace ALZ {
 	};
 
 	std::string GetModeAsText(const SpawnMode& mode);
+	SpawnMode GetTextAsMode(const std::string& mode);
 
 	class ParticleCustomizer
 	{
