@@ -34,9 +34,18 @@ namespace ALZ {
 	static void RadialLightFromJson(Environment* env,json& data, std::string id);
 	static void SettingsFromJson(Environment* env, json& data);
 
-	Environment* LoadEnvironment(const std::string& path)
+	std::pair<Environment*, std::string> LoadEnvironment(const std::string& path)
 	{
-		json data = json::parse(FileManager::ReadEntireTextFile(path));
+		json data;
+		try
+		{
+			data = json::parse(FileManager::ReadEntireTextFile(path));
+		}
+		catch (const std::exception& e)
+		{
+			return { nullptr, e.what() };
+		}
+
 		Environment* env = new Environment();
 		env->InspectorObjects.clear();
 
@@ -56,7 +65,7 @@ namespace ALZ {
 				assert(false);
 		}
 
-		return env;
+		return { env, "" };
 	}
 
 	void SettingsFromJson(Environment* env, json& data)

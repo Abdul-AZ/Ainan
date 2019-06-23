@@ -70,12 +70,40 @@ namespace ALZ {
 			{
 				//check if file is selected
 				if (path.find(".env") != std::string::npos) {
-					//remove minimizing event on file browser window close
-					LoadEnvironmentPath.OnCloseWindow = nullptr;
-					glfwMaximizeWindow(&Window::GetWindow());
-					currentEnv = LoadEnvironment(path);
+					//result is a pair of an Evironment pointer and an error message(std::string), 
+					//error message is "" if an Environment* that is not nullptr is returned 
+					auto result = LoadEnvironment(path);
+
+					if (result.first) {
+						//remove minimizing event on file browser window close
+						LoadEnvironmentPath.OnCloseWindow = nullptr;
+						glfwMaximizeWindow(&Window::GetWindow());
+						currentEnv = result.first;
+					}
+					else {
+						//assign error message
+						m_EnvironmentLoadError = result.second;
+					}
 				}
 			});
+
+		if(m_EnvironmentLoadError != "")
+			ImGui::OpenPopup("Error Loading Env");
+		ImGui::SetNextWindowSize(ImVec2(400, 200));
+
+		if (ImGui::BeginPopupModal("Error Loading Env")) {
+			ImGui::TextWrapped(m_EnvironmentLoadError.c_str());
+
+			ImGui::SetCursorPosX(ImGui::GetWindowSize().x / 2 - 75 / 2);
+			ImGui::SetCursorPosY(ImGui::GetWindowSize().y - 75);
+
+			if (ImGui::Button("Ok", ImVec2(75,50))) {
+				m_EnvironmentLoadError = "";
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
 		 
 		ImGuiWrapper::Render();
 	}

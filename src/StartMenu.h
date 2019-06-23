@@ -9,6 +9,9 @@ namespace ALZ {
 		void Update(Environment*& currentEnv);
 
 		FileBrowser LoadEnvironmentPath;
+
+	private:
+		std::string m_EnvironmentLoadError;
 	};
 
 }
