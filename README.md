@@ -36,3 +36,4 @@ Issues are more than welcome aswell.
 * stb image
 * GLM
 * Premake5
+* nlohmann/json
