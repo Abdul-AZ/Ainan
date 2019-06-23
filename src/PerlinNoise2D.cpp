@@ -44,6 +44,9 @@ namespace ALZ {
 
 	float PerlinNoise2D::Noise(float x, float y)
 	{
+		x = abs(x);
+		y = abs(y);
+
 		int x0 = (int)x;
 		int x1 = x0 + 1;
 		int y0 = (int)y;
