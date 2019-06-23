@@ -30,4 +30,9 @@ namespace ALZ {
 		auto lastBackslashLoc = ApplicationFolder.find_last_of('\\');
 		ApplicationFolder.erase(lastBackslashLoc, ApplicationFolder.size() - lastBackslashLoc);
 	}
+
+	void BrowserWindowSizeCallback(ImGuiSizeCallbackData* data)
+	{
+		data->DesiredSize.x = BROWSER_WINDOW_WIDTH;
+	}
 }

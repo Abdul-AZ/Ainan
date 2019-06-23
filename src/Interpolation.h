@@ -13,6 +13,7 @@ namespace ALZ {
 		Smoothstep
 	};
 
+
 	namespace Interpolation {
 
 		//Basic linear interpolation

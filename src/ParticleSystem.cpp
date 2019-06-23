@@ -37,8 +37,6 @@ namespace ALZ {
 		//initilize the vertices only the first time a particle system is created
 		if (!InitilizedCircleVertices) {
 
-			std::cout << glGetError() << std::endl;
-
 			glGenVertexArrays(1, &VAO);
 			glBindVertexArray(VAO);
 
@@ -66,7 +64,6 @@ namespace ALZ {
 			DefaultTexture.Init("res/Circle.png", 4);
 			glBindTexture(GL_TEXTURE_2D, (GLuint)DefaultTexture.TextureID);
 
-			std::cout << glGetError() << std::endl;
 			InitilizedCircleVertices = true;
 		}
 	}

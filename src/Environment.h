@@ -10,6 +10,7 @@
 #include "ParticleCustomizer.h"
 #include "GeneralSettingsGUI.h"
 #include "FolderBrowserGUI.h"
+#include "SaveItemGUI.h"
 
 #include "ImGuiWrapper.h"
 
@@ -21,6 +22,8 @@
 #include "graphics/Grid.h"
 
 #include "InputManager.h"
+
+#include "vendor/json/json_fwd.hpp"
 
 namespace ALZ {
 
@@ -86,9 +89,25 @@ namespace ALZ {
 		Texture m_StopButtonTexture;
 
 		bool m_MousePressedLastFrame = false;
-
 		bool m_SaveNextFrameAsImage = false;
 
 		Background m_Background;
+
+		SaveItemGUI m_EnvironmentSaveBrowser;
+		bool m_SaveLocationSelected = false;
+
+
+		//expose private parameters for environment serilization (saving and loading environments)
+		friend bool SaveEnvironment(const Environment& env, std::string path);
+		friend std::pair<Environment*, std::string> LoadEnvironment(const std::string& path);
+		friend void SettingsFromJson(Environment* env, nlohmann::json& data);
+		friend void ParticleSystemFromJson(Environment* env, nlohmann::json& data, std::string id);
+		friend void RadialLightFromJson(Environment* env, nlohmann::json& data, std::string id);
 	};
+
+
+	//defined in EnvSave.cpp
+	bool SaveEnvironment(const Environment& env, std::string path);
+	//defined in EnvLoad.cpp
+	std::pair<Environment*, std::string> LoadEnvironment(const std::string& path);
 }

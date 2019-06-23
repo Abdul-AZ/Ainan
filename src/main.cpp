@@ -33,6 +33,8 @@ int main(int argc, const char* argv[]) {
 		else
 			startMenu.Update(env);
 
+
+
 		Window::Present();
 		Window::Clear();
 	}
