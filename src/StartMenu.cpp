@@ -70,19 +70,15 @@ namespace ALZ {
 			{
 				//check if file is selected
 				if (path.find(".env") != std::string::npos) {
-					//result is a pair of an Evironment pointer and an error message(std::string), 
-					//error message is "" if an Environment* that is not nullptr is returned 
-					auto result = LoadEnvironment(path);
+					m_EnvironmentLoadError = CheckEnvironmentFile(path);
 
-					if (result.first) {
+					//if there are no errors load environment
+					if (m_EnvironmentLoadError == "") {
 						//remove minimizing event on file browser window close
 						LoadEnvironmentPath.OnCloseWindow = nullptr;
+
 						glfwMaximizeWindow(&Window::GetWindow());
-						currentEnv = result.first;
-					}
-					else {
-						//assign error message
-						m_EnvironmentLoadError = result.second;
+						currentEnv = LoadEnvironment(path);
 					}
 				}
 			});

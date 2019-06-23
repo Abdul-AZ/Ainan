@@ -36,6 +36,17 @@ namespace ALZ {
 		UpdateBufferWithPoints();
 	}
 
+	void Line::SetPoints(glm::vec2 linePosition, float lineLength, float lineAngle)
+	{
+		glm::vec2 pointDispositionFromCenter = lineLength * glm::vec2(cos(lineAngle * 3.14159265 / 180.0f), sin(lineAngle * 3.14159265 / 180.0f));
+
+		m_StartPoint = linePosition + pointDispositionFromCenter;
+		m_EndPoint = linePosition - pointDispositionFromCenter;
+
+		m_StartPoint *= GlobalScaleFactor;
+		m_EndPoint *= GlobalScaleFactor;
+	}
+
 	void Line::Render(Camera& camera)
 	{
 		glLineWidth(Width);

@@ -154,7 +154,6 @@ namespace ALZ {
 		m_Particle.m_Color = m_ColorCustomizer.GetColorInterpolator();
 		m_Particle.SetLifeTime(m_LifetimeCustomizer.GetLifetime());
 
-
 		m_Particle.m_ScaleInterpolator = m_ScaleCustomizer.GetScaleInterpolator();
 	}
 

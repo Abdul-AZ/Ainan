@@ -77,7 +77,7 @@ namespace ALZ {
 		ActiveParticleCount = 0;
 		for (Particle& particle : m_Particles) {
 
-			if (Customizer.m_NoiseCustomizer.m_NoiseEnabled) {
+			if (Customizer.m_NoiseCustomizer.m_NoiseEnabled && particle.isActive) {
 				particle.m_Velocity.x += m_Noise.Noise(particle.m_Position.x, particle.m_Position.y) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
 				particle.m_Velocity.y += m_Noise.Noise(particle.m_Position.x + 30, particle.m_Position.y - 30) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
 			}
@@ -207,14 +207,9 @@ namespace ALZ {
 			Customizer.DisplayGUI(m_Name, EditorOpen);
 
 		//update editor line 
-		if (Customizer.Mode == SpawnMode::SpawnOnLine && Selected)
+		if (Customizer.Mode == SpawnMode::SpawnOnLine)
 		{
-			glm::vec2 pointDispositionFromCenter = Customizer.m_LineLength * glm::vec2(cos(Customizer.m_LineAngle * 3.14159265 / 180.0f), sin(Customizer.m_LineAngle * 3.14159265 / 180.0f));
-
-			glm::vec2 startLinePoint = Customizer.m_LinePosition + pointDispositionFromCenter;
-			glm::vec2 endLinePoint = Customizer.m_LinePosition - pointDispositionFromCenter;
-
-			Customizer.m_Line.SetPoints(startLinePoint, endLinePoint);
+			Customizer.m_Line.SetPoints(Customizer.m_LinePosition, Customizer.m_LineLength,Customizer.m_LineAngle);
 			Customizer.m_Line.Render(camera);
 		}
 		else if (Customizer.Mode == SpawnMode::SpawnOnCircle && Selected) 

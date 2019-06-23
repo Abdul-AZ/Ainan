@@ -99,7 +99,7 @@ namespace ALZ {
 
 		//expose private parameters for environment serilization (saving and loading environments)
 		friend bool SaveEnvironment(const Environment& env, std::string path);
-		friend std::pair<Environment*, std::string> LoadEnvironment(const std::string& path);
+		friend Environment* LoadEnvironment(const std::string& path);
 		friend void SettingsFromJson(Environment* env, nlohmann::json& data);
 		friend void ParticleSystemFromJson(Environment* env, nlohmann::json& data, std::string id);
 		friend void RadialLightFromJson(Environment* env, nlohmann::json& data, std::string id);
@@ -108,6 +108,9 @@ namespace ALZ {
 
 	//defined in EnvSave.cpp
 	bool SaveEnvironment(const Environment& env, std::string path);
+
 	//defined in EnvLoad.cpp
-	std::pair<Environment*, std::string> LoadEnvironment(const std::string& path);
+	Environment* LoadEnvironment(const std::string& path);
+	//returns error string or "" if successful
+	std::string CheckEnvironmentFile(const std::string& path);
 }

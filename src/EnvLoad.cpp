@@ -28,23 +28,27 @@ namespace ALZ {
 		}
 	}
 
+	std::string CheckEnvironmentFile(const std::string& path) {
 
+		json data;
+		try
+		{
+			data = json::parse(FileManager::ReadEntireTextFile(path));
+			return "";
+		}
+		catch (const std::exception& e)
+		{
+			return e.what();
+		}
+	}
 
 	static void ParticleSystemFromJson(Environment* env, json& data, std::string id);
 	static void RadialLightFromJson(Environment* env,json& data, std::string id);
 	static void SettingsFromJson(Environment* env, json& data);
 
-	std::pair<Environment*, std::string> LoadEnvironment(const std::string& path)
+	Environment* LoadEnvironment(const std::string& path)
 	{
-		json data;
-		try
-		{
-			data = json::parse(FileManager::ReadEntireTextFile(path));
-		}
-		catch (const std::exception& e)
-		{
-			return { nullptr, e.what() };
-		}
+		json data = json::parse(FileManager::ReadEntireTextFile(path));
 
 		Environment* env = new Environment();
 		env->InspectorObjects.clear();
@@ -65,7 +69,7 @@ namespace ALZ {
 				assert(false);
 		}
 
-		return { env, "" };
+		return env;
 	}
 
 	void SettingsFromJson(Environment* env, json& data)
@@ -126,11 +130,14 @@ namespace ALZ {
 		//Texture data
 		ps->Customizer.m_TextureCustomizer.UseDefaultTexture = data[id + "UseDefaultTexture"].get<bool>();
 		ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath = data[id + "TexturePath"].get<std::string>();
+		if(!ps->Customizer.m_TextureCustomizer.UseDefaultTexture)
+			ps->Customizer.m_TextureCustomizer.ParticleTexture.Init(ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath, 4);
 
 
 		//add particle system to environment
 		Inspector_obj_ptr startingPSi((InspectorInterface*)(ps.release()));
 		env->InspectorObjects.push_back(std::move(startingPSi));
+		((ParticleSystem*)env->InspectorObjects[env->InspectorObjects.size() - 1].get())->UpdateUniforms(env->m_Camera);
 	}
 
 	void RadialLightFromJson(Environment* env, json& data, std::string id)

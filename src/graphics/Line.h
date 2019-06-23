@@ -16,6 +16,7 @@ namespace ALZ {
 		float GetYIntercept();
 		glm::vec2 GetPointInLine(const float& t);
 		void SetPoints(glm::vec2 startPoint, glm::vec2 endPoint);
+		void SetPoints(glm::vec2 linePosition, float lineLength, float lineAngle); //angle in degrees NOT radians
 
 	public:
 		float Width = 2.0f;
