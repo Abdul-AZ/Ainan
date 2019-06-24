@@ -16,7 +16,8 @@ namespace ALZ {
 	enum class SpawnMode {
 		SpawnOnPoint,
 		SpawnOnLine,
-		SpawnOnCircle
+		SpawnOnCircle,
+		SpawnInsideCircle
 	};
 
 	std::string GetModeAsText(const SpawnMode& mode);

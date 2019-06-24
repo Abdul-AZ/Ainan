@@ -70,9 +70,7 @@ namespace ALZ {
 
 	void ParticleSystem::Update(const float& deltaTime)
 	{
-		if (Customizer.Mode == SpawnMode::SpawnOnPoint || Customizer.Mode == SpawnMode::SpawnOnLine || Customizer.Mode == SpawnMode::SpawnOnCircle) {
-			SpawnAllParticlesOnQue(deltaTime);
-		}
+		SpawnAllParticlesOnQue(deltaTime);
 
 		ActiveParticleCount = 0;
 		for (Particle& particle : m_Particles) {
@@ -212,7 +210,7 @@ namespace ALZ {
 			Customizer.m_Line.SetPoints(Customizer.m_LinePosition, Customizer.m_LineLength,Customizer.m_LineAngle);
 			Customizer.m_Line.Render(camera);
 		}
-		else if (Customizer.Mode == SpawnMode::SpawnOnCircle && Selected) 
+		else if (Customizer.Mode == SpawnMode::SpawnOnCircle || Customizer.Mode == SpawnMode::SpawnInsideCircle && Selected)
 		{
 			Customizer.m_CircleOutline.Render(camera);
 		}

@@ -528,6 +528,11 @@ namespace ALZ {
 								   + glm::vec3(Window::WindowSize.x / 2, Window::WindowSize.y / 2, 0.0f));
 				break;
 
+			case SpawnMode::SpawnInsideCircle:
+				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_CircleOutline.Position.x, ps.Customizer.m_CircleOutline.Position.y, 0.0f)
+					+ glm::vec3(Window::WindowSize.x / 2, Window::WindowSize.y / 2, 0.0f));
+				break;
+
 			case SpawnMode::SpawnOnLine:
 
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_LinePosition.x * -GlobalScaleFactor, ps.Customizer.m_LinePosition.y * -GlobalScaleFactor, 0.0f)

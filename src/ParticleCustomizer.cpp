@@ -24,6 +24,9 @@ namespace ALZ {
 		case SpawnMode::SpawnOnCircle:
 			return "Spawn On Circle";
 
+		case SpawnMode::SpawnInsideCircle:
+			return "Spawn Inside Circle";
+
 		default:
 			return "";
 		}
@@ -37,6 +40,8 @@ namespace ALZ {
 			return SpawnMode::SpawnOnLine;
 		else if (mode == "Spawn On Circle")
 			return SpawnMode::SpawnOnCircle;
+		else if (mode == "Spawn Inside Circle")
+			return SpawnMode::SpawnInsideCircle;
 		else {
 			assert(false);
 			return SpawnMode::SpawnOnPoint;
@@ -73,6 +78,14 @@ namespace ALZ {
 				}
 			}
 
+			{
+				bool is_active = Mode == SpawnMode::SpawnInsideCircle;
+				if (ImGui::Selectable(GetModeAsText(SpawnMode::SpawnInsideCircle).c_str(), &is_active)) {
+					ImGui::SetItemDefaultFocus();
+					Mode = SpawnMode::SpawnInsideCircle;
+				}
+			}
+
 			ImGui::EndCombo();
 		}
 
@@ -104,7 +117,7 @@ namespace ALZ {
 				ImGui::TreePop();
 			}
 		}
-		else if (Mode == SpawnMode::SpawnOnCircle)
+		else if (Mode == SpawnMode::SpawnOnCircle || Mode == SpawnMode::SpawnInsideCircle)
 		{
 			if (ImGui::TreeNode("Position")) {
 
@@ -146,6 +159,15 @@ namespace ALZ {
 			//random angle between 0 and 2pi (360 degrees)
 			std::uniform_real_distribution<float> dest(0.0f, 2.0f * 3.14159f);
 			m_Particle.m_Position = m_CircleOutline.GetPointByAngle(dest(mt));
+			break;
+		}
+
+		case SpawnMode::SpawnInsideCircle: {
+			std::uniform_real_distribution<float> dest(0.0f, 1.0f);
+			float r = m_CircleOutline.Radius * sqrt(dest(mt));
+			float theta = dest(mt) * 2 * PI; //in radians
+			m_Particle.m_Position = glm::vec2(m_CircleOutline.Position.x + r * cos(theta), m_CircleOutline.Position.y + r * sin(theta));
+			m_Particle.m_Position *= GlobalScaleFactor;
 			break;
 		}
 		}
