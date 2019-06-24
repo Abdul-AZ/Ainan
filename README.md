@@ -1,5 +1,5 @@
 # ALZparticles
-ALZparticles is an app developed in OpenGL and c++ to make cool graphics easily through particle systems.
+ALZparticles is an app developed in OpenGL and c++ to make cool graphics easily through particle systems and lights.
 
 At the moment it only runs on windows.
 
@@ -12,10 +12,10 @@ Steps on building in windows:
 
 1. Open commandline window on project directory.
 2. Type "premake5 vsYOUR_VISUAL_STUDIO_VERSION", so for me it was "premake5 vs2017".
-3. Open the newly generated Buid directory and open Simple-Bezier-Curve-OpenGL.sln.
-4. Build and run the executable in VisualStudio
+3. Open the newly generated sln file from the build folder.
+4. Build and run the executable in VisualStudio.
 
-Similar steps can be made to build for systems other than windows but I do not guarantee they will work for now. 
+Similar steps can be made to build for systems other than windows (other than that you have to get a version of premake that is specific for your platform, basically grab the latest release of [Premake](https://github.com/premake/premake-core) for your OS) but I do not guarantee they will work for now. 
 
 # Documentation
 Still to be made, I'm planning to slowly build it through time. It will be available through the wiki page of this repository.
