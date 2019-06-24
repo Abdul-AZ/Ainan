@@ -45,6 +45,8 @@ namespace ALZ {
 
 		m_StartPoint *= GlobalScaleFactor;
 		m_EndPoint *= GlobalScaleFactor;
+
+		UpdateBufferWithPoints();
 	}
 
 	void Line::Render(Camera& camera)
