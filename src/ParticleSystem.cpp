@@ -103,45 +103,64 @@ namespace ALZ {
 
 	void ParticleSystem::Render(Camera& camera)
 	{
+		//bind vertex array and shader
 		glBindVertexArray(VAO);
 		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
 		CircleShader.Bind();
+
+		//set texture uniform (Sampler2D) to 0
 		CircleShader.SetUniform1i("particleTexture", 0);
+
+		//if we are using the default texture
 		if (Customizer.m_TextureCustomizer.UseDefaultTexture)
+			//bind the default texture to slot 0
 			DefaultTexture.Bind(0);
 		else
+			//if we are using a custom texture, bind it to slot 0
 			Customizer.m_TextureCustomizer.ParticleTexture.Bind(0);
 
+		//cast the start of m_ParticleInfoBuffer to a glm::mat*, because the start of the buffer is the matrices
 		glm::mat4* modelBuffer = (glm::mat4*) m_ParticleInfoBuffer;
+
+		//cast the memory location of the part after the matrices to glm::vec4, because the colors(vec4s) are after the matrices in memory
 		glm::vec4* colorBuffer = (glm::vec4*) ((char*)m_ParticleInfoBuffer + m_ParticleCount * sizeof(glm::mat4));
 
+		//go through all the particles
 		for (unsigned int i = 0; i < m_ParticleCount; i++)
 		{
-			if (m_Particles[i].m_LifeTime == 0.0f)
-				m_Particles[i].m_LifeTime = 0.001f;
+			//get a value from 0 to 1, showing how much the particle lived.
+			//1 meaning it's lifetime is over and it is going to die (get deactivated and not rendered).
+			//0 meaning it's just been spawned (activated).
 			float t = (m_Particles[i].m_LifeTime - m_Particles[i].m_RemainingLifeTime) / m_Particles[i].m_LifeTime;
+
+			//create a new model matrix for each particle
 			glm::mat4 model = glm::mat4(1.0f);
 
+			//if the particle is acive update it's model matrix
 			if (m_Particles[i].isActive) {
-
+				//move particle to it's position
 				model = glm::translate(model, glm::vec3(m_Particles[i].m_Position.x, m_Particles[i].m_Position.y, 0.0f));
+				//use the t value to get the scale of the particle using it's scale interpolator
 				float scale = m_Particles[i].m_ScaleInterpolator.Interpolate(t);
+				//scale the particle by that value
 				model = glm::scale(model, glm::vec3(scale, scale, scale));
 
 			}
+			//if the particle is not active place it in a faraway place so it is not rendered
 			else
 			{
 				model = glm::translate(model, glm::vec3(-10000, -10000, 0.0f));
 			}
-
+			//update the model
 			modelBuffer[i] = model;
-
+			//interpolate the color using the t value using the particles color interpolator
 			colorBuffer[i] = m_Particles[i].m_ColorInterpolator.Interpolate(t);
 		}
 
-
+		//how many times we need to drae (currently we draw 40 particles at a time)
 		int drawCount = (int)m_Particles.size() / 40;
 
+		//draw 40 particles
 		for (int i = 0; i < drawCount; i++)
 		{
 			CircleShader.SetUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
@@ -149,32 +168,42 @@ namespace ALZ {
 			glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, 40);
 		}
 
+		//get the remaining particles 
 		int remaining = m_Particles.size() % 40;
 
+		//draw them
 		CircleShader.SetUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
 		CircleShader.SetUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
 		glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, remaining);
 	}
 
-	void ParticleSystem::SpawnParticle(const Particle & particle)
+	void ParticleSystem::SpawnParticle(const Particle& particle)
 	{
+		//go through all the particles
 		for (unsigned int i = 0; i < m_ParticleCount; i++)
 		{
+			//find a particle that is not active
 			if (!m_Particles[i].isActive)
 			{
+				//assign particle variables from the passed particle
 				m_Particles[i].m_Position = particle.m_Position;
 				m_Particles[i].m_ColorInterpolator = particle.m_ColorInterpolator;
 				m_Particles[i].m_Velocity = particle.m_Velocity;
 				m_Particles[i].isActive = true;
 				m_Particles[i].m_ScaleInterpolator = particle.m_ScaleInterpolator;
 				m_Particles[i].SetLifeTime(particle.m_LifeTime);
+
+				//break out of the for loop because we are spawning one particle only
 				break;
 			}
 		}
+
+		//if no inactive particle is found, don't do anything (do not spawn a new particle)
 	}
 
 	void ParticleSystem::ClearParticles()
 	{
+		//deactivate all particles which will make them stop rendering
 		for (Particle& m_particle : m_Particles)
 			m_particle.isActive = false;
 	}
@@ -182,20 +211,26 @@ namespace ALZ {
 	ParticleSystem::ParticleSystem(const ParticleSystem& Psystem) :
 		Customizer(Psystem.Customizer)
 	{
+		//allocate space for a model matrix (glm::mat4) and a color (glm::vec4) for each particle system
 		m_ParticleInfoBuffer = malloc((sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
+		//copy the info buffer from the object to be copied (Psystem) to the new object (this)
 		memcpy(m_ParticleInfoBuffer, Psystem.m_ParticleInfoBuffer, (sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
 
+		//copy other variables
 		m_Particles = Psystem.m_Particles;
 		m_ParticleCount = Psystem.m_ParticleCount;
 		m_Name = Psystem.m_Name;
 		EditorOpen = Psystem.EditorOpen;
 		ID = Psystem.ID;
 		RenameTextOpen = Psystem.RenameTextOpen;
+
+		//initilize the noise class
 		m_Noise.Init();
 	}
 
 	ParticleSystem ParticleSystem::operator=(const ParticleSystem & Psystem)
 	{
+		//forward the call to the copy constructor
 		return ParticleSystem(Psystem);
 	}
 
@@ -204,12 +239,13 @@ namespace ALZ {
 		if (EditorOpen)
 			Customizer.DisplayGUI(m_Name, EditorOpen);
 
-		//update editor line 
+		//update editor line
 		if (Customizer.Mode == SpawnMode::SpawnOnLine)
 		{
 			Customizer.m_Line.SetPoints(Customizer.m_LinePosition, Customizer.m_LineLength,Customizer.m_LineAngle);
 			Customizer.m_Line.Render(camera);
 		}
+		//update the editor circle
 		else if (Customizer.Mode == SpawnMode::SpawnOnCircle || Customizer.Mode == SpawnMode::SpawnInsideCircle && Selected)
 		{
 			Customizer.m_CircleOutline.Render(camera);
