@@ -14,7 +14,7 @@ namespace ALZ {
 		void SetLifeTime(const float& lifeTime);
 
 		InterpolationSelector<float> m_ScaleInterpolator;
-		InterpolationSelector<glm::vec4> m_Color;
+		InterpolationSelector<glm::vec4> m_ColorInterpolator;
 
 		bool isActive;
 

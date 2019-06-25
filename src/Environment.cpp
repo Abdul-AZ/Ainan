@@ -236,10 +236,14 @@ namespace ALZ {
 		ImGui::SameLine();
 
 		unsigned int activeParticleCount = 0;
-		for (Inspector_obj_ptr& pso : InspectorObjects)
+		for (Inspector_obj_ptr& object : InspectorObjects)
 		{
-			if (pso->Type == InspectorObjectType::ParticleSystemType) {
-				ParticleSystem* ps = static_cast<ParticleSystem*>(pso.get());
+			//if object is a particle system
+			if (object->Type == InspectorObjectType::ParticleSystemType) {
+				//cast it to a particle system pointer
+				ParticleSystem* ps = static_cast<ParticleSystem*>(object.get());
+
+				//increment active particles by how many particles are active in this particle system
 				activeParticleCount += ps->ActiveParticleCount;
 			}
 		}
@@ -497,13 +501,37 @@ namespace ALZ {
 
 	void Environment::Duplicate(InspectorInterface& obj)
 	{
-		if (obj.Type == InspectorObjectType::ParticleSystemType) {
-			std::unique_ptr<ParticleSystem> startingPS = std::make_unique<ParticleSystem>();
-			Inspector_obj_ptr startingPSi((InspectorInterface*)(startingPS.release()));
+		//if this object is a particle system
+		if (obj.Type == InspectorObjectType::ParticleSystemType) 
+		{
+			//make a new particle system
+			InspectorObjects.push_back(std::make_unique<ParticleSystem>());
 
-			InspectorObjects.push_back(std::move(startingPSi));
+			//derefrence both the new particle system and the one to be copied
+			//then copy the particle system using the equals operator (=)
 			*InspectorObjects[InspectorObjects.size() - 1].get() = *static_cast<ParticleSystem*>(&obj);
+
+			//add a -copy to the name of the new particle system to indicate that it was copied
 			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";
+
+			//increment the id to not have 2 particle systems with the same id
+			InspectorObjects[InspectorObjects.size() - 1]->ID++;
+		}
+
+		//if this object is a radial light
+		else if (obj.Type == InspectorObjectType::RadiaLightType) 
+		{
+			//make a new radial light
+			InspectorObjects.push_back(std::make_unique<RadialLight>());
+
+			//derefrence both the new light and the one to be copied
+			//then copy the particle system using the equals operator (=)
+			*InspectorObjects[InspectorObjects.size() - 1].get() = *static_cast<RadialLight*>(&obj);
+
+			//add a -copy to the name of the new light to indicate that it was copied
+			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";
+
+			//increment the id to not have 2 lights with the same id
 			InspectorObjects[InspectorObjects.size() - 1]->ID++;
 		}
 	}

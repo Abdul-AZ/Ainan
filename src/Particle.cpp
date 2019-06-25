@@ -5,7 +5,7 @@ namespace ALZ {
 
 	Particle::Particle() :
 		m_Position(0.0f, 0.0f),
-		m_Color(InterpolationType::Fixed, glm::vec4(0, 0, 0, 0), glm::vec4(0, 0, 0, 0)),
+		m_ColorInterpolator(InterpolationType::Fixed, glm::vec4(0, 0, 0, 0), glm::vec4(0, 0, 0, 0)),
 		m_Velocity(0.0f, 0.0f),
 		isActive(false),
 		m_LifeTime(0.0f),

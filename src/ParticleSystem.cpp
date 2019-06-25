@@ -136,7 +136,7 @@ namespace ALZ {
 
 			modelBuffer[i] = model;
 
-			colorBuffer[i] = m_Particles[i].m_Color.Interpolate(t);
+			colorBuffer[i] = m_Particles[i].m_ColorInterpolator.Interpolate(t);
 		}
 
 
@@ -163,7 +163,7 @@ namespace ALZ {
 			if (!m_Particles[i].isActive)
 			{
 				m_Particles[i].m_Position = particle.m_Position;
-				m_Particles[i].m_Color = particle.m_Color;
+				m_Particles[i].m_ColorInterpolator = particle.m_ColorInterpolator;
 				m_Particles[i].m_Velocity = particle.m_Velocity;
 				m_Particles[i].isActive = true;
 				m_Particles[i].m_ScaleInterpolator = particle.m_ScaleInterpolator;

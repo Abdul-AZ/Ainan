@@ -35,7 +35,7 @@ namespace ALZ {
 		}
 	}
 
-	InterpolationSelector<glm::vec4>& ColorCustomizer::GetColorInterpolator()
+	InterpolationSelector<glm::vec4> ColorCustomizer::GetColorInterpolator()
 	{
 		m_Interpolator.startPoint = m_DefinedColor;
 		m_Interpolator.endPoint = m_EndColor;

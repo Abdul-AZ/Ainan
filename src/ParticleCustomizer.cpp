@@ -173,7 +173,7 @@ namespace ALZ {
 		}
 
 		m_Particle.m_Velocity = m_VelocityCustomizer.GetVelocity();
-		m_Particle.m_Color = m_ColorCustomizer.GetColorInterpolator();
+		m_Particle.m_ColorInterpolator = m_ColorCustomizer.GetColorInterpolator();
 		m_Particle.SetLifeTime(m_LifetimeCustomizer.GetLifetime());
 
 		m_Particle.m_ScaleInterpolator = m_ScaleCustomizer.GetScaleInterpolator();

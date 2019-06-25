@@ -17,7 +17,7 @@ namespace ALZ {
 		ColorCustomizer();
 		void DisplayGUI();
 
-		InterpolationSelector<glm::vec4>& GetColorInterpolator();
+		InterpolationSelector<glm::vec4> GetColorInterpolator();
 
 	private:
 		glm::vec4 m_DefinedColor = { 1.0f,1.0f,1.0f,1.0f };
