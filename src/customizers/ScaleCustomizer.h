@@ -8,6 +8,7 @@ namespace ALZ {
 }
 
 #include "InterpolationSelector.h"
+#include "CurveEditor.h"
 
 namespace ALZ {
 
@@ -28,6 +29,7 @@ namespace ALZ {
 
 		//scale over time
 		InterpolationSelector<float> m_Interpolator;
+		CurveEditor m_Curve;
 		float m_EndScale = m_DefinedScale;
 
 		//random number generator

@@ -52,6 +52,9 @@ namespace ALZ {
 			if (m_EndScale < 0.0f)
 				m_EndScale = 0.0f;
 
+			m_Curve.Type = m_Interpolator.Type;
+			m_Curve.DisplayInCurrentWindow({ 100,75 });
+
 			ImGui::TreePop();
 		}
 	}
