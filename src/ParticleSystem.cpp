@@ -1,12 +1,16 @@
 #include <pch.h>
 #include "ParticleSystem.h"
 
+#include "graphics/VertexArray.h"
+
 namespace ALZ {
 
+	//vertex buffer object
 	static unsigned int VBO;
-	static unsigned int VAO;
+
 	static bool InitilizedCircleVertices = false;
 
+	static VertexArray* VAO = nullptr;
 	static int nameIndextemp = 0;
 
 	Texture DefaultTexture;
@@ -37,8 +41,8 @@ namespace ALZ {
 		//initilize the vertices only the first time a particle system is created
 		if (!InitilizedCircleVertices) {
 
-			glGenVertexArrays(1, &VAO);
-			glBindVertexArray(VAO);
+			VAO = Renderer::CreateVertexArray().release();
+			VAO->Bind();
 
 			glGenBuffers(1, &VBO);
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -104,7 +108,8 @@ namespace ALZ {
 	void ParticleSystem::Render(Camera& camera)
 	{
 		//bind vertex array and shader
-		glBindVertexArray(VAO);
+		//glBindVertexArray(VAO);
+		VAO->Bind();
 		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
 		CircleShader.Bind();
 
@@ -165,7 +170,7 @@ namespace ALZ {
 		{
 			CircleShader.SetUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
 			CircleShader.SetUniformMat4s("model", &modelBuffer[i * 40], 40);
-			glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, 40);
+			Renderer::DrawInstanced(*VAO, CircleShader, Primitive::TriangleFan, 26, 40);
 		}
 
 		//get the remaining particles 
@@ -174,7 +179,7 @@ namespace ALZ {
 		//draw them
 		CircleShader.SetUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
 		CircleShader.SetUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
-		glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, remaining);
+		Renderer::DrawInstanced(*VAO, CircleShader, Primitive::TriangleFan, 26, remaining);
 	}
 
 	void ParticleSystem::SpawnParticle(const Particle& particle)

@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "ShaderProgram.h"
 #include "RadialLight.h"
+#include "Renderer.h"
 
 //This should be the same as the one in the Background shader (inside the fragment shader)
 #define MAX_NUM_RADIAL_LIGHTS 10

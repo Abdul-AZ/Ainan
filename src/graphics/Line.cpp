@@ -6,14 +6,15 @@ namespace ALZ {
 
 	static bool LineBufferInitilized = false;
 	static unsigned int VBO = 0;
-	static unsigned int VAO = 0;
+	static VertexArray* VAO = nullptr;
 
 	Line::Line()
 	{
 		if (!LineBufferInitilized) {
 
-			glGenVertexArrays(1, &VAO);
-			glBindVertexArray(VAO);
+			VAO = Renderer::CreateVertexArray().release();
+			VAO->Bind();
+
 			glGenBuffers(1, &VBO);
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
@@ -58,7 +59,7 @@ namespace ALZ {
 		LineShader.SetUniformMat4("view", camera.ViewMatrix);
 
 		LineShader.Bind();
-		glBindVertexArray(VAO);
+		VAO->Bind();
 
 		glDrawArrays(GL_LINES, 0, 2);
 

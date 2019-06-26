@@ -7,16 +7,15 @@ namespace ALZ {
 	static bool CircleOutlineBuffersInitilized = false;
 	static unsigned int VBO = 0;
 	static unsigned int EBO = 0;
-	static unsigned int VAO = 0;
+	static VertexArray* VAO = 0;
 
 	static const int vertexCount = 60;
 	CircleOutline::CircleOutline()
 	{
 		if (!CircleOutlineBuffersInitilized){
 
-
-			glGenVertexArrays(1, &VAO);
-			glBindVertexArray(VAO);
+			VAO = Renderer::CreateVertexArray().release();
+			VAO->Bind();
 
 			glm::vec2 vertices[vertexCount];
 			unsigned int indecies[vertexCount * 2 - 2];
@@ -70,11 +69,11 @@ namespace ALZ {
 		CircleOutlineShader.SetUniformMat4("view", camera.ViewMatrix);
 		CircleOutlineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
 		CircleOutlineShader.SetUniformVec4("color", Color);
-		glBindVertexArray(VAO);
+		VAO->Bind();
 
 		glDrawElements(GL_LINES, vertexCount * 2 - 2, GL_UNSIGNED_INT, nullptr);
 
-		glBindVertexArray(0);
+		VAO->Unbind();
 		CircleOutlineShader.Unbind();
 	}
 

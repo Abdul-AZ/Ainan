@@ -4,7 +4,7 @@
 
 namespace ALZ {
 
-	static unsigned int VAO = 0;
+	static VertexArray* VAO = nullptr;
 	static unsigned int VBO = 0;
 
 	static bool BackgroundBuffersInitilized = false;
@@ -14,8 +14,8 @@ namespace ALZ {
 	{
 		if (!BackgroundBuffersInitilized) {
 
-			glGenVertexArrays(1, &VAO);
-			glBindVertexArray(VAO);
+			VAO = Renderer::CreateVertexArray().release();
+			VAO->Bind();
 
 			glGenBuffers(1, &VBO);
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -54,7 +54,7 @@ namespace ALZ {
 	{
 		ShaderProgram& BackgroundShader = ShaderProgram::GetBackgroundShader();
 
-		glBindVertexArray(VAO);
+		VAO->Unbind();
 		BackgroundShader.Bind();
 
 		//not used light spots
@@ -80,9 +80,9 @@ namespace ALZ {
 		model = glm::scale(model, glm::vec3(5000.0f));
 		BackgroundShader.SetUniformMat4("model", model);
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		Renderer::Draw(*VAO, BackgroundShader, Primitive::Triangles, 6);
 
-		glBindVertexArray(0);
+		VAO->Unbind();
 		BackgroundShader.Unbind();
 
 		m_RadialLightSubmissionCount = 0;

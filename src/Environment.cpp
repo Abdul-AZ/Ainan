@@ -54,8 +54,9 @@ namespace ALZ {
 
 	void Environment::Render()
 	{
+		Renderer::BeginScene(m_Camera);
 		m_FrameBuffer.Bind();
-		glClear(GL_COLOR_BUFFER_BIT);
+		Renderer::ClearScreen();
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 		{
@@ -94,6 +95,9 @@ namespace ALZ {
 		}
 
 		m_FrameBuffer.RenderToScreen();
+
+
+		Renderer::EndScene();
 	}
 
 	void Environment::RenderGUI()

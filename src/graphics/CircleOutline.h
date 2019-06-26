@@ -1,7 +1,6 @@
 #pragma once
 
-#include "ShaderProgram.h"
-#include "Camera.h"
+#include "Renderer.h"
 
 namespace ALZ {
 

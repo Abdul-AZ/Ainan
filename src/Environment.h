@@ -20,6 +20,7 @@
 #include "graphics/CircleOutline.h"
 #include "graphics/Background.h"
 #include "graphics/Grid.h"
+#include "Renderer.h"
 
 #include "InputManager.h"
 

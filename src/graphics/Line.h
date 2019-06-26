@@ -3,6 +3,7 @@
 #include "ShaderProgram.h"
 #include "Camera.h"
 #include "Window.h"
+#include "Renderer.h"
 
 namespace ALZ {
 
