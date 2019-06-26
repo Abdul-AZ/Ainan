@@ -2,15 +2,14 @@
 #include "ParticleSystem.h"
 
 #include "graphics/VertexArray.h"
+#include "graphics/VertexBuffer.h"
 
 namespace ALZ {
-
-	//vertex buffer object
-	static unsigned int VBO;
-
 	static bool InitilizedCircleVertices = false;
 
 	static VertexArray* VAO = nullptr;
+	static VertexBuffer* VBO = nullptr;
+
 	static int nameIndextemp = 0;
 
 	Texture DefaultTexture;
@@ -44,9 +43,6 @@ namespace ALZ {
 			VAO = Renderer::CreateVertexArray().release();
 			VAO->Bind();
 
-			glGenBuffers(1, &VBO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
 			//						 Position				  Texture Coordinates
 			glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0),
 									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 1.0),
@@ -56,17 +52,17 @@ namespace ALZ {
 									 glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
 									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 1.0) };
 
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
 
+			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices)).release();
+
+			//				 Position					Texture Coordinates
+			VBO->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
+
+			VBO->Unbind();
+			VAO->Unbind();
 
 			DefaultTexture.Init("res/Circle.png", 4);
-			glBindTexture(GL_TEXTURE_2D, (GLuint)DefaultTexture.TextureID);
+			DefaultTexture.Bind();
 
 			InitilizedCircleVertices = true;
 		}

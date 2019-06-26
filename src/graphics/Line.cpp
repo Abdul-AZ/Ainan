@@ -5,8 +5,8 @@
 namespace ALZ {
 
 	static bool LineBufferInitilized = false;
-	static unsigned int VBO = 0;
 	static VertexArray* VAO = nullptr;
+	static VertexBuffer* VBO = nullptr;
 
 	Line::Line()
 	{
@@ -15,15 +15,10 @@ namespace ALZ {
 			VAO = Renderer::CreateVertexArray().release();
 			VAO->Bind();
 
-			glGenBuffers(1, &VBO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2).release();
+			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
-
-			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 2, 0, GL_DYNAMIC_DRAW);
-
-			glBindVertexArray(0);
+			VAO->Unbind();
 
 			LineBufferInitilized = true;
 		}
@@ -96,8 +91,6 @@ namespace ALZ {
 	{
 		glm::vec2 vertices[] = { m_StartPoint, m_EndPoint };
 
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 2, vertices);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		VBO->UpdateData(0, sizeof(vertices), vertices);
 	}
 }

@@ -5,8 +5,9 @@
 namespace ALZ {
 
 	static bool CircleOutlineBuffersInitilized = false;
-	static unsigned int VBO = 0;
 	static unsigned int EBO = 0;
+
+	static VertexBuffer* VBO = 0;
 	static VertexArray* VAO = 0;
 
 	static const int vertexCount = 60;
@@ -36,13 +37,8 @@ namespace ALZ {
 			}
 			vertices[vertexCount - 1] = vertices[0];
 
-			glGenBuffers(1, &VBO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
-
-			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * vertexCount, vertices, GL_STATIC_DRAW);
+			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * vertexCount).release();
+			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
 			glGenBuffers(1, &EBO);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);

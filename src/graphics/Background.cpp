@@ -5,10 +5,9 @@
 namespace ALZ {
 
 	static VertexArray* VAO = nullptr;
-	static unsigned int VBO = 0;
+	static VertexBuffer* VBO = nullptr;
 
 	static bool BackgroundBuffersInitilized = false;
-
 
 	Background::Background()
 	{
@@ -16,9 +15,6 @@ namespace ALZ {
 
 			VAO = Renderer::CreateVertexArray().release();
 			VAO->Bind();
-
-			glGenBuffers(1, &VBO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 			glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f),
 									 glm::vec2(1.0f, -1.0f),
@@ -28,11 +24,11 @@ namespace ALZ {
 									 glm::vec2(1.0f, 1.0f),
 									 glm::vec2(-1.0f, 1.0f) };
 
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices)).release();
 
-			glBindVertexArray(0);
+			VBO->SetLayout({ ShaderVariableType::Vec2 });
+
+			VAO->Unbind();
 
 			BackgroundBuffersInitilized = true;
 		}
