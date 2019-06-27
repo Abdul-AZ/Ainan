@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/FrameBuffer.h"
+#include "graphics/RenderSurface.h"
 #include "stb/stb_image_write.h"
 
 namespace ALZ {
@@ -23,8 +23,8 @@ namespace ALZ {
 		Image operator=(const Image& image);
 
 		static std::string GetFormatString(const ImageFormat& format);
-		static Image FromFrameBuffer(FrameBuffer& framebuffer);
-		static Image FromFrameBuffer(FrameBuffer& framebuffer, const unsigned int& width, const unsigned int& height);
+		static Image FromFrameBuffer(RenderSurface& framebuffer);
+		static Image FromFrameBuffer(RenderSurface& framebuffer, const unsigned int& width, const unsigned int& height);
 
 	private:
 		//pointer to the image pixel array

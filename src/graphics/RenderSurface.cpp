@@ -1,16 +1,17 @@
 #include <pch.h>
-#include "FrameBuffer.h"
+
+#include "RenderSurface.h"
 
 namespace ALZ {
 
 	static ShaderProgram* ImageShader = nullptr;
 	static bool ImageShaderInitilized = false;
 
-	FrameBuffer::FrameBuffer()
+	RenderSurface::RenderSurface()
 	{
-		glGenFramebuffers(1, &RendererID);
+		m_FrameBuffer = Renderer::CreateFrameBuffer();
 
-		Bind();
+		m_FrameBuffer->Bind();
 
 		glGenTextures(1, &m_Texture);
 		glBindTexture(GL_TEXTURE_2D, m_Texture);
@@ -46,7 +47,7 @@ namespace ALZ {
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-		Unbind();
+		m_FrameBuffer->Unbind();
 
 		if (ImageShaderInitilized == false)
 		{
@@ -55,15 +56,14 @@ namespace ALZ {
 		}
 	}
 
-	FrameBuffer::~FrameBuffer()
+	RenderSurface::~RenderSurface()
 	{
-		glDeleteFramebuffers(1, &RendererID);
 		glDeleteTextures(1, &m_Texture);
 		glDeleteBuffers(1, &m_VertexBuffer);
 		glDeleteVertexArrays(1, &m_VertexArray);
 	}
 
-	void FrameBuffer::Render()
+	void RenderSurface::Render()
 	{
 		glBindVertexArray(m_VertexArray);
 		ImageShader->SetUniform1i("screenTexture", 0);
@@ -72,7 +72,7 @@ namespace ALZ {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
-	void FrameBuffer::Render(ShaderProgram & shader)
+	void RenderSurface::Render(ShaderProgram & shader)
 	{
 		glBindVertexArray(m_VertexArray);
 		shader.Bind();
@@ -80,9 +80,9 @@ namespace ALZ {
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
-	void FrameBuffer::RenderToScreen()
+	void RenderSurface::RenderToScreen()
 	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, RendererID);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_FrameBuffer->GetRendererID());
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 		glBlitFramebuffer(0, 0, (GLint)m_Size.x, (GLint)m_Size.y,
@@ -93,10 +93,10 @@ namespace ALZ {
 		glViewport(0, 0, (GLsizei)Window::WindowSize.x, (GLsizei)Window::WindowSize.y);
 	}
 
-	void FrameBuffer::SetSize(const glm::vec2 & size)
+	void RenderSurface::SetSize(const glm::vec2 & size)
 	{
 		m_Size = size;
-		Bind();
+		m_FrameBuffer->Bind();
 		glDeleteTextures(1, &m_Texture);
 
 		glGenTextures(1, &m_Texture);
@@ -109,16 +109,6 @@ namespace ALZ {
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_Texture, 0);
-		Unbind();
-	}
-
-	void FrameBuffer::Bind() const
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, RendererID);
-	}
-
-	void FrameBuffer::Unbind() const
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		m_FrameBuffer->Unbind();
 	}
 }

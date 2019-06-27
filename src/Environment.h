@@ -14,7 +14,7 @@
 
 #include "ImGuiWrapper.h"
 
-#include "graphics/FrameBuffer.h"
+#include "graphics/RenderSurface.h"
 #include "graphics/GaussianBlur.h"
 #include "graphics/Texture.h"
 #include "graphics/CircleOutline.h"
@@ -72,7 +72,7 @@ namespace ALZ {
 		std::clock_t timeStart = 0, timeEnd = 0;
 		GeneralSettingsGUI m_Settings;
 
-		FrameBuffer m_FrameBuffer;
+		RenderSurface m_FrameBuffer;
 		Camera m_Camera;
 		InputManager m_InputManager;
 		Grid m_Grid;

@@ -77,7 +77,8 @@ namespace ALZ {
 			return std::make_unique<OpenGLVertexArray>();
 
 		default:
-			return std::make_unique<OpenGLVertexArray>();
+			assert(false);
+			return nullptr;
 		}
 	}
 
@@ -89,7 +90,8 @@ namespace ALZ {
 			return std::make_unique<OpenGLVertexBuffer>(data, size);
 
 		default:
-			return std::make_unique<OpenGLVertexBuffer>(data, size);
+			assert(false);
+			return nullptr;
 		}
 	}
 
@@ -101,7 +103,8 @@ namespace ALZ {
 			return std::make_unique<OpenGLIndexBuffer>(data, count);
 
 		default:
-			return std::make_unique<OpenGLIndexBuffer>(data, count);
+			assert(false);
+			return nullptr;
 		}
 	}
 
@@ -113,7 +116,21 @@ namespace ALZ {
 			return std::make_unique<OpenGLShaderProgram>(vertPath, fragPath);
 
 		default:
-			return std::make_unique<OpenGLShaderProgram>(vertPath, fragPath);
+			assert(false);
+			return nullptr;
+		}
+	}
+
+	std::unique_ptr<FrameBuffer> Renderer::CreateFrameBuffer()
+	{
+		switch (m_CurrentActiveAPI->GetType())
+		{
+		case RendererType::OpenGL:
+			return std::make_unique<OpenGLFrameBuffer>();
+
+		default:
+			assert(false);
+			return nullptr;
 		}
 	}
 }

@@ -55,7 +55,7 @@ namespace ALZ {
 	void Environment::Render()
 	{
 		Renderer::BeginScene(m_Camera);
-		m_FrameBuffer.Bind();
+		m_FrameBuffer.m_FrameBuffer->Bind();
 		Renderer::ClearScreen();
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
@@ -86,7 +86,7 @@ namespace ALZ {
 
 		if (m_Status == EnvironmentStatus::None) {
 			m_FrameBuffer.RenderToScreen();
-			m_FrameBuffer.Unbind();
+			m_FrameBuffer.m_FrameBuffer->Unbind();
 			return;
 		}
 
@@ -94,12 +94,12 @@ namespace ALZ {
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 			obj->Render(m_Camera);
 
-		m_FrameBuffer.Unbind();
+		m_FrameBuffer.m_FrameBuffer->Unbind();
 
 		if (m_Settings.BlurEnabled)
 			GaussianBlur::Blur(m_FrameBuffer, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
 
-		m_FrameBuffer.Bind();
+		m_FrameBuffer.m_FrameBuffer->Bind();
 
 		if (m_SaveNextFrameAsImage) {
 			Image image = Image::FromFrameBuffer(m_FrameBuffer, m_Settings.ImageResolution.x, m_Settings.ImageResolution.y);

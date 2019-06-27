@@ -7,12 +7,14 @@
 #include "graphics/VertexArray.h"
 #include "graphics/VertexBuffer.h"
 #include "graphics/IndexBuffer.h"
+#include "graphics/FrameBuffer.h"
 
 #include "opengl/OpenGLRendererAPI.h"
 #include "opengl/OpenGLShaderProgram.h"
 #include "opengl/OpenGLVertexArray.h"
 #include "opengl/OpenGLVertexBuffer.h"
 #include "opengl/OpenGLIndexBuffer.h"
+#include "opengl/OpenGLFrameBuffer.h"
 
 namespace ALZ {
 
@@ -45,6 +47,7 @@ namespace ALZ {
 		//data should ALWAYS an UNSIGNED INT array
 		static std::unique_ptr<IndexBuffer> CreateIndexBuffer(unsigned int* data, const int& count);
 		static std::unique_ptr<ShaderProgram> CreateShaderProgram(const std::string& vertPath, const std::string& fragPath);
+		static std::unique_ptr<FrameBuffer> CreateFrameBuffer();
 	private:
 		static Camera* m_Camera;
 		static RendererAPI* m_CurrentActiveAPI;
