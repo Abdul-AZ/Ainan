@@ -13,6 +13,11 @@ namespace ALZ {
 		glDrawArraysInstanced(GetOpenGLPrimitive(primitive), 0, vertexCount, objectCount);
 	}
 
+	void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
+	{
+		glDrawElements(GetOpenGLPrimitive(primitive), indexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
+	}
+
 	void OpenGLRendererAPI::ClearScreen()
 	{
 		glClear(GL_COLOR_BUFFER_BIT);

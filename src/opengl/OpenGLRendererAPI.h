@@ -2,6 +2,7 @@
 
 #include "graphics/RendererAPI.h"
 #include "graphics/ShaderProgram.h"
+#include "graphics/IndexBuffer.h"
 
 #include <glad/glad.h>
 
@@ -17,6 +18,9 @@ namespace ALZ {
 		case Primitive::TriangleFan:
 			return GL_TRIANGLE_FAN;
 
+		case Primitive::Lines:
+			return GL_LINES;
+
 		default:
 			assert(false);
 			return 0;
@@ -31,9 +35,9 @@ namespace ALZ {
 		// Inherited via RendererAPI
 		virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount) override;
 		virtual void DrawInstanced(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount, const unsigned int& objectCount) override;
-		virtual void ClearScreen() override;
+		virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer) override;
 
-		// Inherited via RendererAPI
+		virtual void ClearScreen() override;
 		virtual RendererType GetType() const override { return RendererType::OpenGL; }
 	};
 

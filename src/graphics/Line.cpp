@@ -47,19 +47,18 @@ namespace ALZ {
 
 	void Line::Render(Camera& camera)
 	{
-		glLineWidth(Width);
-		ShaderProgram& LineShader = ShaderProgram::GetLineShader();
-		LineShader.SetUniformVec4("color", Color);
-		LineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
-		LineShader.SetUniformMat4("view", camera.ViewMatrix);
+		ShaderProgram& lineShader = ShaderProgram::GetLineShader();
+		lineShader.SetUniformVec4("color", Color);
+		lineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
+		lineShader.SetUniformMat4("view", camera.ViewMatrix);
 
-		LineShader.Bind();
+		lineShader.Bind();
 		VAO->Bind();
 
-		glDrawArrays(GL_LINES, 0, 2);
+		Renderer::Draw(*VAO, lineShader, Primitive::Lines, 2);
 
-		glBindVertexArray(0);
-		LineShader.Unbind();
+		VAO->Unbind();
+		lineShader.Unbind();
 	}
 
 	float Line::GetSlope()

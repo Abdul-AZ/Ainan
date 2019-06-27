@@ -52,11 +52,12 @@ namespace ALZ {
 	{
 		Bind();
 		glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
-		Unbind();
 	}
 
 	void OpenGLVertexBuffer::SetLayout(const VertexLayout& layout)
 	{
+		Bind();
+
 		int index = 0;
 		int offset = 0;
 		for (auto& type : layout)

@@ -244,12 +244,6 @@ namespace ALZ {
 		if (Customizer.Mode == SpawnMode::SpawnOnLine)
 		{
 			Customizer.m_Line.SetPoints(Customizer.m_LinePosition, Customizer.m_LineLength,Customizer.m_LineAngle);
-			Customizer.m_Line.Render(camera);
-		}
-		//update the editor circle
-		else if (Customizer.Mode == SpawnMode::SpawnOnCircle || Customizer.Mode == SpawnMode::SpawnInsideCircle && Selected)
-		{
-			Customizer.m_CircleOutline.Render(camera);
 		}
 	}
 

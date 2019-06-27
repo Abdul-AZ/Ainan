@@ -25,7 +25,6 @@ namespace ALZ {
 									 glm::vec2(-1.0f, 1.0f) };
 
 			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices)).release();
-
 			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
 			VAO->Unbind();

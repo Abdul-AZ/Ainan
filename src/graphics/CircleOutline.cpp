@@ -5,10 +5,9 @@
 namespace ALZ {
 
 	static bool CircleOutlineBuffersInitilized = false;
-	static unsigned int EBO = 0;
-
-	static VertexBuffer* VBO = 0;
-	static VertexArray* VAO = 0;
+	static IndexBuffer* EBO = nullptr;
+	static VertexBuffer* VBO = nullptr;
+	static VertexArray* VAO = nullptr;
 
 	static const int vertexCount = 60;
 	CircleOutline::CircleOutline()
@@ -40,11 +39,9 @@ namespace ALZ {
 			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * vertexCount).release();
 			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
-			glGenBuffers(1, &EBO);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * vertexCount * 2 - 2, indecies, GL_STATIC_DRAW);
+			EBO = Renderer::CreateIndexBuffer(indecies, vertexCount * 2 - 2).release();
 
-			glBindVertexArray(0);
+			VAO->Unbind();
 
 			CircleOutlineBuffersInitilized = true;
 		}
@@ -52,25 +49,23 @@ namespace ALZ {
 
 	void CircleOutline::Render(Camera& camera)
 	{
-		ShaderProgram& CircleOutlineShader = ShaderProgram::GetCircleOutlineShader();
-
-		glLineWidth(3.0f);
+		ShaderProgram& circleOutlineShader = ShaderProgram::GetCircleOutlineShader();
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(Position.x * GlobalScaleFactor, Position.y * GlobalScaleFactor, 0.0f));
 		model = glm::scale(model, glm::vec3(Radius * GlobalScaleFactor, Radius * GlobalScaleFactor, Radius * GlobalScaleFactor));
 
-		CircleOutlineShader.Bind();
-		CircleOutlineShader.SetUniformMat4("model", model);
-		CircleOutlineShader.SetUniformMat4("view", camera.ViewMatrix);
-		CircleOutlineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
-		CircleOutlineShader.SetUniformVec4("color", Color);
+		circleOutlineShader.Bind();
+		circleOutlineShader.SetUniformMat4("model", model);
+		circleOutlineShader.SetUniformMat4("view", camera.ViewMatrix);
+		circleOutlineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
+		circleOutlineShader.SetUniformVec4("color", Color);
 		VAO->Bind();
 
-		glDrawElements(GL_LINES, vertexCount * 2 - 2, GL_UNSIGNED_INT, nullptr);
+		Renderer::Draw(*VAO, circleOutlineShader, Primitive::Lines, *EBO);
 
 		VAO->Unbind();
-		CircleOutlineShader.Unbind();
+		circleOutlineShader.Unbind();
 	}
 
 	glm::vec2 CircleOutline::GetPointByAngle(const float & angle_in_radians)

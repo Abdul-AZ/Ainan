@@ -50,6 +50,20 @@ namespace ALZ {
 		m_Camera = nullptr;
 	}
 
+	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
+	{
+		vertexArray.Bind();
+		shader.Bind();
+
+		shader.SetUniformMat4("projection", m_Camera->ProjectionMatrix);
+		shader.SetUniformMat4("view", m_Camera->ViewMatrix);
+
+		m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer);
+
+		vertexArray.Unbind();
+		shader.Unbind();
+	}
+
 	void Renderer::ClearScreen()
 	{
 		m_CurrentActiveAPI->ClearScreen();
@@ -76,6 +90,18 @@ namespace ALZ {
 
 		default:
 			return std::make_unique<OpenGLVertexBuffer>(data, size);
+		}
+	}
+
+	std::unique_ptr<IndexBuffer> Renderer::CreateIndexBuffer(unsigned int* data, const int& count)
+	{
+		switch (m_CurrentActiveAPI->GetType())
+		{
+		case RendererType::OpenGL:
+			return std::make_unique<OpenGLIndexBuffer>(data, count);
+
+		default:
+			return std::make_unique<OpenGLIndexBuffer>(data, count);
 		}
 	}
 }

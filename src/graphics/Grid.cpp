@@ -10,7 +10,7 @@ namespace ALZ {
 	static bool GridBufferInitilized = false;
 	static VertexArray* VAO = nullptr;
 	static VertexBuffer* VBO = nullptr;
-	static unsigned int EBO = 0;
+	static IndexBuffer* EBO = nullptr;
 
 	static std::vector<glm::vec2> vertices;
 	static std::vector<unsigned int> indecies;
@@ -71,9 +71,7 @@ namespace ALZ {
 			VBO = Renderer::CreateVertexBuffer(vertices.data(), sizeof(glm::vec2) * vertices.size()).release();
 			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
-			glGenBuffers(1, &EBO);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indecies.size(), indecies.data(), GL_DYNAMIC_DRAW);
+			EBO = Renderer::CreateIndexBuffer(indecies.data(), indecies.size()).release();
 
 			VAO->Unbind();
 
@@ -91,7 +89,7 @@ namespace ALZ {
 		lineShader.SetUniformMat4("view", camera.ViewMatrix);
 		lineShader.SetUniformVec4("color", glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
 
-		glDrawElements(GL_LINES, 400 + 2, GL_UNSIGNED_INT, nullptr);
+		Renderer::Draw(*VAO, lineShader, Primitive::Lines, *EBO);
 
 		VAO->Unbind();
 		lineShader.Unbind();

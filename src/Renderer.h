@@ -5,10 +5,12 @@
 #include "graphics/RendererAPI.h"
 #include "graphics/VertexArray.h"
 #include "graphics/VertexBuffer.h"
+#include "graphics/IndexBuffer.h"
 
 #include "opengl/OpenGLRendererAPI.h"
 #include "opengl/OpenGLVertexArray.h"
 #include "opengl/OpenGLVertexBuffer.h"
+#include "opengl/OpenGLIndexBuffer.h"
 
 namespace ALZ {
 
@@ -24,16 +26,22 @@ namespace ALZ {
 
 		//these will be changed to SubmitRenderCommand() or something like that
 
-		//these overloads do not use an index buffer
+		//these overloads DO NOT use an index buffer
 		static void Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode,
 						 const unsigned int& vertexCount);
 		static void DrawInstanced(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode,
 								  const unsigned int& vertexCount, const unsigned int& objectCount);
 
+		//these overloads DO use an index buffer
+		static void Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive,
+						 const IndexBuffer& indexBuffer);
+
 		static void ClearScreen();
 
 		static std::unique_ptr<VertexArray> CreateVertexArray();
 		static std::unique_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size);
+		//data should ALWAYS an UNSIGNED INT array
+		static std::unique_ptr<IndexBuffer> CreateIndexBuffer(unsigned int* data, const int& count);
 	private:
 		static Camera* m_Camera;
 		static RendererAPI* m_CurrentActiveAPI;
