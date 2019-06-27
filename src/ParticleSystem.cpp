@@ -6,9 +6,9 @@
 
 namespace ALZ {
 	static bool InitilizedCircleVertices = false;
-
 	static VertexArray* VAO = nullptr;
 	static VertexBuffer* VBO = nullptr;
+	static ShaderProgram* CircleInstancedShader = nullptr;
 
 	static int nameIndextemp = 0;
 
@@ -64,6 +64,8 @@ namespace ALZ {
 			DefaultTexture.Init("res/Circle.png", 4);
 			DefaultTexture.Bind();
 
+			CircleInstancedShader = Renderer::CreateShaderProgram("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag").release();
+
 			InitilizedCircleVertices = true;
 		}
 	}
@@ -90,15 +92,13 @@ namespace ALZ {
 
 	void ParticleSystem::UpdateUniforms(Camera & camera)
 	{
-		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
-
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-		CircleShader.SetUniformMat4("projection", camera.ProjectionMatrix);
-		CircleShader.SetUniformMat4("view", camera.ViewMatrix);
+		CircleInstancedShader->SetUniformMat4("projection", camera.ProjectionMatrix);
+		CircleInstancedShader->SetUniformMat4("view", camera.ViewMatrix);
 	}
 
 	void ParticleSystem::Render(Camera& camera)
@@ -106,11 +106,10 @@ namespace ALZ {
 		//bind vertex array and shader
 		//glBindVertexArray(VAO);
 		VAO->Bind();
-		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
-		CircleShader.Bind();
+		CircleInstancedShader->Bind();
 
 		//set texture uniform (Sampler2D) to 0
-		CircleShader.SetUniform1i("particleTexture", 0);
+		CircleInstancedShader->SetUniform1i("particleTexture", 0);
 
 		//if we are using the default texture
 		if (Customizer.m_TextureCustomizer.UseDefaultTexture)
@@ -164,18 +163,18 @@ namespace ALZ {
 		//draw 40 particles
 		for (int i = 0; i < drawCount; i++)
 		{
-			CircleShader.SetUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
-			CircleShader.SetUniformMat4s("model", &modelBuffer[i * 40], 40);
-			Renderer::DrawInstanced(*VAO, CircleShader, Primitive::TriangleFan, 26, 40);
+			CircleInstancedShader->SetUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
+			CircleInstancedShader->SetUniformMat4s("model", &modelBuffer[i * 40], 40);
+			Renderer::DrawInstanced(*VAO, *CircleInstancedShader, Primitive::TriangleFan, 26, 40);
 		}
 
 		//get the remaining particles 
 		int remaining = m_Particles.size() % 40;
 
 		//draw them
-		CircleShader.SetUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
-		CircleShader.SetUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
-		Renderer::DrawInstanced(*VAO, CircleShader, Primitive::TriangleFan, 26, remaining);
+		CircleInstancedShader->SetUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
+		CircleInstancedShader->SetUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
+		Renderer::DrawInstanced(*VAO, *CircleInstancedShader, Primitive::TriangleFan, 26, remaining);
 	}
 
 	void ParticleSystem::SpawnParticle(const Particle& particle)

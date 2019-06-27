@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Window.h"
-#include "ShaderProgram.h"
+#include "Renderer.h"
 
 namespace ALZ {
 

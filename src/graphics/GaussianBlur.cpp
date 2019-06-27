@@ -3,13 +3,13 @@
 
 namespace ALZ {
 
-	ShaderProgram GaussianBlur::Hblur5x5;
-	ShaderProgram GaussianBlur::Vblur5x5;
+	ShaderProgram* GaussianBlur::Hblur5x5;
+	ShaderProgram* GaussianBlur::Vblur5x5;
 
 	void GaussianBlur::Init()
 	{
-		Hblur5x5.Init("shaders/Image.vert", "shaders/GaussianBlur5x5H.frag");
-		Vblur5x5.Init("shaders/Image.vert", "shaders/GaussianBlur5x5V.frag");
+		Hblur5x5 = Renderer::CreateShaderProgram("shaders/Image.vert", "shaders/GaussianBlur5x5H.frag").release();
+		Vblur5x5 = Renderer::CreateShaderProgram("shaders/Image.vert", "shaders/GaussianBlur5x5V.frag").release();
 	}
 
 	void GaussianBlur::Blur(FrameBuffer & frameBuffer, const float& scale, const float& blurScale, const float& sigma)
@@ -23,21 +23,21 @@ namespace ALZ {
 		{
 			BlurPixelValues[i] = GaussianDistribution((float)i, sigma) * blurScale;
 		}
-		Hblur5x5.SetUniform1fs("BlurStrength", BlurPixelValues, 3);
-		Vblur5x5.SetUniform1fs("BlurStrength", BlurPixelValues, 3);
+		Hblur5x5->SetUniform1fs("BlurStrength", BlurPixelValues, 3);
+		Vblur5x5->SetUniform1fs("BlurStrength", BlurPixelValues, 3);
 
 
 		//Horizontal blur
 		FrameBuffer tempFB;
 		tempFB.SetSize(downsampled);
 		tempFB.Bind();
-		frameBuffer.Render(Hblur5x5);
+		frameBuffer.Render(*Hblur5x5);
 
 		//Vertical blur directly to screen buffer
 		FrameBuffer tempFB2;
 		tempFB2.SetSize(downsampled);
 		tempFB2.Bind();
-		frameBuffer.Render(Vblur5x5);
+		frameBuffer.Render(*Vblur5x5);
 
 		frameBuffer.Bind();
 		glClear(GL_COLOR_BUFFER_BIT);

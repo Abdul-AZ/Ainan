@@ -11,6 +11,7 @@ namespace ALZ {
 	static VertexArray* VAO = nullptr;
 	static VertexBuffer* VBO = nullptr;
 	static IndexBuffer* EBO = nullptr;
+	static ShaderProgram* LineShader = nullptr;
 
 	static std::vector<glm::vec2> vertices;
 	static std::vector<unsigned int> indecies;
@@ -22,7 +23,6 @@ namespace ALZ {
 			//reserve vector space for vertices
 			vertices.reserve(VERTICES_PER_AXIS * 4 + 2);
 			indecies.reserve(VERTICES_PER_AXIS * 4 + 4);
-
 
 			//generate vertices
 			//these are the vertices that are on each side
@@ -75,6 +75,8 @@ namespace ALZ {
 
 			VAO->Unbind();
 
+			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/Line.frag").release();
+
 			GridBufferInitilized = true;
 		}
 	}
@@ -82,16 +84,15 @@ namespace ALZ {
 	void Grid::Render(Camera& camera)
 	{
 		VAO->Bind();
-		ShaderProgram& lineShader = ShaderProgram::GetLineShader();
-		lineShader.Bind();
+		LineShader->Bind();
 
-		lineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
-		lineShader.SetUniformMat4("view", camera.ViewMatrix);
-		lineShader.SetUniformVec4("color", glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
+		LineShader->SetUniformMat4("projection", camera.ProjectionMatrix);
+		LineShader->SetUniformMat4("view", camera.ViewMatrix);
+		LineShader->SetUniformVec4("color", glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
 
-		Renderer::Draw(*VAO, lineShader, Primitive::Lines, *EBO);
+		Renderer::Draw(*VAO, *LineShader, Primitive::Lines, *EBO);
 
 		VAO->Unbind();
-		lineShader.Unbind();
+		LineShader->Unbind();
 	}
 }

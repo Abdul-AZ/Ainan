@@ -104,4 +104,16 @@ namespace ALZ {
 			return std::make_unique<OpenGLIndexBuffer>(data, count);
 		}
 	}
+
+	std::unique_ptr<ShaderProgram> Renderer::CreateShaderProgram(const std::string& vertPath, const std::string& fragPath)
+	{
+		switch (m_CurrentActiveAPI->GetType())
+		{
+		case RendererType::OpenGL:
+			return std::make_unique<OpenGLShaderProgram>(vertPath, fragPath);
+
+		default:
+			return std::make_unique<OpenGLShaderProgram>(vertPath, fragPath);
+		}
+	}
 }

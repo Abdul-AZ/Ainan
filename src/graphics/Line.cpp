@@ -7,6 +7,7 @@ namespace ALZ {
 	static bool LineBufferInitilized = false;
 	static VertexArray* VAO = nullptr;
 	static VertexBuffer* VBO = nullptr;
+	static ShaderProgram* LineShader = nullptr;
 
 	Line::Line()
 	{
@@ -19,7 +20,7 @@ namespace ALZ {
 			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
 			VAO->Unbind();
-
+			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/Line.frag").release();
 			LineBufferInitilized = true;
 		}
 	}
@@ -47,18 +48,17 @@ namespace ALZ {
 
 	void Line::Render(Camera& camera)
 	{
-		ShaderProgram& lineShader = ShaderProgram::GetLineShader();
-		lineShader.SetUniformVec4("color", Color);
-		lineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
-		lineShader.SetUniformMat4("view", camera.ViewMatrix);
+		LineShader->SetUniformVec4("color", Color);
+		LineShader->SetUniformMat4("projection", camera.ProjectionMatrix);
+		LineShader->SetUniformMat4("view", camera.ViewMatrix);
 
-		lineShader.Bind();
+		LineShader->Bind();
 		VAO->Bind();
 
-		Renderer::Draw(*VAO, lineShader, Primitive::Lines, 2);
+		Renderer::Draw(*VAO, *LineShader, Primitive::Lines, 2);
 
 		VAO->Unbind();
-		lineShader.Unbind();
+		LineShader->Unbind();
 	}
 
 	float Line::GetSlope()

@@ -3,6 +3,9 @@
 
 namespace ALZ {
 
+	static ShaderProgram* ImageShader = nullptr;
+	static bool ImageShaderInitilized = false;
+
 	FrameBuffer::FrameBuffer()
 	{
 		glGenFramebuffers(1, &RendererID);
@@ -44,6 +47,12 @@ namespace ALZ {
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
 		Unbind();
+
+		if (ImageShaderInitilized == false)
+		{
+			ImageShader = Renderer::CreateShaderProgram("shaders/Image.vert", "shaders/Image.frag").release();
+			ImageShaderInitilized = true;
+		}
 	}
 
 	FrameBuffer::~FrameBuffer()
@@ -57,9 +66,8 @@ namespace ALZ {
 	void FrameBuffer::Render()
 	{
 		glBindVertexArray(m_VertexArray);
-		ShaderProgram& ImageShader = ShaderProgram::GetImageShader();
-		ImageShader.SetUniform1i("screenTexture", 0);
-		ImageShader.Bind();
+		ImageShader->SetUniform1i("screenTexture", 0);
+		ImageShader->Bind();
 		glBindTexture(GL_TEXTURE_2D, m_Texture);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
