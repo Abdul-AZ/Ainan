@@ -1,7 +1,6 @@
 #include <pch.h>
 
-#include "Texture.h"
-#include "stb/stb_image.h"
+/*
 
 namespace ALZ {
 
@@ -10,11 +9,12 @@ namespace ALZ {
 		if (TextureActive)
 			Delete();
 
+		glGenTextures(1, (GLuint*)& TextureID);
+		TextureActive = true;
+
 		int width, height, bytes_per_pixel;
 		unsigned char* data = stbi_load(pathToImage.c_str(), &width, &height, &bytes_per_pixel, bytesPerPixel);
 
-		glGenTextures(1, (GLuint*)&TextureID);
-		TextureActive = true;
 		glBindTexture(GL_TEXTURE_2D, (GLuint)TextureID);
 
 		if (bytesPerPixel == 3)
@@ -39,6 +39,10 @@ namespace ALZ {
 			Delete();
 	}
 
+	void Texture::SetImage(const Image& image)
+	{
+	}
+
 	void Texture::Bind(const int& slot)
 	{
 		glActiveTexture(GL_TEXTURE0 + slot);
@@ -50,3 +54,5 @@ namespace ALZ {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }
+
+*/

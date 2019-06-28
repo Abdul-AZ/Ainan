@@ -39,6 +39,15 @@ namespace ALZ {
 			delete[] m_Data;
 	}
 
+	Image Image::LoadFromFile(const std::string& pathAndName, int desiredComp)
+	{
+		Image image;
+
+		image.m_Data = stbi_load(pathAndName.c_str(), &image.m_Width, &image.m_Height, &image.m_Comp, desiredComp);
+
+		return image;
+	}
+
 	void Image::SaveToFile(const std::string& pathAndName, const ImageFormat & format)
 	{
 		unsigned char* dataCpy = new unsigned char[m_Width * m_Height * m_Comp * sizeof(unsigned char)];

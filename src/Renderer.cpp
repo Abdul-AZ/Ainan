@@ -133,4 +133,17 @@ namespace ALZ {
 			return nullptr;
 		}
 	}
+
+	std::unique_ptr<Texture> Renderer::CreateTexture()
+	{
+		switch (m_CurrentActiveAPI->GetType())
+		{
+		case RendererType::OpenGL:
+			return std::make_unique<OpenGLTexture>();
+
+		default:
+			assert(false);
+			return nullptr;
+		}
+	}
 }

@@ -4,6 +4,7 @@ namespace ALZ {
 
 	class ShaderProgram;
 	class IndexBuffer;
+	class Texture;
 
 	enum class RendererType {
 		OpenGL
@@ -27,7 +28,6 @@ namespace ALZ {
 		virtual void Draw(ShaderProgram& shader, const Primitive& mode,
 						  const IndexBuffer& indexBuffer) = 0;
 		virtual void ClearScreen() = 0;
-
 		virtual RendererType GetType() const = 0;
 	};
 

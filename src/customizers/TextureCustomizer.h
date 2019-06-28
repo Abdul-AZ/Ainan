@@ -7,7 +7,7 @@ namespace ALZ {
 	class ParticleSystem;
 }
 
-#include "graphics/Texture.h"
+#include "Renderer.h"
 #include "FileBrowserGUI.h"
 
 namespace ALZ {
@@ -16,12 +16,14 @@ namespace ALZ {
 	{
 	public:
 		TextureCustomizer();
+		TextureCustomizer(const TextureCustomizer& customizer);
+		TextureCustomizer operator=(const TextureCustomizer& customizer);
 
 		void DisplayGUI();
 
 	public:
 		bool UseDefaultTexture = true;
-		Texture ParticleTexture;
+		std::unique_ptr<Texture> ParticleTexture;
 
 	private:
 		FileBrowser m_FileBrowser;

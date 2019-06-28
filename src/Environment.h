@@ -84,10 +84,10 @@ namespace ALZ {
 		bool m_EnvironmentControlsWindowOpen = true;
 		EnvironmentStatus m_Status = EnvironmentStatus::None;
 
-		Texture m_PlayButtonTexture;
-		Texture m_PauseButtonTexture;
-		Texture m_ResumeButtonTexture;
-		Texture m_StopButtonTexture;
+		std::unique_ptr<Texture> m_PlayButtonTexture;
+		std::unique_ptr<Texture> m_PauseButtonTexture;
+		std::unique_ptr<Texture> m_ResumeButtonTexture;
+		std::unique_ptr<Texture> m_StopButtonTexture;
 
 		bool m_MousePressedLastFrame = false;
 		bool m_SaveNextFrameAsImage = false;

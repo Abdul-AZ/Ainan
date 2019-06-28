@@ -11,6 +11,26 @@ namespace ALZ {
 		m_CircleOutline.Position = { 0.5f, 0.5f };
 	}
 
+	ParticleCustomizer::ParticleCustomizer(const ParticleCustomizer& customizer) :
+		m_TextureCustomizer(customizer.m_TextureCustomizer)
+	{
+		m_VelocityCustomizer = customizer.m_VelocityCustomizer;
+		m_NoiseCustomizer = customizer.m_NoiseCustomizer;
+		m_LifetimeCustomizer = customizer.m_LifetimeCustomizer;
+		m_ColorCustomizer = customizer.m_ColorCustomizer;
+		m_ScaleCustomizer = customizer.m_ScaleCustomizer;
+		m_Line = customizer.m_Line;
+		m_LineAngle = customizer.m_LineAngle;
+		m_LinePosition = customizer.m_LinePosition;
+		m_CircleOutline = customizer.m_CircleOutline;
+		mt = customizer.mt;
+	}
+
+	ParticleCustomizer ParticleCustomizer::operator=(const ParticleCustomizer& customizer)
+	{
+		return ParticleCustomizer(customizer);
+	}
+
 	std::string GetModeAsText(const SpawnMode& mode)
 	{
 		switch (mode)
