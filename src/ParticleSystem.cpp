@@ -45,8 +45,8 @@ namespace ALZ {
 
 			//						 Position				  Texture Coordinates
 			glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0),
-									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 1.0),
-									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 0.0),
+									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
+									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 1.0),
 
 									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
 									 glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
@@ -64,9 +64,6 @@ namespace ALZ {
 			DefaultTexture = Renderer::CreateTexture().release();
 			DefaultTexture->SetImage(Image::LoadFromFile("res/Circle.png"));
 			DefaultTexture->Bind();
-
-			//DefaultTexture.Init("res/Circle.png", 4);
-			//DefaultTexture.Bind();
 
 			CircleInstancedShader = Renderer::CreateShaderProgram("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag").release();
 
@@ -121,7 +118,8 @@ namespace ALZ {
 			DefaultTexture->Bind(0);
 		else
 			//if we are using a custom texture, bind it to slot 0
-			Customizer.m_TextureCustomizer.ParticleTexture->Bind(0);
+			if(Customizer.m_TextureCustomizer.ParticleTexture)
+				Customizer.m_TextureCustomizer.ParticleTexture->Bind(0);
 
 		//cast the start of m_ParticleInfoBuffer to a glm::mat*, because the start of the buffer is the matrices
 		glm::mat4* modelBuffer = (glm::mat4*) m_ParticleInfoBuffer;

@@ -28,6 +28,7 @@ namespace ALZ {
 		virtual void Draw(ShaderProgram& shader, const Primitive& mode,
 						  const IndexBuffer& indexBuffer) = 0;
 		virtual void ClearScreen() = 0;
+		virtual void SetViewportSize(const glm::ivec2 lowerLeftCornerPoint, const glm::ivec2& size) = 0;
 		virtual RendererType GetType() const = 0;
 	};
 

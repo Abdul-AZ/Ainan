@@ -60,13 +60,20 @@ namespace ALZ {
 
 		int index = 0;
 		int offset = 0;
+		int stride = 0;
+
+		for (auto& type : layout)
+		{
+			stride += GetShaderVariableSize(type);
+		}
+
 		for (auto& type : layout)
 		{
 			int size = GetShaderVariableSize(type);
 			int componentCount = GetShaderVariableComponentCount(type);
 			GLenum openglType = GetOpenglTypeFromShaderType(type);
 
-			glVertexAttribPointer(index, componentCount, openglType, false, offset, nullptr);
+			glVertexAttribPointer(index, componentCount, openglType, false, stride, (void*)offset);
 			offset += size;
 
 			glEnableVertexAttribArray(index);

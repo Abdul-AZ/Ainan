@@ -13,24 +13,22 @@ namespace ALZ {
 
 		m_FrameBuffer->Bind();
 
-		glGenTextures(1, &m_Texture);
-		glBindTexture(GL_TEXTURE_2D, m_Texture);
+		m_Texture = Renderer::CreateTexture();
 
 		m_Size = Window::WindowSize;
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, (GLsizei)m_Size.x, (GLsizei)m_Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		
+		m_Texture->SetImage(m_Size, 3);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		m_Texture->SetDefaultTextureSettings();
+		m_Texture->Unbind();
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_Texture, 0);
+		m_FrameBuffer->SetActiveTexture(*m_Texture);
 
-		glGenVertexArrays(1, &m_VertexArray);
-		glBindVertexArray(m_VertexArray);
-		glGenBuffers(1, &m_VertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, m_VertexBuffer);
+		m_VertexArray = Renderer::CreateVertexArray();
+		m_VertexArray->Bind();
 
-		float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+		// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+		float quadVertices[] = { 
 			// positions   // texCoords
 			-1.0f,  1.0f,  0.0f, 1.0f,
 			-1.0f, -1.0f,  0.0f, 0.0f,
@@ -41,11 +39,8 @@ namespace ALZ {
 			 1.0f,  1.0f,  1.0f, 1.0f
 		};
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices));
+		m_VertexBuffer->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
 
 		m_FrameBuffer->Unbind();
 
@@ -56,59 +51,43 @@ namespace ALZ {
 		}
 	}
 
-	RenderSurface::~RenderSurface()
-	{
-		glDeleteTextures(1, &m_Texture);
-		glDeleteBuffers(1, &m_VertexBuffer);
-		glDeleteVertexArrays(1, &m_VertexArray);
-	}
-
 	void RenderSurface::Render()
 	{
-		glBindVertexArray(m_VertexArray);
 		ImageShader->SetUniform1i("screenTexture", 0);
-		ImageShader->Bind();
-		glBindTexture(GL_TEXTURE_2D, m_Texture);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		m_Texture->Bind();
+		Renderer::Draw(*m_VertexArray, *ImageShader, Primitive::Triangles, 6);
 	}
 
-	void RenderSurface::Render(ShaderProgram & shader)
+	void RenderSurface::Render(ShaderProgram& shader)
 	{
-		glBindVertexArray(m_VertexArray);
-		shader.Bind();
-		glBindTexture(GL_TEXTURE_2D, m_Texture);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		m_Texture->Bind();
+		Renderer::Draw(*m_VertexArray, shader, Primitive::Triangles, 6);
 	}
 
 	void RenderSurface::RenderToScreen()
 	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_FrameBuffer->GetRendererID());
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		//nullptr means we are copying to the default render buffer (which is the one being displayed)
+		m_FrameBuffer->Blit(nullptr, m_Size, m_Size);
 
-		glBlitFramebuffer(0, 0, (GLint)m_Size.x, (GLint)m_Size.y,
-						  0, 0, (GLint)m_Size.x, (GLint)m_Size.y,
-						  GL_COLOR_BUFFER_BIT,
-						  GL_LINEAR);
-
-		glViewport(0, 0, (GLsizei)Window::WindowSize.x, (GLsizei)Window::WindowSize.y);
+		Renderer::SetViewportSize(glm::ivec2(0.0), glm::ivec2(Window::WindowSize.x, Window::WindowSize.y));
 	}
 
 	void RenderSurface::SetSize(const glm::vec2 & size)
 	{
 		m_Size = size;
 		m_FrameBuffer->Bind();
-		glDeleteTextures(1, &m_Texture);
-
-		glGenTextures(1, &m_Texture);
-		glBindTexture(GL_TEXTURE_2D, m_Texture);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, (GLsizei)size.x, (GLsizei)size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_Texture, 0);
+		
+		//delete old trexture
+		m_Texture.reset();
+	
+		//create a new one with the window size
+		m_Texture = Renderer::CreateTexture();
+		m_Texture->SetImage(size, 3);
+	
+		m_Texture->SetDefaultTextureSettings();
+		m_Texture->Unbind();
+	
+		m_FrameBuffer->SetActiveTexture(*m_Texture);
 		m_FrameBuffer->Unbind();
 	}
 }

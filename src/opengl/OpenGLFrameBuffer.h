@@ -1,5 +1,6 @@
 #pragma once
 
+#include "graphics/Texture.h"
 #include "graphics/FrameBuffer.h"
 
 namespace ALZ {
@@ -19,6 +20,9 @@ namespace ALZ {
 
 	private:
 		unsigned int m_RendererID;
+
+		// Inherited via FrameBuffer
+		virtual void SetActiveTexture(const Texture& texture) override;
 	};
 
 }

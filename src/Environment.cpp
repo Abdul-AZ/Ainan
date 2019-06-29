@@ -104,7 +104,7 @@ namespace ALZ {
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 			obj->Render(m_Camera);
 
-		m_FrameBuffer.m_FrameBuffer->Unbind();
+		m_FrameBuffer.m_FrameBuffer->Bind();
 
 		if (m_Settings.BlurEnabled)
 			GaussianBlur::Blur(m_FrameBuffer, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);

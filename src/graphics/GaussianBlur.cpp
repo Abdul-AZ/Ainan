@@ -26,31 +26,30 @@ namespace ALZ {
 		Hblur5x5->SetUniform1fs("BlurStrength", BlurPixelValues, 3);
 		Vblur5x5->SetUniform1fs("BlurStrength", BlurPixelValues, 3);
 
-
 		//Horizontal blur
-		RenderSurface tempFB;
+		static RenderSurface tempFB;
 		tempFB.SetSize(downsampled);
 		tempFB.m_FrameBuffer->Bind();
 		frameBuffer.Render(*Hblur5x5);
-
+		
 		//Vertical blur directly to screen buffer
-		RenderSurface tempFB2;
+		static RenderSurface tempFB2;
 		tempFB2.SetSize(downsampled);
 		tempFB2.m_FrameBuffer->Bind();
 		frameBuffer.Render(*Vblur5x5);
-
+		
 		frameBuffer.m_FrameBuffer->Bind();
 		glClear(GL_COLOR_BUFFER_BIT);
-
+		
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, tempFB2.m_FrameBuffer->GetRendererID()); // READ:  Supersampled
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer.m_FrameBuffer->GetRendererID());					  // WRITE: Default
-
+		
 		// Downsample the supersampled FBO using LINEAR interpolation
 		glBlitFramebuffer(0, 0, (GLint)downsampled.x, (GLint)downsampled.y,
 						  0, 0, (GLint)normal.x, (GLint)normal.y,
 						  GL_COLOR_BUFFER_BIT,
 						  GL_LINEAR);
-
+		
 		glViewport(0, 0, (GLsizei)normal.x, (GLsizei)normal.y);
 	}
 

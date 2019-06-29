@@ -7,7 +7,6 @@ namespace ALZ {
 	class RenderSurface {
 	public:
 		RenderSurface();
-		~RenderSurface();
 
 		RenderSurface(const RenderSurface&) = delete;
 		RenderSurface operator=(const RenderSurface&) = delete;
@@ -23,9 +22,9 @@ namespace ALZ {
 		std::unique_ptr<FrameBuffer> m_FrameBuffer;
 	
 	private:
-		unsigned int m_Texture;
-		unsigned int m_VertexArray;
-		unsigned int m_VertexBuffer;
+		std::unique_ptr<Texture> m_Texture;
+		std::unique_ptr<VertexArray> m_VertexArray;
+		std::unique_ptr<VertexBuffer> m_VertexBuffer;
 		glm::vec2 m_Size;
 	};
 }

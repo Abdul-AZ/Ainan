@@ -7,8 +7,8 @@ namespace ALZ {
 	class VertexArray 
 	{
 	public:
+		virtual ~VertexArray() {};
 		virtual unsigned int GetRendererID() = 0;
-
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 	};

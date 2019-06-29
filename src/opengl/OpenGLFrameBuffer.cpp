@@ -24,6 +24,11 @@ namespace ALZ {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
+	void OpenGLFrameBuffer::SetActiveTexture(const Texture& texture)
+	{
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture.GetRendererID(), 0);
+	}
+
 	void OpenGLFrameBuffer::Blit(FrameBuffer* otherBuffer, const glm::vec2& sourceSize, const glm::vec2& targetSize)
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_RendererID);

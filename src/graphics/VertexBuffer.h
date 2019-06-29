@@ -12,6 +12,8 @@ namespace ALZ {
 	class VertexBuffer
 	{
 	public:
+		virtual ~VertexBuffer() {};
+
 		virtual void SetLayout(const VertexLayout& layout) = 0;
 
 		//NOTE: offset and size are in bytes

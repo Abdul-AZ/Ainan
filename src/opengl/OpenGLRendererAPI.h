@@ -38,6 +38,7 @@ namespace ALZ {
 		virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer) override;
 
 		virtual void ClearScreen() override;
+		virtual void SetViewportSize(const glm::ivec2 lowerLeftCornerPoint, const glm::ivec2& size) override;
 		virtual RendererType GetType() const override { return RendererType::OpenGL; }
 	};
 

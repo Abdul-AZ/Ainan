@@ -5,6 +5,8 @@ namespace ALZ {
 	class IndexBuffer 
 	{
 	public:
+		virtual ~IndexBuffer() {};
+
 		virtual unsigned int GetRendererID() = 0;
 		virtual int GetCount() const = 0;
 		virtual void Bind() const = 0;

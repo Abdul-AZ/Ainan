@@ -23,6 +23,11 @@ namespace ALZ {
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
+	void OpenGLRendererAPI::SetViewportSize(const glm::ivec2 lowerLeftCornerPoint, const glm::ivec2& size)
+	{
+		glViewport(lowerLeftCornerPoint.x, lowerLeftCornerPoint.y, size.x, size.y);
+	}
+
 	void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount)
 	{
 		glDrawArrays(GetOpenGLPrimitive(primitive), 0, vertexCount);
