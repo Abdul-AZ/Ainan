@@ -1,8 +1,8 @@
 #include <pch.h>
 #include "ParticleSystem.h"
 
-#include "graphics/VertexArray.h"
-#include "graphics/VertexBuffer.h"
+#include "renderer/VertexArray.h"
+#include "renderer/VertexBuffer.h"
 
 namespace ALZ {
 	static bool InitilizedCircleVertices = false;

@@ -1,4 +1,4 @@
-#include "graphics/VertexBuffer.h"
+#include "renderer/VertexBuffer.h"
 
 namespace ALZ
 {

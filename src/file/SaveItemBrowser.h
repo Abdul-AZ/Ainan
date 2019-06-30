@@ -3,10 +3,10 @@
 #include "FileManager.h"
 
 namespace ALZ {
-	class SaveItemGUI
+	class SaveItemBrowser
 	{
 	public:
-		SaveItemGUI(const std::string& startingFolder, const std::string& windowName = "File Browser");
+		SaveItemBrowser(const std::string& startingFolder, const std::string& windowName = "File Browser");
 
 		void OpenWindow();
 		void CloseWindow();

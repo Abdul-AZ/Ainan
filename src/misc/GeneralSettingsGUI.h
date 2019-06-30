@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Image.h"
-#include "FolderBrowserGUI.h"
+#include "file/FolderBrowser.h"
 
 namespace ALZ {
 

@@ -1,29 +1,29 @@
 #include <pch.h>
 
-#include "SaveItemGUI.h"
+#include "SaveItemBrowser.h"
 
 namespace ALZ {
 
 	namespace fs = std::filesystem;
 
-	SaveItemGUI::SaveItemGUI(const std::string& startingFolder, const std::string& windowName) :
+	SaveItemBrowser::SaveItemBrowser(const std::string& startingFolder, const std::string& windowName) :
 		m_CurrentFolder(startingFolder),
 		m_WindowName(windowName),
 		m_InputFolder(startingFolder)
 	{}
 
-	void SaveItemGUI::OpenWindow()
+	void SaveItemBrowser::OpenWindow()
 	{
 		m_WindowOpen = true;
 		m_LastWindowState = true;
 	}
 
-	void SaveItemGUI::CloseWindow()
+	void SaveItemBrowser::CloseWindow()
 	{
 		m_WindowOpen = false;
 	}
 
-	void SaveItemGUI::DisplayGUI(const std::function<void(const std::string&)>& func)
+	void SaveItemBrowser::DisplayGUI(const std::function<void(const std::string&)>& func)
 	{
 		if (!m_WindowOpen)
 			return;
@@ -102,7 +102,7 @@ namespace ALZ {
 		}
 	}
 
-	std::string SaveItemGUI::GetSelectedSavePath()
+	std::string SaveItemBrowser::GetSelectedSavePath()
 	{
 		return m_CurrentFolder + '\\' + m_FileName;
 	}

@@ -1,4 +1,4 @@
-#include "graphics/VertexArray.h"
+#include "renderer/VertexArray.h"
 
 namespace ALZ {
 

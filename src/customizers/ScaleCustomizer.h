@@ -7,8 +7,8 @@ namespace ALZ {
 	class ParticleSystem;
 }
 
-#include "InterpolationSelector.h"
-#include "CurveEditor.h"
+#include "misc/InterpolationSelector.h"
+#include "misc/CurveEditor.h"
 
 namespace ALZ {
 

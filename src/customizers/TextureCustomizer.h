@@ -7,8 +7,8 @@ namespace ALZ {
 	class ParticleSystem;
 }
 
-#include "Renderer.h"
-#include "FileBrowserGUI.h"
+#include "renderer/Renderer.h"
+#include "file/FileBrowser.h"
 
 namespace ALZ {
 

@@ -1,9 +1,9 @@
 #include <pch.h>
 
-#include "Window.h"
-#include "Environment.h"
-#include "StartMenu.h"
-#include "Renderer.h"
+#include "misc/Window.h"
+#include "misc/Environment.h"
+#include "misc/StartMenu.h"
+#include "renderer/Renderer.h"
 
 int main(int argc, const char* argv[]) {
 

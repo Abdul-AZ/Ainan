@@ -1,6 +1,6 @@
 #pragma once
 
-#include "graphics/IndexBuffer.h"
+#include "renderer/IndexBuffer.h"
 
 namespace ALZ {
 

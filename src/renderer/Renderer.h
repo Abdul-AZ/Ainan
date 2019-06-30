@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Camera.h"
+#include "misc/Camera.h"
 
-#include "graphics/RendererAPI.h"
-#include "graphics/ShaderProgram.h"
-#include "graphics/VertexArray.h"
-#include "graphics/VertexBuffer.h"
-#include "graphics/IndexBuffer.h"
-#include "graphics/Texture.h"
-#include "graphics/FrameBuffer.h"
+#include "RendererAPI.h"
+#include "ShaderProgram.h"
+#include "VertexArray.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "Texture.h"
+#include "FrameBuffer.h"
 
 #include "opengl/OpenGLRendererAPI.h"
 #include "opengl/OpenGLShaderProgram.h"

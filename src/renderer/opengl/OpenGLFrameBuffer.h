@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics/Texture.h"
-#include "graphics/FrameBuffer.h"
+#include "renderer/Texture.h"
+#include "renderer/FrameBuffer.h"
 
 namespace ALZ {
 

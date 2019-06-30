@@ -1,7 +1,7 @@
 #pragma once
 
-#include "graphics/Texture.h"
-#include "Image.h"
+#include "renderer/Texture.h"
+#include "misc/Image.h"
 
 namespace ALZ {
 

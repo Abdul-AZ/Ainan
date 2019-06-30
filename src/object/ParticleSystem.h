@@ -1,14 +1,13 @@
 #pragma once
 
-#include "graphics/ShaderProgram.h"
-#include "Window.h"
-#include "Particle.h"
-#include "Camera.h"
-#include "ParticleCustomizer.h"
-#include "PerlinNoise2D.h"
-#include "InspectorInterface.h"
-#include "graphics/Texture.h"
-#include "Renderer.h"
+#include "renderer/ShaderProgram.h"
+#include "misc/Window.h"
+#include "misc/Particle.h"
+#include "misc/Camera.h"
+#include "misc/ParticleCustomizer.h"
+#include "misc/PerlinNoise2D.h"
+#include "misc/InspectorInterface.h"
+#include "renderer/Renderer.h"
 
 namespace ALZ {
 

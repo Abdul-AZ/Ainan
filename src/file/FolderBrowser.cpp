@@ -1,5 +1,5 @@
 #include <pch.h>
-#include "FolderBrowserGUI.h"
+#include "FolderBrowser.h"
 
 namespace ALZ {
 

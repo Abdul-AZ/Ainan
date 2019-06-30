@@ -1,26 +1,25 @@
 #pragma once
 
-#include "FileManager.h"
+#include "file/FileManager.h"
 #include "stb/stb_image_write.h"
 
-#include "ParticleSystem.h"
+#include "object/ParticleSystem.h"
 #include "Camera.h"
 #include "EditorStyles.h"
 
 #include "ParticleCustomizer.h"
 #include "GeneralSettingsGUI.h"
-#include "FolderBrowserGUI.h"
-#include "SaveItemGUI.h"
+#include "file/FolderBrowser.h"
+#include "file/SaveItemBrowser.h"
 
 #include "ImGuiWrapper.h"
 
-#include "graphics/RenderSurface.h"
-#include "graphics/GaussianBlur.h"
-#include "graphics/Texture.h"
-#include "graphics/CircleOutline.h"
-#include "graphics/Background.h"
-#include "graphics/Grid.h"
-#include "Renderer.h"
+#include "misc/RenderSurface.h"
+#include "misc/GaussianBlur.h"
+#include "misc/CircleOutline.h"
+#include "misc/Background.h"
+#include "misc/Grid.h"
+#include "renderer/Renderer.h"
 
 #include "InputManager.h"
 
@@ -94,7 +93,7 @@ namespace ALZ {
 
 		Background m_Background;
 
-		SaveItemGUI m_EnvironmentSaveBrowser;
+		SaveItemBrowser m_EnvironmentSaveBrowser;
 		bool m_SaveLocationSelected = false;
 
 

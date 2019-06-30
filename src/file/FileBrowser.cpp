@@ -1,6 +1,6 @@
 #include <pch.h>
 
-#include "FileBrowserGUI.h"
+#include "FileBrowser.h"
 
 namespace ALZ {
 

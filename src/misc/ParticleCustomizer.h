@@ -8,8 +8,8 @@
 #include "customizers/ScaleCustomizer.h"
 #include "customizers/LifetimeCustomizer.h"
 #include "customizers/NoiseCustomizer.h"
-#include "graphics/Line.h"
-#include "graphics/CircleOutline.h"
+#include "misc/Line.h"
+#include "misc/CircleOutline.h"
 
 namespace ALZ {
 

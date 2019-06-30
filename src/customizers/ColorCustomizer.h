@@ -7,7 +7,7 @@ namespace ALZ {
 	class ParticleSystem;
 }
 
-#include "InterpolationSelector.h"
+#include "misc/InterpolationSelector.h"
 
 namespace ALZ {
 

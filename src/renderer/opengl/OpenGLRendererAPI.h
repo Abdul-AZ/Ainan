@@ -1,8 +1,8 @@
 #pragma once
 
-#include "graphics/RendererAPI.h"
-#include "graphics/ShaderProgram.h"
-#include "graphics/IndexBuffer.h"
+#include "renderer/RendererAPI.h"
+#include "renderer/ShaderProgram.h"
+#include "renderer/IndexBuffer.h"
 
 #include <glad/glad.h>
 
