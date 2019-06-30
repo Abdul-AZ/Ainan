@@ -9,7 +9,7 @@ namespace ALZ {
 
 	void Renderer::Init()
 	{
-		m_CurrentActiveAPI = new OpenGLRendererAPI();
+		m_CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
 	}
 
 	void Renderer::BeginScene(Camera& camera)
@@ -79,7 +79,7 @@ namespace ALZ {
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGLVertexArray>();
+			return std::make_unique<OpenGL::OpenGLVertexArray>();
 
 		default:
 			assert(false);
@@ -92,7 +92,7 @@ namespace ALZ {
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGLVertexBuffer>(data, size);
+			return std::make_unique<OpenGL::OpenGLVertexBuffer>(data, size);
 
 		default:
 			assert(false);
@@ -105,7 +105,7 @@ namespace ALZ {
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGLIndexBuffer>(data, count);
+			return std::make_unique<OpenGL::OpenGLIndexBuffer>(data, count);
 
 		default:
 			assert(false);
@@ -118,7 +118,7 @@ namespace ALZ {
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGLShaderProgram>(vertPath, fragPath);
+			return std::make_unique<OpenGL::OpenGLShaderProgram>(vertPath, fragPath);
 
 		default:
 			assert(false);
@@ -131,7 +131,7 @@ namespace ALZ {
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGLFrameBuffer>();
+			return std::make_unique<OpenGL::OpenGLFrameBuffer>();
 
 		default:
 			assert(false);
@@ -144,7 +144,7 @@ namespace ALZ {
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGLTexture>();
+			return std::make_unique<OpenGL::OpenGLTexture>();
 
 		default:
 			assert(false);
