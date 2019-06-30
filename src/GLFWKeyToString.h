@@ -1,5 +1,7 @@
 #pragma once
 
+#include <GLFW/glfw3.h>
+
 namespace ALZ {
 
 #define KeyCase(x) case GLFW_KEY_##x :\

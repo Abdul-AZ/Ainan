@@ -1,4 +1,6 @@
 #include <pch.h>
+#include <glad/glad.h>
+
 
 #include "OpenGLVertexArray.h"
 

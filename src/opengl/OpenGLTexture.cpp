@@ -1,4 +1,5 @@
 #include <pch.h>
+#include <glad/glad.h>
 
 #include "OpenGLTexture.h"
 

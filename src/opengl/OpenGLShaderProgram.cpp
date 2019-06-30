@@ -1,23 +1,9 @@
 #include <pch.h>
+#include <glad/glad.h>
 
 #include "OpenGLShaderProgram.h"
 
 namespace ALZ {
-
-	//static ShaderProgram LineShader;
-	//static bool LineShaderInitilized = false;
-	//
-	//static ShaderProgram CircleInstancedShader;
-	//static bool CircleInstancedShaderInitilized = false;
-	//
-	//static ShaderProgram CircleOutlineShader;
-	//static bool CircleOutlineShaderInitilized = false;
-	//
-	//static ShaderProgram ImageShader;
-	//static bool ImageShaderInitilized = false;
-	//
-	//static ShaderProgram BackgroundShader;
-	//static bool BackgroundShaderInitilized = false;
 
 	OpenGLShaderProgram::OpenGLShaderProgram(const std::string& vertPath, const std::string& fragPath)
 	{
