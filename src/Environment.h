@@ -14,12 +14,13 @@
 
 #include "ImGuiWrapper.h"
 
-#include "graphics/FrameBuffer.h"
+#include "graphics/RenderSurface.h"
 #include "graphics/GaussianBlur.h"
 #include "graphics/Texture.h"
 #include "graphics/CircleOutline.h"
 #include "graphics/Background.h"
 #include "graphics/Grid.h"
+#include "Renderer.h"
 
 #include "InputManager.h"
 
@@ -71,7 +72,7 @@ namespace ALZ {
 		std::clock_t timeStart = 0, timeEnd = 0;
 		GeneralSettingsGUI m_Settings;
 
-		FrameBuffer m_FrameBuffer;
+		RenderSurface m_FrameBuffer;
 		Camera m_Camera;
 		InputManager m_InputManager;
 		Grid m_Grid;
@@ -83,10 +84,10 @@ namespace ALZ {
 		bool m_EnvironmentControlsWindowOpen = true;
 		EnvironmentStatus m_Status = EnvironmentStatus::None;
 
-		Texture m_PlayButtonTexture;
-		Texture m_PauseButtonTexture;
-		Texture m_ResumeButtonTexture;
-		Texture m_StopButtonTexture;
+		std::unique_ptr<Texture> m_PlayButtonTexture;
+		std::unique_ptr<Texture> m_PauseButtonTexture;
+		std::unique_ptr<Texture> m_ResumeButtonTexture;
+		std::unique_ptr<Texture> m_StopButtonTexture;
 
 		bool m_MousePressedLastFrame = false;
 		bool m_SaveNextFrameAsImage = false;

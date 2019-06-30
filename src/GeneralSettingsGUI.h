@@ -26,9 +26,9 @@ namespace ALZ {
 
 		//blur
 		bool  BlurEnabled       = false;
-		float BlurScale         = 1.5f;
-		float BlurStrength      = 1.75f;
-		float BlurGaussianSigma = 3.0f;
+		float BlurScale         = 1.1f;
+		float BlurStrength      = 3.6f;
+		float BlurGaussianSigma = 1.3f;
 
 		//image saving
 		ImageFormat   ImageFormat      = ImageFormat::png;

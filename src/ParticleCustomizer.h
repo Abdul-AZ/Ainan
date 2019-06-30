@@ -28,10 +28,12 @@ namespace ALZ {
 	public:
 		ParticleCustomizer();
 
+		ParticleCustomizer(const ParticleCustomizer& customizer);
+		ParticleCustomizer operator=(const ParticleCustomizer& customizer);
+
 		void DisplayGUI(const std::string& windowName, bool& windowOpen);
 		void Update();
 		Particle& GetParticle();
-
 
 		float GetTimeBetweenParticles() { return 1 / m_ParticlesPerSecond; }
 

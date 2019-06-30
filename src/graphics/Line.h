@@ -3,6 +3,7 @@
 #include "ShaderProgram.h"
 #include "Camera.h"
 #include "Window.h"
+#include "Renderer.h"
 
 namespace ALZ {
 
@@ -19,7 +20,6 @@ namespace ALZ {
 		void SetPoints(glm::vec2 linePosition, float lineLength, float lineAngle); //angle in degrees NOT radians
 
 	public:
-		float Width = 2.0f;
 		glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 

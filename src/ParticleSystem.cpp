@@ -1,15 +1,18 @@
 #include <pch.h>
 #include "ParticleSystem.h"
 
-namespace ALZ {
+#include "graphics/VertexArray.h"
+#include "graphics/VertexBuffer.h"
 
-	static unsigned int VBO;
-	static unsigned int VAO;
+namespace ALZ {
 	static bool InitilizedCircleVertices = false;
+	static VertexArray* VAO = nullptr;
+	static VertexBuffer* VBO = nullptr;
+	static ShaderProgram* CircleInstancedShader = nullptr;
 
 	static int nameIndextemp = 0;
 
-	Texture DefaultTexture;
+	static Texture* DefaultTexture;
 
 	ParticleSystem::ParticleSystem()
 	{
@@ -37,32 +40,32 @@ namespace ALZ {
 		//initilize the vertices only the first time a particle system is created
 		if (!InitilizedCircleVertices) {
 
-			glGenVertexArrays(1, &VAO);
-			glBindVertexArray(VAO);
-
-			glGenBuffers(1, &VBO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			VAO = Renderer::CreateVertexArray().release();
+			VAO->Bind();
 
 			//						 Position				  Texture Coordinates
 			glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0),
-									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 1.0),
-									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 0.0),
+									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
+									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 1.0),
 
 									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
 									 glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
 									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 1.0) };
 
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), 0);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
 
+			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices)).release();
 
-			DefaultTexture.Init("res/Circle.png", 4);
-			glBindTexture(GL_TEXTURE_2D, (GLuint)DefaultTexture.TextureID);
+			//				 Position					Texture Coordinates
+			VBO->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
+
+			VBO->Unbind();
+			VAO->Unbind();
+
+			DefaultTexture = Renderer::CreateTexture().release();
+			DefaultTexture->SetImage(Image::LoadFromFile("res/Circle.png"));
+			DefaultTexture->Bind();
+
+			CircleInstancedShader = Renderer::CreateShaderProgram("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag").release();
 
 			InitilizedCircleVertices = true;
 		}
@@ -90,34 +93,33 @@ namespace ALZ {
 
 	void ParticleSystem::UpdateUniforms(Camera & camera)
 	{
-		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
-
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-		CircleShader.SetUniformMat4("projection", camera.ProjectionMatrix);
-		CircleShader.SetUniformMat4("view", camera.ViewMatrix);
+		CircleInstancedShader->SetUniformMat4("projection", camera.ProjectionMatrix);
+		CircleInstancedShader->SetUniformMat4("view", camera.ViewMatrix);
 	}
 
 	void ParticleSystem::Render(Camera& camera)
 	{
 		//bind vertex array and shader
-		glBindVertexArray(VAO);
-		ShaderProgram& CircleShader = ShaderProgram::GetCircleInstancedShader();
-		CircleShader.Bind();
+		//glBindVertexArray(VAO);
+		VAO->Bind();
+		CircleInstancedShader->Bind();
 
 		//set texture uniform (Sampler2D) to 0
-		CircleShader.SetUniform1i("particleTexture", 0);
+		CircleInstancedShader->SetUniform1i("particleTexture", 0);
 
 		//if we are using the default texture
 		if (Customizer.m_TextureCustomizer.UseDefaultTexture)
 			//bind the default texture to slot 0
-			DefaultTexture.Bind(0);
+			DefaultTexture->Bind(0);
 		else
 			//if we are using a custom texture, bind it to slot 0
-			Customizer.m_TextureCustomizer.ParticleTexture.Bind(0);
+			if(Customizer.m_TextureCustomizer.ParticleTexture)
+				Customizer.m_TextureCustomizer.ParticleTexture->Bind(0);
 
 		//cast the start of m_ParticleInfoBuffer to a glm::mat*, because the start of the buffer is the matrices
 		glm::mat4* modelBuffer = (glm::mat4*) m_ParticleInfoBuffer;
@@ -163,18 +165,18 @@ namespace ALZ {
 		//draw 40 particles
 		for (int i = 0; i < drawCount; i++)
 		{
-			CircleShader.SetUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
-			CircleShader.SetUniformMat4s("model", &modelBuffer[i * 40], 40);
-			glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, 40);
+			CircleInstancedShader->SetUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
+			CircleInstancedShader->SetUniformMat4s("model", &modelBuffer[i * 40], 40);
+			Renderer::DrawInstanced(*VAO, *CircleInstancedShader, Primitive::TriangleFan, 26, 40);
 		}
 
 		//get the remaining particles 
 		int remaining = m_Particles.size() % 40;
 
 		//draw them
-		CircleShader.SetUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
-		CircleShader.SetUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
-		glDrawArraysInstanced(GL_TRIANGLE_FAN, 0, 26, remaining);
+		CircleInstancedShader->SetUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
+		CircleInstancedShader->SetUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
+		Renderer::DrawInstanced(*VAO, *CircleInstancedShader, Primitive::TriangleFan, 26, remaining);
 	}
 
 	void ParticleSystem::SpawnParticle(const Particle& particle)
@@ -243,12 +245,6 @@ namespace ALZ {
 		if (Customizer.Mode == SpawnMode::SpawnOnLine)
 		{
 			Customizer.m_Line.SetPoints(Customizer.m_LinePosition, Customizer.m_LineLength,Customizer.m_LineAngle);
-			Customizer.m_Line.Render(camera);
-		}
-		//update the editor circle
-		else if (Customizer.Mode == SpawnMode::SpawnOnCircle || Customizer.Mode == SpawnMode::SpawnInsideCircle && Selected)
-		{
-			Customizer.m_CircleOutline.Render(camera);
 		}
 	}
 

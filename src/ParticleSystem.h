@@ -8,6 +8,7 @@
 #include "PerlinNoise2D.h"
 #include "InspectorInterface.h"
 #include "graphics/Texture.h"
+#include "Renderer.h"
 
 namespace ALZ {
 

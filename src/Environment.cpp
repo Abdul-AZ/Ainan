@@ -6,10 +6,20 @@ namespace ALZ {
 	Environment::Environment() : 
 		m_EnvironmentSaveBrowser(FileManager::ApplicationFolder, "Save Environment")
 	{
-		m_PlayButtonTexture.Init("res/PlayButton.png", 3);
-		m_PauseButtonTexture.Init("res/PauseButton.png", 3);
-		m_ResumeButtonTexture.Init("res/ResumeButton.png", 3);
-		m_StopButtonTexture.Init("res/StopButton.png", 3);
+		//m_PlayButtonTexture.Init("res/PlayButton.png", 3);
+		//m_PauseButtonTexture.Init("res/PauseButton.png", 3);
+		//m_ResumeButtonTexture.Init("res/ResumeButton.png", 3);
+		//m_StopButtonTexture.Init("res/StopButton.png", 3);
+
+		m_PlayButtonTexture = Renderer::CreateTexture();
+		m_PauseButtonTexture = Renderer::CreateTexture();
+		m_ResumeButtonTexture = Renderer::CreateTexture();
+		m_StopButtonTexture = Renderer::CreateTexture();
+
+		m_PlayButtonTexture->SetImage(Image::LoadFromFile("res/PlayButton.png", 3));
+		m_PauseButtonTexture->SetImage(Image::LoadFromFile("res/PauseButton.png", 3));
+		m_ResumeButtonTexture->SetImage(Image::LoadFromFile("res/ResumeButton.png", 3));
+		m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 3));
 
 		AddPS();
 
@@ -54,8 +64,9 @@ namespace ALZ {
 
 	void Environment::Render()
 	{
-		m_FrameBuffer.Bind();
-		glClear(GL_COLOR_BUFFER_BIT);
+		Renderer::BeginScene(m_Camera);
+		m_FrameBuffer.m_FrameBuffer->Bind();
+		Renderer::ClearScreen();
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 		{
@@ -70,9 +81,22 @@ namespace ALZ {
 		if(m_Settings.ShowGrid && m_Status != EnvironmentStatus::PlayMode)
 			m_Grid.Render(m_Camera);
 
+		//Render world space gui here because we need camera information for that
+		for (Inspector_obj_ptr& obj : InspectorObjects)
+		{
+			if (obj->Type == InspectorObjectType::ParticleSystemType)
+			{
+				ParticleSystem* ps = (ParticleSystem*)obj.get();
+				if (ps->Customizer.Mode == SpawnMode::SpawnOnLine)
+					ps->Customizer.m_Line.Render(m_Camera);
+				else if (ps->Customizer.Mode == SpawnMode::SpawnOnCircle || ps->Customizer.Mode == SpawnMode::SpawnInsideCircle && ps->Selected)
+					ps->Customizer.m_CircleOutline.Render(m_Camera);
+			}
+		}
+
 		if (m_Status == EnvironmentStatus::None) {
 			m_FrameBuffer.RenderToScreen();
-			m_FrameBuffer.Unbind();
+			m_FrameBuffer.m_FrameBuffer->Unbind();
 			return;
 		}
 
@@ -80,12 +104,12 @@ namespace ALZ {
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 			obj->Render(m_Camera);
 
-		m_FrameBuffer.Unbind();
+		m_FrameBuffer.m_FrameBuffer->Bind();
 
 		if (m_Settings.BlurEnabled)
 			GaussianBlur::Blur(m_FrameBuffer, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
 
-		m_FrameBuffer.Bind();
+		m_FrameBuffer.m_FrameBuffer->Bind();
 
 		if (m_SaveNextFrameAsImage) {
 			Image image = Image::FromFrameBuffer(m_FrameBuffer, m_Settings.ImageResolution.x, m_Settings.ImageResolution.y);
@@ -94,6 +118,8 @@ namespace ALZ {
 		}
 
 		m_FrameBuffer.RenderToScreen();
+
+		Renderer::EndScene();
 	}
 
 	void Environment::RenderGUI()
@@ -284,24 +310,24 @@ namespace ALZ {
 		ImGui::SetCursorPosX((float)width / 2 - 20);
 
 		if (m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode) {
-			if (ImGui::ImageButton((ImTextureID)m_StopButtonTexture.TextureID, ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
+			if (ImGui::ImageButton((ImTextureID)m_StopButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
 				Stop();
 			}
 		}
 
 		else {
-			if (ImGui::ImageButton((ImTextureID)m_PlayButtonTexture.TextureID, ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
+			if (ImGui::ImageButton((ImTextureID)m_PlayButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
 				Play();
 			}
 		}
 
 		ImGui::SameLine();
 		if (m_Status == EnvironmentStatus::PlayMode) {
-			if (ImGui::ImageButton((ImTextureID)m_PauseButtonTexture.TextureID, ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
+			if (ImGui::ImageButton((ImTextureID)m_PauseButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 				Pause();
 		}
 		else if (m_Status == EnvironmentStatus::PauseMode) {
-			if (ImGui::ImageButton((ImTextureID)m_ResumeButtonTexture.TextureID, ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
+			if (ImGui::ImageButton((ImTextureID)m_ResumeButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 				Resume();
 		}
 
@@ -505,11 +531,11 @@ namespace ALZ {
 		if (obj.Type == InspectorObjectType::ParticleSystemType) 
 		{
 			//make a new particle system
-			InspectorObjects.push_back(std::make_unique<ParticleSystem>());
+			InspectorObjects.push_back(std::make_unique<ParticleSystem>(*static_cast<ParticleSystem*>(&obj)));
 
 			//derefrence both the new particle system and the one to be copied
 			//then copy the particle system using the equals operator (=)
-			*InspectorObjects[InspectorObjects.size() - 1].get() = *static_cast<ParticleSystem*>(&obj);
+			//*InspectorObjects[InspectorObjects.size() - 1].get() = *static_cast<ParticleSystem*>(&obj);
 
 			//add a -copy to the name of the new particle system to indicate that it was copied
 			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";

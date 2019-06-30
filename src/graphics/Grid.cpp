@@ -8,9 +8,10 @@
 namespace ALZ {
 
 	static bool GridBufferInitilized = false;
-	static unsigned int VAO = 0;
-	static unsigned int VBO = 0;
-	static unsigned int EBO = 0;
+	static VertexArray* VAO = nullptr;
+	static VertexBuffer* VBO = nullptr;
+	static IndexBuffer* EBO = nullptr;
+	static ShaderProgram* LineShader = nullptr;
 
 	static std::vector<glm::vec2> vertices;
 	static std::vector<unsigned int> indecies;
@@ -22,7 +23,6 @@ namespace ALZ {
 			//reserve vector space for vertices
 			vertices.reserve(VERTICES_PER_AXIS * 4 + 2);
 			indecies.reserve(VERTICES_PER_AXIS * 4 + 4);
-
 
 			//generate vertices
 			//these are the vertices that are on each side
@@ -65,20 +65,17 @@ namespace ALZ {
 				indecies.push_back((unsigned int)i + VERTICES_PER_AXIS * 3 + 1);
 			}
 
-			glGenVertexArrays(1, &VAO);
-			glBindVertexArray(VAO);
-			glGenBuffers(1, &VBO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			VAO = Renderer::CreateVertexArray().release();
+			VAO->Bind();
 
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * vertices.size(), vertices.data(), GL_DYNAMIC_DRAW);
+			VBO = Renderer::CreateVertexBuffer(vertices.data(), sizeof(glm::vec2) * vertices.size()).release();
+			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
-			glGenBuffers(1, &EBO);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indecies.size(), indecies.data(), GL_DYNAMIC_DRAW);
+			EBO = Renderer::CreateIndexBuffer(indecies.data(), indecies.size()).release();
 
-			glBindVertexArray(0);
+			VAO->Unbind();
+
+			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/Line.frag").release();
 
 			GridBufferInitilized = true;
 		}
@@ -86,17 +83,16 @@ namespace ALZ {
 
 	void Grid::Render(Camera& camera)
 	{
-		glBindVertexArray(VAO);
-		ShaderProgram& lineShader = ShaderProgram::GetLineShader();
-		lineShader.Bind();
+		VAO->Bind();
+		LineShader->Bind();
 
-		lineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
-		lineShader.SetUniformMat4("view", camera.ViewMatrix);
-		lineShader.SetUniformVec4("color", glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
+		LineShader->SetUniformMat4("projection", camera.ProjectionMatrix);
+		LineShader->SetUniformMat4("view", camera.ViewMatrix);
+		LineShader->SetUniformVec4("color", glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
 
-		glDrawElements(GL_LINES, 400 + 2, GL_UNSIGNED_INT, nullptr);
+		Renderer::Draw(*VAO, *LineShader, Primitive::Lines, *EBO);
 
-		glBindVertexArray(0);
-		lineShader.Unbind();
+		VAO->Unbind();
+		LineShader->Unbind();
 	}
 }

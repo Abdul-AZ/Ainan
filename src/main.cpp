@@ -3,6 +3,7 @@
 #include "Window.h"
 #include "Environment.h"
 #include "StartMenu.h"
+#include "Renderer.h"
 
 int main(int argc, const char* argv[]) {
 
@@ -10,6 +11,7 @@ int main(int argc, const char* argv[]) {
 
 	Window::Init();
 	FileManager::Init(argv[0]);
+	Renderer::Init();
 	
 	ImGuiWrapper::Init();
 	SetEditorStyle(EditorStyle::Dark_Gray);
@@ -32,8 +34,6 @@ int main(int argc, const char* argv[]) {
 		}
 		else
 			startMenu.Update(env);
-
-
 
 		Window::Present();
 		Window::Clear();

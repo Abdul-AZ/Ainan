@@ -1,7 +1,7 @@
 #include <pch.h>
 
 #include "ImGuiWrapper.h"
-// GLFW
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
 #undef APIENTRY

@@ -4,21 +4,18 @@
 
 namespace ALZ {
 
-	static unsigned int VAO = 0;
-	static unsigned int VBO = 0;
+	static VertexArray* VAO = nullptr;
+	static VertexBuffer* VBO = nullptr;
 
 	static bool BackgroundBuffersInitilized = false;
-
+	static ShaderProgram* BackgroundShader = nullptr;
 
 	Background::Background()
 	{
 		if (!BackgroundBuffersInitilized) {
 
-			glGenVertexArrays(1, &VAO);
-			glBindVertexArray(VAO);
-
-			glGenBuffers(1, &VBO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			VAO = Renderer::CreateVertexArray().release();
+			VAO->Bind();
 
 			glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f),
 									 glm::vec2(1.0f, -1.0f),
@@ -28,15 +25,14 @@ namespace ALZ {
 									 glm::vec2(1.0f, 1.0f),
 									 glm::vec2(-1.0f, 1.0f) };
 
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices)).release();
+			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
-			glBindVertexArray(0);
+			VAO->Unbind();
 
+			BackgroundShader = Renderer::CreateShaderProgram("shaders/Background.vert", "shaders/Background.frag").release();
 			BackgroundBuffersInitilized = true;
 		}
-
 	}
 
 	void Background::SubmitLight(const RadialLight& light)
@@ -52,10 +48,8 @@ namespace ALZ {
 
 	void Background::Render(Camera& camera)
 	{
-		ShaderProgram& BackgroundShader = ShaderProgram::GetBackgroundShader();
-
-		glBindVertexArray(VAO);
-		BackgroundShader.Bind();
+		VAO->Unbind();
+		BackgroundShader->Bind();
 
 		//not used light spots
 		for (int i = m_RadialLightSubmissionCount; i < MAX_NUM_RADIAL_LIGHTS; i++)
@@ -66,24 +60,24 @@ namespace ALZ {
 			m_RadialLightQuadraticBuffer[i] = 1000.0f;
 		}
 		
-		BackgroundShader.SetUniformVec4("baseColor", BaseColor);
-		BackgroundShader.SetUniformMat4("projection", camera.ProjectionMatrix);
-		BackgroundShader.SetUniformMat4("view", camera.ViewMatrix);
+		BackgroundShader->SetUniformVec4("baseColor", BaseColor);
+		BackgroundShader->SetUniformMat4("projection", camera.ProjectionMatrix);
+		BackgroundShader->SetUniformMat4("view", camera.ViewMatrix);
 
-		BackgroundShader.SetUniformVec2s("radialLights.Position", m_RadialLightPositionBuffer, MAX_NUM_RADIAL_LIGHTS);
-		BackgroundShader.SetUniformVec3s("radialLights.Color", m_RadialLightColorBuffer, MAX_NUM_RADIAL_LIGHTS);
-		BackgroundShader.SetUniform1fs("radialLights.Constant", m_RadialLightConstantBuffer, MAX_NUM_RADIAL_LIGHTS);
-		BackgroundShader.SetUniform1fs("radialLights.Linear", m_RadialLightLinearBuffer, MAX_NUM_RADIAL_LIGHTS);
-		BackgroundShader.SetUniform1fs("radialLights.Quadratic", m_RadialLightQuadraticBuffer, MAX_NUM_RADIAL_LIGHTS);
+		BackgroundShader->SetUniformVec2s("radialLights.Position", m_RadialLightPositionBuffer, MAX_NUM_RADIAL_LIGHTS);
+		BackgroundShader->SetUniformVec3s("radialLights.Color", m_RadialLightColorBuffer, MAX_NUM_RADIAL_LIGHTS);
+		BackgroundShader->SetUniform1fs("radialLights.Constant", m_RadialLightConstantBuffer, MAX_NUM_RADIAL_LIGHTS);
+		BackgroundShader->SetUniform1fs("radialLights.Linear", m_RadialLightLinearBuffer, MAX_NUM_RADIAL_LIGHTS);
+		BackgroundShader->SetUniform1fs("radialLights.Quadratic", m_RadialLightQuadraticBuffer, MAX_NUM_RADIAL_LIGHTS);
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(5000.0f));
-		BackgroundShader.SetUniformMat4("model", model);
+		BackgroundShader->SetUniformMat4("model", model);
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);
+		Renderer::Draw(*VAO, *BackgroundShader, Primitive::Triangles, 6);
 
-		glBindVertexArray(0);
-		BackgroundShader.Unbind();
+		VAO->Unbind();
+		BackgroundShader->Unbind();
 
 		m_RadialLightSubmissionCount = 0;
 	}

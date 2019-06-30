@@ -3,16 +3,16 @@
 
 namespace ALZ {
 
-	ShaderProgram GaussianBlur::Hblur5x5;
-	ShaderProgram GaussianBlur::Vblur5x5;
+	ShaderProgram* GaussianBlur::Hblur5x5;
+	ShaderProgram* GaussianBlur::Vblur5x5;
 
 	void GaussianBlur::Init()
 	{
-		Hblur5x5.Init("shaders/Image.vert", "shaders/GaussianBlur5x5H.frag");
-		Vblur5x5.Init("shaders/Image.vert", "shaders/GaussianBlur5x5V.frag");
+		Hblur5x5 = Renderer::CreateShaderProgram("shaders/Image.vert", "shaders/GaussianBlur5x5H.frag").release();
+		Vblur5x5 = Renderer::CreateShaderProgram("shaders/Image.vert", "shaders/GaussianBlur5x5V.frag").release();
 	}
 
-	void GaussianBlur::Blur(FrameBuffer & frameBuffer, const float& scale, const float& blurScale, const float& sigma)
+	void GaussianBlur::Blur(RenderSurface & frameBuffer, const float& scale, const float& blurScale, const float& sigma)
 	{
 		glm::vec2 normal = { Window::WindowSize.x , Window::WindowSize.y };
 		glm::vec2 downsampled = { Window::WindowSize.x / scale , Window::WindowSize.y / scale };
@@ -23,34 +23,33 @@ namespace ALZ {
 		{
 			BlurPixelValues[i] = GaussianDistribution((float)i, sigma) * blurScale;
 		}
-		Hblur5x5.SetUniform1fs("BlurStrength", BlurPixelValues, 3);
-		Vblur5x5.SetUniform1fs("BlurStrength", BlurPixelValues, 3);
-
+		Hblur5x5->SetUniform1fs("BlurStrength", BlurPixelValues, 3);
+		Vblur5x5->SetUniform1fs("BlurStrength", BlurPixelValues, 3);
 
 		//Horizontal blur
-		FrameBuffer tempFB;
+		static RenderSurface tempFB;
 		tempFB.SetSize(downsampled);
-		tempFB.Bind();
-		frameBuffer.Render(Hblur5x5);
-
+		tempFB.m_FrameBuffer->Bind();
+		frameBuffer.Render(*Hblur5x5);
+		
 		//Vertical blur directly to screen buffer
-		FrameBuffer tempFB2;
+		static RenderSurface tempFB2;
 		tempFB2.SetSize(downsampled);
-		tempFB2.Bind();
-		frameBuffer.Render(Vblur5x5);
-
-		frameBuffer.Bind();
+		tempFB2.m_FrameBuffer->Bind();
+		frameBuffer.Render(*Vblur5x5);
+		
+		frameBuffer.m_FrameBuffer->Bind();
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, tempFB2.RendererID); // READ:  Supersampled
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer.RendererID);					  // WRITE: Default
-
+		
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, tempFB2.m_FrameBuffer->GetRendererID()); // READ:  Supersampled
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer.m_FrameBuffer->GetRendererID());					  // WRITE: Default
+		
 		// Downsample the supersampled FBO using LINEAR interpolation
 		glBlitFramebuffer(0, 0, (GLint)downsampled.x, (GLint)downsampled.y,
 						  0, 0, (GLint)normal.x, (GLint)normal.y,
 						  GL_COLOR_BUFFER_BIT,
 						  GL_LINEAR);
-
+		
 		glViewport(0, 0, (GLsizei)normal.x, (GLsizei)normal.y);
 	}
 

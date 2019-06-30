@@ -5,25 +5,22 @@
 namespace ALZ {
 
 	static bool LineBufferInitilized = false;
-	static unsigned int VBO = 0;
-	static unsigned int VAO = 0;
+	static VertexArray* VAO = nullptr;
+	static VertexBuffer* VBO = nullptr;
+	static ShaderProgram* LineShader = nullptr;
 
 	Line::Line()
 	{
 		if (!LineBufferInitilized) {
 
-			glGenVertexArrays(1, &VAO);
-			glBindVertexArray(VAO);
-			glGenBuffers(1, &VBO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			VAO = Renderer::CreateVertexArray().release();
+			VAO->Bind();
 
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+			VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2).release();
+			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
-			glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * 2, 0, GL_DYNAMIC_DRAW);
-
-			glBindVertexArray(0);
-
+			VAO->Unbind();
+			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/Line.frag").release();
 			LineBufferInitilized = true;
 		}
 	}
@@ -51,19 +48,17 @@ namespace ALZ {
 
 	void Line::Render(Camera& camera)
 	{
-		glLineWidth(Width);
-		ShaderProgram& LineShader = ShaderProgram::GetLineShader();
-		LineShader.SetUniformVec4("color", Color);
-		LineShader.SetUniformMat4("projection", camera.ProjectionMatrix);
-		LineShader.SetUniformMat4("view", camera.ViewMatrix);
+		LineShader->SetUniformVec4("color", Color);
+		LineShader->SetUniformMat4("projection", camera.ProjectionMatrix);
+		LineShader->SetUniformMat4("view", camera.ViewMatrix);
 
-		LineShader.Bind();
-		glBindVertexArray(VAO);
+		LineShader->Bind();
+		VAO->Bind();
 
-		glDrawArrays(GL_LINES, 0, 2);
+		Renderer::Draw(*VAO, *LineShader, Primitive::Lines, 2);
 
-		glBindVertexArray(0);
-		LineShader.Unbind();
+		VAO->Unbind();
+		LineShader->Unbind();
 	}
 
 	float Line::GetSlope()
@@ -95,8 +90,6 @@ namespace ALZ {
 	{
 		glm::vec2 vertices[] = { m_StartPoint, m_EndPoint };
 
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec2) * 2, vertices);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		VBO->UpdateData(0, sizeof(vertices), vertices);
 	}
 }

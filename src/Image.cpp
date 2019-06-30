@@ -39,6 +39,15 @@ namespace ALZ {
 			delete[] m_Data;
 	}
 
+	Image Image::LoadFromFile(const std::string& pathAndName, int desiredComp)
+	{
+		Image image;
+
+		image.m_Data = stbi_load(pathAndName.c_str(), &image.m_Width, &image.m_Height, &image.m_Comp, desiredComp);
+
+		return image;
+	}
+
 	void Image::SaveToFile(const std::string& pathAndName, const ImageFormat & format)
 	{
 		unsigned char* dataCpy = new unsigned char[m_Width * m_Height * m_Comp * sizeof(unsigned char)];
@@ -78,7 +87,7 @@ namespace ALZ {
 		}
 	}
 
-	Image Image::FromFrameBuffer(FrameBuffer & framebuffer)
+	Image Image::FromFrameBuffer(RenderSurface & framebuffer)
 	{
 		Image image;
 		image.m_Width  = (unsigned int)framebuffer.GetSize().x;
@@ -86,13 +95,13 @@ namespace ALZ {
 		image.m_Data = new unsigned char[image.m_Width * image.m_Height * 4];
 		image.m_Comp = 4;
 
-		framebuffer.Bind();
+		framebuffer.m_FrameBuffer->Bind();
 		glReadPixels(0, 0, image.m_Width, image.m_Height, GL_RGBA, GL_UNSIGNED_BYTE, image.m_Data);
 
 		return image;
 	}
 
-	Image Image::FromFrameBuffer(FrameBuffer & framebuffer, const unsigned int & width, const unsigned int & height)
+	Image Image::FromFrameBuffer(RenderSurface & framebuffer, const unsigned int & width, const unsigned int & height)
 	{
 		Image image;
 		image.m_Width = width;
@@ -100,14 +109,14 @@ namespace ALZ {
 		image.m_Data = new unsigned char[image.m_Width * image.m_Height * 4];
 		image.m_Comp = 4;
 
-		FrameBuffer tempFrameBuffer;
+		RenderSurface tempFrameBuffer;
 		tempFrameBuffer.SetSize(glm::vec2(width, height));
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer.RendererID);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tempFrameBuffer.RendererID);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer.m_FrameBuffer->GetRendererID());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tempFrameBuffer.m_FrameBuffer->GetRendererID());
 
 		glBlitFramebuffer(0, 0, (GLuint)framebuffer.GetSize().x, (GLuint)framebuffer.GetSize().y, 0, 0, (GLuint)tempFrameBuffer.GetSize().x, (GLuint)tempFrameBuffer.GetSize().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-		tempFrameBuffer.Bind();
+		tempFrameBuffer.m_FrameBuffer->Bind();
 		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image.m_Data);
 
 		return image;
