@@ -1,6 +1,6 @@
 workspace "ALZparticles"
     configurations { "Debug", "Release" }
-    platforms { "x64", "x86" }
+    platforms { "64bit", "32bit" }
     startproject "Core"
 
 include "premake/Core.lua"
