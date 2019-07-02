@@ -12,7 +12,7 @@ namespace ALZ {
 	public:
 		Line();
 
-		void Render(Camera& camera);
+		void Draw();
 		float GetSlope();
 		float GetYIntercept();
 		glm::vec2 GetPointInLine(const float& t);

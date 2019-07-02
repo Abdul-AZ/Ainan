@@ -19,7 +19,7 @@ namespace ALZ {
 
 		void Update(const float& deltaTime) override;
 		void UpdateUniforms(Camera& camera) override;
-		void Render(Camera& camera) override;
+		void Draw() override;
 		void SpawnAllParticlesOnQue(const float& deltaTime);
 		void SpawnParticle(const Particle& particle);
 		void ClearParticles();

@@ -81,13 +81,11 @@ namespace ALZ {
 		}
 	}
 
-	void Grid::Render(Camera& camera)
+	void Grid::Draw()
 	{
 		VAO->Bind();
 		LineShader->Bind();
 
-		LineShader->SetUniformMat4("projection", camera.ProjectionMatrix);
-		LineShader->SetUniformMat4("view", camera.ViewMatrix);
 		LineShader->SetUniformVec4("color", glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
 
 		Renderer::Draw(*VAO, *LineShader, Primitive::Lines, *EBO);

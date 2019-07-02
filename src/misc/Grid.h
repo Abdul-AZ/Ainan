@@ -11,6 +11,6 @@ namespace ALZ {
 	{
 	public:
 		Grid();
-		void Render(Camera& camera);
+		void Draw();
 	};
 }

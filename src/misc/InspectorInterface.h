@@ -16,7 +16,7 @@ namespace ALZ {
 		virtual void Update(const float& deltaTime) {};
 		//this function updates uniform buffers (does OpenGL calls)
 		virtual void UpdateUniforms(Camera& camera) {};
-		virtual void Render(Camera& camera) {};
+		virtual void Draw() {};
 		virtual void DisplayGUI(Camera& camera) {};
 
 		virtual ~InspectorInterface() {};

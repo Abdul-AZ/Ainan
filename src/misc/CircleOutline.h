@@ -8,7 +8,7 @@ namespace ALZ {
 	public:
 		CircleOutline();
 
-		void Render(Camera& camera);
+		void Draw();
 		glm::vec2 GetPointByAngle(const float& angle_in_radians);
 
 	public:

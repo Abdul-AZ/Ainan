@@ -75,10 +75,10 @@ namespace ALZ {
 			}
 		}
 
-		m_Background.Render(m_Camera);
+		m_Background.Draw();
 
 		if(m_Settings.ShowGrid && m_Status != EnvironmentStatus::PlayMode)
-			m_Grid.Render(m_Camera);
+			m_Grid.Draw();
 
 		//Render world space gui here because we need camera information for that
 		for (Inspector_obj_ptr& obj : InspectorObjects)
@@ -87,9 +87,9 @@ namespace ALZ {
 			{
 				ParticleSystem* ps = (ParticleSystem*)obj.get();
 				if (ps->Customizer.Mode == SpawnMode::SpawnOnLine)
-					ps->Customizer.m_Line.Render(m_Camera);
+					ps->Customizer.m_Line.Draw();
 				else if (ps->Customizer.Mode == SpawnMode::SpawnOnCircle || ps->Customizer.Mode == SpawnMode::SpawnInsideCircle && ps->Selected)
-					ps->Customizer.m_CircleOutline.Render(m_Camera);
+					ps->Customizer.m_CircleOutline.Draw();
 			}
 		}
 
@@ -101,7 +101,7 @@ namespace ALZ {
 
 		//stuff to only render in play mode
 		for (Inspector_obj_ptr& obj : InspectorObjects)
-			obj->Render(m_Camera);
+			obj->Draw();
 
 		m_FrameBuffer.m_FrameBuffer->Bind();
 

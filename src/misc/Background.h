@@ -16,7 +16,7 @@ namespace ALZ {
 
 		void SubmitLight(const RadialLight& light);
 
-		void Render(Camera& camera);
+		void Draw();
 
 	public:
 		glm::vec4 BaseColor;

@@ -46,12 +46,9 @@ namespace ALZ {
 		UpdateBufferWithPoints();
 	}
 
-	void Line::Render(Camera& camera)
+	void Line::Draw()
 	{
 		LineShader->SetUniformVec4("color", Color);
-		LineShader->SetUniformMat4("projection", camera.ProjectionMatrix);
-		LineShader->SetUniformMat4("view", camera.ViewMatrix);
-
 		LineShader->Bind();
 		VAO->Bind();
 

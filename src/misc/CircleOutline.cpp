@@ -50,7 +50,7 @@ namespace ALZ {
 		}
 	}
 
-	void CircleOutline::Render(Camera& camera)
+	void CircleOutline::Draw()
 	{
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(Position.x * GlobalScaleFactor, Position.y * GlobalScaleFactor, 0.0f));
@@ -58,8 +58,6 @@ namespace ALZ {
 
 		CircleOutlineShader->Bind();
 		CircleOutlineShader->SetUniformMat4("model", model);
-		CircleOutlineShader->SetUniformMat4("view", camera.ViewMatrix);
-		CircleOutlineShader->SetUniformMat4("projection", camera.ProjectionMatrix);
 		CircleOutlineShader->SetUniformVec4("color", Color);
 		VAO->Bind();
 

@@ -102,7 +102,7 @@ namespace ALZ {
 		CircleInstancedShader->SetUniformMat4("view", camera.ViewMatrix);
 	}
 
-	void ParticleSystem::Render(Camera& camera)
+	void ParticleSystem::Draw()
 	{
 		//bind vertex array and shader
 		//glBindVertexArray(VAO);

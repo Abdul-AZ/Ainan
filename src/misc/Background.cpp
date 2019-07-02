@@ -46,7 +46,7 @@ namespace ALZ {
 		m_RadialLightSubmissionCount++;
 	}
 
-	void Background::Render(Camera& camera)
+	void Background::Draw()
 	{
 		VAO->Unbind();
 		BackgroundShader->Bind();
@@ -61,8 +61,6 @@ namespace ALZ {
 		}
 		
 		BackgroundShader->SetUniformVec4("baseColor", BaseColor);
-		BackgroundShader->SetUniformMat4("projection", camera.ProjectionMatrix);
-		BackgroundShader->SetUniformMat4("view", camera.ViewMatrix);
 
 		BackgroundShader->SetUniformVec2s("radialLights.Position", m_RadialLightPositionBuffer, MAX_NUM_RADIAL_LIGHTS);
 		BackgroundShader->SetUniformVec3s("radialLights.Color", m_RadialLightColorBuffer, MAX_NUM_RADIAL_LIGHTS);
