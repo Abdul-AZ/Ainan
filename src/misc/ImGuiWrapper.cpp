@@ -459,7 +459,6 @@ namespace ALZ {
 		glfwSetWindowPosCallback(data->Window, ImGui_ImplGlfw_WindowPosCallback);
 		glfwSetWindowSizeCallback(data->Window, ImGui_ImplGlfw_WindowSizeCallback);
 		glfwMakeContextCurrent(data->Window);
-		glfwSwapInterval(0);
 	}
 
 	static void Glfw_DestroyWindow(ImGuiViewport* viewport)

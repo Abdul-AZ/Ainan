@@ -41,7 +41,6 @@ namespace ALZ {
 		float deltaTime = (timeEnd - timeStart) / 1000.0f;
 		timeStart = timeEnd;
 
-		Window::Update();
 		m_Camera.Update(deltaTime);
 
 		for (int i = 0; i < InspectorObjects.size(); i++) {

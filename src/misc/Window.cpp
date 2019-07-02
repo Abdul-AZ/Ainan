@@ -9,6 +9,7 @@ namespace ALZ {
 	bool Window::m_WindowSizeChanged = false;
 	glm::vec2 Window::WindowSize = { 0,0 };
 	GLFWwindow* Window::m_Window = nullptr;
+	clock_t Window::m_FrameStart;
 
 	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	{
@@ -23,12 +24,14 @@ namespace ALZ {
 
 		glfwWindowHint(GLFW_VERSION_MAJOR, 4);
 		glfwWindowHint(GLFW_VERSION_MINOR, 0);
+		//glfwSwapInterval
 
 		m_Window = glfwCreateWindow(WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16, "ALZ Particles", nullptr, nullptr);
 		WindowSize = { WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 };
 		CenterWindow();
 
 		glfwMakeContextCurrent(m_Window);
+		glfwSwapInterval(1);
 
 		glfwSetFramebufferSizeCallback(m_Window, framebuffer_size_callback);
 
@@ -38,15 +41,33 @@ namespace ALZ {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
-	void Window::Update()
-	{
-		glfwPollEvents();
-	}
-
 	void Window::Present()
 	{
 		glfwSwapBuffers(m_Window);
 		m_WindowSizeChanged = false;
+	}
+
+	void Window::StartFrame(clock_t frameStart)
+	{
+		m_FrameStart = frameStart;
+	}
+
+	void Window::EndFrame()
+	{
+		float frameTime = 1 / 60.0f;
+
+		float currentTimePassed = (clock() - m_FrameStart) / 1000.0f;
+
+		float sleepTime = frameTime - currentTimePassed;
+
+		if (sleepTime > 0.0f) {
+			//Sleep(sleepTime * 1000.0f);
+		}
+	}
+
+	void Window::HandleWindowEvents()
+	{
+		glfwPollEvents();
 	}
 
 	void Window::Clear()

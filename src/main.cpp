@@ -21,6 +21,8 @@ int main(int argc, const char* argv[]) {
 
 	while (!glfwWindowShouldClose(&Window::GetWindow()))
 	{
+		Window::HandleWindowEvents();
+
 		if (env) {
 			env->Update();
 			env->HandleInput();

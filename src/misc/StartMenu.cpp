@@ -27,8 +27,6 @@ namespace ALZ {
 			Window::CenterWindow();
 		};
 
-		Window::Update();
-
 		ImGuiWrapper::NewFrame();	
 		
 		ImGui::SetNextWindowPos({ 0,0 });
