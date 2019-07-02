@@ -9,7 +9,6 @@ namespace ALZ {
 	bool Window::m_WindowSizeChanged = false;
 	glm::vec2 Window::WindowSize = { 0,0 };
 	GLFWwindow* Window::m_Window = nullptr;
-	clock_t Window::m_FrameStart;
 
 	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	{
@@ -45,24 +44,6 @@ namespace ALZ {
 	{
 		glfwSwapBuffers(m_Window);
 		m_WindowSizeChanged = false;
-	}
-
-	void Window::StartFrame(clock_t frameStart)
-	{
-		m_FrameStart = frameStart;
-	}
-
-	void Window::EndFrame()
-	{
-		float frameTime = 1 / 60.0f;
-
-		float currentTimePassed = (clock() - m_FrameStart) / 1000.0f;
-
-		float sleepTime = frameTime - currentTimePassed;
-
-		if (sleepTime > 0.0f) {
-			//Sleep(sleepTime * 1000.0f);
-		}
 	}
 
 	void Window::HandleWindowEvents()
