@@ -45,12 +45,12 @@ namespace ALZ {
 
 			//						 Position				  Texture Coordinates
 			glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0),
-									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
 									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 1.0),
-
-									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
 									 glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
-									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 1.0) };
+
+									 glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
+									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
+									 glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0) };
 
 
 			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices)).release();
