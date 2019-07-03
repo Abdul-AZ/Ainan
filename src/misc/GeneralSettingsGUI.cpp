@@ -5,6 +5,10 @@ namespace ALZ {
 
 	static const ImU32 ImageResolutionStep = 1;
 
+	GeneralSettingsGUI::GeneralSettingsGUI() :
+		ImageLocationBrowser(FileManager::ApplicationFolder, "Save Image")
+	{}
+
 	void GeneralSettingsGUI::DisplayGUI()
 	{
 		if (!GeneralSettingsWindowOpen)
@@ -100,10 +104,8 @@ namespace ALZ {
 			ImGui::InputScalar("width", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.x, &ImageResolutionStep, &ImageResolutionStep);
 			ImGui::InputScalar("height", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.y, &ImageResolutionStep, &ImageResolutionStep);
 
-			if (ImGui::Button("Change Save Location"))
-				DisplayImageSaveLocationBrowser();
-
-			ImGui::InputText("Image Name", &ImageFileName);
+			if (ImGui::Button("Save Location"))
+				ImageLocationBrowser.OpenWindow();
 
 			ImGui::TreePop();
 		}
@@ -111,10 +113,5 @@ namespace ALZ {
 		ImGui::End();
 
 		ImageLocationBrowser.DisplayGUI();
-	}
-
-	void GeneralSettingsGUI::DisplayImageSaveLocationBrowser()
-	{
-		ImageLocationBrowser.WindowOpen = true;
 	}
 }

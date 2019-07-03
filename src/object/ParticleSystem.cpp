@@ -45,12 +45,12 @@ namespace ALZ {
 
 			//						 Position				  Texture Coordinates
 			glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0),
-									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
 									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 1.0),
-
-									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
 									 glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
-									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 1.0) };
+
+									 glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
+									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
+									 glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0) };
 
 
 			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices)).release();
@@ -91,17 +91,6 @@ namespace ALZ {
 		}
 	}
 
-	void ParticleSystem::UpdateUniforms(Camera & camera)
-	{
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-
-		CircleInstancedShader->SetUniformMat4("projection", camera.ProjectionMatrix);
-		CircleInstancedShader->SetUniformMat4("view", camera.ViewMatrix);
-	}
-
 	void ParticleSystem::Draw()
 	{
 		//bind vertex array and shader
@@ -113,13 +102,17 @@ namespace ALZ {
 		CircleInstancedShader->SetUniform1i("particleTexture", 0);
 
 		//if we are using the default texture
-		if (Customizer.m_TextureCustomizer.UseDefaultTexture)
+		if (Customizer.m_TextureCustomizer.UseDefaultTexture) {
 			//bind the default texture to slot 0
 			DefaultTexture->Bind(0);
+			DefaultTexture->SetDefaultTextureSettings();
+		}
 		else
 			//if we are using a custom texture, bind it to slot 0
-			if(Customizer.m_TextureCustomizer.ParticleTexture)
+			if (Customizer.m_TextureCustomizer.ParticleTexture) {
 				Customizer.m_TextureCustomizer.ParticleTexture->Bind(0);
+				Customizer.m_TextureCustomizer.ParticleTexture->SetDefaultTextureSettings();
+			}
 
 		//cast the start of m_ParticleInfoBuffer to a glm::mat*, because the start of the buffer is the matrices
 		glm::mat4* modelBuffer = (glm::mat4*) m_ParticleInfoBuffer;

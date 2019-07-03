@@ -141,7 +141,6 @@ namespace ALZ {
 		//add particle system to environment
 		Inspector_obj_ptr startingPSi((InspectorInterface*)(ps.release()));
 		env->InspectorObjects.push_back(std::move(startingPSi));
-		((ParticleSystem*)env->InspectorObjects[env->InspectorObjects.size() - 1].get())->UpdateUniforms(env->m_Camera);
 	}
 
 	void RadialLightFromJson(Environment* env, json& data, std::string id)

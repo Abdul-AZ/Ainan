@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Image.h"
-#include "file/FolderBrowser.h"
+#include "file/SaveItemBrowser.h"
 
 namespace ALZ {
 
@@ -12,10 +12,10 @@ namespace ALZ {
 
 	class GeneralSettingsGUI {
 	public:
+		GeneralSettingsGUI();;
 		void DisplayGUI();
 
-		void DisplayImageSaveLocationBrowser();
-		std::string GetImageSaveLocation() { return ImageLocationBrowser.GetChosenFolderPath(); }
+		std::string GetImageSaveLocation() { return ImageLocationBrowser.m_CurrentselectedFolder; }
 
 	public:
 		bool GeneralSettingsWindowOpen = true;
@@ -27,14 +27,14 @@ namespace ALZ {
 		//blur
 		bool  BlurEnabled       = false;
 		float BlurScale         = 1.1f;
-		float BlurStrength      = 3.6f;
-		float BlurGaussianSigma = 1.3f;
+		float BlurStrength      = 4.0f;
+		float BlurGaussianSigma = 4.5f;
 
 		//image saving
 		ImageFormat   ImageFormat      = ImageFormat::png;
 		glm::uvec2    ImageResolution  = { 1080, 720 };
-		std::string   ImageFileName    = "test";
-		FolderBrowser ImageLocationBrowser;
+		//FolderBrowser ImageLocationBrowser;
+		SaveItemBrowser ImageLocationBrowser;
 
 	private:
 		BlendMode m_ActiveBlendMode = BlendMode::Additive;

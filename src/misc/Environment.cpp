@@ -49,7 +49,6 @@ namespace ALZ {
 		for (Inspector_obj_ptr& obj : InspectorObjects) {
 			if(m_Status == EnvironmentStatus::PlayMode)
 				obj->Update(deltaTime);
-			obj->UpdateUniforms(m_Camera);
 		}
 
 		if (Window::WindowSizeChangedSinceLastFrame())
@@ -103,12 +102,10 @@ namespace ALZ {
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 			obj->Draw();
 
-		m_FrameBuffer.m_FrameBuffer->Bind();
 
 		if (m_Settings.BlurEnabled)
 			GaussianBlur::Blur(m_FrameBuffer, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
 
-		m_FrameBuffer.m_FrameBuffer->Bind();
 		m_FrameBuffer.RenderToScreen();
 
 		Renderer::EndScene();
@@ -136,7 +133,14 @@ namespace ALZ {
 				GaussianBlur::Blur(m_ExportCamera.m_RenderSurface, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
 
 			Image image = Image::FromFrameBuffer(m_ExportCamera.m_RenderSurface, m_Settings.ImageResolution.x, m_Settings.ImageResolution.y);
-			image.SaveToFile(m_Settings.GetImageSaveLocation() + '/' + m_Settings.ImageFileName, m_Settings.ImageFormat);
+
+			std::string saveTarget = m_Settings.ImageLocationBrowser.GetSelectedSavePath();
+
+			//add a default name if none is chosen
+			if (saveTarget.back() == '\\')
+				saveTarget.append("image");
+
+			image.SaveToFile(saveTarget, m_Settings.ImageFormat);
 			m_SaveNextFrameAsImage = false;
 
 			Renderer::EndScene();
