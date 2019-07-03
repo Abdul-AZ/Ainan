@@ -22,8 +22,8 @@ namespace ALZ {
 	{
 		if (Window::WindowSizeChangedSinceLastFrame())
 		{
-			glm::vec2& size = Window::WindowSize;
-			ProjectionMatrix = glm::ortho(0.0f, size.x, 0.0f, size.y);
+			float aspectRatio = Window::WindowSize.x / Window::WindowSize.y;
+			ProjectionMatrix = glm::ortho(0.0f, GlobalScaleFactor * aspectRatio, 0.0f, GlobalScaleFactor);
 		}
 	}
 

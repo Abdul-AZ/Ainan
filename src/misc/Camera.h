@@ -16,6 +16,7 @@ namespace ALZ {
 	public:
 		Camera(CameraMode mode = CameraMode::Orthographic);
 
+		//this only sets the camera size to the screen size
 		void Update(const float& deltaTime);
 		void SetPosition(const glm::vec2& newPos);
 

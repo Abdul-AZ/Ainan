@@ -22,10 +22,6 @@ namespace ALZ {
 	public:
 		glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-
-	private:
-		void UpdateBufferWithPoints();
-
 	private:
 		glm::vec2 m_StartPoint;
 		glm::vec2 m_EndPoint;

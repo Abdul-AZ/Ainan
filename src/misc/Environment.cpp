@@ -6,11 +6,6 @@ namespace ALZ {
 	Environment::Environment() : 
 		m_EnvironmentSaveBrowser(FileManager::ApplicationFolder, "Save Environment")
 	{
-		//m_PlayButtonTexture.Init("res/PlayButton.png", 3);
-		//m_PauseButtonTexture.Init("res/PauseButton.png", 3);
-		//m_ResumeButtonTexture.Init("res/ResumeButton.png", 3);
-		//m_StopButtonTexture.Init("res/StopButton.png", 3);
-
 		m_PlayButtonTexture = Renderer::CreateTexture();
 		m_PauseButtonTexture = Renderer::CreateTexture();
 		m_ResumeButtonTexture = Renderer::CreateTexture();
@@ -25,6 +20,7 @@ namespace ALZ {
 
 		GaussianBlur::Init();
 		RegisterEnvironmentInputKeys();
+
 	}
 
 	Environment::~Environment()
@@ -42,6 +38,7 @@ namespace ALZ {
 		timeStart = timeEnd;
 
 		m_Camera.Update(deltaTime);
+		m_ExportCamera.SetSize(m_ExportCameraPosition, m_ExportCameraSize);
 
 		for (int i = 0; i < InspectorObjects.size(); i++) {
 			if (InspectorObjects[i]->ToBeDeleted)
@@ -93,6 +90,9 @@ namespace ALZ {
 			}
 		}
 
+		if(m_DrawExportCamera)
+			m_ExportCamera.DrawOutline();
+
 		if (m_Status == EnvironmentStatus::None) {
 			m_FrameBuffer.RenderToScreen();
 			m_FrameBuffer.m_FrameBuffer->Unbind();
@@ -109,16 +109,38 @@ namespace ALZ {
 			GaussianBlur::Blur(m_FrameBuffer, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
 
 		m_FrameBuffer.m_FrameBuffer->Bind();
-
-		if (m_SaveNextFrameAsImage) {
-			Image image = Image::FromFrameBuffer(m_FrameBuffer, m_Settings.ImageResolution.x, m_Settings.ImageResolution.y);
-			image.SaveToFile(m_Settings.GetImageSaveLocation() + '/' + m_Settings.ImageFileName, m_Settings.ImageFormat);
-			m_SaveNextFrameAsImage = false;
-		}
-
 		m_FrameBuffer.RenderToScreen();
 
 		Renderer::EndScene();
+
+		if (m_SaveNextFrameAsImage) {
+			Renderer::BeginScene(m_ExportCamera.RealCamera);
+
+			m_ExportCamera.m_RenderSurface.SetSize(m_ExportCameraSize * GlobalScaleFactor);
+			m_ExportCamera.m_RenderSurface.m_FrameBuffer->Bind();
+
+			for (Inspector_obj_ptr& obj : InspectorObjects)
+			{
+				if (obj->Type == InspectorObjectType::RadiaLightType) {
+					RadialLight* light = static_cast<RadialLight*>(obj.get());
+					m_Background.SubmitLight(*light);
+				}
+			}
+
+			m_Background.Draw();
+
+			for (Inspector_obj_ptr& obj : InspectorObjects)
+				obj->Draw();
+
+			if (m_Settings.BlurEnabled)
+				GaussianBlur::Blur(m_ExportCamera.m_RenderSurface, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
+
+			Image image = Image::FromFrameBuffer(m_ExportCamera.m_RenderSurface, m_Settings.ImageResolution.x, m_Settings.ImageResolution.y);
+			image.SaveToFile(m_Settings.GetImageSaveLocation() + '/' + m_Settings.ImageFileName, m_Settings.ImageFormat);
+			m_SaveNextFrameAsImage = false;
+
+			Renderer::EndScene();
+		}
 	}
 
 	void Environment::RenderGUI()
@@ -133,6 +155,7 @@ namespace ALZ {
 		DisplayObjectInspecterGUI();
 		m_Settings.DisplayGUI();
 		DisplayEnvironmentStatusGUI();
+		DisplayExportCameraSettings();
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 			obj->DisplayGUI(m_Camera);
@@ -430,6 +453,21 @@ namespace ALZ {
 		viewport.Size = ImVec2(Window::WindowSize.x, Window::WindowSize.y);
 		viewport.Pos = ImVec2(0, (float)MenuBarHeight);
 		ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
+	}
+
+	void Environment::DisplayExportCameraSettings()
+	{
+		ImGui::Begin("Export Settings");
+
+		ImGui::Checkbox("Draw Export Camera Outline", &m_DrawExportCamera);
+		ImGui::DragFloat2("Position", &m_ExportCameraPosition.x, 0.01f);
+		ImGui::DragFloat2("Size", &m_ExportCameraSize.x, 0.01f);
+
+		//clamp the size, so it is always positive
+		m_ExportCameraSize.x = std::clamp(m_ExportCameraSize.x, 0.0f, 100000.0f);
+		m_ExportCameraSize.y = std::clamp(m_ExportCameraSize.y, 0.0f, 100000.0f);
+
+		ImGui::End();
 	}
 
 	void Environment::Play()

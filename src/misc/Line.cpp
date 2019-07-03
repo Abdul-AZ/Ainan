@@ -29,8 +29,6 @@ namespace ALZ {
 	{
 		m_StartPoint = startPoint * GlobalScaleFactor;
 		m_EndPoint = endPoint * GlobalScaleFactor;
-
-		UpdateBufferWithPoints();
 	}
 
 	void Line::SetPoints(glm::vec2 linePosition, float lineLength, float lineAngle)
@@ -42,12 +40,12 @@ namespace ALZ {
 
 		m_StartPoint *= GlobalScaleFactor;
 		m_EndPoint *= GlobalScaleFactor;
-
-		UpdateBufferWithPoints();
 	}
 
 	void Line::Draw()
 	{
+		glm::vec2 vertices[] = { m_StartPoint, m_EndPoint };
+		VBO->UpdateData(0, sizeof(vertices), vertices);
 		LineShader->SetUniformVec4("color", Color);
 		LineShader->Bind();
 		VAO->Bind();
@@ -81,12 +79,5 @@ namespace ALZ {
 		float y = slope * x + yIntercept;
 
 		return glm::vec2(x, y);
-	}
-
-	void Line::UpdateBufferWithPoints()
-	{
-		glm::vec2 vertices[] = { m_StartPoint, m_EndPoint };
-
-		VBO->UpdateData(0, sizeof(vertices), vertices);
 	}
 }

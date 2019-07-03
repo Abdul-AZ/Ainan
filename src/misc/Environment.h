@@ -6,6 +6,7 @@
 #include "object/ParticleSystem.h"
 #include "Camera.h"
 #include "EditorStyles.h"
+#include "ExportCamera.h"
 
 #include "ParticleCustomizer.h"
 #include "GeneralSettingsGUI.h"
@@ -52,6 +53,7 @@ namespace ALZ {
 		void DisplayEnvironmentStatusGUI();
 		void DisplayEnvironmentControlsGUI();
 		void DisplayMainMenuBarGUI();
+		void DisplayExportCameraSettings();
 
 		void Play();
 		void Stop();
@@ -73,6 +75,7 @@ namespace ALZ {
 
 		RenderSurface m_FrameBuffer;
 		Camera m_Camera;
+		ExportCamera m_ExportCamera;
 		InputManager m_InputManager;
 		Grid m_Grid;
 		std::vector<std::unique_ptr<InspectorInterface>> InspectorObjects;
@@ -88,14 +91,17 @@ namespace ALZ {
 		std::unique_ptr<Texture> m_ResumeButtonTexture;
 		std::unique_ptr<Texture> m_StopButtonTexture;
 
+		bool m_DrawExportCamera = false;
 		bool m_MousePressedLastFrame = false;
 		bool m_SaveNextFrameAsImage = false;
+
+		glm::vec2 m_ExportCameraPosition = { 0.0f,0.0f };
+		glm::vec2 m_ExportCameraSize = { 1.0f, 1.0f * 9.0f / 16.0f };
 
 		Background m_Background;
 
 		SaveItemBrowser m_EnvironmentSaveBrowser;
 		bool m_SaveLocationSelected = false;
-
 
 		//expose private parameters for environment serilization (saving and loading environments)
 		friend bool SaveEnvironment(const Environment& env, std::string path);
