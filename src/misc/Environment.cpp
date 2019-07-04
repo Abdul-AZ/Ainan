@@ -76,6 +76,13 @@ namespace ALZ {
 		if(m_Settings.ShowGrid && m_Status != EnvironmentStatus::PlayMode)
 			m_Grid.Draw();
 
+		for (Inspector_obj_ptr& obj : InspectorObjects)
+		{
+			if(obj->Type == InspectorObjectType::ParticleSystemType)
+				if(obj->Selected)
+					m_Gizmo.Draw(obj->GetPositionRef(), m_InputManager.GetMousePositionNDC());
+		}
+
 		//Render world space gui here because we need camera information for that
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 		{

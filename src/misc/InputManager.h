@@ -21,6 +21,7 @@ namespace ALZ {
 		void ClearKeys();
 		void HandleInput();
 		void DisplayGUI();
+		glm::vec2 GetMousePositionNDC();
 
 	public:
 		bool ControlsWindowOpen = false;

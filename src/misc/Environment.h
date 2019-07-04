@@ -20,6 +20,7 @@
 #include "misc/CircleOutline.h"
 #include "misc/Background.h"
 #include "misc/Grid.h"
+#include "misc/Gizmo.h"
 #include "renderer/Renderer.h"
 
 #include "InputManager.h"
@@ -78,6 +79,7 @@ namespace ALZ {
 		ExportCamera m_ExportCamera;
 		InputManager m_InputManager;
 		Grid m_Grid;
+		Gizmo m_Gizmo;
 		std::vector<std::unique_ptr<InspectorInterface>> InspectorObjects;
 
 		bool m_HideGUI = false;

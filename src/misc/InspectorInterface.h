@@ -16,6 +16,7 @@ namespace ALZ {
 		virtual void Update(const float& deltaTime) {};
 		virtual void Draw() {};
 		virtual void DisplayGUI(Camera& camera) {};
+		virtual glm::vec2& GetPositionRef() { return glm::vec2(0.0f, 0.0f); };
 
 		virtual ~InspectorInterface() {};
 

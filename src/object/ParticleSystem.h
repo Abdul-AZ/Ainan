@@ -24,6 +24,7 @@ namespace ALZ {
 		void ClearParticles();
 		void DisplayGUI(Camera& camera) override;
 
+		glm::vec2& GetPositionRef() override;
 		ParticleSystem(const ParticleSystem& Psystem);
 		ParticleSystem operator=(const ParticleSystem& Psystem);
 

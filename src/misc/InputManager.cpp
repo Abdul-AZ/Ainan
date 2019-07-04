@@ -84,4 +84,23 @@ namespace ALZ {
 
 		ImGui::End();
 	}
+
+	//NDC = Normalized Device Coordinates
+	//aka ranges from -1 to 1
+	glm::vec2 InputManager::GetMousePositionNDC()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(&Window::GetWindow(), &xpos, &ypos);
+
+		int width, height;
+		glfwGetWindowSize(&Window::GetWindow(), &width, &height);
+
+		//change from being relative to top left to being relative to bottom left
+		ypos = -ypos + height;
+
+		float NDC_xpos = xpos * 2 / width - 1.0f;
+		float NDC_ypos = ypos * 2 / height - 1.0f;
+
+		return glm::vec2(NDC_xpos, NDC_ypos);
+	}
 }
