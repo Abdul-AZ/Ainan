@@ -89,7 +89,7 @@ namespace ALZ {
 
 		GizmoArrow mouseOver = None;
 
-		if (CheckIfInsideArrowRectangle(Horizontal, objectPositionWS, glm::vec2(result.x,result.y)) )
+		if (CheckIfInsideArrow(Horizontal, objectPositionWS, glm::vec2(result.x,result.y)) )
 		{
 			mouseOver = Horizontal;
 			if (mouseButtonDown && m_ArrowPressed != Vertical) {
@@ -100,7 +100,7 @@ namespace ALZ {
 			}
 		}
 
-		if (CheckIfInsideArrowRectangle(Vertical, objectPositionWS, glm::vec2(result.x, result.y)))
+		if (CheckIfInsideArrow(Vertical, objectPositionWS, glm::vec2(result.x, result.y)))
 		{
 			mouseOver = Vertical;
 			if (mouseButtonDown && m_ArrowPressed != Horizontal) {
@@ -154,7 +154,7 @@ namespace ALZ {
 		Renderer::Draw(*VAO, *GizmoShader, Primitive::Triangles, *EBO);
 	}
 
-	bool Gizmo::CheckIfInsideArrowRectangle(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point)
+	bool Gizmo::CheckIfInsideArrow(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point)
 	{
 
 		//check if inside arrow rectangle, that is the shape (v0, v1, v2, v6) in the arrow in the start of this file
