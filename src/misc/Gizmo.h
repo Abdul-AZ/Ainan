@@ -19,6 +19,10 @@ namespace ALZ {
 		void Draw(glm::vec2& objectPosition, const glm::vec2& mousePositionNDC);
 
 	private:
+		bool CheckIfInsideArrowRectangle(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point);
+
+	private:
 		GizmoArrow m_ArrowPressed = None;
+		float m_ArrowPressLocationDistanceFromArrowOrigin = 0.0f;
 	};
 }
