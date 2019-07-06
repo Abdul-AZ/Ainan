@@ -20,8 +20,6 @@ namespace ALZ {
 	public:
 		bool GeneralSettingsWindowOpen = true;
 
-		glm::vec4 BackgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.2f);
-
 		bool ShowGrid = true;
 
 		//blur

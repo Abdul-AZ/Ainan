@@ -15,11 +15,12 @@ namespace ALZ {
 		Background();
 
 		void SubmitLight(const RadialLight& light);
-
+		void DisplayGUI();
 		void Draw();
 
 	public:
-		glm::vec4 BaseColor;
+		glm::vec3 BaseColor = glm::vec3(1.0f, 1.0f, 1.0f);
+		float BaseLight = 0.1f;
 
 	private:
 
@@ -29,5 +30,6 @@ namespace ALZ {
 		float m_RadialLightConstantBuffer[MAX_NUM_RADIAL_LIGHTS];
 		float m_RadialLightLinearBuffer[MAX_NUM_RADIAL_LIGHTS];
 		float m_RadialLightQuadraticBuffer[MAX_NUM_RADIAL_LIGHTS];
+		float m_RadialLightIntensityBuffer[MAX_NUM_RADIAL_LIGHTS];
 	};
 }

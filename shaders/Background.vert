@@ -9,6 +9,7 @@ out vec2 FragPos;
 
 void main() 
 {
-	FragPos = vec2(model * vec4(aPos / 5000, 0.0, 1.0));
-	gl_Position = projection * view * model * vec4(aPos.x, aPos.y, 0.0, 1.0);
+	vec4 pos = model * vec4(aPos.x,aPos.y, 0.0, 1.0);
+	FragPos = pos.xy;
+	gl_Position = projection * view * model * vec4(aPos.xy, 0.0, 1.0);
 }

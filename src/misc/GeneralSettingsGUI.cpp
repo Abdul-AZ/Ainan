@@ -65,13 +65,6 @@ namespace ALZ {
 			}
 		}
 
-		if (ImGui::TreeNode("Background:"))
-		{
-			ImGui::ColorPicker4("Background Color", &BackgroundColor.r);
-
-			ImGui::TreePop();
-		}
-
 		if (ImGui::TreeNode("Image Saving:"))
 		{
 			if (ImGui::BeginCombo("Image Format", Image::GetFormatString(ImageFormat).c_str()))

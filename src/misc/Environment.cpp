@@ -53,8 +53,6 @@ namespace ALZ {
 
 		if (Window::WindowSizeChangedSinceLastFrame())
 			m_FrameBuffer.SetSize(Window::WindowSize);
-
-		m_Background.BaseColor = m_Settings.BackgroundColor;
 	}
 
 	void Environment::Render()
@@ -78,9 +76,8 @@ namespace ALZ {
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 		{
-			if(obj->Type == InspectorObjectType::ParticleSystemType)
-				if(obj->Selected)
-					m_Gizmo.Draw(obj->GetPositionRef(), m_InputManager.GetMousePositionNDC());
+			if(obj->Selected)
+				m_Gizmo.Draw(obj->GetPositionRef(), m_InputManager.GetMousePositionNDC());
 		}
 
 		//Render world space gui here because we need camera information for that
@@ -167,6 +164,7 @@ namespace ALZ {
 		m_Settings.DisplayGUI();
 		DisplayEnvironmentStatusGUI();
 		DisplayExportCameraSettings();
+		m_Background.DisplayGUI();
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 			obj->DisplayGUI(m_Camera);

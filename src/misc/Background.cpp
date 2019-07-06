@@ -37,13 +37,25 @@ namespace ALZ {
 
 	void Background::SubmitLight(const RadialLight& light)
 	{
-		m_RadialLightPositionBuffer[m_RadialLightSubmissionCount] = glm::vec2(light.Position.x, light.Position.y);
+		m_RadialLightPositionBuffer[m_RadialLightSubmissionCount] = glm::vec2(light.Position.x, light.Position.y) * GlobalScaleFactor;
 		m_RadialLightColorBuffer[m_RadialLightSubmissionCount] = light.Color;
 		m_RadialLightConstantBuffer[m_RadialLightSubmissionCount] = light.Constant;
 		m_RadialLightLinearBuffer[m_RadialLightSubmissionCount] = light.Linear;
 		m_RadialLightQuadraticBuffer[m_RadialLightSubmissionCount] = light.Quadratic;
+		m_RadialLightIntensityBuffer[m_RadialLightSubmissionCount] = light.Intensity;
 
 		m_RadialLightSubmissionCount++;
+	}
+
+	void Background::DisplayGUI()
+	{
+		ImGui::Begin("Background");
+
+		ImGui::ColorEdit3("Base Background Color", &BaseColor.r);
+
+		ImGui::SliderFloat("Base Light", &BaseLight, 0.0f, 1.0f);
+
+		ImGui::End();
 	}
 
 	void Background::Draw()
@@ -57,16 +69,19 @@ namespace ALZ {
 			m_RadialLightPositionBuffer[i] = glm::vec2(10000.0f, 10000.0f);
 			m_RadialLightConstantBuffer[i] = 1000.0f;
 			m_RadialLightLinearBuffer[i] = 1000.0f;
+			m_RadialLightIntensityBuffer[i] = 0.0f;
 			m_RadialLightQuadraticBuffer[i] = 1000.0f;
 		}
 		
-		BackgroundShader->SetUniformVec4("baseColor", BaseColor);
+		BackgroundShader->SetUniformVec3("baseColor", BaseColor);
 
 		BackgroundShader->SetUniformVec2s("radialLights.Position", m_RadialLightPositionBuffer, MAX_NUM_RADIAL_LIGHTS);
 		BackgroundShader->SetUniformVec3s("radialLights.Color", m_RadialLightColorBuffer, MAX_NUM_RADIAL_LIGHTS);
 		BackgroundShader->SetUniform1fs("radialLights.Constant", m_RadialLightConstantBuffer, MAX_NUM_RADIAL_LIGHTS);
 		BackgroundShader->SetUniform1fs("radialLights.Linear", m_RadialLightLinearBuffer, MAX_NUM_RADIAL_LIGHTS);
 		BackgroundShader->SetUniform1fs("radialLights.Quadratic", m_RadialLightQuadraticBuffer, MAX_NUM_RADIAL_LIGHTS);
+		BackgroundShader->SetUniform1fs("radialLights.Intensity", m_RadialLightIntensityBuffer, MAX_NUM_RADIAL_LIGHTS);
+		BackgroundShader->SetUniform1f("baseLight", BaseLight);
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(5000.0f));
