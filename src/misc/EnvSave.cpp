@@ -117,6 +117,7 @@ namespace ALZ {
 		j[id + "Constant"] = light.Constant;
 		j[id + "Linear"] = light.Linear;
 		j[id + "Quadratic"] = light.Quadratic;
+		j[id + "Intensity"] = light.Intensity;
 	}
 
 }

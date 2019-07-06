@@ -155,6 +155,7 @@ namespace ALZ {
 		light->Constant = data[id + "Constant"].get<float>();
 		light->Linear = data[id + "Linear"].get<float>();
 		light->Quadratic = data[id + "Quadratic"].get<float>();
+		light->Intensity = data[id + "Intensity"].get<float>();
 
 		//add radial light to environment
 		Inspector_obj_ptr startingPSi((InspectorInterface*)(light.release()));
