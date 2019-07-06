@@ -38,7 +38,7 @@ namespace ALZ {
 		timeStart = timeEnd;
 
 		m_Camera.Update(deltaTime);
-		m_ExportCamera.SetSize(m_ExportCameraPosition, m_ExportCameraSize);
+		//m_ExportCamera.SetSize(m_ExportCameraPosition, m_ExportCameraSize);
 
 		for (int i = 0; i < InspectorObjects.size(); i++) {
 			if (InspectorObjects[i]->ToBeDeleted)
@@ -92,9 +92,7 @@ namespace ALZ {
 					ps->Customizer.m_CircleOutline.Draw();
 			}
 		}
-
-		if(m_DrawExportCamera)
-			m_ExportCamera.DrawOutline();
+		m_ExportCamera.DrawOutline();
 
 		if (m_Status == EnvironmentStatus::None) {
 			m_FrameBuffer.RenderToScreen();
@@ -117,7 +115,7 @@ namespace ALZ {
 		if (m_SaveNextFrameAsImage) {
 			Renderer::BeginScene(m_ExportCamera.RealCamera);
 
-			m_ExportCamera.m_RenderSurface.SetSize(m_ExportCameraSize * GlobalScaleFactor);
+			m_ExportCamera.m_RenderSurface.SetSize(m_ExportCamera.m_ExportCameraSize * GlobalScaleFactor);
 			m_ExportCamera.m_RenderSurface.m_FrameBuffer->Bind();
 
 			for (Inspector_obj_ptr& obj : InspectorObjects)
@@ -136,15 +134,15 @@ namespace ALZ {
 			if (m_Settings.BlurEnabled)
 				GaussianBlur::Blur(m_ExportCamera.m_RenderSurface, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
 
-			Image image = Image::FromFrameBuffer(m_ExportCamera.m_RenderSurface, m_Settings.ImageResolution.x, m_Settings.ImageResolution.y);
+			Image image = Image::FromFrameBuffer(m_ExportCamera.m_RenderSurface, m_ExportCamera.ImageResolution);
 
-			std::string saveTarget = m_Settings.ImageLocationBrowser.GetSelectedSavePath();
+			std::string saveTarget = m_ExportCamera.ImageSavePath;
 
 			//add a default name if none is chosen
 			if (saveTarget.back() == '\\')
-				saveTarget.append("image");
+				saveTarget.append("default name");
 
-			image.SaveToFile(saveTarget, m_Settings.ImageFormat);
+			image.SaveToFile(saveTarget, m_ExportCamera.SaveImageFormat);
 			m_SaveNextFrameAsImage = false;
 
 			Renderer::EndScene();
@@ -162,8 +160,8 @@ namespace ALZ {
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
 		m_Settings.DisplayGUI();
+		m_ExportCamera.DisplayGUI();
 		DisplayEnvironmentStatusGUI();
-		DisplayExportCameraSettings();
 		m_Background.DisplayGUI();
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
@@ -420,6 +418,12 @@ namespace ALZ {
 				if (ImGui::MenuItem("Environment Status"))
 					m_EnvironmentStatusWindowOpen = !m_EnvironmentStatusWindowOpen;
 
+				if (ImGui::MenuItem("Background Settings"))
+					m_Background.SettingsWindowOpen = !m_Background.SettingsWindowOpen;
+
+				if (ImGui::MenuItem("Export Settings"))
+					m_ExportCamera.SettingsWindowOpen = !m_ExportCamera.SettingsWindowOpen;
+
 				ImGui::EndMenu();
 			}
 
@@ -462,21 +466,6 @@ namespace ALZ {
 		viewport.Size = ImVec2(Window::WindowSize.x, Window::WindowSize.y);
 		viewport.Pos = ImVec2(0, (float)MenuBarHeight);
 		ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
-	}
-
-	void Environment::DisplayExportCameraSettings()
-	{
-		ImGui::Begin("Export Settings");
-
-		ImGui::Checkbox("Draw Export Camera Outline", &m_DrawExportCamera);
-		ImGui::DragFloat2("Position", &m_ExportCameraPosition.x, 0.01f);
-		ImGui::DragFloat2("Size", &m_ExportCameraSize.x, 0.01f);
-
-		//clamp the size, so it is always positive
-		m_ExportCameraSize.x = std::clamp(m_ExportCameraSize.x, 0.0f, 100000.0f);
-		m_ExportCameraSize.y = std::clamp(m_ExportCameraSize.y, 0.0f, 100000.0f);
-
-		ImGui::End();
 	}
 
 	void Environment::Play()

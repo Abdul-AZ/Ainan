@@ -49,7 +49,10 @@ namespace ALZ {
 
 	void Background::DisplayGUI()
 	{
-		ImGui::Begin("Background");
+		if (!SettingsWindowOpen)
+			return;
+
+		ImGui::Begin("Background", &SettingsWindowOpen);
 
 		ImGui::ColorEdit3("Base Background Color", &BaseColor.r);
 

@@ -19,6 +19,7 @@ namespace ALZ {
 		void Draw();
 
 	public:
+		bool SettingsWindowOpen = true;;
 		glm::vec3 BaseColor = glm::vec3(1.0f, 1.0f, 1.0f);
 		float BaseLight = 0.1f;
 

@@ -24,5 +24,11 @@ namespace ALZ {
 	private:
 		GizmoArrow m_ArrowPressed = None;
 		float m_ArrowPressLocationDistanceFromArrowOrigin = 0.0f;
+
+
+		std::unique_ptr<IndexBuffer> EBO;
+		std::unique_ptr<VertexBuffer> VBO;
+		std::unique_ptr<VertexArray> VAO;
+		std::unique_ptr<ShaderProgram> GizmoShader;
 	};
 }

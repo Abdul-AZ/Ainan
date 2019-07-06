@@ -12,10 +12,7 @@ namespace ALZ {
 
 	class GeneralSettingsGUI {
 	public:
-		GeneralSettingsGUI();;
 		void DisplayGUI();
-
-		std::string GetImageSaveLocation() { return ImageLocationBrowser.m_CurrentselectedFolder; }
 
 	public:
 		bool GeneralSettingsWindowOpen = true;
@@ -27,12 +24,6 @@ namespace ALZ {
 		float BlurScale         = 1.1f;
 		float BlurStrength      = 4.0f;
 		float BlurGaussianSigma = 4.5f;
-
-		//image saving
-		ImageFormat   ImageFormat      = ImageFormat::png;
-		glm::uvec2    ImageResolution  = { 1080, 720 };
-		//FolderBrowser ImageLocationBrowser;
-		SaveItemBrowser ImageLocationBrowser;
 
 	private:
 		BlendMode m_ActiveBlendMode = BlendMode::Additive;

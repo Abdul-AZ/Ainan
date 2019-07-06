@@ -3,12 +3,6 @@
 
 namespace ALZ {
 
-	static const ImU32 ImageResolutionStep = 1;
-
-	GeneralSettingsGUI::GeneralSettingsGUI() :
-		ImageLocationBrowser(FileManager::ApplicationFolder, "Save Image")
-	{}
-
 	void GeneralSettingsGUI::DisplayGUI()
 	{
 		if (!GeneralSettingsWindowOpen)
@@ -65,46 +59,6 @@ namespace ALZ {
 			}
 		}
 
-		if (ImGui::TreeNode("Image Saving:"))
-		{
-			if (ImGui::BeginCombo("Image Format", Image::GetFormatString(ImageFormat).c_str()))
-			{
-				bool is_png = ImageFormat == ImageFormat::png ? true : false;
-				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::png).c_str(), &is_png)) {
-
-					ImGui::SetItemDefaultFocus();
-					ImageFormat = ImageFormat::png;
-				}
-
-				bool is_jpeg = ImageFormat == ImageFormat::jpeg ? true : false;
-				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::jpeg).c_str(), &is_jpeg)) {
-
-					ImGui::SetItemDefaultFocus();
-					ImageFormat = ImageFormat::jpeg;
-				}
-
-				bool is_bmp = ImageFormat == ImageFormat::bmp ? true : false;
-				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::bmp).c_str(), &is_bmp)) {
-
-					ImGui::SetItemDefaultFocus();
-					ImageFormat = ImageFormat::bmp;
-				}
-
-				ImGui::EndCombo();
-			}
-
-			ImGui::Text("Image Resolution");
-			ImGui::InputScalar("width", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.x, &ImageResolutionStep, &ImageResolutionStep);
-			ImGui::InputScalar("height", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.y, &ImageResolutionStep, &ImageResolutionStep);
-
-			if (ImGui::Button("Save Location"))
-				ImageLocationBrowser.OpenWindow();
-
-			ImGui::TreePop();
-		}
-
 		ImGui::End();
-
-		ImageLocationBrowser.DisplayGUI();
 	}
 }

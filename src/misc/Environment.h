@@ -54,7 +54,6 @@ namespace ALZ {
 		void DisplayEnvironmentStatusGUI();
 		void DisplayEnvironmentControlsGUI();
 		void DisplayMainMenuBarGUI();
-		void DisplayExportCameraSettings();
 
 		void Play();
 		void Stop();
@@ -93,12 +92,8 @@ namespace ALZ {
 		std::unique_ptr<Texture> m_ResumeButtonTexture;
 		std::unique_ptr<Texture> m_StopButtonTexture;
 
-		bool m_DrawExportCamera = false;
 		bool m_MousePressedLastFrame = false;
 		bool m_SaveNextFrameAsImage = false;
-
-		glm::vec2 m_ExportCameraPosition = { 0.0f,0.0f };
-		glm::vec2 m_ExportCameraSize = { 1.0f, 1.0f * 9.0f / 16.0f };
 
 		Background m_Background;
 

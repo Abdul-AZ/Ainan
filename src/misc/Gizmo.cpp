@@ -52,26 +52,21 @@ namespace ALZ {
 		0,2,6
 	};
 
-	static IndexBuffer* EBO;
-	static VertexBuffer* VBO;
-	static VertexArray* VAO;
-	static ShaderProgram* GizmoShader;
-
 	Gizmo::Gizmo()
 	{
-		VAO = Renderer::CreateVertexArray().release();
+		VAO = Renderer::CreateVertexArray();
 		VAO->Bind();
 
-		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices)).release();
+		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices));
 		VBO->Bind();
 		VBO->SetLayout({ ShaderVariableType::Vec2 });
 
-		EBO = Renderer::CreateIndexBuffer((unsigned int*)arrowIndecies, sizeof(arrowIndecies) / sizeof(unsigned int)).release();
+		EBO = Renderer::CreateIndexBuffer((unsigned int*)arrowIndecies, sizeof(arrowIndecies) / sizeof(unsigned int));
 		EBO->Bind();
 
 		VAO->Unbind();
 
-		GizmoShader = Renderer::CreateShaderProgram("shaders/Gizmo.vert", "shaders/Gizmo.frag").release();
+		GizmoShader = Renderer::CreateShaderProgram("shaders/Gizmo.vert", "shaders/Gizmo.frag");
 	}
 
 	void Gizmo::Draw(glm::vec2& objectPosition, const glm::vec2& mousePositionNDC)

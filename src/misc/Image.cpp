@@ -122,4 +122,9 @@ namespace ALZ {
 
 		return image;
 	}
+
+	Image Image::FromFrameBuffer(RenderSurface& framebuffer, const glm::ivec2& size)
+	{
+		return FromFrameBuffer(framebuffer, size.x, size.y);
+	}
 }

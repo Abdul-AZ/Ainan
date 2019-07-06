@@ -29,6 +29,8 @@ namespace ALZ {
 		static std::string GetFormatString(const ImageFormat& format);
 		static Image FromFrameBuffer(RenderSurface& framebuffer);
 		static Image FromFrameBuffer(RenderSurface& framebuffer, const unsigned int& width, const unsigned int& height);
+		//for convenience
+		static Image FromFrameBuffer(RenderSurface& framebuffer, const glm::ivec2& size);
 
 	public:
 		//pointer to the image pixel array
