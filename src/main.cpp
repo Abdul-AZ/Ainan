@@ -28,7 +28,7 @@ int main(int argc, const char* argv[]) {
 			env->HandleInput();
 			env->Render();
 			env->RenderGUI();
-
+		
 			if (env->ShouldDelete) {
 				delete env;
 				env = nullptr;
@@ -36,6 +36,8 @@ int main(int argc, const char* argv[]) {
 		}
 		else
 			startMenu.Update(env);
+
+		ImGuiWrapper::Render();
 
 		Window::Present();
 		Window::Clear();

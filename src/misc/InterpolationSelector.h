@@ -14,6 +14,7 @@ namespace ALZ {
 			X(Linear)
 			X(Cubic)
 			X(Smoothstep)
+			X(Custom)
 		}
 #undef X
 		return "";
@@ -95,6 +96,15 @@ namespace ALZ {
 
 						ImGui::SetItemDefaultFocus();
 						Type = Smoothstep;
+					}
+				}
+
+				{
+					bool is_Active = Type == Custom;
+					if (ImGui::Selectable(InterpolationTypeToString(Custom), &is_Active)) {
+
+						ImGui::SetItemDefaultFocus();
+						Type = Custom;
 					}
 				}
 

@@ -10,7 +10,8 @@ namespace ALZ {
 		Fixed,
 		Linear,
 		Cubic,
-		Smoothstep
+		Smoothstep,
+		Custom
 	};
 
 
