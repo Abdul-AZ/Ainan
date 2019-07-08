@@ -27,99 +27,112 @@ namespace ALZ {
 		return Interpolation::Cubic<float>(0.0f, 1.0f, t);
 	}
 	
-	CurveEditor::CurveEditor() :
-		Type(InterpolationType::Linear)
-	{
-		ControlPoints.push_back({ 0.0f, 0.0f});
-		ControlPoints.push_back({ 0.5f, 0.95f});
-		ControlPoints.push_back({ 1.0f, 1.0f });
-	}
-
 	CurveEditor::CurveEditor(const InterpolationType& type) :
 		Type(type)
 	{}
 
-
+	//for using the imgui plotlines function
 	static CurveEditor* s_CurrentCurve = nullptr;
-
-	static int offset = 0;
-	static int count = 100;
-	static float t_max = 0.0f;
 
 	void CurveEditor::DisplayInCurrentWindow(const glm::vec2& size)
 	{
 		switch (Type)
 		{
-		case ALZ::Fixed:
+		case Fixed:
 			break;
-		case ALZ::Linear:
+		case Linear:
 			ImGui::PlotLines("End Point", linearWrapper, nullptr, 100, 0, nullptr, 3.402823466e+38F, 3.402823466e+38F, { size.x, size.y });
 			break;
-		case ALZ::Cubic:
+		case Cubic:
 			ImGui::PlotLines("End Point", cubicWrapper, nullptr, 100, 0, nullptr, 3.402823466e+38F, 3.402823466e+38F, { size.x, size.y });
 			break;
-		case ALZ::Smoothstep:
+		case Smoothstep:
 			ImGui::PlotLines("End Point", smoothStepWrapper, nullptr, 100, 0, nullptr, 3.402823466e+38F, 3.402823466e+38F, { size.x, size.y });
 			break;
+		case Custom:
+			DrawCustomCurve();
 		default:
 			break;
 		}
-		
-		s_CurrentCurve = this;
-		int cursorAtStartY = ImGui::GetCursorPosY();
-		ImGui::PlotLines("Custom Curve", [](void* data, int idx) {return s_CurrentCurve->CustomCurveFunc(idx / 100.0f); }, nullptr, count, offset, nullptr, 3.402823466e+38F, 3.402823466e+38F, ImVec2(400, 300));
-		s_CurrentCurve = nullptr;
-
-		bool mouseButtonDown = glfwGetMouseButton(&Window::GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
-
-		float radius = 10.0f;
-
-		for (size_t i = 0; i < ControlPoints.size(); i++)
-		{
-			ImVec2 circlePos = { ImGui::GetCursorPosX() + (float)ControlPoints[i].x * 400 + ImGui::GetWindowPos().x, cursorAtStartY + 300 - ControlPoints[i].y * 300 + ImGui::GetWindowPos().y - ImGui::GetScrollY() };
-			ImVec2 mousePos = ImGui::GetMousePos();
-			ImGui::GetWindowDrawList()->AddCircle(circlePos, radius, ImGui::ColorConvertFloat4ToU32(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)), 12, 1.0f);
-
-			bool mouseInCircle = sqrt(pow(mousePos.x - circlePos.x, 2) + pow(mousePos.y - circlePos.y, 2)) < radius * radius;
-
-			if (mouseInCircle && mouseButtonDown)
-					m_FollowingPoint = i;
-		}
-
-		if (m_FollowingPoint != -1) {
-			ControlPoints[m_FollowingPoint].x = std::clamp((ImGui::GetMousePos().x - (ImGui::GetWindowPos().x + ImGui::GetCursorPosX())) / 400.0f, 0.0f, 1.0f);
-			ControlPoints[m_FollowingPoint].y = std::clamp(1.0f - ((ImGui::GetMousePos().y  - (ImGui::GetWindowPos().y + cursorAtStartY - ImGui::GetScrollY())) / 300.0f), 0.0f, 1.0f);
-		}
-
-		if (!mouseButtonDown)
-			m_FollowingPoint = -1;
-	}
-
-
-	//these two functions will be changed
-	static int Factorial(int x) {
-		if (x > 1)
-			return x * Factorial(x - 1);
-		else
-			return 1;
-	}
-
-	static int BinomialCoefficiant(int n, int k)
-	{
-		return Factorial(n) / (Factorial(k) * Factorial(n - k));
 	}
 
 	float CurveEditor::CustomCurveFunc(float t)
 	{
-		glm::vec2 result = { 0.0f, 0.0f };
+		 float result = pow((1.0f - t), 3) * CustomCurve.StartPoint.y + 3.0f * pow((1.0f - t), 2) * t * CustomCurve.ControlPoint1.y +
+			3.0f * pow((1.0f - t), 2) * pow(t, 2) * CustomCurve.ControlPoint2.y + pow(t, 3) * CustomCurve.EndPoint.y;
 
-		int n = ControlPoints.size() - 1;
+		return std::clamp(result, 0.0f, 1.0f);
+	}
 
-		for (size_t i = 0; i <= n; i++)
-		{
-			result += (float)BinomialCoefficiant(n, i) * (float)pow(1.0f - t, n - i) * (float) pow(t, i) * ControlPoints[i];
+	void CurveEditor::DrawCustomCurve()
+	{
+		s_CurrentCurve = this;
+		int cursorAtStartY = ImGui::GetCursorPosY();
+		ImGui::PlotLines("Custom Curve", [](void* data, int idx) {return s_CurrentCurve->CustomCurveFunc(idx / 100.0f); }, nullptr, 100, 0, nullptr, 3.402823466e+38F, 3.402823466e+38F, ImVec2(400, 300));
+		s_CurrentCurve = nullptr;
+
+		m_SelectedPoint = DrawControls(cursorAtStartY);
+
+		//move the point to the mouse position
+		if (m_SelectedPoint != nullptr) {
+
+			m_SelectedPoint->x = std::clamp((ImGui::GetMousePos().x - (ImGui::GetWindowPos().x + ImGui::GetCursorPosX())) / 400.0f, 0.0f, 1.0f);
+			m_SelectedPoint->y = std::clamp(1.0f - ((ImGui::GetMousePos().y - (ImGui::GetWindowPos().y + cursorAtStartY - ImGui::GetScrollY())) / 300.0f), 0.0f, 1.0f);
 		}
+	}
 
-		return std::clamp(result.y, 0.0f, 1.0f);
+	//returns a pointer to the selected point position
+	glm::vec2* CurveEditor::DrawControls(float graphYstart)
+	{
+		ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+		ImVec2 mousePos = ImGui::GetMousePos();
+		ImVec2 baseCirclePos = { ImGui::GetCursorPosX() + ImGui::GetWindowPos().x, graphYstart + 300 + ImGui::GetWindowPos().y - ImGui::GetScrollY() };
+
+		ImVec2 startpointPos = { baseCirclePos.x + CustomCurve.StartPoint.x * 400.0f, baseCirclePos.y - CustomCurve.StartPoint.y * 300.0f };
+
+		ImVec2 endpointPos = { baseCirclePos.x + CustomCurve.EndPoint.x * 400.0f, baseCirclePos.y - CustomCurve.EndPoint.y * 300.0f };
+
+		ImVec2 controlpoint1Pos = { baseCirclePos.x + CustomCurve.ControlPoint1.x * 400.0f, baseCirclePos.y - CustomCurve.ControlPoint1.y * 300.0f };
+
+		ImVec2 controlpoint2Pos = { baseCirclePos.x + CustomCurve.ControlPoint2.x * 400.0f, baseCirclePos.y - CustomCurve.ControlPoint2.y * 300.0f };
+
+		//we draw them in this order so that the lines are behind the circles
+
+		//Draw line from startpoint to controlpoint1
+		drawList->AddLine(startpointPos, controlpoint1Pos, ControlPointColor);
+
+		//Draw line from startpoint to controlpoint2
+		drawList->AddLine(endpointPos, controlpoint2Pos, ControlPointColor);
+
+		drawList->AddCircleFilled(startpointPos, StartAndEndPointRadius, StartAndEndPointColor);
+		drawList->AddCircleFilled(controlpoint1Pos, ControlPointRadius, ControlPointColor);
+		drawList->AddCircleFilled(controlpoint2Pos, ControlPointRadius, ControlPointColor);
+		drawList->AddCircleFilled(endpointPos, StartAndEndPointRadius, StartAndEndPointColor);
+
+
+		bool mouseButtonDown = glfwGetMouseButton(&Window::GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+
+		//if the mouse is not pressed returns because no point is selected
+		if (!mouseButtonDown)
+			m_SelectedPoint = nullptr;
+
+		//check if mouse is over any point and returns a pointer to it's position
+
+		//so it is easier to check distance
+		auto distance = [](const ImVec2& vec1, const ImVec2& vec2) {
+			return sqrt(pow(vec1.x - vec2.x, 2) + pow(vec1.y - vec2.y, 2));
+		};
+
+		if (mouseButtonDown && distance(startpointPos, mousePos) < StartAndEndPointRadius)
+			return &CustomCurve.StartPoint;
+		else if (mouseButtonDown && distance(controlpoint1Pos, mousePos) < ControlPointRadius)
+			return &CustomCurve.ControlPoint1;
+		else if (mouseButtonDown && distance(controlpoint2Pos, mousePos) < ControlPointRadius)
+			return &CustomCurve.ControlPoint2;
+		else if (mouseButtonDown && distance(endpointPos, mousePos) < StartAndEndPointRadius)
+			return &CustomCurve.EndPoint;
+
+		return m_SelectedPoint;
 	}
 }
