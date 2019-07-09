@@ -20,7 +20,6 @@ namespace ALZ {
 		m_RemainingLifeTime -= deltaTime;
 		if (m_RemainingLifeTime < 0.0f)
 			isActive = false;
-
 	}
 
 	void Particle::SetLifeTime(const float & lifeTime)

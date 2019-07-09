@@ -56,10 +56,16 @@ namespace ALZ {
 		}
 	}
 
+	float CurveEditor::Interpolate(float startPoint, float endPoint, float t)
+	{
+		return startPoint + (endPoint - startPoint) * CustomCurveFunc(t);
+	}
+
 	float CurveEditor::CustomCurveFunc(float t)
 	{
 		 float result = pow((1.0f - t), 3) * CustomCurve.StartPoint.y + 3.0f * pow((1.0f - t), 2) * t * CustomCurve.ControlPoint1.y +
-			3.0f * pow((1.0f - t), 2) * pow(t, 2) * CustomCurve.ControlPoint2.y + pow(t, 3) * CustomCurve.EndPoint.y;
+						3.0f * pow((1.0f - t), 2) * pow(t, 2) * CustomCurve.ControlPoint2.y + pow(t, 3) * CustomCurve.EndPoint.y;
+
 
 		return std::clamp(result, 0.0f, 1.0f);
 	}
@@ -68,7 +74,7 @@ namespace ALZ {
 	{
 		s_CurrentCurve = this;
 		int cursorAtStartY = ImGui::GetCursorPosY();
-		ImGui::PlotLines("Custom Curve", [](void* data, int idx) {return s_CurrentCurve->CustomCurveFunc(idx / 100.0f); }, nullptr, 100, 0, nullptr, 3.402823466e+38F, 3.402823466e+38F, ImVec2(400, 300));
+		ImGui::PlotLines("Custom Curve", [](void* data, int idx) {return s_CurrentCurve->CustomCurveFunc(idx / 100.0f); }, nullptr, 100, 0, nullptr, 0.0f, 1.0f, ImVec2(400, 300));
 		s_CurrentCurve = nullptr;
 
 		m_SelectedPoint = DrawControls(cursorAtStartY);

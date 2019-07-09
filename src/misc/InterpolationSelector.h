@@ -53,6 +53,7 @@ namespace ALZ {
 
 			case Smoothstep:
 				return Interpolation::Smoothstep(startPoint, endPoint, t);
+
 			default:
 				return startPoint;
 			}

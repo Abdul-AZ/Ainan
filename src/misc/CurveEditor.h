@@ -20,10 +20,11 @@ namespace ALZ {
 		CurveEditor(const InterpolationType& Type);
 
 		void DisplayInCurrentWindow(const glm::vec2& size = { 300, 200 });
-		float CustomCurveFunc(float t);
+		float Interpolate(float startPoint, float endPoint, float t);
 
 	private:
 		void DrawCustomCurve();
+		float CustomCurveFunc(float t);
 		//returns a pointer to the selected point position
 		glm::vec2* DrawControls(float graphYstart);
 
