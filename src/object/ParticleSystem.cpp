@@ -18,7 +18,7 @@ namespace ALZ {
 	{
 		Type = InspectorObjectType::ParticleSystemType;
 
-		m_Name = "Particle System (" + std::to_string(nameIndextemp) + ")";
+		m_Name = "Particle System## (" + std::to_string(nameIndextemp) + ")";
 		ID = nameIndextemp;
 		nameIndextemp++;
 

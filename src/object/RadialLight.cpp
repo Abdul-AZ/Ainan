@@ -8,7 +8,7 @@ namespace ALZ {
 	RadialLight::RadialLight()
 	{
 		Type = InspectorObjectType::RadiaLightType;
-		m_Name = "Radial Light (" + std::to_string(nameIndextemp) + ")";
+		m_Name = "Radial Light## (" + std::to_string(nameIndextemp) + ")";
 		ID = nameIndextemp;
 		nameIndextemp++;
 	}
