@@ -1,6 +1,7 @@
 #pragma once
 
 #include "InterpolationSelector.h"
+#include "CurveEditor.h"
 
 namespace ALZ {
 
@@ -15,6 +16,7 @@ namespace ALZ {
 
 		InterpolationSelector<float> m_ScaleInterpolator;
 		InterpolationSelector<glm::vec4> m_ColorInterpolator;
+		CurveEditor CustomScaleCurve;
 
 		bool isActive;
 

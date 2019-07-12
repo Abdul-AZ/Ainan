@@ -94,7 +94,6 @@ namespace ALZ {
 	void ParticleSystem::Draw()
 	{
 		//bind vertex array and shader
-		//glBindVertexArray(VAO);
 		VAO->Bind();
 		CircleInstancedShader->Bind();
 
@@ -135,8 +134,13 @@ namespace ALZ {
 			if (m_Particles[i].isActive) {
 				//move particle to it's position
 				model = glm::translate(model, glm::vec3(m_Particles[i].m_Position.x, m_Particles[i].m_Position.y, 0.0f));
-				//use the t value to get the scale of the particle using it's scale interpolator
-				float scale = m_Particles[i].m_ScaleInterpolator.Interpolate(t);
+				//use the t value to get the scale of the particle using it's not using a Custom Curve
+				float scale;
+				if (m_Particles[i].m_ScaleInterpolator.Type == Custom)
+					scale = m_Particles[i].CustomScaleCurve.Interpolate(m_Particles[i].m_ScaleInterpolator.startPoint, m_Particles[i].m_ScaleInterpolator.endPoint, t);
+				else
+					scale = m_Particles[i].m_ScaleInterpolator.Interpolate(t);
+
 				//scale the particle by that value
 				model = glm::scale(model, glm::vec3(scale, scale, scale));
 
@@ -186,6 +190,7 @@ namespace ALZ {
 				m_Particles[i].m_Velocity = particle.m_Velocity;
 				m_Particles[i].isActive = true;
 				m_Particles[i].m_ScaleInterpolator = particle.m_ScaleInterpolator;
+				m_Particles[i].CustomScaleCurve = particle.CustomScaleCurve;
 				m_Particles[i].SetLifeTime(particle.m_LifeTime);
 
 				//break out of the for loop because we are spawning one particle only

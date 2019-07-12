@@ -197,6 +197,11 @@ namespace ALZ {
 		m_Particle.SetLifeTime(m_LifetimeCustomizer.GetLifetime());
 
 		m_Particle.m_ScaleInterpolator = m_ScaleCustomizer.GetScaleInterpolator();
+
+		if (m_ScaleCustomizer.GetScaleInterpolator().Type == Custom)
+		{
+			m_Particle.CustomScaleCurve = m_ScaleCustomizer.m_Curve;
+		}
 	}
 
 	Particle& ParticleCustomizer::GetParticle()
