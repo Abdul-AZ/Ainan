@@ -7,7 +7,7 @@ namespace ALZ {
 
 	ColorCustomizer::ColorCustomizer() :
 		mt(std::random_device{}()),
-		m_Interpolator(InterpolationType::Fixed, glm::vec4(0, 0, 0, 0), glm::vec4(0, 0, 0, 0))
+		m_Interpolator(InterpolationType::Fixed, glm::vec4(0, 0, 0, 0), glm::vec4(0, 0, 0, 0), InterpolationSelectorFlags::NoCustomMode)
 	{}
 
 	void ColorCustomizer::DisplayGUI()

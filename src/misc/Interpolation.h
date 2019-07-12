@@ -14,7 +14,6 @@ namespace ALZ {
 		Custom
 	};
 
-
 	namespace Interpolation {
 
 		//Basic linear interpolation

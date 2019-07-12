@@ -20,21 +20,33 @@ namespace ALZ {
 		return "";
 	}
 
+	//you should or (||) these together if you want multiple flags
+	enum class InterpolationSelectorFlags : int
+	{
+		None              = 0b0,
+		NoLinearMode      = 0b1,
+		NoCubicMode       = 0b10,
+		NoSmoothstepMode  = 0b100,
+		NoCustomMode      = 0b1000
+	};
+
 	template<typename T>
 	class InterpolationSelector
 	{
 	public:
 
-		InterpolationSelector() :
+		InterpolationSelector(InterpolationSelectorFlags interpolationFlags = InterpolationSelectorFlags::None) :
 			Type(InterpolationType::Fixed),
 			startPoint(0),
-			endPoint(0)
+			endPoint(0),
+			flags(interpolationFlags)
 		{}
 
-		InterpolationSelector(InterpolationType mode, T start, T end) :
+		InterpolationSelector(InterpolationType mode, T start, T end, InterpolationSelectorFlags interpolationFlags = InterpolationSelectorFlags::None) :
 			Type(mode),
 			startPoint(start),
-			endPoint(end)
+			endPoint(end),
+			flags(interpolationFlags)
 		{}
 
 		T Interpolate(const float& t) {
@@ -73,6 +85,7 @@ namespace ALZ {
 					}
 				}
 
+				if(!(bool)((int)flags & (int)InterpolationSelectorFlags::NoLinearMode))
 				{
 					bool is_Active = Type == Linear;
 					if (ImGui::Selectable(InterpolationTypeToString(Linear), &is_Active)) {
@@ -82,6 +95,7 @@ namespace ALZ {
 					}
 				}
 
+				if (!(bool)((int)flags & (int)InterpolationSelectorFlags::NoCubicMode))
 				{
 					bool is_Active = Type == Cubic;
 					if (ImGui::Selectable(InterpolationTypeToString(Cubic), &is_Active)) {
@@ -91,6 +105,7 @@ namespace ALZ {
 					}
 				}
 
+				if (!(bool)((int)flags & (int)InterpolationSelectorFlags::NoSmoothstepMode))
 				{
 					bool is_Active = Type == Smoothstep;
 					if (ImGui::Selectable(InterpolationTypeToString(Smoothstep), &is_Active)) {
@@ -100,6 +115,7 @@ namespace ALZ {
 					}
 				}
 
+				if (!(bool)((int)flags & (int)InterpolationSelectorFlags::NoCustomMode))
 				{
 					bool is_Active = Type == Custom;
 					if (ImGui::Selectable(InterpolationTypeToString(Custom), &is_Active)) {
@@ -115,7 +131,7 @@ namespace ALZ {
 
 
 		InterpolationType Type;
-
+		InterpolationSelectorFlags flags;
 		T startPoint;
 		T endPoint;
 	};
