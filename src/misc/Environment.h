@@ -63,6 +63,7 @@ namespace ALZ {
 
 		void AddPS();
 		void AddRadialLight();
+		void AddSpotLight();
 		void Duplicate(InspectorInterface& obj);
 		void FocusCameraOnObject(InspectorInterface& object);
 
@@ -106,6 +107,7 @@ namespace ALZ {
 		friend void SettingsFromJson(Environment* env, nlohmann::json& data);
 		friend void ParticleSystemFromJson(Environment* env, nlohmann::json& data, std::string id);
 		friend void RadialLightFromJson(Environment* env, nlohmann::json& data, std::string id);
+		friend void SpotLightFromJson(Environment* env, nlohmann::json& data, std::string id);
 	};
 
 

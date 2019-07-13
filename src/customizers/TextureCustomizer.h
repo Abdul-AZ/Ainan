@@ -28,7 +28,7 @@ namespace ALZ {
 	private:
 		FileBrowser m_FileBrowser;
 
-		friend void toJson(nlohmann::json& j, const ParticleSystem& ps, const int& objectOrder);
+		friend void toJson(nlohmann::json& j, const ParticleSystem& ps, int objectOrder);
 		friend void ParticleSystemFromJson(Environment* env, nlohmann::json& data, std::string id);
 	};
 }

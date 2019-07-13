@@ -254,7 +254,7 @@ namespace ALZ {
 		return ParticleSystem(Psystem);
 	}
 
-	void ParticleSystem::DisplayGUI(Camera& camera)
+	void ParticleSystem::DisplayGUI()
 	{
 		if (EditorOpen)
 			Customizer.DisplayGUI(m_Name, EditorOpen);

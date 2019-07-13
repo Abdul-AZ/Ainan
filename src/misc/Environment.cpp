@@ -63,8 +63,12 @@ namespace ALZ {
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 		{
-			if (obj->Type == InspectorObjectType::RadiaLightType) {
+			if (obj->Type == RadiaLightType) {
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
+				m_Background.SubmitLight(*light);
+			}
+			else if (obj->Type == SpotLightType) {
+				SpotLight* light = static_cast<SpotLight*>(obj.get());
 				m_Background.SubmitLight(*light);
 			}
 		}
@@ -165,7 +169,7 @@ namespace ALZ {
 		m_Background.DisplayGUI();
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
-			obj->DisplayGUI(m_Camera);
+			obj->DisplayGUI();
 
 		m_InputManager.DisplayGUI();
 
@@ -265,16 +269,17 @@ namespace ALZ {
 
 		ImGui::ListBoxFooter();
 
-		ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 60.0f);
+		ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 90.0f);
 
 		if (ImGui::Button("Add Particle System"))
 		{
 			AddPS();
 		}
-
-
 		if (ImGui::Button("Add Radial Light")) {
 			AddRadialLight();
+		}
+		if (ImGui::Button("Add Spot Light")) {
+			AddSpotLight();
 		}
 
 		ImGui::End();
@@ -554,10 +559,18 @@ namespace ALZ {
 
 	void Environment::AddRadialLight()
 	{
-		std::unique_ptr<RadialLight> startingPS = std::make_unique<RadialLight>();
-		Inspector_obj_ptr startingPSi((InspectorInterface*)(startingPS.release()));
+		std::unique_ptr<RadialLight> light = std::make_unique<RadialLight>();
+		Inspector_obj_ptr lightObj((InspectorInterface*)(light.release()));
 
-		InspectorObjects.push_back(std::move(startingPSi));
+		InspectorObjects.push_back(std::move(lightObj));
+	}
+
+	void Environment::AddSpotLight()
+	{
+		std::unique_ptr<SpotLight> light = std::make_unique<SpotLight>();
+		Inspector_obj_ptr lightObj((InspectorInterface*)(light.release()));
+
+		InspectorObjects.push_back(std::move(lightObj));
 	}
 
 	void Environment::Duplicate(InspectorInterface& obj)

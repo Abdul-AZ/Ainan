@@ -20,7 +20,7 @@ namespace ALZ {
 		float m_NoiseStrength = 1.0f;
 
 		friend class ParticleSystem;
-		friend void toJson(nlohmann::json& j, const ParticleSystem& ps, const int& objectOrder);
+		friend void toJson(nlohmann::json& j, const ParticleSystem& ps, int objectOrder);
 		friend void ParticleSystemFromJson(Environment* env, nlohmann::json& data, std::string id);
 	};
 }

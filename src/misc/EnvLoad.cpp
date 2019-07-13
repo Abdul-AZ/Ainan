@@ -65,6 +65,8 @@ namespace ALZ {
 				ParticleSystemFromJson(env, data, id);
 			else if (type == "Radial Light")
 				RadialLightFromJson(env, data, id);
+			else if (type == "Spot Light")
+				SpotLightFromJson(env, data, id);
 			else
 				assert(false);
 		}
@@ -152,14 +154,29 @@ namespace ALZ {
 		light->m_Name = data[id + "Name"].get <std::string>();
 		light->Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
 		light->Color = JSON_ARRAY_TO_VEC3(data[id + "Color"].get<std::vector<float>>());
-		light->Constant = data[id + "Constant"].get<float>();
-		light->Linear = data[id + "Linear"].get<float>();
-		light->Quadratic = data[id + "Quadratic"].get<float>();
 		light->Intensity = data[id + "Intensity"].get<float>();
 
 		//add radial light to environment
 		Inspector_obj_ptr startingPSi((InspectorInterface*)(light.release()));
 		env->InspectorObjects.push_back(std::move(startingPSi));
+	}
+
+	void SpotLightFromJson(Environment* env, json& data, std::string id)
+	{
+		//create radial light
+		std::unique_ptr<SpotLight> light = std::make_unique<SpotLight>();
+
+		//populate with data
+		light->m_Name = data[id + "Name"].get <std::string>();
+		light->Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
+		light->Color = JSON_ARRAY_TO_VEC3(data[id + "Color"].get<std::vector<float>>());
+		light->OuterCutoff = data[id + "OuterCutoff"].get<float>();
+		light->InnerCutoff = data[id + "InnerCutoff"].get<float>();
+		light->Intensity = data[id + "Intensity"].get<float>();
+
+		//add radial light to environment
+		Inspector_obj_ptr obj((InspectorInterface*)(light.release()));
+		env->InspectorObjects.push_back(std::move(obj));
 	}
 }
 

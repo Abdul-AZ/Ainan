@@ -12,8 +12,9 @@ using json = nlohmann::json;
 namespace ALZ {
 
 	//forward declarations
-	static void toJson(json& j, const ParticleSystem& ps, const int& objectOrder);
-	static void toJson(json& j, const RadialLight& light, const int& objectOrder);
+	static void toJson(json& j, const ParticleSystem& ps, int objectOrder);
+	static void toJson(json& j, const RadialLight& light, int objectOrder);
+	static void toJson(json& j, const SpotLight& light, int objectOrder);
 	static void toJson(json& j, const GeneralSettingsGUI& settings);
 
 	bool SaveEnvironment(const Environment& env, std::string path)
@@ -27,14 +28,19 @@ namespace ALZ {
 		for (size_t i = 0; i < env.InspectorObjects.size(); i++)
 		{
 			//this means we are serializing a Particle System
-			if (env.InspectorObjects[i]->Type == InspectorObjectType::ParticleSystemType)
+			if (env.InspectorObjects[i]->Type == ParticleSystemType)
 			{
 				toJson(data, *(ParticleSystem*)env.InspectorObjects[i].get(), i);
 			}
 			//this means we are serializing a Radial Light
-			else if (env.InspectorObjects[i]->Type == InspectorObjectType::RadiaLightType)
+			else if (env.InspectorObjects[i]->Type == RadiaLightType)
 			{
 				toJson(data, *(RadialLight*)env.InspectorObjects[i].get(), i);
+			}
+			//this means we are serializing a Spot Light
+			else if (env.InspectorObjects[i]->Type == SpotLightType)
+			{
+				toJson(data, *(SpotLight*)env.InspectorObjects[i].get(), (int)i);
 			}
 		}
 		toJson(data, env.m_Settings);
@@ -60,7 +66,7 @@ namespace ALZ {
 		j["ShowGrid"] = settings.ShowGrid;
 	}
 
-	void toJson(json& j, const ParticleSystem& ps, const int& objectOrder)
+	void toJson(json& j, const ParticleSystem& ps, int objectOrder)
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
@@ -106,7 +112,7 @@ namespace ALZ {
 		j[id + "TexturePath"] = ps.Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath;
 	}
 
-	void toJson(json& j, const RadialLight& light, const int& objectOrder)
+	void toJson(json& j, const RadialLight& light, int objectOrder)
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
@@ -114,9 +120,19 @@ namespace ALZ {
 		j[id + "Name"] = light.m_Name;
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
 		j[id + "Color"] = VEC3_TO_JSON_ARRAY(light.Color);
-		j[id + "Constant"] = light.Constant;
-		j[id + "Linear"] = light.Linear;
-		j[id + "Quadratic"] = light.Quadratic;
+		j[id + "Intensity"] = light.Intensity;
+	}
+
+	void toJson(json& j, const SpotLight& light, int objectOrder)
+	{
+		std::string id = "obj" + std::to_string(objectOrder) + "_";
+
+		j[id + "Type"] = "Spot Light";
+		j[id + "Name"] = light.m_Name;
+		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
+		j[id + "Color"] = VEC3_TO_JSON_ARRAY(light.Color);
+		j[id + "OuterCutoff"] = light.OuterCutoff;
+		j[id + "InnerCutoff"] = light.InnerCutoff;
 		j[id + "Intensity"] = light.Intensity;
 	}
 

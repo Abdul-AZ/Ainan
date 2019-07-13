@@ -6,7 +6,8 @@ namespace ALZ {
 
 	enum InspectorObjectType {
 		ParticleSystemType,
-		RadiaLightType
+		RadiaLightType,
+		SpotLightType
 	};
 
 	class InspectorInterface
@@ -15,7 +16,7 @@ namespace ALZ {
 		//this function does no graphics works (no OpenGL calls)
 		virtual void Update(const float& deltaTime) {};
 		virtual void Draw() {};
-		virtual void DisplayGUI(Camera& camera) {};
+		virtual void DisplayGUI() {};
 		virtual glm::vec2& GetPositionRef() { return glm::vec2(0.0f, 0.0f); };
 
 		virtual ~InspectorInterface() {};

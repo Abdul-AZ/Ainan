@@ -4,47 +4,46 @@
 
 namespace ALZ {
 
-	static VertexArray* VAO = nullptr;
-	static VertexBuffer* VBO = nullptr;
-
-	static bool BackgroundBuffersInitilized = false;
-	static ShaderProgram* BackgroundShader = nullptr;
-
 	Background::Background()
 	{
-		if (!BackgroundBuffersInitilized) {
+		VAO = Renderer::CreateVertexArray();
+		VAO->Bind();
 
-			VAO = Renderer::CreateVertexArray().release();
-			VAO->Bind();
+		glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f),
+								 glm::vec2(1.0f, -1.0f),
+								 glm::vec2(-1.0f, 1.0f),
 
-			glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f),
-									 glm::vec2(1.0f, -1.0f),
-									 glm::vec2(-1.0f, 1.0f),
+								 glm::vec2(1.0f, -1.0f),
+								 glm::vec2(1.0f, 1.0f),
+								 glm::vec2(-1.0f, 1.0f) };
 
-									 glm::vec2(1.0f, -1.0f),
-									 glm::vec2(1.0f, 1.0f),
-									 glm::vec2(-1.0f, 1.0f) };
+		VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices));
+		VBO->SetLayout({ ShaderVariableType::Vec2 });
 
-			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices)).release();
-			VBO->SetLayout({ ShaderVariableType::Vec2 });
+		VAO->Unbind();
 
-			VAO->Unbind();
-
-			BackgroundShader = Renderer::CreateShaderProgram("shaders/Background.vert", "shaders/Background.frag").release();
-			BackgroundBuffersInitilized = true;
-		}
+		BackgroundShader = Renderer::CreateShaderProgram("shaders/Background.vert", "shaders/Background.frag");
 	}
 
 	void Background::SubmitLight(const RadialLight& light)
 	{
-		m_RadialLightPositionBuffer[m_RadialLightSubmissionCount] = glm::vec2(light.Position.x, light.Position.y) * GlobalScaleFactor;
+		m_RadialLightPositionBuffer[m_RadialLightSubmissionCount] = light.Position * GlobalScaleFactor;
 		m_RadialLightColorBuffer[m_RadialLightSubmissionCount] = light.Color;
-		m_RadialLightConstantBuffer[m_RadialLightSubmissionCount] = light.Constant;
-		m_RadialLightLinearBuffer[m_RadialLightSubmissionCount] = light.Linear;
-		m_RadialLightQuadraticBuffer[m_RadialLightSubmissionCount] = light.Quadratic;
 		m_RadialLightIntensityBuffer[m_RadialLightSubmissionCount] = light.Intensity;
 
 		m_RadialLightSubmissionCount++;
+	}
+
+	void Background::SubmitLight(const SpotLight& light)
+	{
+		m_SpotLightPositionBuffer[m_SpotLightSubmissionCount] = light.Position * GlobalScaleFactor;
+		m_SpotLightColorBuffer[m_SpotLightSubmissionCount] = light.Color;
+		m_SpotLightAngleBuffer[m_SpotLightSubmissionCount] = light.Angle * PI / 180.0f;            //convert to radians
+		m_SpotLightInnerCutoffBuffer[m_SpotLightSubmissionCount] = light.InnerCutoff * PI / 180.0f;//convert to radians
+		m_SpotLightOuterCutoffBuffer[m_SpotLightSubmissionCount] = light.OuterCutoff * PI / 180.0f;//convert to radians
+		m_SpotLightIntensityBuffer[m_SpotLightSubmissionCount] = light.Intensity;
+
+		m_SpotLightSubmissionCount++;
 	}
 
 	void Background::DisplayGUI()
@@ -53,10 +52,12 @@ namespace ALZ {
 			return;
 
 		ImGui::Begin("Background", &SettingsWindowOpen);
-
 		ImGui::ColorEdit3("Base Background Color", &BaseColor.r);
-
 		ImGui::SliderFloat("Base Light", &BaseLight, 0.0f, 1.0f);
+
+		ImGui::DragFloat("Constant", &Constant, 0.01f);
+		ImGui::DragFloat("Linear", &Linear, 0.0001f);
+		ImGui::DragFloat("Quadratic", &Quadratic, 0.00001f);
 
 		ImGui::End();
 	}
@@ -68,23 +69,29 @@ namespace ALZ {
 
 		//not used light spots
 		for (int i = m_RadialLightSubmissionCount; i < MAX_NUM_RADIAL_LIGHTS; i++)
-		{
-			m_RadialLightPositionBuffer[i] = glm::vec2(10000.0f, 10000.0f);
-			m_RadialLightConstantBuffer[i] = 1000.0f;
-			m_RadialLightLinearBuffer[i] = 1000.0f;
 			m_RadialLightIntensityBuffer[i] = 0.0f;
-			m_RadialLightQuadraticBuffer[i] = 1000.0f;
-		}
+
+		for (int i = m_SpotLightSubmissionCount; i < MAX_NUM_SPOT_LIGHTS; i++)
+			m_SpotLightIntensityBuffer[i] = 0.0f;
 		
 		BackgroundShader->SetUniformVec3("baseColor", BaseColor);
+		BackgroundShader->SetUniform1f("constant", Constant);
+		BackgroundShader->SetUniform1f("linear", Linear);
+		BackgroundShader->SetUniform1f("quadratic", Quadratic);
 
+		//radial light data
 		BackgroundShader->SetUniformVec2s("radialLights.Position", m_RadialLightPositionBuffer, MAX_NUM_RADIAL_LIGHTS);
 		BackgroundShader->SetUniformVec3s("radialLights.Color", m_RadialLightColorBuffer, MAX_NUM_RADIAL_LIGHTS);
-		BackgroundShader->SetUniform1fs("radialLights.Constant", m_RadialLightConstantBuffer, MAX_NUM_RADIAL_LIGHTS);
-		BackgroundShader->SetUniform1fs("radialLights.Linear", m_RadialLightLinearBuffer, MAX_NUM_RADIAL_LIGHTS);
-		BackgroundShader->SetUniform1fs("radialLights.Quadratic", m_RadialLightQuadraticBuffer, MAX_NUM_RADIAL_LIGHTS);
 		BackgroundShader->SetUniform1fs("radialLights.Intensity", m_RadialLightIntensityBuffer, MAX_NUM_RADIAL_LIGHTS);
 		BackgroundShader->SetUniform1f("baseLight", BaseLight);
+
+		//spot light data
+		BackgroundShader->SetUniformVec2s("spotLights.Position", m_SpotLightPositionBuffer, MAX_NUM_SPOT_LIGHTS);
+		BackgroundShader->SetUniformVec3s("spotLights.Color", m_SpotLightColorBuffer, MAX_NUM_SPOT_LIGHTS);
+		BackgroundShader->SetUniform1fs("spotLights.Angle", m_SpotLightAngleBuffer, MAX_NUM_SPOT_LIGHTS);
+		BackgroundShader->SetUniform1fs("spotLights.InnerCutoff", m_SpotLightInnerCutoffBuffer, MAX_NUM_SPOT_LIGHTS);
+		BackgroundShader->SetUniform1fs("spotLights.OuterCutoff", m_SpotLightOuterCutoffBuffer, MAX_NUM_SPOT_LIGHTS);
+		BackgroundShader->SetUniform1fs("spotLights.Intensity", m_SpotLightIntensityBuffer, MAX_NUM_SPOT_LIGHTS);
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(5000.0f));
@@ -96,5 +103,6 @@ namespace ALZ {
 		BackgroundShader->Unbind();
 
 		m_RadialLightSubmissionCount = 0;
+		m_SpotLightSubmissionCount = 0;
 	}
 }

@@ -35,7 +35,7 @@ namespace ALZ {
 		//random number generator
 		std::mt19937 mt;
 
-		friend void toJson(nlohmann::json& j, const ParticleSystem& ps, const int& objectOrder);
+		friend void toJson(nlohmann::json& j, const ParticleSystem& ps, int objectOrder);
 		friend void ParticleSystemFromJson(Environment* env, nlohmann::json& data, std::string id);
 	};
 }
