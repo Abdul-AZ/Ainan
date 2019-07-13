@@ -45,6 +45,7 @@ namespace ALZ {
 	static void ParticleSystemFromJson(Environment* env, json& data, std::string id);
 	static void RadialLightFromJson(Environment* env,json& data, std::string id);
 	static void SettingsFromJson(Environment* env, json& data);
+	static void BackgroundFromJson(Background& background, json& data);
 
 	Environment* LoadEnvironment(const std::string& path)
 	{
@@ -54,6 +55,7 @@ namespace ALZ {
 		env->InspectorObjects.clear();
 
 		SettingsFromJson(env, data);
+		BackgroundFromJson(env->m_Background, data);
 
 		int objectCount = data["objectCount"].get<int>();
 
@@ -82,6 +84,15 @@ namespace ALZ {
 		env->m_Settings.BlurGaussianSigma = data["BlurGaussianSigma"].get<float>();
 
 		env->m_Settings.ShowGrid = data["ShowGrid"].get<bool>();
+	}
+
+	void BackgroundFromJson(Background& background, json& data)
+	{
+		background.BaseColor = JSON_ARRAY_TO_VEC3(data["BackgroundColor"].get<std::vector<float>>());
+		background.BaseLight = data["BackgroundBaseLight"].get<float>();
+		background.Constant = data["BackgroundConstant"].get<float>();
+		background.Linear = data["BackgroundLinear"].get<float>();
+		background.Quadratic = data["BackgroundQuadratic"].get<float>();
 	}
 
 	void ParticleSystemFromJson(Environment* env, json& data, std::string id)

@@ -16,6 +16,7 @@ namespace ALZ {
 	static void toJson(json& j, const RadialLight& light, int objectOrder);
 	static void toJson(json& j, const SpotLight& light, int objectOrder);
 	static void toJson(json& j, const GeneralSettingsGUI& settings);
+	static void toJson(json& j, const Background& background);
 
 	bool SaveEnvironment(const Environment& env, std::string path)
 	{
@@ -44,6 +45,7 @@ namespace ALZ {
 			}
 		}
 		toJson(data, env.m_Settings);
+		toJson(data, env.m_Background);
 
 		std::string jsonString = data.dump(4);
 
@@ -64,6 +66,15 @@ namespace ALZ {
 		j["BlurGaussianSigma"] = settings.BlurGaussianSigma;
 
 		j["ShowGrid"] = settings.ShowGrid;
+	}
+
+	void toJson(json& j, const Background& background)
+	{
+		j["BackgroundColor"] = VEC3_TO_JSON_ARRAY(background.BaseColor);
+		j["BackgroundBaseLight"] = background.BaseLight;
+		j["BackgroundConstant"] = background.Constant;
+		j["BackgroundLinear"] = background.Linear;
+		j["BackgroundQuadratic"] = background.Quadratic;
 	}
 
 	void toJson(json& j, const ParticleSystem& ps, int objectOrder)
