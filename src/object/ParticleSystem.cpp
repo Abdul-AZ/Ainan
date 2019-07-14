@@ -78,16 +78,47 @@ namespace ALZ {
 		ActiveParticleCount = 0;
 		for (Particle& particle : m_Particles) {
 
+			//add noise if it is enabled
 			if (Customizer.m_NoiseCustomizer.m_NoiseEnabled && particle.isActive) {
 				particle.m_Velocity.x += m_Noise.Noise(particle.m_Position.x, particle.m_Position.y) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
 				particle.m_Velocity.y += m_Noise.Noise(particle.m_Position.x + 30, particle.m_Position.y - 30) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
 			}
 
-			particle.Update(deltaTime);
+			if (particle.isActive) {
 
-			//update active particle count
-			if (particle.isActive)
+				//update particle speed, lifetime etc
+				particle.Update(deltaTime);
+
+				//limit particle velocity
+				if (Customizer.m_VelocityCustomizer.CurrentVelocityLimitType != VelocityCustomizer::NoLimit)
+				{
+					//to make the code look cleaner
+					VelocityCustomizer& velocityCustomizer = Customizer.m_VelocityCustomizer;
+
+					//use normal velocity limit
+					//by calculating the velocity in both x and y and limiting the length of the vector
+					if (velocityCustomizer.CurrentVelocityLimitType == VelocityCustomizer::NormalLimit)
+					{
+						float length = glm::length(particle.m_Velocity);
+						if (length > velocityCustomizer.m_MaxNormalVelocityLimit ||
+							length < velocityCustomizer.m_MinNormalVelocityLimit)
+						{
+							glm::vec2 direction = glm::normalize(particle.m_Velocity);
+							length = std::clamp(length, velocityCustomizer.m_MinNormalVelocityLimit, velocityCustomizer.m_MaxNormalVelocityLimit);
+							particle.m_Velocity = length * direction;
+						}
+					}
+					//limit velocity in each axis
+					else if (Customizer.m_VelocityCustomizer.CurrentVelocityLimitType == VelocityCustomizer::PerAxisLimit)
+					{
+						particle.m_Velocity.x = std::clamp(particle.m_Velocity.x, velocityCustomizer.m_MinPerAxisVelocityLimit.x, velocityCustomizer.m_MaxPerAxisVelocityLimit.x);
+						particle.m_Velocity.y = std::clamp(particle.m_Velocity.y, velocityCustomizer.m_MinPerAxisVelocityLimit.y, velocityCustomizer.m_MaxPerAxisVelocityLimit.y);
+					}
+				}
+
+				//update active particle count
 				ActiveParticleCount++;
+			}
 		}
 	}
 

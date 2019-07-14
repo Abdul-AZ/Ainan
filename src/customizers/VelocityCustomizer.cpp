@@ -3,14 +3,14 @@
 
 namespace ALZ {
 
-	static constexpr const char* LimitTypeToString(VelocityLimitType type) {
+	static constexpr const char* LimitTypeToString(VelocityCustomizer::VelocityLimitType type) {
 		switch (type)
 		{
-		case VelocityLimitType::NoLimit:
+		case VelocityCustomizer::NoLimit:
 			return "No Limit";
-		case VelocityLimitType::NormalLimit:
+		case VelocityCustomizer::NormalLimit:
 			return "Limit";
-		case VelocityLimitType::PerAxisLimit:
+		case VelocityCustomizer::PerAxisLimit:
 			return "Per Axis Limit";
 		default:
 			assert(false);
@@ -48,36 +48,58 @@ namespace ALZ {
 
 
 			ImGui::Spacing();
-			ImGui::Separator();
+			ImGui::Spacing();
+			ImGui::Spacing();
 			ImGui::Spacing();
 
-			if (ImGui::BeginCombo("Velocity Limit", LimitTypeToString(m_LimitType)))
+			if (ImGui::BeginCombo("Velocity Limit", LimitTypeToString(CurrentVelocityLimitType)))
 			{
 				{
-					bool is_active = m_LimitType == VelocityLimitType::NoLimit;
-					if (ImGui::Selectable(LimitTypeToString(VelocityLimitType::NoLimit), &is_active)) {
+					bool is_active = CurrentVelocityLimitType == NoLimit;
+					if (ImGui::Selectable(LimitTypeToString(NoLimit), &is_active)) {
 						ImGui::SetItemDefaultFocus();
-						m_LimitType = VelocityLimitType::NoLimit;
+						CurrentVelocityLimitType = NoLimit;
 					}
 				}
 
 				{
-					bool is_active = m_LimitType == VelocityLimitType::NormalLimit;
-					if (ImGui::Selectable(LimitTypeToString(VelocityLimitType::NormalLimit), &is_active)) {
+					bool is_active = CurrentVelocityLimitType == NormalLimit;
+					if (ImGui::Selectable(LimitTypeToString(NormalLimit), &is_active)) {
 						ImGui::SetItemDefaultFocus();
-						m_LimitType = VelocityLimitType::NormalLimit;
+						CurrentVelocityLimitType = NormalLimit;
 					}
 				}
 
 				{
-					bool is_active = m_LimitType == VelocityLimitType::PerAxisLimit;
-					if (ImGui::Selectable(LimitTypeToString(VelocityLimitType::PerAxisLimit), &is_active)) {
+					bool is_active = CurrentVelocityLimitType == PerAxisLimit;
+					if (ImGui::Selectable(LimitTypeToString(PerAxisLimit), &is_active)) {
 						ImGui::SetItemDefaultFocus();
-						m_LimitType = VelocityLimitType::PerAxisLimit;
+						CurrentVelocityLimitType = PerAxisLimit;
 					}
 				}
 
 				ImGui::EndCombo();
+			}
+
+			if (CurrentVelocityLimitType == NormalLimit)
+			{
+				ImGui::DragFloat("Minimum Velocity Length", &m_MinNormalVelocityLimit);
+				ImGui::DragFloat("Maximum Velocity Length", &m_MaxNormalVelocityLimit);
+
+				//clamp eveything so that the maximum is always bigger than the minimum and the opposite
+				m_MaxNormalVelocityLimit = std::clamp(m_MaxNormalVelocityLimit, m_MinNormalVelocityLimit, 100000.0f);
+				m_MinNormalVelocityLimit = std::clamp(m_MinNormalVelocityLimit, 0.0f, m_MaxNormalVelocityLimit);
+			}
+			else if (CurrentVelocityLimitType == PerAxisLimit)
+			{
+				ImGui::DragFloat2("Minimum Velocity", &m_MinPerAxisVelocityLimit.x);
+				ImGui::DragFloat2("Maximum Velocity", &m_MaxPerAxisVelocityLimit.x);
+
+				//clamp eveything so that the maximum is always bigger than the minimum and the opposite
+				m_MinPerAxisVelocityLimit.x = std::clamp(m_MinPerAxisVelocityLimit.x, -100000.0f, m_MaxPerAxisVelocityLimit.x);
+				m_MinPerAxisVelocityLimit.y = std::clamp(m_MinPerAxisVelocityLimit.y, -100000.0f, m_MaxPerAxisVelocityLimit.y);
+				m_MaxPerAxisVelocityLimit.x = std::clamp(m_MaxPerAxisVelocityLimit.x, m_MinPerAxisVelocityLimit.x, 100000.0f);
+				m_MaxPerAxisVelocityLimit.y = std::clamp(m_MaxPerAxisVelocityLimit.y, m_MinPerAxisVelocityLimit.y, 100000.0f);
 			}
 
 			ImGui::TreePop();
