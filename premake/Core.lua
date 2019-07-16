@@ -28,7 +28,7 @@ project "Core"
   filter "configurations:Release"
     runtime "Release"
     symbols "On"
-    optimize "Off"
+    optimize "On"
 
   filter "system:Windows"
     systemversion ("latest")
