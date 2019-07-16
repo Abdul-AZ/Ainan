@@ -37,8 +37,6 @@ int main(int argc, const char* argv[]) {
 		else
 			startMenu.Update(env);
 
-		ImGuiWrapper::Render();
-
 		Window::Present();
 		Window::Clear();
 	}
