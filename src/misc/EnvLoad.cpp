@@ -150,6 +150,11 @@ namespace ALZ {
 			//ps->Customizer.m_TextureCustomizer.ParticleTexture.Init(ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath, 4);
 		}
 
+		//Force data
+		ps->Customizer.m_ForceCustomizer.m_EnableGravity = data[id + "GravityEnabled"].get<bool>();
+		ps->Customizer.m_ForceCustomizer.m_GravityStrength = data[id + "GravityStrength"].get<float>();
+		//update gravity force because this only happens when it is changed in GUI and we want it to be set when we load the environment
+		ps->Customizer.m_ForceCustomizer.m_Forces["Gravity"] = glm::vec2(0.0f, ps->Customizer.m_ForceCustomizer.m_GravityStrength);
 
 		//add particle system to environment
 		Inspector_obj_ptr startingPSi((InspectorInterface*)(ps.release()));

@@ -121,6 +121,10 @@ namespace ALZ {
 		//Texture data
 		j[id + "UseDefaultTexture"] = ps.Customizer.m_TextureCustomizer.UseDefaultTexture;
 		j[id + "TexturePath"] = ps.Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath;
+
+		//Force data
+		j[id + "GravityEnabled"] = ps.Customizer.m_ForceCustomizer.m_EnableGravity;
+		j[id + "GravityStrength"] = ps.Customizer.m_ForceCustomizer.m_GravityStrength;
 	}
 
 	void toJson(json& j, const RadialLight& light, int objectOrder)
