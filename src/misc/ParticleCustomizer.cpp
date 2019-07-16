@@ -19,6 +19,7 @@ namespace ALZ {
 		m_LifetimeCustomizer = customizer.m_LifetimeCustomizer;
 		m_ColorCustomizer = customizer.m_ColorCustomizer;
 		m_ScaleCustomizer = customizer.m_ScaleCustomizer;
+		m_ForceCustomizer = customizer.m_ForceCustomizer;
 		m_Line = customizer.m_Line;
 		m_LineAngle = customizer.m_LineAngle;
 		m_LinePosition = customizer.m_LinePosition;
@@ -155,6 +156,7 @@ namespace ALZ {
 		m_ColorCustomizer.DisplayGUI();
 		m_LifetimeCustomizer.DisplayGUI();
 		m_ScaleCustomizer.DisplayGUI();
+		m_ForceCustomizer.DisplayGUI();
 
 		ImGui::End();
 	}

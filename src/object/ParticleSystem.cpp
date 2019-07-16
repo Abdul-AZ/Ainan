@@ -1,9 +1,6 @@
 #include <pch.h>
 #include "ParticleSystem.h"
 
-#include "renderer/VertexArray.h"
-#include "renderer/VertexBuffer.h"
-
 namespace ALZ {
 	static bool InitilizedCircleVertices = false;
 	static VertexArray* VAO = nullptr;
@@ -85,6 +82,12 @@ namespace ALZ {
 			}
 
 			if (particle.isActive) {
+
+				//add forces to the particle
+				for (auto& force : Customizer.m_ForceCustomizer.m_Forces)
+				{
+					particle.m_Acceleration += force.second * deltaTime;
+				}
 
 				//update particle speed, lifetime etc
 				particle.Update(deltaTime);
@@ -223,6 +226,7 @@ namespace ALZ {
 				m_Particles[i].m_ScaleInterpolator = particle.m_ScaleInterpolator;
 				m_Particles[i].CustomScaleCurve = particle.CustomScaleCurve;
 				m_Particles[i].SetLifeTime(particle.m_LifeTime);
+				m_Particles[i].m_Acceleration = glm::vec2(0.0f);
 
 				//break out of the for loop because we are spawning one particle only
 				break;

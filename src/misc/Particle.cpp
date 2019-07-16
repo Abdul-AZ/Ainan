@@ -15,6 +15,8 @@ namespace ALZ {
 
 	void Particle::Update(const float & deltaTime)
 	{
+		m_Velocity += m_Acceleration;
+
 		m_Position += m_Velocity * deltaTime;
 
 		m_RemainingLifeTime -= deltaTime;

@@ -23,6 +23,7 @@ namespace ALZ {
 	private:
 		glm::vec2 m_Position;
 		glm::vec2 m_Velocity;
+		glm::vec2 m_Acceleration = { 0.0f,0.0f };
 		float m_LifeTime;
 		float m_RemainingLifeTime;
 

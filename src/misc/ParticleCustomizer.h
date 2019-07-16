@@ -8,6 +8,7 @@
 #include "customizers/ScaleCustomizer.h"
 #include "customizers/LifetimeCustomizer.h"
 #include "customizers/NoiseCustomizer.h"
+#include "customizers/ForceCustomizer.h"
 #include "misc/Line.h"
 #include "misc/CircleOutline.h"
 
@@ -49,6 +50,7 @@ namespace ALZ {
 		ScaleCustomizer m_ScaleCustomizer;
 		ColorCustomizer m_ColorCustomizer;
 		TextureCustomizer m_TextureCustomizer;
+		ForceCustomizer m_ForceCustomizer;
 
 		//this is on a scale from 0 to 1
 		glm::vec2 m_SpawnPosition = { 0.5f, 0.5f };
