@@ -1,14 +1,8 @@
 #pragma once
 
-//for declaring friend to json serializer
-#include "json/json_fwd.hpp"
-namespace ALZ {
-	class Environment;
-	class ParticleSystem;
-}
-
 #include "renderer/Renderer.h"
 #include "file/FileBrowser.h"
+#include "misc/ExposeToJson.h"
 
 namespace ALZ {
 
@@ -28,7 +22,6 @@ namespace ALZ {
 	private:
 		FileBrowser m_FileBrowser;
 
-		friend void toJson(nlohmann::json& j, const ParticleSystem& ps, int objectOrder);
-		friend void ParticleSystemFromJson(Environment* env, nlohmann::json& data, std::string id);
+		EXPOSE_CUSTOMIZER_TO_JSON
 	};
 }
