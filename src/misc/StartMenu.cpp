@@ -34,8 +34,9 @@ namespace ALZ {
 		glfwGetWindowSize(&Window::GetWindow(), &screenSizeX, &screenSizeY);
 		ImGui::SetNextWindowSize({ (float)screenSizeX , (float)screenSizeY });
 
-		ImGui::Begin("Start Menu", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
+		ImGui::SetNextWindowDockID(ImGui::DockSpaceOverViewport(), ImGuiCond_::ImGuiCond_Always);
+		ImGui::Begin("Start Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
+		
 		ImGui::SetWindowSize(ImVec2(Window::WindowSize.x, Window::WindowSize.y));
 
 		ImGui::SetCursorPosX(screenSizeX / 2 - START_MENU_BUTTON_WIDTH / 2);
@@ -50,8 +51,6 @@ namespace ALZ {
 
 		if (ImGui::Button("Load Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
-			glfwSetWindowSize(&Window::GetWindow(), WINDOW_SIZE_FACTOR_ON_LAUNCH * 3, WINDOW_SIZE_FACTOR_ON_LAUNCH * 3 * 9 / 16);
-			Window::CenterWindow();
 			LoadEnvironmentPath.OpenWindow();
 		}
 

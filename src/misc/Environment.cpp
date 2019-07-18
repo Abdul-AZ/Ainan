@@ -161,6 +161,13 @@ namespace ALZ {
 		ImGuiWrapper::NewFrame();
 
 		DisplayMainMenuBarGUI();
+
+		int menuBarHeight = ImGui::GetFrameHeightWithSpacing();
+		ImGuiViewport viewport;
+		viewport.Size = ImVec2(Window::WindowSize.x, Window::WindowSize.y -(menuBarHeight / 2));
+		viewport.Pos = ImVec2(0, menuBarHeight * 2 + 3);
+		ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
+
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
 		m_Settings.DisplayGUI();
@@ -194,7 +201,7 @@ namespace ALZ {
 		auto flags = ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysUseWindowPadding;
 		ImGui::Begin("Object Inspector", &m_ObjectInspectorWindowOpen, flags);
 
-		ImGui::PushItemWidth(ImGui::GetWindowWidth());
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() - 30);
 		ImGui::ListBoxHeader("##Inspector", -1, 30);
 
 		for (int i = 0; i < InspectorObjects.size(); i++)
@@ -370,7 +377,6 @@ namespace ALZ {
 
 	void Environment::DisplayMainMenuBarGUI()
 	{
-		int MenuBarHeight = 0;
 		if (ImGui::BeginMainMenuBar()) {
 
 			if (ImGui::BeginMenu("File")) {
@@ -461,16 +467,8 @@ namespace ALZ {
 				ImGui::EndMenu();
 			}
 
-			MenuBarHeight = (int)ImGui::GetWindowSize().y;
-
 			ImGui::EndMainMenuBar();
 		}
-
-		//TODO change this to a seperate function
-		ImGuiViewport viewport;
-		viewport.Size = ImVec2(Window::WindowSize.x, Window::WindowSize.y);
-		viewport.Pos = ImVec2(0, (float)MenuBarHeight);
-		ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
 	}
 
 	void Environment::Play()

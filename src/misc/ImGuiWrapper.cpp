@@ -71,6 +71,7 @@ namespace ALZ {
 	static void UpdateMousePosAndButtons();
 	static void UpdateMouseCursor();
 	static void UpdateGamepads();
+	static void ImGui_ImplWin32_OnChangedViewport(ImGuiViewport* viewport);
 
 	struct ImGuiViewportDataGlfw
 	{
@@ -87,10 +88,11 @@ namespace ALZ {
 		ImGui::CreateContext();
 		ImGui::StyleColorsDark();
 
-		ImGuiInit("#version 410 core");
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
-
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;           // Enable viewports
+
+		ImGuiInit("#version 410 core");
 	}
 
 	void ImGuiWrapper::Terminate()
@@ -139,6 +141,14 @@ namespace ALZ {
 	{
 		ImGui::Render();
 		ALZ::RenderDrawData(ImGui::GetDrawData());
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_context);
+		}
 	}
 
 	static bool ImGuiInit(const char* glsl_version)
@@ -150,6 +160,7 @@ namespace ALZ {
 		io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;         // We can honor GetMouseCursor() values (optional)
 		io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;          // We can honor io.WantSetMousePos requests (optional, rarely used)
 		io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;    // We can create multi-viewports on the Platform side (optional)
+		io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;    // We can create multi-viewports on the Platform side (optional)
 #if GLFW_HAS_GLFW_HOVERED && defined(_WIN32)
 		io.BackendFlags |= ImGuiBackendFlags_HasMouseHoveredViewport; // We can set io.MouseHoveredViewport correctly (optional, not easy)
 #endif
@@ -206,10 +217,8 @@ namespace ALZ {
 		main_viewport->PlatformHandle = (void*)&Window::GetWindow();
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 			Glfw_InitPlatformInterface();
-		//return true;
 
 		// Setup back-end capabilities flags
-		io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;    // We can create multi-viewports on the Renderer side (optional)
 		io.BackendRendererName = "imgui_impl_opengl3";
 
 		// Store GLSL version string so we can refer to it later in case we recreate shaders. Note: GLSL version is NOT the same as GL version. Leave this to NULL if unsure.
@@ -279,10 +288,6 @@ namespace ALZ {
 	static void UpdateMousePosAndButtons()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		const ImVec2 mouse_pos_backup = io.MousePos;
-		io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
-		io.MouseHoveredViewport = 0;
-
 		// Update buttons
 		for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
 		{
@@ -291,18 +296,18 @@ namespace ALZ {
 			MouseJustPressed[i] = false;
 		}
 
+		// Update mouse position
+		const ImVec2 mouse_pos_backup = io.MousePos;
+		io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+		io.MouseHoveredViewport = 0;
+
 		ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
 		for (int n = 0; n < platform_io.Viewports.Size; n++)
 		{
 			ImGuiViewport* viewport = platform_io.Viewports[n];
 			GLFWwindow* window = (GLFWwindow*)viewport->PlatformHandle;
 			IM_ASSERT(window != NULL);
-#ifdef __EMSCRIPTEN__
-			const bool focused = true;
-			IM_ASSERT(platform_io.Viewports.Size == 1);
-#else
 			const bool focused = glfwGetWindowAttrib(window, GLFW_FOCUSED) != 0;
-#endif
 			if (focused)
 			{
 				if (io.WantSetMousePos)
@@ -441,9 +446,6 @@ namespace ALZ {
 		glfwWindowHint(GLFW_VISIBLE, false);
 		glfwWindowHint(GLFW_FOCUSED, false);
 		glfwWindowHint(GLFW_DECORATED, (viewport->Flags & ImGuiViewportFlags_NoDecoration) ? false : true);
-#if 1
-		glfwWindowHint(GLFW_FLOATING, (viewport->Flags & ImGuiViewportFlags_TopMost) ? true : false);
-#endif
 		GLFWwindow* share_window = &Window::GetWindow();
 		data->Window = glfwCreateWindow((int)viewport->Size.x, (int)viewport->Size.y, "No Title Yet", NULL, share_window);
 		data->WindowOwned = true;
@@ -1208,4 +1210,5 @@ namespace ALZ {
 		glViewport(last_viewport[0], last_viewport[1], (GLsizei)last_viewport[2], (GLsizei)last_viewport[3]);
 		glScissor(last_scissor_box[0], last_scissor_box[1], (GLsizei)last_scissor_box[2], (GLsizei)last_scissor_box[3]);
 	}
+
 }
