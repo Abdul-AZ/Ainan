@@ -598,6 +598,19 @@ namespace ALZ {
 			//increment the id to not have 2 lights with the same id
 			InspectorObjects[InspectorObjects.size() - 1]->ID++;
 		}
+
+		//if this object is a spot light
+		else if (obj.Type == InspectorObjectType::SpotLightType)
+		{
+			//make a new radial light
+			InspectorObjects.push_back(std::make_unique<SpotLight>(*static_cast<SpotLight*>(&obj)));
+
+			//add a -copy to the name of the new light to indicate that it was copied
+			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";
+
+			//increment the id to not have 2 lights with the same id
+			InspectorObjects[InspectorObjects.size() - 1]->ID++;
+		}
 	}
 
 	void Environment::FocusCameraOnObject(InspectorInterface& object)
