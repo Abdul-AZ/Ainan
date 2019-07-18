@@ -579,10 +579,6 @@ namespace ALZ {
 			//make a new particle system
 			InspectorObjects.push_back(std::make_unique<ParticleSystem>(*static_cast<ParticleSystem*>(&obj)));
 
-			//derefrence both the new particle system and the one to be copied
-			//then copy the particle system using the equals operator (=)
-			//*InspectorObjects[InspectorObjects.size() - 1].get() = *static_cast<ParticleSystem*>(&obj);
-
 			//add a -copy to the name of the new particle system to indicate that it was copied
 			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";
 
@@ -594,11 +590,7 @@ namespace ALZ {
 		else if (obj.Type == InspectorObjectType::RadiaLightType) 
 		{
 			//make a new radial light
-			InspectorObjects.push_back(std::make_unique<RadialLight>());
-
-			//derefrence both the new light and the one to be copied
-			//then copy the particle system using the equals operator (=)
-			*InspectorObjects[InspectorObjects.size() - 1].get() = *static_cast<RadialLight*>(&obj);
+			InspectorObjects.push_back(std::make_unique<RadialLight>(*static_cast<RadialLight*>(&obj)));
 
 			//add a -copy to the name of the new light to indicate that it was copied
 			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";
