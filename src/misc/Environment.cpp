@@ -207,13 +207,13 @@ namespace ALZ {
 		for (int i = 0; i < InspectorObjects.size(); i++)
 		{
 
-			ImGui::PushID(InspectorObjects[i]->ID);
+			ImGui::PushID(InspectorObjects[i].get());
 
 			if (ImGui::Selectable((InspectorObjects[i]->m_Name.size() > 0) ? InspectorObjects[i]->m_Name.c_str() : "No Name", &InspectorObjects[i]->Selected)) {
 
 				//if this is selected. deselect all other particle systems
 				for (auto& particle : InspectorObjects) {
-					if (particle->ID != InspectorObjects[i]->ID)
+					if (particle.get() != InspectorObjects[i].get())
 						particle->Selected = false;
 				}
 			}
@@ -581,9 +581,6 @@ namespace ALZ {
 
 			//add a -copy to the name of the new particle system to indicate that it was copied
 			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";
-
-			//increment the id to not have 2 particle systems with the same id
-			InspectorObjects[InspectorObjects.size() - 1]->ID++;
 		}
 
 		//if this object is a radial light
@@ -594,9 +591,6 @@ namespace ALZ {
 
 			//add a -copy to the name of the new light to indicate that it was copied
 			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";
-
-			//increment the id to not have 2 lights with the same id
-			InspectorObjects[InspectorObjects.size() - 1]->ID++;
 		}
 
 		//if this object is a spot light
@@ -607,9 +601,6 @@ namespace ALZ {
 
 			//add a -copy to the name of the new light to indicate that it was copied
 			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";
-
-			//increment the id to not have 2 lights with the same id
-			InspectorObjects[InspectorObjects.size() - 1]->ID++;
 		}
 	}
 

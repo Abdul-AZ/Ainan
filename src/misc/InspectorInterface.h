@@ -25,7 +25,6 @@ namespace ALZ {
 		bool EditorOpen = false;
 		bool RenameTextOpen = false;
 		bool Selected = false;
-		int ID;
 
 		//set this to true if you want to delete the object because it can't be deleted at certain times
 		bool ToBeDeleted = false;

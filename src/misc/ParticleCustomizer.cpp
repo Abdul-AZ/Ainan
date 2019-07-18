@@ -71,7 +71,7 @@ namespace ALZ {
 
 	void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowOpen)
 	{
-		ImGui::Begin((windowName.size() > 0) ? windowName.c_str() : "No Name", &windowOpen);
+		ImGui::Begin((windowName.size() > 0) ? (windowName + "##" +  std::to_string(ImGui::GetID(this))).c_str() : "No Name", &windowOpen);
 
 		if (ImGui::BeginCombo("Spawn Mode", GetModeAsText(Mode).c_str())) {
 

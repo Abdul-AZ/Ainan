@@ -2,15 +2,11 @@
 
 #include "SpotLight.h"
 
-static int nameIndextemp = 20000;
-
 namespace ALZ {
 	SpotLight::SpotLight()
 	{
 		Type = InspectorObjectType::SpotLightType;
-		m_Name = "Spot Light## (" + std::to_string(nameIndextemp) + ")";
-		ID = nameIndextemp;
-		nameIndextemp++;
+		m_Name = "Spot Light";
 	}
 
 	void SpotLight::DisplayGUI()
@@ -18,7 +14,9 @@ namespace ALZ {
 		if (!EditorOpen)
 			return;
 
-		ImGui::Begin(m_Name.c_str(), &EditorOpen);
+		ImGui::PushID(this);
+
+		ImGui::Begin((m_Name + "##" + std::to_string(ImGui::GetID(this))).c_str(), &EditorOpen);
 
 		ImGui::DragFloat2("Position", &Position.x, 0.001f);
 		ImGui::ColorEdit3("Color", &Color.r);
@@ -29,5 +27,7 @@ namespace ALZ {
 		ImGui::DragFloat("Intensity", &Intensity, 5.0f, 0.1f, 10000.0f);
 
 		ImGui::End();
+
+		ImGui::PopID();
 	}
 }

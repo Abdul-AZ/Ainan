@@ -7,17 +7,13 @@ namespace ALZ {
 	static VertexBuffer* VBO = nullptr;
 	static ShaderProgram* CircleInstancedShader = nullptr;
 
-	static int nameIndextemp = 0;
-
 	static Texture* DefaultTexture;
 
 	ParticleSystem::ParticleSystem()
 	{
 		Type = InspectorObjectType::ParticleSystemType;
 
-		m_Name = "Particle System## (" + std::to_string(nameIndextemp) + ")";
-		ID = nameIndextemp;
-		nameIndextemp++;
+		m_Name = "Particle System";
 
 		m_Noise.Init();
 
@@ -276,7 +272,6 @@ namespace ALZ {
 		m_ParticleCount = Psystem.m_ParticleCount;
 		m_Name = Psystem.m_Name;
 		EditorOpen = Psystem.EditorOpen;
-		ID = Psystem.ID;
 		RenameTextOpen = Psystem.RenameTextOpen;
 
 		//initilize the noise class
@@ -291,8 +286,10 @@ namespace ALZ {
 
 	void ParticleSystem::DisplayGUI()
 	{
+		ImGui::PushID(this);
 		if (EditorOpen)
 			Customizer.DisplayGUI(m_Name, EditorOpen);
+		ImGui::PopID();
 
 		//update editor line
 		if (Customizer.Mode == SpawnMode::SpawnOnLine)
