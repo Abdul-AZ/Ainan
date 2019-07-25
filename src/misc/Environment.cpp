@@ -202,79 +202,80 @@ namespace ALZ {
 		ImGui::Begin("Object Inspector", &m_ObjectInspectorWindowOpen, flags);
 
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() - 30);
-		ImGui::ListBoxHeader("##Inspector", -1, 30);
+		if (ImGui::ListBoxHeader("##Inspector", -1, 30)) {
 
-		for (int i = 0; i < InspectorObjects.size(); i++)
-		{
-
-			ImGui::PushID(InspectorObjects[i].get());
-
-			if (ImGui::Selectable((InspectorObjects[i]->m_Name.size() > 0) ? InspectorObjects[i]->m_Name.c_str() : "No Name", &InspectorObjects[i]->Selected)) {
-
-				//if this is selected. deselect all other particle systems
-				for (auto& particle : InspectorObjects) {
-					if (particle.get() != InspectorObjects[i].get())
-						particle->Selected = false;
-				}
-			}
-
-			//show menu when right clicking
-			if (ImGui::BeginPopupContextItem("Object Popup"))
+			for (int i = 0; i < InspectorObjects.size(); i++)
 			{
-				if (ImGui::Selectable("Edit"))
-					InspectorObjects[i]->EditorOpen = !InspectorObjects[i]->EditorOpen;
 
-				if (ImGui::Selectable("Delete")) {
-					InspectorObjects[i]->ToBeDeleted = true;
+				ImGui::PushID(InspectorObjects[i].get());
+
+				if (ImGui::Selectable((InspectorObjects[i]->m_Name.size() > 0) ? InspectorObjects[i]->m_Name.c_str() : "No Name", &InspectorObjects[i]->Selected)) {
+
+					//if this is selected. deselect all other particle systems
+					for (auto& particle : InspectorObjects) {
+						if (particle.get() != InspectorObjects[i].get())
+							particle->Selected = false;
+					}
 				}
 
-				if (ImGui::Selectable("Duplicate")) 
+				//show menu when right clicking
+				if (ImGui::BeginPopupContextItem("Object Popup"))
 				{
-					Duplicate(*InspectorObjects[i]);
+					if (ImGui::Selectable("Edit"))
+						InspectorObjects[i]->EditorOpen = !InspectorObjects[i]->EditorOpen;
+
+					if (ImGui::Selectable("Delete")) {
+						InspectorObjects[i]->ToBeDeleted = true;
+					}
+
+					if (ImGui::Selectable("Duplicate"))
+					{
+						Duplicate(*InspectorObjects[i]);
+						ImGui::EndPopup();
+						ImGui::PopID();
+						continue;
+					}
+
+					if (ImGui::Selectable("Rename"))
+						InspectorObjects[i]->RenameTextOpen = !InspectorObjects[i]->RenameTextOpen;
+
+
 					ImGui::EndPopup();
-					ImGui::PopID();
-					continue;
 				}
 
-				if (ImGui::Selectable("Rename"))
-					InspectorObjects[i]->RenameTextOpen = !InspectorObjects[i]->RenameTextOpen;
+				//display particle system buttons only if it is selected
+				if (InspectorObjects[i]->Selected) {
+					if (ImGui::Button("Edit"))
+						InspectorObjects[i]->EditorOpen = !InspectorObjects[i]->EditorOpen;
 
+					ImGui::SameLine();
+					if (ImGui::Button("Delete"))
+						InspectorObjects[i]->ToBeDeleted = true;
 
-				ImGui::EndPopup();
-			}
+					ImGui::SameLine();
+					if (ImGui::Button("Rename"))
+						InspectorObjects[i]->RenameTextOpen = !InspectorObjects[i]->RenameTextOpen;
 
-			//display particle system buttons only if it is selected
-			if (InspectorObjects[i]->Selected) {
-				if (ImGui::Button("Edit"))
-					InspectorObjects[i]->EditorOpen = !InspectorObjects[i]->EditorOpen;
+					ImGui::SameLine();
 
-				ImGui::SameLine();
-				if (ImGui::Button("Delete")) 
-					InspectorObjects[i]->ToBeDeleted = true;
-
-				ImGui::SameLine();
-				if (ImGui::Button("Rename"))
-					InspectorObjects[i]->RenameTextOpen = !InspectorObjects[i]->RenameTextOpen;
-
-				ImGui::SameLine();
-
-				if (ImGui::Button("Find"))
-					FocusCameraOnObject(*InspectorObjects[i]);
-			}
-
-			ImGui::Spacing();
-
-			if (InspectorObjects[i]->RenameTextOpen) {
-				auto flags = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;
-				if (ImGui::InputText("Name", &InspectorObjects[i]->m_Name, flags)) {
-					InspectorObjects[i]->RenameTextOpen = !InspectorObjects[i]->RenameTextOpen;
+					if (ImGui::Button("Find"))
+						FocusCameraOnObject(*InspectorObjects[i]);
 				}
+
+				ImGui::Spacing();
+
+				if (InspectorObjects[i]->RenameTextOpen) {
+					auto flags = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;
+					if (ImGui::InputText("Name", &InspectorObjects[i]->m_Name, flags)) {
+						InspectorObjects[i]->RenameTextOpen = !InspectorObjects[i]->RenameTextOpen;
+					}
+				}
+
+				ImGui::PopID();
 			}
 
-			ImGui::PopID();
+			ImGui::ListBoxFooter();
 		}
-
-		ImGui::ListBoxFooter();
 
 		ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 90.0f);
 
