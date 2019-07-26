@@ -47,63 +47,110 @@ namespace ALZ {
 		if (!SettingsWindowOpen)
 			return;
 
+		ImGui::PushID(this);
+
 		ImGui::Begin("Export Settings", &SettingsWindowOpen);
 
-		ImGui::Checkbox("Draw Export Camera Outline", &m_DrawExportCamera);
+		if (ImGui::TreeNode("Export Camera Settings"))
+		{
+			ImGui::Text("Draw Export Camera Outline");
+			ImGui::SameLine();
+			ImGui::Checkbox("##Draw Export Camera Outline", &m_DrawExportCamera);
 
-		//update position if any of these are changed, using SetSize().
-		if(ImGui::DragFloat2("Position", &m_ExportCameraPosition.x, 0.01f))
-			SetSize();
-		if(ImGui::DragFloat2("Size", &m_ExportCameraSize.x, 0.01f))
-			SetSize();
+			//update position if any of these are changed, using SetSize().
 
-		//clamp the size, so it is always positive
-		m_ExportCameraSize.x = std::clamp(m_ExportCameraSize.x, 0.0f, 100000.0f);
-		m_ExportCameraSize.y = std::clamp(m_ExportCameraSize.y, 0.0f, 100000.0f);
+			ImGui::Text("Position");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(100);
+			if (ImGui::DragFloat2("##Position", &m_ExportCameraPosition.x, 0.01f))
+				SetSize();
+			ImGui::Text("Size");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(100);
+			if (ImGui::DragFloat2("##Size", &m_ExportCameraSize.x, 0.01f))
+				SetSize();
+
+			//clamp the size, so it is always positive
+			m_ExportCameraSize.x = std::clamp(m_ExportCameraSize.x, 0.0f, 100000.0f);
+			m_ExportCameraSize.y = std::clamp(m_ExportCameraSize.y, 0.0f, 100000.0f);
+
+			ImGui::TreePop();
+		}
 
 		if (ImGui::TreeNode("Image Saving:"))
-	{
-		if (ImGui::BeginCombo("Image Format", Image::GetFormatString(SaveImageFormat).c_str()))
 		{
-			bool is_png = SaveImageFormat == ImageFormat::png ? true : false;
-			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::png).c_str(), &is_png)) {
-	
-				ImGui::SetItemDefaultFocus();
-				SaveImageFormat = ImageFormat::png;
+			ImGui::Text("Image Format");
+			ImGui::SameLine();
+			if (ImGui::BeginCombo("##Image Format", Image::GetFormatString(SaveImageFormat).c_str()))
+			{
+				bool is_png = SaveImageFormat == ImageFormat::png ? true : false;
+				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::png).c_str(), &is_png)) {
+		
+					ImGui::SetItemDefaultFocus();
+					SaveImageFormat = ImageFormat::png;
+				}
+		
+				bool is_jpeg = SaveImageFormat == ImageFormat::jpeg ? true : false;
+				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::jpeg).c_str(), &is_jpeg)) {
+		
+					ImGui::SetItemDefaultFocus();
+					SaveImageFormat = ImageFormat::jpeg;
+				}
+		
+				bool is_bmp = SaveImageFormat == ImageFormat::bmp ? true : false;
+				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::bmp).c_str(), &is_bmp)) {
+		
+					ImGui::SetItemDefaultFocus();
+					SaveImageFormat = ImageFormat::bmp;
+				}
+		
+				ImGui::EndCombo();
 			}
-	
-			bool is_jpeg = SaveImageFormat == ImageFormat::jpeg ? true : false;
-			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::jpeg).c_str(), &is_jpeg)) {
-	
-				ImGui::SetItemDefaultFocus();
-				SaveImageFormat = ImageFormat::jpeg;
-			}
-	
-			bool is_bmp = SaveImageFormat == ImageFormat::bmp ? true : false;
-			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::bmp).c_str(), &is_bmp)) {
-	
-				ImGui::SetItemDefaultFocus();
-				SaveImageFormat = ImageFormat::bmp;
-			}
-	
-			ImGui::EndCombo();
+		
+			ImGui::Text("Image Resolution");
+			ImGui::Text("Width");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(85);
+			ImGui::InputScalar("##Width", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.x);
+			ImGui::Text("Height");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(85);
+			ImGui::InputScalar("##Height", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.y);
+		
+			if (ImGui::Button("Save Location"))
+				m_ImageLocationBrowser.OpenWindow();
+		
+			ImGui::TreePop();
 		}
-	
-		ImGui::Text("Image Resolution");
-		ImGui::InputScalar("width", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.x);
-		ImGui::InputScalar("height", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.y);
-	
-		if (ImGui::Button("Save Location"))
-			m_ImageLocationBrowser.OpenWindow();
-	
-		ImGui::TreePop();
-	}
+
+		if (ImGui::TreeNode("Image Capture Settings:")) 
+		{
+			ImGui::Text("Capture After :");
+
+			bool textHovered = ImGui::IsItemHovered();
+
+			ImGui::SameLine();
+			ImGui::PushItemWidth(150);
+			if(ImGui::DragFloat("##Capture After :", &ImageCaptureTime, 0.1f))
+				ImageCaptureTime = std::clamp(ImageCaptureTime, 0.0f, 3600.0f);
+
+			bool dragFloatHovered = ImGui::IsItemHovered();
+
+			if(textHovered || dragFloatHovered) {
+				ImGui::BeginTooltip();
+				ImGui::Text("This specifies how many seconds since \nplay mode started before we capture an \nimage and export it if we are running \nin export mode");
+				ImGui::EndTooltip();
+			}
+
+			ImGui::TreePop();
+		}
+
 		ImGui::End();
+		ImGui::PopID();
 
 	    m_ImageLocationBrowser.DisplayGUI([this](const std::string& path) {
 		ImageSavePath = path;
 		m_ImageLocationBrowser.CloseWindow();
 		});
-
 	}
 }

@@ -26,6 +26,11 @@ namespace ALZ {
 		std::string   ImageSavePath;
 		ImageFormat   SaveImageFormat = ImageFormat::png;
 
+		//this means after x seconds we will capture the frame using this export camera
+		//timing is handled in the environment class not here
+		bool EnableCaptureImageAfterXSeconds = false;
+		float ImageCaptureTime = 0.0f;
+
 	private:
 		void SetSize();
 

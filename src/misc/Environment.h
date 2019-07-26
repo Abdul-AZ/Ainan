@@ -96,6 +96,8 @@ namespace ALZ {
 		bool m_MousePressedLastFrame = false;
 		bool m_SaveNextFrameAsImage = false;
 
+		float m_TimeSincePlayModeStarted = 0.0f;
+
 		Background m_Background;
 
 		SaveItemBrowser m_EnvironmentSaveBrowser;

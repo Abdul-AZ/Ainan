@@ -38,13 +38,11 @@ namespace ALZ {
 		timeStart = timeEnd;
 
 		m_Camera.Update(deltaTime);
-		//m_ExportCamera.SetSize(m_ExportCameraPosition, m_ExportCameraSize);
 
 		for (int i = 0; i < InspectorObjects.size(); i++) {
 			if (InspectorObjects[i]->ToBeDeleted)
 				InspectorObjects.erase(InspectorObjects.begin() + i);
 		}
-
 
 		for (Inspector_obj_ptr& obj : InspectorObjects) {
 			if(m_Status == EnvironmentStatus::PlayMode)
@@ -53,6 +51,9 @@ namespace ALZ {
 
 		if (Window::WindowSizeChangedSinceLastFrame())
 			m_FrameBuffer.SetSize(Window::WindowSize);
+
+		if (m_Status == EnvironmentStatus::PlayMode)
+			m_TimeSincePlayModeStarted += deltaTime;
 	}
 
 	void Environment::Render()
@@ -298,7 +299,7 @@ namespace ALZ {
 		if (!m_EnvironmentStatusWindowOpen)
 			return;
 
-		ImGui::Begin("Environment Status", &m_EnvironmentStatusWindowOpen);
+		ImGui::Begin("Particle Status", &m_EnvironmentStatusWindowOpen);
 
 		ImGui::Text("Global Particle Count :");
 		ImGui::SameLine();
@@ -335,6 +336,22 @@ namespace ALZ {
 
 			ImGui::Spacing();
 		}
+
+		auto id = ImGui::GetWindowDockID();
+
+		ImGui::End();
+
+		ImGui::SetNextWindowDockID(id, ImGuiCond_Always);
+
+		ImGui::Begin("Play Mode Status", nullptr, ImGuiWindowFlags_NoSavedSettings);
+
+		//this is to control how many decimal points we want to display
+		std::stringstream stream;
+		//we want 3 decimal places
+		stream << std::setprecision(3) << m_TimeSincePlayModeStarted;
+		ImGui::Text("Time Since Play Mode Started :" );
+		ImGui::SameLine();
+		ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, stream.str().c_str());
 
 		ImGui::End();
 	}
@@ -476,6 +493,7 @@ namespace ALZ {
 	{
 		assert(m_Status == EnvironmentStatus::None);
 		m_Status = EnvironmentStatus::PlayMode;
+		m_TimeSincePlayModeStarted = 0.0f;
 	}
 
 	void Environment::Stop()
