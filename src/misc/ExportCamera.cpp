@@ -49,13 +49,13 @@ namespace ALZ {
 
 		ImGui::PushID(this);
 
-		ImGui::Begin("Export Settings", &SettingsWindowOpen);
+		ImGui::Begin("ExportMode Settings", &SettingsWindowOpen);
 
-		if (ImGui::TreeNode("Export Camera Settings"))
+		if (ImGui::TreeNode("ExportMode Camera Settings"))
 		{
-			ImGui::Text("Draw Export Camera Outline");
+			ImGui::Text("Draw ExportMode Camera Outline");
 			ImGui::SameLine();
-			ImGui::Checkbox("##Draw Export Camera Outline", &m_DrawExportCamera);
+			ImGui::Checkbox("##Draw ExportMode Camera Outline", &m_DrawExportCamera);
 
 			//update position if any of these are changed, using SetSize().
 

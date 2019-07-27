@@ -29,7 +29,7 @@ namespace ALZ {
 		//this means after x seconds we will capture the frame using this export camera
 		//timing is handled in the environment class not here
 		bool EnableCaptureImageAfterXSeconds = false;
-		float ImageCaptureTime = 0.0f;
+		float ImageCaptureTime = 5.0f;
 
 	private:
 		void SetSize();

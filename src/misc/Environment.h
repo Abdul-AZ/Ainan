@@ -32,7 +32,8 @@ namespace ALZ {
 	enum class EnvironmentStatus {
 		None,
 		PlayMode,
-		PauseMode
+		PauseMode,
+		ExportMode
 	};
 
 	using Inspector_obj_ptr = std::unique_ptr<InspectorInterface>;
@@ -55,7 +56,8 @@ namespace ALZ {
 		void DisplayEnvironmentControlsGUI();
 		void DisplayMainMenuBarGUI();
 
-		void Play();
+		void PlayMode();
+		void ExportMode();
 		void Stop();
 		void Pause();
 		void Resume();
@@ -64,6 +66,7 @@ namespace ALZ {
 		void AddPS();
 		void AddRadialLight();
 		void AddSpotLight();
+		void CaptureFrameAndExport();
 		void Duplicate(InspectorInterface& obj);
 		void FocusCameraOnObject(InspectorInterface& object);
 
@@ -97,6 +100,7 @@ namespace ALZ {
 		bool m_SaveNextFrameAsImage = false;
 
 		float m_TimeSincePlayModeStarted = 0.0f;
+		bool m_ExportedEverything = false;
 
 		Background m_Background;
 

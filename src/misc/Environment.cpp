@@ -45,15 +45,30 @@ namespace ALZ {
 		}
 
 		for (Inspector_obj_ptr& obj : InspectorObjects) {
-			if(m_Status == EnvironmentStatus::PlayMode)
+			if(m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::ExportMode)
 				obj->Update(deltaTime);
 		}
 
 		if (Window::WindowSizeChangedSinceLastFrame())
 			m_FrameBuffer.SetSize(Window::WindowSize);
 
-		if (m_Status == EnvironmentStatus::PlayMode)
+		if (m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::ExportMode)
 			m_TimeSincePlayModeStarted += deltaTime;
+
+		//this code will be changed and refactored, that is why it is strcutured badly
+		if (m_Status == EnvironmentStatus::ExportMode) {
+			if (m_TimeSincePlayModeStarted > m_ExportCamera.ImageCaptureTime)
+			{
+				CaptureFrameAndExport();
+				m_ExportedEverything = true;
+			}
+
+			if (m_ExportedEverything) {
+				Stop();
+				m_ExportedEverything = false;
+				m_HideGUI = false;
+			}
+		}
 	}
 
 	void Environment::Render()
@@ -105,7 +120,7 @@ namespace ALZ {
 			return;
 		}
 
-		//stuff to only render in play mode
+		//stuff to only render in play mode and export mode
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 			obj->Draw();
 
@@ -118,39 +133,7 @@ namespace ALZ {
 		Renderer::EndScene();
 
 		if (m_SaveNextFrameAsImage) {
-			Renderer::BeginScene(m_ExportCamera.RealCamera);
-
-			m_ExportCamera.m_RenderSurface.SetSize(m_ExportCamera.m_ExportCameraSize * GlobalScaleFactor);
-			m_ExportCamera.m_RenderSurface.m_FrameBuffer->Bind();
-
-			for (Inspector_obj_ptr& obj : InspectorObjects)
-			{
-				if (obj->Type == InspectorObjectType::RadiaLightType) {
-					RadialLight* light = static_cast<RadialLight*>(obj.get());
-					m_Background.SubmitLight(*light);
-				}
-			}
-
-			m_Background.Draw();
-
-			for (Inspector_obj_ptr& obj : InspectorObjects)
-				obj->Draw();
-
-			if (m_Settings.BlurEnabled)
-				GaussianBlur::Blur(m_ExportCamera.m_RenderSurface, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
-
-			Image image = Image::FromFrameBuffer(m_ExportCamera.m_RenderSurface, m_ExportCamera.ImageResolution);
-
-			std::string saveTarget = m_ExportCamera.ImageSavePath;
-
-			//add a default name if none is chosen
-			if (saveTarget.back() == '\\')
-				saveTarget.append("default name");
-
-			image.SaveToFile(saveTarget, m_ExportCamera.SaveImageFormat);
-			m_SaveNextFrameAsImage = false;
-
-			Renderer::EndScene();
+			CaptureFrameAndExport();
 		}
 	}
 
@@ -343,13 +326,13 @@ namespace ALZ {
 
 		ImGui::SetNextWindowDockID(id, ImGuiCond_Always);
 
-		ImGui::Begin("Play Mode Status", nullptr, ImGuiWindowFlags_NoSavedSettings);
+		ImGui::Begin("PlayMode Mode Status", nullptr, ImGuiWindowFlags_NoSavedSettings);
 
 		//this is to control how many decimal points we want to display
 		std::stringstream stream;
 		//we want 3 decimal places
 		stream << std::setprecision(3) << m_TimeSincePlayModeStarted;
-		ImGui::Text("Time Since Play Mode Started :" );
+		ImGui::Text("Time Since PlayMode Mode Started :" );
 		ImGui::SameLine();
 		ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, stream.str().c_str());
 
@@ -362,8 +345,12 @@ namespace ALZ {
 		if (!m_EnvironmentControlsWindowOpen)
 			return;
 
-
 		ImGui::Begin("Controls", &m_EnvironmentControlsWindowOpen);
+		if (m_Status == EnvironmentStatus::ExportMode)
+		{
+			ImGui::End();
+			return;
+		}
 
 		int width = (int)ImGui::GetWindowSize().x;
 		ImGui::SetCursorPosX((float)width / 2 - 20);
@@ -376,7 +363,11 @@ namespace ALZ {
 
 		else {
 			if (ImGui::ImageButton((ImTextureID)m_PlayButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
-				Play();
+				PlayMode();
+			}
+			if (ImGui::Button("Export")) {
+				m_HideGUI = true;
+				ExportMode();
 			}
 		}
 
@@ -450,7 +441,7 @@ namespace ALZ {
 				if (ImGui::MenuItem("Background Settings"))
 					m_Background.SettingsWindowOpen = !m_Background.SettingsWindowOpen;
 
-				if (ImGui::MenuItem("Export Settings"))
+				if (ImGui::MenuItem("ExportMode Settings"))
 					m_ExportCamera.SettingsWindowOpen = !m_ExportCamera.SettingsWindowOpen;
 
 				ImGui::EndMenu();
@@ -489,16 +480,23 @@ namespace ALZ {
 		}
 	}
 
-	void Environment::Play()
+	void Environment::PlayMode()
 	{
 		assert(m_Status == EnvironmentStatus::None);
 		m_Status = EnvironmentStatus::PlayMode;
 		m_TimeSincePlayModeStarted = 0.0f;
 	}
 
+	void Environment::ExportMode()
+	{
+		assert(m_Status == EnvironmentStatus::None);
+		m_Status = EnvironmentStatus::ExportMode;
+		m_TimeSincePlayModeStarted = 0.0f;
+	}
+
 	void Environment::Stop()
 	{
-		assert(m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode);
+		assert(m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode || m_Status == EnvironmentStatus::ExportMode);
 		m_Status = EnvironmentStatus::None;
 
 		for (Inspector_obj_ptr& obj : InspectorObjects) {
@@ -523,9 +521,9 @@ namespace ALZ {
 
 	void Environment::RegisterEnvironmentInputKeys()
 	{
-		m_InputManager.RegisterKey(GLFW_KEY_F5, "Play/Resume", [this]() {
+		m_InputManager.RegisterKey(GLFW_KEY_F5, "PlayMode/Resume", [this]() {
 			if (m_Status == EnvironmentStatus::None)
-				Play();
+				PlayMode();
 			if (m_Status == EnvironmentStatus::PauseMode)
 				Resume();
 		});
@@ -588,6 +586,43 @@ namespace ALZ {
 		Inspector_obj_ptr lightObj((InspectorInterface*)(light.release()));
 
 		InspectorObjects.push_back(std::move(lightObj));
+	}
+
+	void Environment::CaptureFrameAndExport()
+	{
+		Renderer::BeginScene(m_ExportCamera.RealCamera);
+
+		m_ExportCamera.m_RenderSurface.SetSize(m_ExportCamera.m_ExportCameraSize * GlobalScaleFactor);
+		m_ExportCamera.m_RenderSurface.m_FrameBuffer->Bind();
+
+		for (Inspector_obj_ptr& obj : InspectorObjects)
+		{
+			if (obj->Type == InspectorObjectType::RadiaLightType) {
+				RadialLight* light = static_cast<RadialLight*>(obj.get());
+				m_Background.SubmitLight(*light);
+			}
+		}
+
+		m_Background.Draw();
+
+		for (Inspector_obj_ptr& obj : InspectorObjects)
+			obj->Draw();
+
+		if (m_Settings.BlurEnabled)
+			GaussianBlur::Blur(m_ExportCamera.m_RenderSurface, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
+
+		Image image = Image::FromFrameBuffer(m_ExportCamera.m_RenderSurface, m_ExportCamera.ImageResolution);
+
+		std::string saveTarget = m_ExportCamera.ImageSavePath;
+
+		//add a default name if none is chosen
+		if (saveTarget.back() == '\\')
+			saveTarget.append("default name");
+
+		image.SaveToFile(saveTarget, m_ExportCamera.SaveImageFormat);
+		m_SaveNextFrameAsImage = false;
+
+		Renderer::EndScene();
 	}
 
 	void Environment::Duplicate(InspectorInterface& obj)
