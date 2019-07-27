@@ -426,23 +426,12 @@ namespace ALZ {
 
 			if (ImGui::BeginMenu("Window")) {
 
-				if (ImGui::MenuItem("Environment Controls"))
-					m_EnvironmentControlsWindowOpen = !m_EnvironmentControlsWindowOpen;
-
-				if (ImGui::MenuItem("Object Inspector"))
-					m_ObjectInspectorWindowOpen = !m_ObjectInspectorWindowOpen;
-
-				if (ImGui::MenuItem("General Settings"))
-					m_Settings.GeneralSettingsWindowOpen = !m_Settings.GeneralSettingsWindowOpen;
-
-				if (ImGui::MenuItem("Environment Status"))
-					m_EnvironmentStatusWindowOpen = !m_EnvironmentStatusWindowOpen;
-
-				if (ImGui::MenuItem("Background Settings"))
-					m_Background.SettingsWindowOpen = !m_Background.SettingsWindowOpen;
-
-				if (ImGui::MenuItem("ExportMode Settings"))
-					m_ExportCamera.SettingsWindowOpen = !m_ExportCamera.SettingsWindowOpen;
+				ImGui::MenuItem("Environment Controls", nullptr, &m_EnvironmentControlsWindowOpen);
+				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
+				ImGui::MenuItem("General Settings",nullptr, &m_Settings.GeneralSettingsWindowOpen);
+				ImGui::MenuItem("Environment Status", nullptr, &m_EnvironmentStatusWindowOpen);
+				ImGui::MenuItem("Background Settings", nullptr, &m_Background.SettingsWindowOpen);
+				ImGui::MenuItem("ExportMode Settings", nullptr, &m_ExportCamera.SettingsWindowOpen);
 
 				ImGui::EndMenu();
 			}
