@@ -24,6 +24,7 @@ namespace ALZ {
 		float BlurScale         = 1.1f;
 		float BlurStrength      = 4.0f;
 		float BlurGaussianSigma = 4.5f;
+		float BlurRadius = 1.0f;
 
 	private:
 		BlendMode m_ActiveBlendMode = BlendMode::Additive;

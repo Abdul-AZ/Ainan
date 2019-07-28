@@ -112,7 +112,6 @@ namespace ALZ {
 						ps->Customizer.m_CircleOutline.Draw();
 				}
 		}
-		m_ExportCamera.DrawOutline();
 
 		if (m_Status == EnvironmentStatus::None) {
 			m_FrameBuffer.RenderToScreen();
@@ -126,7 +125,10 @@ namespace ALZ {
 
 
 		if (m_Settings.BlurEnabled)
-			GaussianBlur::Blur(m_FrameBuffer, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
+			GaussianBlur::Blur(m_FrameBuffer, m_Settings.BlurRadius);
+
+		//draw this after post processing because we do not want the line blured
+		m_ExportCamera.DrawOutline();
 
 		m_FrameBuffer.RenderToScreen();
 
@@ -598,7 +600,7 @@ namespace ALZ {
 			obj->Draw();
 
 		if (m_Settings.BlurEnabled)
-			GaussianBlur::Blur(m_ExportCamera.m_RenderSurface, m_Settings.BlurScale, m_Settings.BlurStrength, m_Settings.BlurGaussianSigma);
+			GaussianBlur::Blur(m_ExportCamera.m_RenderSurface, m_Settings.BlurRadius);
 
 		Image image = Image::FromFrameBuffer(m_ExportCamera.m_RenderSurface, m_ExportCamera.ImageResolution);
 

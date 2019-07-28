@@ -51,9 +51,11 @@ namespace ALZ {
 		if (BlurEnabled) {
 			if (ImGui::TreeNode("Blur Settings:")) {
 
-				ImGui::SliderFloat("Scale: ", &BlurScale, 1.0f, 3.0f);
-				ImGui::SliderFloat("Strength: ", &BlurStrength, 1.0f, 5.0f);
-				ImGui::SliderFloat("Gaussian Sigma: ", &BlurGaussianSigma, 1.0f, 5.0f);
+				//ImGui::SliderFloat("Scale: ", &BlurScale, 1.0f, 3.0f);
+				//ImGui::SliderFloat("Strength: ", &BlurStrength, 1.0f, 5.0f);
+				//ImGui::SliderFloat("Gaussian Sigma: ", &BlurGaussianSigma, 1.0f, 5.0f);
+
+				ImGui::DragFloat("Blur Radius", &BlurRadius,0.01f, 0.0f, 5.0f);
 
 				ImGui::TreePop();
 			}

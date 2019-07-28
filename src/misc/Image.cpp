@@ -119,7 +119,6 @@ namespace ALZ {
 		tempFrameBuffer.m_FrameBuffer->Bind();
 		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image.m_Data);
 
-
 		return image;
 	}
 

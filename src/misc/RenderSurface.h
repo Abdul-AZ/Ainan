@@ -16,7 +16,7 @@ namespace ALZ {
 		void RenderToScreen();
 
 		void SetSize(const glm::vec2& size);
-		glm::vec2& GetSize() { return m_Size; }
+		glm::vec2 GetSize() { return m_Size; }
 
 	public:
 		std::unique_ptr<FrameBuffer> m_FrameBuffer;
