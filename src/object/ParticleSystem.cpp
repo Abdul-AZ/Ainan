@@ -17,18 +17,13 @@ namespace ALZ {
 
 		m_Noise.Init();
 
-		//TODO pass as a parameter
+		//TODO make this customizable or something, for now it's a default value of 1000
 		m_ParticleCount = 1000;
-		m_ParticleInfoBuffer = malloc((sizeof(glm::mat4) + sizeof(glm::vec4)) * m_ParticleCount);
-		memset(m_ParticleInfoBuffer, 0, (sizeof(glm::mat4) + sizeof(glm::vec4)) * m_ParticleCount);
 
-		m_Particles.reserve(m_ParticleCount);
-		for (size_t i = 0; i < m_ParticleCount; i++)
-		{
-			Particle particle;
-			particle.isActive = false;
-			m_Particles.push_back(particle);
-		}
+		m_ParticleDrawTransformationBuffer.resize(m_ParticleCount);
+		m_ParticleDrawColorBuffer.resize(m_ParticleCount);
+		m_Particles.resize(m_ParticleCount);
+
 
 		//initilize the vertices only the first time a particle system is created
 		if (!InitilizedCircleVertices) {
@@ -143,25 +138,22 @@ namespace ALZ {
 				Customizer.m_TextureCustomizer.ParticleTexture->SetDefaultTextureSettings();
 			}
 
-		//cast the start of m_ParticleInfoBuffer to a glm::mat*, because the start of the buffer is the matrices
-		glm::mat4* modelBuffer = (glm::mat4*) m_ParticleInfoBuffer;
-
-		//cast the memory location of the part after the matrices to glm::vec4, because the colors(vec4s) are after the matrices in memory
-		glm::vec4* colorBuffer = (glm::vec4*) ((char*)m_ParticleInfoBuffer + m_ParticleCount * sizeof(glm::mat4));
+		//reset the amount of particles to be drawn every frame
+		m_ParticleDrawCount = 0;
 
 		//go through all the particles
 		for (unsigned int i = 0; i < m_ParticleCount; i++)
 		{
-			//get a value from 0 to 1, showing how much the particle lived.
-			//1 meaning it's lifetime is over and it is going to die (get deactivated and not rendered).
-			//0 meaning it's just been spawned (activated).
-			float t = (m_Particles[i].m_LifeTime - m_Particles[i].m_RemainingLifeTime) / m_Particles[i].m_LifeTime;
-
-			//create a new model matrix for each particle
-			glm::mat4 model = glm::mat4(1.0f);
-
-			//if the particle is acive update it's model matrix
 			if (m_Particles[i].isActive) {
+
+				//get a value from 0 to 1, showing how much the particle lived.
+				//1 meaning it's lifetime is over and it is going to die (get deactivated and not rendered).
+				//0 meaning it's just been spawned (activated).
+				float t = (m_Particles[i].m_LifeTime - m_Particles[i].m_RemainingLifeTime) / m_Particles[i].m_LifeTime;
+
+				//create a new model matrix for each particle
+				glm::mat4 model = glm::mat4(1.0f);
+
 				//move particle to it's position
 				model = glm::translate(model, glm::vec3(m_Particles[i].m_Position.x, m_Particles[i].m_Position.y, 0.0f));
 				//use the t value to get the scale of the particle using it's not using a Custom Curve
@@ -174,35 +166,36 @@ namespace ALZ {
 				//scale the particle by that value
 				model = glm::scale(model, glm::vec3(scale, scale, scale));
 
+				//put the drawing properties of the particles in the draw buffers that would be drawn this frame
+				m_ParticleDrawTransformationBuffer[m_ParticleDrawCount] = model;
+				m_ParticleDrawColorBuffer[m_ParticleDrawCount] = m_Particles[i].m_ColorInterpolator.Interpolate(t);
+
+				//up the amount of particles to be drawn this frame
+				m_ParticleDrawCount++;
 			}
-			//if the particle is not active place it in a faraway place so it is not rendered
-			else
-			{
-				model = glm::translate(model, glm::vec3(-10000, -10000, 0.0f));
-			}
-			//update the model
-			modelBuffer[i] = model;
-			//interpolate the color using the t value using the particles color interpolator
-			colorBuffer[i] = m_Particles[i].m_ColorInterpolator.Interpolate(t);
 		}
 
 		//how many times we need to drae (currently we draw 40 particles at a time)
-		int drawCount = (int)m_Particles.size() / 40;
+		int drawCount = (int)m_ParticleDrawCount / 40;
 
 		//draw 40 particles
 		for (int i = 0; i < drawCount; i++)
 		{
-			CircleInstancedShader->SetUniformVec4s("colorArr", &colorBuffer[i * 40], 40);
-			CircleInstancedShader->SetUniformMat4s("model", &modelBuffer[i * 40], 40);
+			CircleInstancedShader->SetUniformMat4s("model", &m_ParticleDrawTransformationBuffer[i * 40], 40);
+			CircleInstancedShader->SetUniformVec4s("colorArr", &m_ParticleDrawColorBuffer[i * 40], 40);
 			Renderer::DrawInstanced(*VAO, *CircleInstancedShader, Primitive::TriangleFan, 26, 40);
 		}
 
-		//get the remaining particles 
-		int remaining = m_Particles.size() % 40;
+		//get the remaining particles (because we draw 40 at a time and not every number is divisble by 40)
+		int remaining = m_ParticleDrawCount % 40;
+
+		//return early if non are remaining
+		if (remaining == 0)
+			return;
 
 		//draw them
-		CircleInstancedShader->SetUniformVec4s("colorArr", &colorBuffer[drawCount * 40], remaining);
-		CircleInstancedShader->SetUniformMat4s("model", &modelBuffer[drawCount * 40], remaining);
+		CircleInstancedShader->SetUniformMat4s("model", &m_ParticleDrawTransformationBuffer[drawCount * 40], remaining);
+		CircleInstancedShader->SetUniformVec4s("colorArr", &m_ParticleDrawColorBuffer[drawCount * 40], remaining);
 		Renderer::DrawInstanced(*VAO, *CircleInstancedShader, Primitive::TriangleFan, 26, remaining);
 	}
 
@@ -262,10 +255,10 @@ namespace ALZ {
 	ParticleSystem::ParticleSystem(const ParticleSystem& Psystem) :
 		Customizer(Psystem.Customizer)
 	{
-		//allocate space for a model matrix (glm::mat4) and a color (glm::vec4) for each particle system
-		m_ParticleInfoBuffer = malloc((sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
-		//copy the info buffer from the object to be copied (Psystem) to the new object (this)
-		memcpy(m_ParticleInfoBuffer, Psystem.m_ParticleInfoBuffer, (sizeof(glm::mat4) + sizeof(glm::vec4)) * Psystem.m_ParticleCount);
+
+		//these are calculated every frame, so there is no need to copy them. a resize should be enough
+		m_ParticleDrawTransformationBuffer.resize(Psystem.m_ParticleDrawTransformationBuffer.size());
+		m_ParticleDrawColorBuffer.resize(Psystem.m_ParticleDrawColorBuffer.size());
 
 		//copy other variables
 		m_Particles = Psystem.m_Particles;
@@ -312,10 +305,5 @@ namespace ALZ {
 
 			TimeTillNextParticleSpawn = Customizer.GetTimeBetweenParticles();
 		}
-	}
-
-	ParticleSystem::~ParticleSystem()
-	{
-		free(m_ParticleInfoBuffer);
 	}
 }

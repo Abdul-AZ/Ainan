@@ -15,7 +15,6 @@ namespace ALZ {
 	{
 	public:
 		ParticleSystem();
-		~ParticleSystem();
 
 		void Update(const float& deltaTime) override;
 		void Draw() override;
@@ -36,7 +35,12 @@ namespace ALZ {
 		unsigned int ActiveParticleCount = 0;
 
 	private:
-		void* m_ParticleInfoBuffer;
+		//void* m_ParticleInfoBuffer;
+		//these are the buffers for all the particles that will be drawn this frame
+		std::vector<glm::mat4> m_ParticleDrawTransformationBuffer;
+		std::vector<glm::vec4> m_ParticleDrawColorBuffer;
+		size_t m_ParticleDrawCount = 0;
+
 
 		std::vector<Particle> m_Particles;
 		unsigned int m_ParticleCount;
