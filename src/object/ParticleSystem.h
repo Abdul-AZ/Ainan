@@ -35,7 +35,6 @@ namespace ALZ {
 		unsigned int ActiveParticleCount = 0;
 
 	private:
-		//void* m_ParticleInfoBuffer;
 		//these are the buffers for all the particles that will be drawn this frame
 		std::vector<glm::mat4> m_ParticleDrawTransformationBuffer;
 		std::vector<glm::vec4> m_ParticleDrawColorBuffer;
