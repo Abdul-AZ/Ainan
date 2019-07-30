@@ -5,9 +5,18 @@
 
 namespace ALZ {
 	namespace OpenGL {
+		
+		static void opengl_debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+		{
+			if(type == GL_DEBUG_TYPE_ERROR || type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR || type == GL_DEBUG_TYPE_PERFORMANCE || type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
+				std::cout << message << std::endl;
+		};
 
 		OpenGLRendererAPI::OpenGLRendererAPI()
 		{
+#ifdef DEBUG
+			glDebugMessageCallback(&opengl_debug_message_callback, nullptr);
+#endif // DEBUG
 		}
 
 		void OpenGLRendererAPI::DrawInstanced(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount, const unsigned int& objectCount)

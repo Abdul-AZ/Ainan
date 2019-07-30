@@ -17,12 +17,26 @@ namespace ALZ {
 		glViewport(0, 0, width, height);
 	}
 
+	void error_callback(int num, const char* message)
+	{
+		std::cout << message << std::endl;
+	}
+
 	void Window::Init()
 	{
+#ifdef DEBUG
+		glfwSetErrorCallback(error_callback);
+#endif // !NDEBUG
+
 		glfwInit();
 
-		glfwWindowHint(GLFW_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_VERSION_MINOR, 0);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef DEBUG
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif // !NDEBUG
 
 		m_Window = glfwCreateWindow(WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16, "ALZ Particles", nullptr, nullptr);
 		WindowSize = { WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 };

@@ -24,11 +24,13 @@ project "Core"
     runtime "Debug"
     symbols "On"
     optimize "Off"
+	defines { "DEBUG" }
 
   filter "configurations:Release"
     runtime "Release"
     symbols "On"
     optimize "On"
+	defines { "NDEBUG" }
 
   filter "system:Windows"
     systemversion ("latest")
