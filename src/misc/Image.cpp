@@ -101,7 +101,7 @@ namespace ALZ {
 		return image;
 	}
 
-	Image Image::FromFrameBuffer(RenderSurface & framebuffer, const unsigned int & width, const unsigned int & height)
+	Image Image::FromFrameBuffer(RenderSurface & renderSurface, const unsigned int & width, const unsigned int & height)
 	{
 		Image image;
 		image.m_Width = width;
@@ -109,21 +109,21 @@ namespace ALZ {
 		image.m_Data = new unsigned char[image.m_Width * image.m_Height * 4];
 		image.m_Comp = 4;
 
-		RenderSurface tempFrameBuffer;
-		tempFrameBuffer.SetSize(glm::vec2(width, height));
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer.m_FrameBuffer->GetRendererID());
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tempFrameBuffer.m_FrameBuffer->GetRendererID());
+		RenderSurface tempRenderSurface;
+		tempRenderSurface.SetSize(glm::vec2(width, height));
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, renderSurface.m_FrameBuffer->GetRendererID());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tempRenderSurface.m_FrameBuffer->GetRendererID());
 
-		glBlitFramebuffer(0, 0, (GLuint)framebuffer.GetSize().x, (GLuint)framebuffer.GetSize().y, 0, 0, (GLuint)tempFrameBuffer.GetSize().x, (GLuint)tempFrameBuffer.GetSize().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, (GLuint)renderSurface.GetSize().x, (GLuint)renderSurface.GetSize().y, 0, 0, (GLuint)tempRenderSurface.GetSize().x, (GLuint)tempRenderSurface.GetSize().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-		tempFrameBuffer.m_FrameBuffer->Bind();
+		tempRenderSurface.m_FrameBuffer->Bind();
 		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image.m_Data);
 
 		return image;
 	}
 
-	Image Image::FromFrameBuffer(RenderSurface& framebuffer, const glm::ivec2& size)
+	Image Image::FromFrameBuffer(RenderSurface& renderSurface, const glm::ivec2& size)
 	{
-		return FromFrameBuffer(framebuffer, size.x, size.y);
+		return FromFrameBuffer(renderSurface, size.x, size.y);
 	}
 }

@@ -69,9 +69,22 @@ namespace ALZ {
 		m_CurrentActiveAPI->ClearScreen();
 	}
 
-	void Renderer::SetViewportSize(const glm::ivec2 lowerLeftCornerPoint, const glm::ivec2 size)
+	void Renderer::SetViewport(const Viewport viewport)
 	{
-		m_CurrentActiveAPI->SetViewportSize(lowerLeftCornerPoint, size);
+		m_CurrentActiveAPI->SetViewport(viewport);
+	}
+
+	Viewport Renderer::GetCurrentViewport()
+	{
+		switch (m_CurrentActiveAPI->GetType())
+		{
+		case RendererType::OpenGL:
+			return m_CurrentActiveAPI->GetCurrentViewport();
+
+		default:
+			assert(false);
+			return Viewport();
+		}
 	}
 
 	std::unique_ptr<VertexArray> Renderer::CreateVertexArray()

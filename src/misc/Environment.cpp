@@ -50,7 +50,7 @@ namespace ALZ {
 		}
 
 		if (Window::WindowSizeChangedSinceLastFrame())
-			m_FrameBuffer.SetSize(Window::WindowSize);
+			m_RenderSurface.SetSize(Window::WindowSize);
 
 		if (m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::ExportMode)
 			m_TimeSincePlayModeStarted += deltaTime;
@@ -74,7 +74,7 @@ namespace ALZ {
 	void Environment::Render()
 	{
 		Renderer::BeginScene(m_Camera);
-		m_FrameBuffer.m_FrameBuffer->Bind();
+		m_RenderSurface.m_FrameBuffer->Bind();
 		Renderer::ClearScreen();
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
@@ -114,8 +114,8 @@ namespace ALZ {
 		}
 
 		if (m_Status == EnvironmentStatus::None) {
-			m_FrameBuffer.RenderToScreen();
-			m_FrameBuffer.m_FrameBuffer->Unbind();
+			m_RenderSurface.RenderToScreen();
+			m_RenderSurface.m_FrameBuffer->Unbind();
 			return;
 		}
 
@@ -125,18 +125,19 @@ namespace ALZ {
 
 
 		if (m_Settings.BlurEnabled)
-			GaussianBlur::Blur(m_FrameBuffer, m_Settings.BlurRadius);
+			GaussianBlur::Blur(m_RenderSurface, m_Settings.BlurRadius);
 
 		//draw this after post processing because we do not want the line blured
 		m_ExportCamera.DrawOutline();
 
-		m_FrameBuffer.RenderToScreen();
+		m_RenderSurface.RenderToScreen();
 
 		Renderer::EndScene();
 
-		if (m_SaveNextFrameAsImage) {
+		if (m_SaveNextFrameAsImage)
 			CaptureFrameAndExport();
-		}
+
+		m_RenderSurface.m_FrameBuffer->Unbind();
 	}
 
 	void Environment::RenderGUI()
@@ -602,7 +603,7 @@ namespace ALZ {
 		if (m_Settings.BlurEnabled)
 			GaussianBlur::Blur(m_ExportCamera.m_RenderSurface, m_Settings.BlurRadius);
 
-		Image image = Image::FromFrameBuffer(m_ExportCamera.m_RenderSurface, m_ExportCamera.ImageResolution);
+		Image image = Image::FromFrameBuffer(m_ExportCamera.m_RenderSurface, m_ExportCamera.m_RenderSurface.GetSize());
 
 		std::string saveTarget = m_ExportCamera.ImageSavePath;
 

@@ -22,7 +22,6 @@ namespace ALZ {
 		Camera RealCamera;
 		RenderSurface m_RenderSurface;
 
-		glm::ivec2    ImageResolution = { 1080, 720 };
 		std::string   ImageSavePath;
 		ImageFormat   SaveImageFormat = ImageFormat::png;
 

@@ -9,6 +9,7 @@
 #include "IndexBuffer.h"
 #include "Texture.h"
 #include "FrameBuffer.h"
+#include "Viewport.h"
 
 #include "opengl/OpenGLRendererAPI.h"
 #include "opengl/OpenGLShaderProgram.h"
@@ -43,7 +44,8 @@ namespace ALZ {
 						 const IndexBuffer& indexBuffer);
 
 		static void ClearScreen();
-		static void SetViewportSize(const glm::ivec2 lowerLeftCornerPoint, const glm::ivec2 size);
+		static void SetViewport(const Viewport viewport);
+		static Viewport GetCurrentViewport();
 
 		static std::unique_ptr<VertexArray> CreateVertexArray();
 		static std::unique_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size);

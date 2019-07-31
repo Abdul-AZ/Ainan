@@ -3,6 +3,7 @@
 #include "renderer/RendererAPI.h"
 #include "renderer/ShaderProgram.h"
 #include "renderer/IndexBuffer.h"
+#include "renderer/Viewport.h"
 
 #include <glad/glad.h>
 
@@ -39,7 +40,8 @@ namespace ALZ {
 			virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer) override;
 
 			virtual void ClearScreen() override;
-			virtual void SetViewportSize(const glm::ivec2 lowerLeftCornerPoint, const glm::ivec2& size) override;
+			virtual void SetViewport(const Viewport& viewport) override;
+			virtual Viewport GetCurrentViewport() override;
 			virtual RendererType GetType() const override { return RendererType::OpenGL; }
 		};
 	}

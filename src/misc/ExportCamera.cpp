@@ -111,11 +111,11 @@ namespace ALZ {
 			ImGui::Text("Width");
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(85);
-			ImGui::InputScalar("##Width", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.x);
+			ImGui::TextColored(ImVec4(0.0f,0.8f,0.0f,1.0f), std::to_string(static_cast<int>(m_ExportCameraSize.x * GlobalScaleFactor)).c_str());
 			ImGui::Text("Height");
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(85);
-			ImGui::InputScalar("##Height", ImGuiDataType_::ImGuiDataType_U32, &ImageResolution.y);
+			ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.0f, 1.0f), std::to_string(static_cast<int>(m_ExportCameraSize.y * GlobalScaleFactor)).c_str());
 		
 			if (ImGui::Button("Save Location"))
 				m_ImageLocationBrowser.OpenWindow();

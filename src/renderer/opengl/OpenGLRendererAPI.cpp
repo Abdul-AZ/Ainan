@@ -34,9 +34,18 @@ namespace ALZ {
 			glClear(GL_COLOR_BUFFER_BIT);
 		}
 
-		void OpenGLRendererAPI::SetViewportSize(const glm::ivec2 lowerLeftCornerPoint, const glm::ivec2& size)
+		void OpenGLRendererAPI::SetViewport(const Viewport& viewport)
 		{
-			glViewport(lowerLeftCornerPoint.x, lowerLeftCornerPoint.y, size.x, size.y);
+			glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+		}
+
+		Viewport OpenGLRendererAPI::GetCurrentViewport()
+		{
+			Viewport viewport;
+
+			glGetIntegerv(GL_VIEWPORT, &viewport.x);
+
+			return viewport;
 		}
 
 		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount)

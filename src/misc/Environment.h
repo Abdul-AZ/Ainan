@@ -77,7 +77,7 @@ namespace ALZ {
 		std::clock_t timeStart = 0, timeEnd = 0;
 		GeneralSettingsGUI m_Settings;
 
-		RenderSurface m_FrameBuffer;
+		RenderSurface m_RenderSurface;
 		Camera m_Camera;
 		ExportCamera m_ExportCamera;
 		InputManager m_InputManager;

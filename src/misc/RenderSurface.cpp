@@ -69,7 +69,13 @@ namespace ALZ {
 		//nullptr means we are copying to the default render buffer (which is the one being displayed)
 		m_FrameBuffer->Blit(nullptr, m_Size, m_Size);
 
-		Renderer::SetViewportSize(glm::ivec2(0.0), glm::ivec2(Window::WindowSize.x, Window::WindowSize.y));
+		Viewport screenViewport;
+		screenViewport.x = 0;
+		screenViewport.y = 0;
+		screenViewport.width = Window::WindowSize.x;
+		screenViewport.height = Window::WindowSize.y;
+
+		Renderer::SetViewport(screenViewport);
 	}
 
 	void RenderSurface::SetSize(const glm::vec2 & size)

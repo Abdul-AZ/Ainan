@@ -12,6 +12,16 @@ namespace ALZ {
 
 	void GaussianBlur::Blur(RenderSurface& surface, float radius)
 	{
+		Viewport lastViewport = Renderer::GetCurrentViewport();
+
+		Viewport viewport;
+		viewport.x = 0;
+		viewport.y = 0;
+		viewport.width = surface.GetSize().x;
+		viewport.height = surface.GetSize().y;
+
+		Renderer::SetViewport(viewport);
+
 		BlurShader->SetUniformVec2("u_Resolution", surface.GetSize());
 		BlurShader->SetUniform1f("u_Radius", radius);
 		BlurShader->SetUniform1i("u_BlurTarget", 0);
@@ -36,5 +46,7 @@ namespace ALZ {
 
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
 		tempSurface.Render(*BlurShader);
+
+		Renderer::SetViewport(lastViewport);
 	}
 }
