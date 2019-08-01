@@ -54,8 +54,9 @@ namespace ALZ {
 		static std::unique_ptr<ShaderProgram> CreateShaderProgram(const std::string& vertPath, const std::string& fragPath);
 		static std::unique_ptr<FrameBuffer> CreateFrameBuffer();
 		static std::unique_ptr<Texture> CreateTexture();
-		static Camera* m_Camera;
+		static Camera* m_CurrentSceneCamera;
 	private:
+		static glm::mat4 m_CurrentViewProjection;
 		static RendererAPI* m_CurrentActiveAPI;
 	};
 

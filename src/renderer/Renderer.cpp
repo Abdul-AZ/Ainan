@@ -4,8 +4,9 @@
 
 namespace ALZ {
 
-	Camera* Renderer::m_Camera = nullptr;
 	RendererAPI* Renderer::m_CurrentActiveAPI = nullptr;
+	Camera* Renderer::m_CurrentSceneCamera = nullptr;
+	glm::mat4 Renderer::m_CurrentViewProjection = glm::mat4(1.0f);
 
 	void Renderer::Init()
 	{
@@ -14,7 +15,8 @@ namespace ALZ {
 
 	void Renderer::BeginScene(Camera& camera)
 	{
-		m_Camera = &camera;
+		m_CurrentSceneCamera = &camera;
+		m_CurrentViewProjection = camera.ProjectionMatrix * camera.ViewMatrix;
 	}
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
@@ -22,8 +24,7 @@ namespace ALZ {
 		vertexArray.Bind();
 		shader.Bind();
 
-		shader.SetUniformMat4("projection", m_Camera->ProjectionMatrix);
-		shader.SetUniformMat4("view", m_Camera->ViewMatrix);
+		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
 
 		m_CurrentActiveAPI->Draw(shader, mode, vertexCount);
 
@@ -36,8 +37,7 @@ namespace ALZ {
 		vertexArray.Bind();
 		shader.Bind();
 
-		shader.SetUniformMat4("projection", m_Camera->ProjectionMatrix);
-		shader.SetUniformMat4("view", m_Camera->ViewMatrix);
+		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
 
 		m_CurrentActiveAPI->DrawInstanced(shader, mode, vertexCount, objectCount);
 
@@ -47,7 +47,7 @@ namespace ALZ {
 
 	void Renderer::EndScene()
 	{
-		m_Camera = nullptr;
+		m_CurrentSceneCamera = nullptr;
 	}
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
@@ -55,8 +55,7 @@ namespace ALZ {
 		vertexArray.Bind();
 		shader.Bind();
 
-		shader.SetUniformMat4("projection", m_Camera->ProjectionMatrix);
-		shader.SetUniformMat4("view", m_Camera->ViewMatrix);
+		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
 
 		m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer);
 

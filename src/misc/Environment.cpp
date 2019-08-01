@@ -114,6 +114,7 @@ namespace ALZ {
 		}
 
 		if (m_Status == EnvironmentStatus::None) {
+			m_ExportCamera.DrawOutline();
 			m_RenderSurface.RenderToScreen();
 			m_RenderSurface.m_FrameBuffer->Unbind();
 			return;

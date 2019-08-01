@@ -73,8 +73,8 @@ namespace ALZ {
 	{
 		glm::vec2 objectPositionWS = objectPosition * GlobalScaleFactor;
 
-		glm::mat4 invView = glm::inverse(Renderer::m_Camera->ViewMatrix);
-		glm::mat4 invProj = glm::inverse(Renderer::m_Camera->ProjectionMatrix);
+		glm::mat4 invView = glm::inverse(Renderer::m_CurrentSceneCamera->ViewMatrix);
+		glm::mat4 invProj = glm::inverse(Renderer::m_CurrentSceneCamera->ProjectionMatrix);
 
 		glm::vec4 result = invView * invProj * glm::vec4(mousePositionNDC.x, mousePositionNDC.y, 0.0f, 1.0f);
 
@@ -143,7 +143,7 @@ namespace ALZ {
 
 		GizmoShader->SetUniformVec4("color", color);
 		GizmoShader->SetUniformMat4("model", model);
-		glm::vec2 mousePosWS = Renderer::m_Camera->Position + mousePositionNDC * GlobalScaleFactor;
+		glm::vec2 mousePosWS = Renderer::m_CurrentSceneCamera->Position + mousePositionNDC * GlobalScaleFactor;
 		glm::vec2 objectPosWS = objectPositionWS * GlobalScaleFactor;
 
 		Renderer::Draw(*VAO, *GizmoShader, Primitive::Triangles, *EBO);
