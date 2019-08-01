@@ -152,8 +152,8 @@ namespace ALZ {
 
 		float menuBarHeight = ImGui::GetFrameHeightWithSpacing();
 		ImGuiViewport viewport;
-		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y -(menuBarHeight / 2));
-		viewport.Pos = ImVec2(0, menuBarHeight * 2 + 3);
+		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y -menuBarHeight);
+		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
 		ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
 
 		DisplayEnvironmentControlsGUI();

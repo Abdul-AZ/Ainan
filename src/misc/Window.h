@@ -20,6 +20,7 @@ namespace ALZ {
 
 		static GLFWwindow& GetWindow();
 		static glm::vec2 FramebufferSize;
+		static glm::vec2 Position;
 
 		static bool m_WindowSizeChanged;
 	private:

@@ -8,6 +8,7 @@ namespace ALZ {
 
 	bool Window::m_WindowSizeChanged = false;
 	glm::vec2 Window::FramebufferSize = { 0,0 };
+	glm::vec2 Window::Position = { 0,0 };
 	GLFWwindow* Window::Ptr = nullptr;
 
 	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -15,6 +16,12 @@ namespace ALZ {
 		Window::m_WindowSizeChanged = true;
 		Window::FramebufferSize = { width, height };
 		glViewport(0, 0, width, height);
+	}
+
+	void pos_callback(GLFWwindow* window, int x, int y)
+	{
+		Window::Position.x = x;
+		Window::Position.y = y;
 	}
 
 	void error_callback(int num, const char* message)
@@ -46,6 +53,7 @@ namespace ALZ {
 		glfwSwapInterval(1);
 
 		glfwSetFramebufferSizeCallback(Ptr, framebuffer_size_callback);
+		glfwSetWindowPosCallback(Ptr, pos_callback);
 
 		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
