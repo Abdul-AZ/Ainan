@@ -37,9 +37,9 @@ namespace ALZ {
 		ImGui::SetNextWindowDockID(ImGui::DockSpaceOverViewport(), ImGuiCond_::ImGuiCond_Always);
 		ImGui::Begin("Start Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
 		
-		ImGui::SetWindowSize(ImVec2(Window::WindowSize.x, Window::WindowSize.y));
+		ImGui::SetWindowSize(ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y));
 
-		ImGui::SetCursorPosX(screenSizeX / 2 - START_MENU_BUTTON_WIDTH / 2);
+		ImGui::SetCursorPosX((float)screenSizeX / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
 
 		if (ImGui::Button("Create New Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
@@ -47,14 +47,14 @@ namespace ALZ {
 			currentEnv = new Environment();
 		}
 
-		ImGui::SetCursorPosX(screenSizeX / 2 - START_MENU_BUTTON_WIDTH / 2);
+		ImGui::SetCursorPosX((float)screenSizeX / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
 
 		if (ImGui::Button("Load Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
 			LoadEnvironmentPath.OpenWindow();
 		}
 
-		ImGui::SetCursorPosX(screenSizeX / 2 - START_MENU_BUTTON_WIDTH / 2);
+		ImGui::SetCursorPosX((float)screenSizeX / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
 
 		if (ImGui::Button("Exit App", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{

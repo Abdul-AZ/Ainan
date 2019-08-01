@@ -7,13 +7,13 @@
 namespace ALZ {
 
 	bool Window::m_WindowSizeChanged = false;
-	glm::vec2 Window::WindowSize = { 0,0 };
-	GLFWwindow* Window::m_Window = nullptr;
+	glm::vec2 Window::FramebufferSize = { 0,0 };
+	GLFWwindow* Window::Ptr = nullptr;
 
 	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	{
 		Window::m_WindowSizeChanged = true;
-		Window::WindowSize = { width, height };
+		Window::FramebufferSize = { width, height };
 		glViewport(0, 0, width, height);
 	}
 
@@ -38,14 +38,14 @@ namespace ALZ {
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif // !NDEBUG
 
-		m_Window = glfwCreateWindow(WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16, "ALZ Particles", nullptr, nullptr);
-		WindowSize = { WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 };
+		Ptr = glfwCreateWindow(WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16, "ALZ Particles", nullptr, nullptr);
+		FramebufferSize = { WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 };
 		CenterWindow();
 
-		glfwMakeContextCurrent(m_Window);
+		glfwMakeContextCurrent(Ptr);
 		glfwSwapInterval(1);
 
-		glfwSetFramebufferSizeCallback(m_Window, framebuffer_size_callback);
+		glfwSetFramebufferSizeCallback(Ptr, framebuffer_size_callback);
 
 		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
@@ -55,7 +55,7 @@ namespace ALZ {
 
 	void Window::Present()
 	{
-		glfwSwapBuffers(m_Window);
+		glfwSwapBuffers(Ptr);
 		m_WindowSizeChanged = false;
 	}
 
@@ -71,7 +71,7 @@ namespace ALZ {
 
 	void Window::Terminate()
 	{
-		glfwDestroyWindow(m_Window);
+		glfwDestroyWindow(Ptr);
 		glfwTerminate();
 	}
 
@@ -98,6 +98,6 @@ namespace ALZ {
 
 	GLFWwindow & Window::GetWindow()
 	{
-		return *m_Window;
+		return *Ptr;
 	}
 }

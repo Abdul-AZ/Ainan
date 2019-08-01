@@ -98,8 +98,8 @@ namespace ALZ {
 		//change from being relative to top left to being relative to bottom left
 		ypos = -ypos + height;
 
-		float NDC_xpos = xpos * 2 / width - 1.0f;
-		float NDC_ypos = ypos * 2 / height - 1.0f;
+		float NDC_xpos = (float)xpos * 2 / width - 1.0f;
+		float NDC_ypos = (float)ypos * 2 / height - 1.0f;
 
 		return glm::vec2(NDC_xpos, NDC_ypos);
 	}

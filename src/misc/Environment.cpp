@@ -50,7 +50,7 @@ namespace ALZ {
 		}
 
 		if (Window::WindowSizeChangedSinceLastFrame())
-			m_RenderSurface.SetSize(Window::WindowSize);
+			m_RenderSurface.SetSize(Window::FramebufferSize);
 
 		if (m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::ExportMode)
 			m_TimeSincePlayModeStarted += deltaTime;
@@ -149,9 +149,9 @@ namespace ALZ {
 
 		DisplayMainMenuBarGUI();
 
-		int menuBarHeight = ImGui::GetFrameHeightWithSpacing();
+		float menuBarHeight = ImGui::GetFrameHeightWithSpacing();
 		ImGuiViewport viewport;
-		viewport.Size = ImVec2(Window::WindowSize.x, Window::WindowSize.y -(menuBarHeight / 2));
+		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y -(menuBarHeight / 2));
 		viewport.Pos = ImVec2(0, menuBarHeight * 2 + 3);
 		ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
 
@@ -359,13 +359,13 @@ namespace ALZ {
 		ImGui::SetCursorPosX((float)width / 2 - 20);
 
 		if (m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode) {
-			if (ImGui::ImageButton((ImTextureID)m_StopButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
+			if (ImGui::ImageButton((void*)(uintptr_t)m_StopButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
 				Stop();
 			}
 		}
 
 		else {
-			if (ImGui::ImageButton((ImTextureID)m_PlayButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
+			if (ImGui::ImageButton((void*)(uintptr_t)m_PlayButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
 				PlayMode();
 			}
 			if (ImGui::Button("Export")) {
@@ -376,11 +376,11 @@ namespace ALZ {
 
 		ImGui::SameLine();
 		if (m_Status == EnvironmentStatus::PlayMode) {
-			if (ImGui::ImageButton((ImTextureID)m_PauseButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
+			if (ImGui::ImageButton((void*)(uintptr_t)m_PauseButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 				Pause();
 		}
 		else if (m_Status == EnvironmentStatus::PauseMode) {
-			if (ImGui::ImageButton((ImTextureID)m_ResumeButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
+			if (ImGui::ImageButton((void*)(uintptr_t)m_ResumeButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 				Resume();
 		}
 
@@ -662,23 +662,23 @@ namespace ALZ {
 			case SpawnMode::SpawnOnPoint:
 
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_SpawnPosition.x * -GlobalScaleFactor, ps.Customizer.m_SpawnPosition.y * -GlobalScaleFactor, 0.0f)
-					+ glm::vec3(Window::WindowSize.x / 2, Window::WindowSize.y / 2, 0.0f));
+					+ glm::vec3(Window::FramebufferSize.x / 2, Window::FramebufferSize.y / 2, 0.0f));
 				break;
 
 			case SpawnMode::SpawnOnCircle:
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_CircleOutline.Position.x, ps.Customizer.m_CircleOutline.Position.y, 0.0f)
-								   + glm::vec3(Window::WindowSize.x / 2, Window::WindowSize.y / 2, 0.0f));
+								   + glm::vec3(Window::FramebufferSize.x / 2, Window::FramebufferSize.y / 2, 0.0f));
 				break;
 
 			case SpawnMode::SpawnInsideCircle:
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_CircleOutline.Position.x, ps.Customizer.m_CircleOutline.Position.y, 0.0f)
-					+ glm::vec3(Window::WindowSize.x / 2, Window::WindowSize.y / 2, 0.0f));
+					+ glm::vec3(Window::FramebufferSize.x / 2, Window::FramebufferSize.y / 2, 0.0f));
 				break;
 
 			case SpawnMode::SpawnOnLine:
 
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_LinePosition.x * -GlobalScaleFactor, ps.Customizer.m_LinePosition.y * -GlobalScaleFactor, 0.0f)
-								   + glm::vec3(Window::WindowSize.x / 2, Window::WindowSize.y / 2, 0.0f));
+								   + glm::vec3(Window::FramebufferSize.x / 2, Window::FramebufferSize.y / 2, 0.0f));
 				break;
 			}
 		}
@@ -686,7 +686,7 @@ namespace ALZ {
 			RadialLight& ps = *static_cast<RadialLight*>(&object);
 
 			m_Camera.SetPosition(glm::vec3(ps.Position.x, ps.Position.y, 0.0f)
-							   + glm::vec3(Window::WindowSize.x / 2, Window::WindowSize.y / 2, 0.0f));
+							   + glm::vec3(Window::FramebufferSize.x / 2, Window::FramebufferSize.y / 2, 0.0f));
 		}
 	}
 }

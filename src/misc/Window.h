@@ -19,11 +19,11 @@ namespace ALZ {
 		static bool WindowSizeChangedSinceLastFrame() { return m_WindowSizeChanged; };
 
 		static GLFWwindow& GetWindow();
-		static glm::vec2 WindowSize;
+		static glm::vec2 FramebufferSize;
 
 		static bool m_WindowSizeChanged;
 	private:
-		static GLFWwindow* m_Window;
+		static GLFWwindow* Ptr;
 		friend void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 	};
 }

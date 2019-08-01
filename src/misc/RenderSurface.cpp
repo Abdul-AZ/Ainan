@@ -15,7 +15,7 @@ namespace ALZ {
 
 		m_Texture = Renderer::CreateTexture();
 
-		m_Size = Window::WindowSize;
+		m_Size = Window::FramebufferSize;
 		
 		m_Texture->SetImage(m_Size, 3);
 
@@ -72,8 +72,8 @@ namespace ALZ {
 		Viewport screenViewport;
 		screenViewport.x = 0;
 		screenViewport.y = 0;
-		screenViewport.width = Window::WindowSize.x;
-		screenViewport.height = Window::WindowSize.y;
+		screenViewport.width  = (int)Window::FramebufferSize.x;
+		screenViewport.height = (int)Window::FramebufferSize.y;
 
 		Renderer::SetViewport(screenViewport);
 	}

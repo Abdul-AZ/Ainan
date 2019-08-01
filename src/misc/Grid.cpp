@@ -68,10 +68,10 @@ namespace ALZ {
 			VAO = Renderer::CreateVertexArray().release();
 			VAO->Bind();
 
-			VBO = Renderer::CreateVertexBuffer(vertices.data(), sizeof(glm::vec2) * vertices.size()).release();
+			VBO = Renderer::CreateVertexBuffer(vertices.data(),(unsigned int)sizeof(glm::vec2) * (unsigned int)vertices.size()).release();
 			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
-			EBO = Renderer::CreateIndexBuffer(indecies.data(), indecies.size()).release();
+			EBO = Renderer::CreateIndexBuffer(indecies.data(), (unsigned int)indecies.size()).release();
 
 			VAO->Unbind();
 

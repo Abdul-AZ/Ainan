@@ -12,9 +12,9 @@ using json = nlohmann::json;
 namespace ALZ {
 
 	//forward declarations
-	static void toJson(json& j, const ParticleSystem& ps, int objectOrder);
-	static void toJson(json& j, const RadialLight& light, int objectOrder);
-	static void toJson(json& j, const SpotLight& light, int objectOrder);
+	static void toJson(json& j, const ParticleSystem& ps, size_t objectOrder);
+	static void toJson(json& j, const RadialLight& light, size_t objectOrder);
+	static void toJson(json& j, const SpotLight& light, size_t objectOrder);
 	static void toJson(json& j, const GeneralSettingsGUI& settings);
 	static void toJson(json& j, const Background& background);
 
@@ -77,7 +77,7 @@ namespace ALZ {
 		j["BackgroundQuadratic"] = background.Quadratic;
 	}
 
-	void toJson(json& j, const ParticleSystem& ps, int objectOrder)
+	void toJson(json& j, const ParticleSystem& ps, size_t objectOrder)
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
@@ -127,7 +127,7 @@ namespace ALZ {
 		j[id + "GravityStrength"] = ps.Customizer.m_ForceCustomizer.m_GravityStrength;
 	}
 
-	void toJson(json& j, const RadialLight& light, int objectOrder)
+	void toJson(json& j, const RadialLight& light, size_t objectOrder)
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
@@ -138,7 +138,7 @@ namespace ALZ {
 		j[id + "Intensity"] = light.Intensity;
 	}
 
-	void toJson(json& j, const SpotLight& light, int objectOrder)
+	void toJson(json& j, const SpotLight& light, size_t objectOrder)
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 

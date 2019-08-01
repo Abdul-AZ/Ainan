@@ -73,7 +73,7 @@ namespace ALZ {
 	void CurveEditor::DrawCustomCurve()
 	{
 		s_CurrentCurve = this;
-		int cursorAtStartY = ImGui::GetCursorPosY();
+		float cursorAtStartY = ImGui::GetCursorPosY();
 		ImGui::PlotLines("Custom Curve", [](void* data, int idx) {return s_CurrentCurve->CustomCurveFunc(idx / 100.0f); }, nullptr, 100, 0, nullptr, 0.0f, 1.0f, ImVec2(400, 300));
 		s_CurrentCurve = nullptr;
 

@@ -17,8 +17,8 @@ namespace ALZ {
 		Viewport viewport;
 		viewport.x = 0;
 		viewport.y = 0;
-		viewport.width = surface.GetSize().x;
-		viewport.height = surface.GetSize().y;
+		viewport.width  = (int)surface.GetSize().x;
+		viewport.height = (int)surface.GetSize().y;
 
 		Renderer::SetViewport(viewport);
 
