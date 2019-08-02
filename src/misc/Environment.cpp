@@ -59,7 +59,7 @@ namespace ALZ {
 		if (m_Status == EnvironmentStatus::ExportMode) {
 			if (m_TimeSincePlayModeStarted > m_ExportCamera.ImageCaptureTime)
 			{
-				CaptureFrameAndExport();
+				m_ExportCamera.ExportFrame(m_Background, InspectorObjects, m_Settings.BlurRadius > 0.0f ? m_Settings.BlurRadius : -1.0f);
 				m_ExportedEverything = true;
 			}
 
@@ -135,9 +135,11 @@ namespace ALZ {
 
 		Renderer::EndScene();
 
-		if (m_SaveNextFrameAsImage)
-			CaptureFrameAndExport();
-
+		if (m_SaveNextFrameAsImage) 
+		{
+			m_ExportCamera.ExportFrame(m_Background, InspectorObjects, m_Settings.BlurRadius > 0.0f ? m_Settings.BlurRadius : -1.0f);
+			m_SaveNextFrameAsImage = false;
+		}
 		m_RenderSurface.m_FrameBuffer->Unbind();
 	}
 
@@ -579,43 +581,6 @@ namespace ALZ {
 		Inspector_obj_ptr lightObj((InspectorInterface*)(light.release()));
 
 		InspectorObjects.push_back(std::move(lightObj));
-	}
-
-	void Environment::CaptureFrameAndExport()
-	{
-		Renderer::BeginScene(m_ExportCamera.RealCamera);
-
-		m_ExportCamera.m_RenderSurface.SetSize(m_ExportCamera.m_ExportCameraSize * GlobalScaleFactor);
-		m_ExportCamera.m_RenderSurface.m_FrameBuffer->Bind();
-
-		for (Inspector_obj_ptr& obj : InspectorObjects)
-		{
-			if (obj->Type == InspectorObjectType::RadiaLightType) {
-				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				m_Background.SubmitLight(*light);
-			}
-		}
-
-		m_Background.Draw();
-
-		for (Inspector_obj_ptr& obj : InspectorObjects)
-			obj->Draw();
-
-		if (m_Settings.BlurEnabled)
-			GaussianBlur::Blur(m_ExportCamera.m_RenderSurface, m_Settings.BlurRadius);
-
-		Image image = Image::FromFrameBuffer(m_ExportCamera.m_RenderSurface, m_ExportCamera.m_RenderSurface.GetSize());
-
-		std::string saveTarget = m_ExportCamera.ImageSavePath;
-
-		//add a default name if none is chosen
-		if (saveTarget.back() == '\\')
-			saveTarget.append("default name");
-
-		image.SaveToFile(saveTarget, m_ExportCamera.SaveImageFormat);
-		m_SaveNextFrameAsImage = false;
-
-		Renderer::EndScene();
 	}
 
 	void Environment::Duplicate(InspectorInterface& obj)

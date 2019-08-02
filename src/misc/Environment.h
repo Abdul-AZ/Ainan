@@ -36,8 +36,6 @@ namespace ALZ {
 		ExportMode
 	};
 
-	using Inspector_obj_ptr = std::unique_ptr<InspectorInterface>;
-
 	class Environment
 	{
 	public:
@@ -66,7 +64,6 @@ namespace ALZ {
 		void AddPS();
 		void AddRadialLight();
 		void AddSpotLight();
-		void CaptureFrameAndExport();
 		void Duplicate(InspectorInterface& obj);
 		void FocusCameraOnObject(InspectorInterface& object);
 
