@@ -16,8 +16,11 @@ namespace ALZ {
 		ExportCamera();
 		void DrawOutline();
 		void DisplayGUI();
+		void Update(float deltaTime);
+		void StartExporting();
 		//TODO change blur radius argument to it's own struct called PosProcessingSettings or something like that
 		void ExportFrame(Background& background, std::vector<Inspector_obj_ptr>& objects, float blurRadius);
+		void BeginExportScene();
 
 	public:
 		enum ExportMode {
@@ -42,7 +45,15 @@ namespace ALZ {
 		//timing is handled in the environment class not here
 		bool EnableCaptureImageAfterXSeconds = false;
 		float ImageCaptureTime = 5.0f;
+		bool NeedToExport = false;
 
+		//only used in multiple frame capture
+		bool ExportedEverything = false;
+
+		//only used in single frame capture
+		bool AlreadyExportedFrame = false;
+
+		int RemainingFramesToBeCaptured = 0;
 	private:
 		void SetSize();
 
@@ -55,6 +66,6 @@ namespace ALZ {
 		//These are only used when exporting multiple frames
 		int m_CaptureFrameCount = 3;
 		float m_TimeBetweenCaptures = 0.5f;
-		int m_CaptureIndex = 0;
+		float m_TimeSinceLastCapture = 0.0f;
 	};
 }

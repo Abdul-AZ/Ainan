@@ -218,6 +218,37 @@ namespace ALZ {
 		});
 	}
 
+	void ExportCamera::Update(float deltaTime)
+	{
+		m_TimeSinceLastCapture += deltaTime;
+
+		if (m_TimeSinceLastCapture > m_TimeBetweenCaptures && RemainingFramesToBeCaptured > 0)
+		{
+			NeedToExport = true;
+			m_TimeSinceLastCapture = 0.0f;
+		}
+
+		if (m_ExportMode == MultipleFramesAsSeperateImages && RemainingFramesToBeCaptured <= 0)
+			NeedToExport = false;
+
+		ExportedEverything = RemainingFramesToBeCaptured <= 0;
+	}
+
+	void ExportCamera::StartExporting()
+	{
+		NeedToExport = true;
+	}
+
+	void ExportCamera::BeginExportScene() 
+	{
+		if (m_ExportMode == SingleFrame) {
+			AlreadyExportedFrame = false;
+		}
+		else if (m_ExportMode == MultipleFramesAsSeperateImages) {
+			RemainingFramesToBeCaptured = m_CaptureFrameCount;
+		}
+	}
+
 	void ExportCamera::ExportFrame(Background& background, std::vector<Inspector_obj_ptr>& objects, float blurRadius)
 	{
 		Renderer::BeginScene(RealCamera);
@@ -241,6 +272,8 @@ namespace ALZ {
 		if (blurRadius > 0.0f)
 			GaussianBlur::Blur(m_RenderSurface, blurRadius);
 
+		Renderer::EndScene();
+
 		Image image = Image::FromFrameBuffer(m_RenderSurface, m_RenderSurface.GetSize());
 
 		std::string saveTarget = ImageSavePath;
@@ -249,8 +282,19 @@ namespace ALZ {
 		if (saveTarget.back() == '\\')
 			saveTarget.append("default name");
 
+		//append a number at the end for each image if we are exporting multiple ones
+		if (m_ExportMode == MultipleFramesAsSeperateImages)
+		{
+			saveTarget.append(std::to_string(m_CaptureFrameCount - RemainingFramesToBeCaptured));
+		}
+
 		image.SaveToFile(saveTarget, SaveImageFormat);
 
-		Renderer::EndScene();
+		NeedToExport = false;
+		if (m_ExportMode == SingleFrame) {
+			AlreadyExportedFrame = true;
+		}
+
+		RemainingFramesToBeCaptured--;
 	}
 }

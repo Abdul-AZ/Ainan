@@ -94,10 +94,8 @@ namespace ALZ {
 		std::unique_ptr<Texture> m_StopButtonTexture;
 
 		bool m_MousePressedLastFrame = false;
-		bool m_SaveNextFrameAsImage = false;
 
 		float m_TimeSincePlayModeStarted = 0.0f;
-		bool m_ExportedEverything = false;
 
 		Background m_Background;
 

@@ -38,6 +38,7 @@ namespace ALZ {
 		timeStart = timeEnd;
 
 		m_Camera.Update(deltaTime);
+		m_ExportCamera.Update(deltaTime);
 
 		for (int i = 0; i < InspectorObjects.size(); i++) {
 			if (InspectorObjects[i]->ToBeDeleted)
@@ -57,15 +58,19 @@ namespace ALZ {
 
 		//this code will be changed and refactored, that is why it is strcutured badly
 		if (m_Status == EnvironmentStatus::ExportMode) {
-			if (m_TimeSincePlayModeStarted > m_ExportCamera.ImageCaptureTime)
-			{
-				m_ExportCamera.ExportFrame(m_Background, InspectorObjects, m_Settings.BlurRadius > 0.0f ? m_Settings.BlurRadius : -1.0f);
-				m_ExportedEverything = true;
-			}
+			if (m_TimeSincePlayModeStarted > m_ExportCamera.ImageCaptureTime && m_ExportCamera.NeedToExport == false && m_ExportCamera.AlreadyExportedFrame == false)
+				m_ExportCamera.StartExporting();
+			else if (m_TimeSincePlayModeStarted > m_ExportCamera.ImageCaptureTime && m_ExportCamera.NeedToExport == false && m_ExportCamera.ExportedEverything == false)
+				m_ExportCamera.StartExporting();
 
-			if (m_ExportedEverything) {
+			if (m_ExportCamera.m_ExportMode == ExportCamera::SingleFrame && m_ExportCamera.AlreadyExportedFrame)
+			{
 				Stop();
-				m_ExportedEverything = false;
+				m_HideGUI = false;
+				m_ExportCamera.AlreadyExportedFrame = false;
+			}
+			else if (m_ExportCamera.m_ExportMode == ExportCamera::MultipleFramesAsSeperateImages && m_ExportCamera.ExportedEverything == true) {
+				Stop();
 				m_HideGUI = false;
 			}
 		}
@@ -135,11 +140,9 @@ namespace ALZ {
 
 		Renderer::EndScene();
 
-		if (m_SaveNextFrameAsImage) 
-		{
-			m_ExportCamera.ExportFrame(m_Background, InspectorObjects, m_Settings.BlurRadius > 0.0f ? m_Settings.BlurRadius : -1.0f);
-			m_SaveNextFrameAsImage = false;
-		}
+		if (m_ExportCamera.NeedToExport) 
+			m_ExportCamera.ExportFrame(m_Background, InspectorObjects,m_Settings.BlurEnabled ? m_Settings.BlurRadius : -1.0f );
+
 		m_RenderSurface.m_FrameBuffer->Unbind();
 	}
 
@@ -374,6 +377,7 @@ namespace ALZ {
 			if (ImGui::Button("Export")) {
 				m_HideGUI = true;
 				ExportMode();
+				m_ExportCamera.ExportedEverything = false;
 			}
 		}
 
@@ -487,6 +491,7 @@ namespace ALZ {
 		assert(m_Status == EnvironmentStatus::None);
 		m_Status = EnvironmentStatus::ExportMode;
 		m_TimeSincePlayModeStarted = 0.0f;
+		m_ExportCamera.BeginExportScene();
 	}
 
 	void Environment::Stop()
@@ -524,11 +529,6 @@ namespace ALZ {
 		});
 
 		m_InputManager.RegisterKey(GLFW_KEY_F1, "Hide Menus", [this]() { m_HideGUI = !m_HideGUI; });
-
-		m_InputManager.RegisterKey(GLFW_KEY_F11, "Capture Screenshot", [this]()
-		{
-			m_SaveNextFrameAsImage = true;
-		});
 
 		m_InputManager.RegisterKey(GLFW_KEY_SPACE, "Clear All Particles", [this]()
 		{
