@@ -31,4 +31,6 @@ namespace ALZ {
 
 		InspectorObjectType Type;
 	};
+
+	using Inspector_obj_ptr = std::unique_ptr<InspectorInterface>;
 }

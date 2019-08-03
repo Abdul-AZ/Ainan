@@ -4,6 +4,25 @@
 
 namespace ALZ {
 
+	constexpr const char* ExportModeToString(ExportCamera::ExportMode mode)
+	{
+		switch (mode)
+		{
+		case ExportCamera::SingleFrame:
+			return "Single Frame Export";
+			break;
+
+		case ExportCamera::MultipleFramesAsSeperateImages:
+			return "Multiple Frames As Seperate Images";
+			break;
+
+		default:
+			assert(false);
+			return "";
+			break;
+		}
+	}
+
 	ExportCamera::ExportCamera() :
 		m_ImageLocationBrowser(FileManager::ApplicationFolder, "Save Image")
 	{
@@ -142,6 +161,51 @@ namespace ALZ {
 				ImGui::EndTooltip();
 			}
 
+			ImGui::Text("Export Mode");
+			ImGui::SameLine();
+			ImGui::PushItemWidth(250);
+			if (ImGui::BeginCombo("##Export Mode", ExportModeToString(m_ExportMode)))
+			{
+				//single frame capture
+				{
+					bool selected = m_ExportMode == SingleFrame;
+					if (ImGui::Selectable(ExportModeToString(SingleFrame), &selected))
+					{
+						ImGui::SetItemDefaultFocus();
+						m_ExportMode = SingleFrame;
+					}
+				}
+
+				//multiple frame seperate images capture
+				{
+					bool selected = m_ExportMode == MultipleFramesAsSeperateImages;
+					if (ImGui::Selectable(ExportModeToString(MultipleFramesAsSeperateImages), &selected))
+					{
+						ImGui::SetItemDefaultFocus();
+						m_ExportMode = MultipleFramesAsSeperateImages;
+					}
+				}
+
+				ImGui::EndCombo();
+			}
+
+			if (m_ExportMode == MultipleFramesAsSeperateImages) 
+			{
+				ImGui::Text("Time Between Captures");
+				ImGui::SameLine();
+				ImGui::PushItemWidth(75);
+				ImGui::DragFloat("##Time Between Captures", &m_TimeBetweenCaptures, 0.01f);
+
+				m_TimeBetweenCaptures = std::clamp(m_TimeBetweenCaptures, 0.01f, 10.0f);
+
+				ImGui::Text("Number Of Frames");
+				ImGui::SameLine();
+				ImGui::PushItemWidth(75);
+				ImGui::DragInt("##Number Of Frames", &m_CaptureFrameCount, 0.01f);
+
+				m_CaptureFrameCount = std::clamp(m_CaptureFrameCount, 1, 20);
+			}
+
 			ImGui::TreePop();
 		}
 
@@ -152,5 +216,85 @@ namespace ALZ {
 		ImageSavePath = path;
 		m_ImageLocationBrowser.CloseWindow();
 		});
+	}
+
+	void ExportCamera::Update(float deltaTime)
+	{
+		m_TimeSinceLastCapture += deltaTime;
+
+		if (m_TimeSinceLastCapture > m_TimeBetweenCaptures && RemainingFramesToBeCaptured > 0)
+		{
+			NeedToExport = true;
+			m_TimeSinceLastCapture = 0.0f;
+		}
+
+		if (m_ExportMode == MultipleFramesAsSeperateImages && RemainingFramesToBeCaptured <= 0)
+			NeedToExport = false;
+
+		ExportedEverything = RemainingFramesToBeCaptured <= 0;
+	}
+
+	void ExportCamera::StartExporting()
+	{
+		NeedToExport = true;
+	}
+
+	void ExportCamera::BeginExportScene() 
+	{
+		if (m_ExportMode == SingleFrame) {
+			AlreadyExportedFrame = false;
+		}
+		else if (m_ExportMode == MultipleFramesAsSeperateImages) {
+			RemainingFramesToBeCaptured = m_CaptureFrameCount;
+		}
+	}
+
+	void ExportCamera::ExportFrame(Background& background, std::vector<Inspector_obj_ptr>& objects, float blurRadius)
+	{
+		Renderer::BeginScene(RealCamera);
+
+		m_RenderSurface.SetSize(m_ExportCameraSize * GlobalScaleFactor);
+		m_RenderSurface.m_FrameBuffer->Bind();
+
+		for (Inspector_obj_ptr& obj : objects)
+		{
+			if (obj->Type == InspectorObjectType::RadiaLightType) {
+				RadialLight* light = static_cast<RadialLight*>(obj.get());
+				background.SubmitLight(*light);
+			}
+		}
+
+		background.Draw();
+
+		for (Inspector_obj_ptr& obj : objects)
+			obj->Draw();
+
+		if (blurRadius > 0.0f)
+			GaussianBlur::Blur(m_RenderSurface, blurRadius);
+
+		Renderer::EndScene();
+
+		Image image = Image::FromFrameBuffer(m_RenderSurface, m_RenderSurface.GetSize());
+
+		std::string saveTarget = ImageSavePath;
+
+		//add a default name if none is chosen
+		if (saveTarget.back() == '\\')
+			saveTarget.append("default name");
+
+		//append a number at the end for each image if we are exporting multiple ones
+		if (m_ExportMode == MultipleFramesAsSeperateImages)
+		{
+			saveTarget.append(std::to_string(m_CaptureFrameCount - RemainingFramesToBeCaptured));
+		}
+
+		image.SaveToFile(saveTarget, SaveImageFormat);
+
+		NeedToExport = false;
+		if (m_ExportMode == SingleFrame) {
+			AlreadyExportedFrame = true;
+		}
+
+		RemainingFramesToBeCaptured--;
 	}
 }
