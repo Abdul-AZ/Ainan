@@ -151,11 +151,19 @@ namespace ALZ {
 		}
 
 		//Force data
-		ps->Customizer.m_ForceCustomizer.m_EnableGravity = data[id + "GravityEnabled"].get<bool>();
-		ps->Customizer.m_ForceCustomizer.m_GravityStrength = data[id + "GravityStrength"].get<float>();
-		//update gravity force because this only happens when it is changed in GUI and we want it to be set when we load the environment
-		ps->Customizer.m_ForceCustomizer.m_Forces["Gravity"] = glm::vec2(0.0f, ps->Customizer.m_ForceCustomizer.m_GravityStrength);
+		size_t forceCount = data[id + "Force Count"].get<size_t>();
 
+		//delete the default force
+		ps->Customizer.m_ForceCustomizer.m_Forces.erase("Gravity");
+
+		for (size_t i = 0; i < forceCount; i++)
+		{
+			//make a new force with the data from the json file
+			ps->Customizer.m_ForceCustomizer.m_Forces[data[id + "Force" + std::to_string(i).c_str() + "Key"].get<std::string>()]
+				= { JSON_ARRAY_TO_VEC2(data[id + "Force" + std::to_string(i).c_str() + "Value"].get<std::vector<float>>()),
+					data[id + "Force" + std::to_string(i).c_str() + "Enabled"].get<bool>() };
+		}
+		
 		//add particle system to environment
 		Inspector_obj_ptr startingPSi((InspectorInterface*)(ps.release()));
 		env->InspectorObjects.push_back(std::move(startingPSi));

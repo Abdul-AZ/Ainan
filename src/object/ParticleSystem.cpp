@@ -77,7 +77,8 @@ namespace ALZ {
 				//add forces to the particle
 				for (auto& force : Customizer.m_ForceCustomizer.m_Forces)
 				{
-					particle.m_Acceleration += force.second * deltaTime;
+					if(force.second.Enabled)
+						particle.m_Acceleration += force.second.Value * deltaTime;
 				}
 
 				//update particle speed, lifetime etc

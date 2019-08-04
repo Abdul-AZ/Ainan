@@ -123,8 +123,18 @@ namespace ALZ {
 		j[id + "TexturePath"] = ps.Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath;
 
 		//Force data
-		j[id + "GravityEnabled"] = ps.Customizer.m_ForceCustomizer.m_EnableGravity;
-		j[id + "GravityStrength"] = ps.Customizer.m_ForceCustomizer.m_GravityStrength;
+		{
+			size_t i = 0;
+			j[id + "Force Count"] = ps.Customizer.m_ForceCustomizer.m_Forces.size();
+			for (auto& force : ps.Customizer.m_ForceCustomizer.m_Forces)
+			{
+				j[id + "Force" + std::to_string(i).c_str() + "Key"] = force.first;
+				j[id + "Force" + std::to_string(i).c_str() + "Value"] = VEC2_TO_JSON_ARRAY(force.second.Value);
+				j[id + "Force" + std::to_string(i).c_str() + "Enabled"] = force.second.Enabled;
+
+				i++;
+			}
+		}
 	}
 
 	void toJson(json& j, const RadialLight& light, size_t objectOrder)
