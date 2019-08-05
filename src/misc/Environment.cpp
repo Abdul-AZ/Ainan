@@ -659,10 +659,8 @@ namespace ALZ {
 				break;
 			}
 		}
-		else if (type == ALZ::RadiaLightType) {
-			RadialLight& ps = *static_cast<RadialLight*>(&object);
-
-			m_Camera.SetPosition(glm::vec3(ps.Position.x, ps.Position.y, 0.0f)
+		else {
+			m_Camera.SetPosition(glm::vec3(object.GetPositionRef().x, object.GetPositionRef().y, 0.0f) * -GlobalScaleFactor
 							   + glm::vec3(Window::FramebufferSize.x / 2, Window::FramebufferSize.y / 2, 0.0f));
 		}
 	}
