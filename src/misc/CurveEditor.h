@@ -40,8 +40,10 @@ namespace ALZ {
 	private:
 		glm::vec2* m_SelectedPoint = nullptr;
 		float StartAndEndPointRadius = 7.0f;
-		ImU32 StartAndEndPointColor = ImGui::ColorConvertFloat4ToU32(ImVec4(0.9f, 0.0f, 0.0f, 1.0f));
+		ImU32 StartAndEndPointColor = ImGui::ColorConvertFloat4ToU32(ImVec4(0.65f, 0.0f, 0.0f, 1.0f));
+		ImU32 StartAndEndPointSelectedColor = ImGui::ColorConvertFloat4ToU32(ImVec4(0.95f, 0.0f, 0.0f, 1.0f));
 		float ControlPointRadius = 4.0f;
-		ImU32 ControlPointColor = ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 0.0f, 0.9f, 1.0f));
+		ImU32 ControlPointColor = ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 0.0f, 0.65f, 1.0f));
+		ImU32 ControlPointSelectedColor = ImGui::ColorConvertFloat4ToU32(ImVec4(0.0f, 0.0f, 0.95f, 1.0f));
 	};
 }

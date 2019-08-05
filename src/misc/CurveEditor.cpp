@@ -111,12 +111,6 @@ namespace ALZ {
 		//Draw line from startpoint to controlpoint2
 		drawList->AddLine(endpointPos, controlpoint2Pos, ControlPointColor);
 
-		drawList->AddCircleFilled(startpointPos, StartAndEndPointRadius, StartAndEndPointColor);
-		drawList->AddCircleFilled(controlpoint1Pos, ControlPointRadius, ControlPointColor);
-		drawList->AddCircleFilled(controlpoint2Pos, ControlPointRadius, ControlPointColor);
-		drawList->AddCircleFilled(endpointPos, StartAndEndPointRadius, StartAndEndPointColor);
-
-
 		bool mouseButtonDown = glfwGetMouseButton(&Window::GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
 
 		//if the mouse is not pressed returns because no point is selected
@@ -130,14 +124,93 @@ namespace ALZ {
 			return sqrt(pow(vec1.x - vec2.x, 2) + pow(vec1.y - vec2.y, 2));
 		};
 
-		if (mouseButtonDown && distance(startpointPos, mousePos) < StartAndEndPointRadius)
-			return &CustomCurve.StartPoint;
-		else if (mouseButtonDown && distance(controlpoint1Pos, mousePos) < ControlPointRadius)
-			return &CustomCurve.ControlPoint1;
-		else if (mouseButtonDown && distance(controlpoint2Pos, mousePos) < ControlPointRadius)
-			return &CustomCurve.ControlPoint2;
-		else if (mouseButtonDown && distance(endpointPos, mousePos) < StartAndEndPointRadius)
-			return &CustomCurve.EndPoint;
+		if (distance(startpointPos, mousePos) < StartAndEndPointRadius) { // if the mouse is hovering over the start point
+
+			//draw the other points
+			drawList->AddCircleFilled(controlpoint1Pos, ControlPointRadius, ControlPointColor);
+			drawList->AddCircleFilled(controlpoint2Pos, ControlPointRadius, ControlPointColor);
+			drawList->AddCircleFilled(endpointPos, StartAndEndPointRadius, StartAndEndPointColor);
+
+			if (mouseButtonDown) 
+			{
+				m_SelectedPoint = &CustomCurve.StartPoint;
+
+				//if the point is selected draw it bigger
+				drawList->AddCircleFilled(startpointPos, StartAndEndPointRadius * 1.5f, StartAndEndPointSelectedColor); //diffrent color for selected point
+			}
+			else 
+			{
+				//if the point is not selected but only hovered, just draw it with a diffrent color
+				drawList->AddCircleFilled(startpointPos, StartAndEndPointRadius, StartAndEndPointSelectedColor); //diffrent color for selected point
+			}
+		}
+		else if (distance(controlpoint1Pos, mousePos) < ControlPointRadius) { // if the mouse is hovering over the first control point
+
+			//draw the other points
+			drawList->AddCircleFilled(startpointPos, StartAndEndPointRadius, StartAndEndPointColor);
+			drawList->AddCircleFilled(controlpoint2Pos, ControlPointRadius, ControlPointColor);
+			drawList->AddCircleFilled(endpointPos, StartAndEndPointRadius, StartAndEndPointColor);
+
+			if (mouseButtonDown) 
+			{
+				m_SelectedPoint = &CustomCurve.ControlPoint1;
+
+				//if the point is selected draw it bigger
+				drawList->AddCircleFilled(controlpoint1Pos, ControlPointRadius * 2.0f, ControlPointSelectedColor); //diffrent color for selected point
+			}
+			else
+			{
+				//if the point is not selected but only hovered, just draw it with a diffrent color
+				drawList->AddCircleFilled(controlpoint1Pos, ControlPointRadius, ControlPointSelectedColor); //diffrent color for selected point
+			}
+		}
+		else if (distance(controlpoint2Pos, mousePos) < ControlPointRadius) { // if the mouse is hovering over the second control point
+
+			//draw the other points
+			drawList->AddCircleFilled(startpointPos, StartAndEndPointRadius, StartAndEndPointColor);
+			drawList->AddCircleFilled(controlpoint1Pos, ControlPointRadius, ControlPointColor);
+			drawList->AddCircleFilled(endpointPos, StartAndEndPointRadius, StartAndEndPointColor);
+
+			if (mouseButtonDown) 
+			{
+				m_SelectedPoint = &CustomCurve.ControlPoint2;
+
+				//if the point is selected draw it bigger
+				drawList->AddCircleFilled(controlpoint2Pos, ControlPointRadius * 2.0f, ControlPointSelectedColor); //diffrent color for selected point
+			}
+			else 
+			{
+				//if the point is not selected but only hovered, just draw it with a diffrent color
+				drawList->AddCircleFilled(controlpoint2Pos, ControlPointRadius, ControlPointSelectedColor); //diffrent color for selected point
+			}
+		}
+		else if (distance(endpointPos, mousePos) < StartAndEndPointRadius) { // if the mouse is hovering over the end point
+
+			//draw the other points
+			drawList->AddCircleFilled(startpointPos, StartAndEndPointRadius, StartAndEndPointColor);
+			drawList->AddCircleFilled(controlpoint1Pos, ControlPointRadius, ControlPointColor);
+			drawList->AddCircleFilled(controlpoint2Pos, ControlPointRadius, ControlPointColor);
+
+
+
+			if (mouseButtonDown) {
+				m_SelectedPoint = &CustomCurve.EndPoint;
+
+				//if the point is selected draw it bigger
+				drawList->AddCircleFilled(endpointPos, StartAndEndPointRadius * 1.5f, StartAndEndPointSelectedColor); //diffrent color for selected point
+			}
+			else 
+			{
+				//if the point is not selected but only hovered, just draw it with a diffrent color
+				drawList->AddCircleFilled(endpointPos, StartAndEndPointRadius, StartAndEndPointSelectedColor); //diffrent color for selected point
+			}
+		}
+		else { // draw them all with the normal color and size
+			drawList->AddCircleFilled(startpointPos, StartAndEndPointRadius, StartAndEndPointColor);
+			drawList->AddCircleFilled(controlpoint1Pos, ControlPointRadius, ControlPointColor);
+			drawList->AddCircleFilled(controlpoint2Pos, ControlPointRadius, ControlPointColor);
+			drawList->AddCircleFilled(endpointPos, StartAndEndPointRadius, StartAndEndPointColor);
+		}
 
 		return m_SelectedPoint;
 	}
