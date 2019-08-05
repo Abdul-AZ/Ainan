@@ -5,7 +5,11 @@ namespace ALZ {
 
 	ForceCustomizer::ForceCustomizer()
 	{
-		m_Forces["Gravity"] = Force{ glm::vec2(0.0f, -9.81), false };
+		Force gravityForce;
+		gravityForce.DF_Value = glm::vec2(0.0f, -9.81);
+		gravityForce.Enabled = false;
+
+		m_Forces["Gravity"] = gravityForce;
 	}
 
 	void ForceCustomizer::DisplayGUI()
@@ -28,7 +32,10 @@ namespace ALZ {
 				{
 					if (m_AddForceInputString != "")
 					{
-						m_Forces[m_AddForceInputString] = { {0.0,0.0}, true };
+						Force force;
+						force.Enabled = true;
+
+						m_Forces[m_AddForceInputString] = force;
 					}
 
 					m_AddForceInputString = "";
@@ -59,10 +66,37 @@ namespace ALZ {
 			if (m_CurrentSelectedForceName != "")
 			{
 				ImGui::Text(m_CurrentSelectedForceName.c_str());
-				ImGui::Checkbox("Force Enabled", &m_Forces[m_CurrentSelectedForceName].Enabled);
-				ImGui::DragFloat2("Force Value", &m_Forces[m_CurrentSelectedForceName].Value.x);
-			}
 
+				//display a dropdown displaying the types of forces
+				if (ImGui::BeginCombo("Force Type", Force::ForceTypeToString(m_Forces[m_CurrentSelectedForceName].Type)))
+				{
+					{
+						bool isSelected = m_Forces[m_CurrentSelectedForceName].Type == Force::DirectionalForce;
+						if (ImGui::Selectable(Force::ForceTypeToString(Force::DirectionalForce), &isSelected))
+							m_Forces[m_CurrentSelectedForceName].Type = Force::DirectionalForce;
+					}
+
+					{
+						bool isSelected = m_Forces[m_CurrentSelectedForceName].Type == Force::RelativeForce;
+						if (ImGui::Selectable(Force::ForceTypeToString(Force::RelativeForce), &isSelected))
+							m_Forces[m_CurrentSelectedForceName].Type = Force::RelativeForce;
+					}
+
+					ImGui::EndCombo();
+				}
+
+				ImGui::Checkbox("Force Enabled", &m_Forces[m_CurrentSelectedForceName].Enabled);
+
+				if (m_Forces[m_CurrentSelectedForceName].Type == Force::DirectionalForce) 
+				{
+					ImGui::DragFloat2("Force Value", &m_Forces[m_CurrentSelectedForceName].DF_Value.x);
+				}
+				else if ((m_Forces[m_CurrentSelectedForceName].Type == Force::RelativeForce))
+				{
+					ImGui::DragFloat2("Target Position", &m_Forces[m_CurrentSelectedForceName].RF_Target.x, 0.001f);
+					ImGui::DragFloat("Force Strength", &m_Forces[m_CurrentSelectedForceName].RF_Strength);
+				}
+			}
 
 			ImGui::TreePop();
 		}

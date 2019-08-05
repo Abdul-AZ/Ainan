@@ -22,9 +22,8 @@ namespace ALZ {
 		bool CheckIfInsideArrow(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point);
 
 	private:
-		GizmoArrow m_ArrowPressed = None;
-		float m_ArrowPressLocationDistanceFromArrowOrigin = 0.0f;
-
+		std::unordered_map<void*, GizmoArrow> m_ArrowPressedMap;
+		std::unordered_map<void*, float> m_ArrowPressLocationDistanceFromArrowOriginMap;
 
 		std::unique_ptr<IndexBuffer> EBO;
 		std::unique_ptr<VertexBuffer> VBO;

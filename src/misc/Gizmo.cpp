@@ -87,33 +87,33 @@ namespace ALZ {
 		if (CheckIfInsideArrow(Horizontal, objectPositionWS, glm::vec2(result.x,result.y)) )
 		{
 			mouseOver = Horizontal;
-			if (mouseButtonDown && m_ArrowPressed != Vertical) {
-				m_ArrowPressed = Horizontal;
+			if (mouseButtonDown && m_ArrowPressedMap[&objectPosition] != Vertical) {
+				m_ArrowPressedMap[&objectPosition] = Horizontal;
 
-				if (m_ArrowPressLocationDistanceFromArrowOrigin == 0.0f)
-					m_ArrowPressLocationDistanceFromArrowOrigin = result.x - objectPositionWS.x;
+				if (m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition] == 0.0f)
+					m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition] = result.x - objectPositionWS.x;
 			}
 		}
 
 		if (CheckIfInsideArrow(Vertical, objectPositionWS, glm::vec2(result.x, result.y)))
 		{
 			mouseOver = Vertical;
-			if (mouseButtonDown && m_ArrowPressed != Horizontal) {
-				m_ArrowPressed = Vertical;
+			if (mouseButtonDown && m_ArrowPressedMap[&objectPosition] != Horizontal) {
+				m_ArrowPressedMap[&objectPosition] = Vertical;
 
-				if(m_ArrowPressLocationDistanceFromArrowOrigin == 0.0f)
-					m_ArrowPressLocationDistanceFromArrowOrigin = result.y - objectPositionWS.y;
+				if(m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition] == 0.0f)
+					m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition] = result.y - objectPositionWS.y;
 			}
 		}
 
-		if (m_ArrowPressed == Horizontal)
-			objectPosition.x = (result.x - m_ArrowPressLocationDistanceFromArrowOrigin) / GlobalScaleFactor;
-		else if(m_ArrowPressed == Vertical)
-			objectPosition.y = (result.y - m_ArrowPressLocationDistanceFromArrowOrigin) / GlobalScaleFactor;
+		if (m_ArrowPressedMap[&objectPosition] == Horizontal)
+			objectPosition.x = (result.x - m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition]) / GlobalScaleFactor;
+		else if(m_ArrowPressedMap[&objectPosition] == Vertical)
+			objectPosition.y = (result.y - m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition]) / GlobalScaleFactor;
 
 		if (!mouseButtonDown) {
-			m_ArrowPressed = None;
-			m_ArrowPressLocationDistanceFromArrowOrigin = 0.0f;
+			m_ArrowPressedMap[&objectPosition] = None;
+			m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition] = 0.0f;
 		}
 
 		//Draw the triangles
@@ -124,7 +124,7 @@ namespace ALZ {
 		glm::vec4 color;
 
 		//assign a brighter color if the mouse is over the arrow
-		if (m_ArrowPressed == Horizontal || mouseOver == Horizontal)
+		if (m_ArrowPressedMap[&objectPosition] == Horizontal || mouseOver == Horizontal)
 			color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
 		else
 			color = glm::vec4(0.75f, 0.0f, 0.0f, 1.0f);
@@ -136,7 +136,7 @@ namespace ALZ {
 		model = glm::rotate(model, -PI / 2, glm::vec3(0.0f, 0.0f, -1.0f));
 
 		//assign a brighter color if the mouse is over the arrow
-		if (m_ArrowPressed == Vertical || mouseOver == Vertical)
+		if (m_ArrowPressedMap[&objectPosition] == Vertical || mouseOver == Vertical)
 			color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 		else
 			color = glm::vec4(0.0f, 0.75f, 0.0f, 1.0f);

@@ -129,8 +129,11 @@ namespace ALZ {
 			for (auto& force : ps.Customizer.m_ForceCustomizer.m_Forces)
 			{
 				j[id + "Force" + std::to_string(i).c_str() + "Key"] = force.first;
-				j[id + "Force" + std::to_string(i).c_str() + "Value"] = VEC2_TO_JSON_ARRAY(force.second.Value);
 				j[id + "Force" + std::to_string(i).c_str() + "Enabled"] = force.second.Enabled;
+				j[id + "Force" + std::to_string(i).c_str() + "Type"] = std::string(force.second.ForceTypeToString(force.second.Type));
+				j[id + "Force" + std::to_string(i).c_str() + "DF_Value"] = VEC2_TO_JSON_ARRAY(force.second.DF_Value);
+				j[id + "Force" + std::to_string(i).c_str() + "RF_Target"] = VEC2_TO_JSON_ARRAY(force.second.RF_Target);
+				j[id + "Force" + std::to_string(i).c_str() + "RF_Strength"] = force.second.RF_Strength;
 
 				i++;
 			}

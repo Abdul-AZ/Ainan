@@ -7,6 +7,7 @@
 #include "misc/ParticleCustomizer.h"
 #include "misc/PerlinNoise2D.h"
 #include "misc/InspectorInterface.h"
+#include "misc/Gizmo.h"
 #include "renderer/Renderer.h"
 
 namespace ALZ {

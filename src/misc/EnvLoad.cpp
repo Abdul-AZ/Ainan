@@ -159,9 +159,15 @@ namespace ALZ {
 		for (size_t i = 0; i < forceCount; i++)
 		{
 			//make a new force with the data from the json file
-			ps->Customizer.m_ForceCustomizer.m_Forces[data[id + "Force" + std::to_string(i).c_str() + "Key"].get<std::string>()]
-				= { JSON_ARRAY_TO_VEC2(data[id + "Force" + std::to_string(i).c_str() + "Value"].get<std::vector<float>>()),
-					data[id + "Force" + std::to_string(i).c_str() + "Enabled"].get<bool>() };
+			Force force;
+			ps->Customizer.m_ForceCustomizer.m_Forces[data[id + "Force" + std::to_string(i).c_str() + "Key"].get<std::string>()] = force;
+			Force& currentForce = ps->Customizer.m_ForceCustomizer.m_Forces[data[id + "Force" + std::to_string(i).c_str() + "Key"].get<std::string>()];
+
+			currentForce.Enabled = data[id + "Force" + std::to_string(i).c_str() + "Enabled"].get<bool>();
+			currentForce.Type = Force::StringToForceType(data[id + "Force" + std::to_string(i).c_str() + "Type"].get<std::string>());
+			currentForce.DF_Value = JSON_ARRAY_TO_VEC2(data[id + "Force" + std::to_string(i).c_str() + "DF_Value"].get<std::vector<float>>());
+			currentForce.RF_Target = JSON_ARRAY_TO_VEC2(data[id + "Force" + std::to_string(i).c_str() + "RF_Target"].get<std::vector<float>>());
+			currentForce.RF_Strength = data[id + "Force" + std::to_string(i).c_str() + "RF_Strength"].get<float>();
 		}
 		
 		//add particle system to environment

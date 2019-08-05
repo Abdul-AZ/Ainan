@@ -101,8 +101,19 @@ namespace ALZ {
 
 		if(m_Status == EnvironmentStatus::None)
 			for (Inspector_obj_ptr& obj : InspectorObjects)
-				if(obj->Selected)
+				if (obj->Selected) {
+					//draw object position gizmo
 					m_Gizmo.Draw(obj->GetPositionRef(), m_InputManager.GetMousePositionNDC());
+
+					//if particle system needs to edit a force target (a world point), use a gimzo for it
+					if (obj->Type == InspectorObjectType::ParticleSystemType)
+					{
+						auto ps = static_cast<ParticleSystem*>(obj.get());
+						if(ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "")
+							if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce)
+								m_Gizmo.Draw(ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target, m_InputManager.GetMousePositionNDC());
+					}
+				}
 
 		//Render world space gui here because we need camera information for that
 		for (Inspector_obj_ptr& obj : InspectorObjects)
