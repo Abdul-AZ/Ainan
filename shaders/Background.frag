@@ -24,48 +24,48 @@ struct SpotLights
 	float Intensity[MAX_NUM_SPOT_LIGHTS];
 };
 
-uniform vec3 baseColor;
-uniform float baseLight;
+uniform vec3 u_BaseColor;
+uniform float u_BaseLight;
 
-uniform float constant;
-uniform float linear;
-uniform float quadratic;
+uniform float u_Constant;
+uniform float u_Linear;
+uniform float u_Quadratic;
 
-uniform RadialLights radialLights;
-uniform SpotLights spotLights;
+uniform RadialLights u_RadialLights;
+uniform SpotLights u_SpotLights;
 
 void main()
 {
-	FragColor = vec4(baseColor * baseLight, 1.0);
+	FragColor = vec4(u_BaseColor * u_BaseLight, 1.0);
 
 	for(int i = 0; i < MAX_NUM_RADIAL_LIGHTS; i++) {
-		vec3 color = radialLights.Color[i];
+		vec3 color = u_RadialLights.Color[i];
 		
-		float distance    = length(radialLights.Position[i] - FragPos);
-		float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance)); 
+		float distance    = length(u_RadialLights.Position[i] - FragPos);
+		float attenuation = 1.0 / (u_Constant + u_Linear * distance + u_Quadratic * (distance * distance)); 
 		
-		color *= radialLights.Intensity[i];
+		color *= u_RadialLights.Intensity[i];
 		color *= attenuation;
-		color *= baseColor;
+		color *= u_BaseColor;
 
 		FragColor += vec4(color.xyz, 1.0);
 	}
 
 	for(int i = 0; i < MAX_NUM_SPOT_LIGHTS; i++) {
-		vec3 color = spotLights.Color[i];
+		vec3 color = u_SpotLights.Color[i];
 
-		float distance = length(spotLights.Position[i] - FragPos);
-		float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance)); 
+		float distance = length(u_SpotLights.Position[i] - FragPos);
+		float attenuation = 1.0 / (u_Constant + u_Linear * distance + u_Quadratic * (distance * distance)); 
 
-		vec2 lightDir  = normalize(spotLights.Position[i] - FragPos);
+		vec2 lightDir  = normalize(u_SpotLights.Position[i] - FragPos);
 
-		vec2 lightFace = vec2(cos(spotLights.Angle[i]), sin(spotLights.Angle[i]));
+		vec2 lightFace = vec2(cos(u_SpotLights.Angle[i]), sin(u_SpotLights.Angle[i]));
 
 		float theta = dot(lightDir, normalize(-lightFace));
-		float epsilon   = cos(spotLights.InnerCutoff[i]) - cos(spotLights.OuterCutoff[i]);
-		float intensity = clamp((theta - cos(spotLights.OuterCutoff[i])) / epsilon, 0.0, 1.0);  
+		float epsilon   = cos(u_SpotLights.InnerCutoff[i]) - cos(u_SpotLights.OuterCutoff[i]);
+		float intensity = clamp((theta - cos(u_SpotLights.OuterCutoff[i])) / epsilon, 0.0, 1.0);  
 
-		if(theta > cos(spotLights.OuterCutoff[i]))
-		   FragColor += vec4(color.xyz, 1.0) * intensity * spotLights.Intensity[i] * attenuation;
+		if(theta > cos(u_SpotLights.OuterCutoff[i]))
+		   FragColor += vec4(color.xyz, 1.0) * intensity * u_SpotLights.Intensity[i] * attenuation;
 	}
 }

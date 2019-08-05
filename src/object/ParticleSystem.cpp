@@ -124,7 +124,7 @@ namespace ALZ {
 		CircleInstancedShader->Bind();
 
 		//set texture uniform (Sampler2D) to 0
-		CircleInstancedShader->SetUniform1i("particleTexture", 0);
+		CircleInstancedShader->SetUniform1i("u_Texture", 0);
 
 		//if we are using the default texture
 		if (Customizer.m_TextureCustomizer.UseDefaultTexture) {
@@ -182,8 +182,8 @@ namespace ALZ {
 		//draw 40 particles
 		for (int i = 0; i < drawCount; i++)
 		{
-			CircleInstancedShader->SetUniformMat4s("model", &m_ParticleDrawTransformationBuffer[i * 40], 40);
-			CircleInstancedShader->SetUniformVec4s("colorArr", &m_ParticleDrawColorBuffer[i * 40], 40);
+			CircleInstancedShader->SetUniformMat4s("u_ModelArr", &m_ParticleDrawTransformationBuffer[i * 40], 40);
+			CircleInstancedShader->SetUniformVec4s("u_ColorArr", &m_ParticleDrawColorBuffer[i * 40], 40);
 			Renderer::DrawInstanced(*VAO, *CircleInstancedShader, Primitive::TriangleFan, 26, 40);
 		}
 
@@ -195,8 +195,8 @@ namespace ALZ {
 			return;
 
 		//draw them
-		CircleInstancedShader->SetUniformMat4s("model", &m_ParticleDrawTransformationBuffer[drawCount * 40], remaining);
-		CircleInstancedShader->SetUniformVec4s("colorArr", &m_ParticleDrawColorBuffer[drawCount * 40], remaining);
+		CircleInstancedShader->SetUniformMat4s("u_ModelArr", &m_ParticleDrawTransformationBuffer[drawCount * 40], remaining);
+		CircleInstancedShader->SetUniformVec4s("u_ColorArr", &m_ParticleDrawColorBuffer[drawCount * 40], remaining);
 		Renderer::DrawInstanced(*VAO, *CircleInstancedShader, Primitive::TriangleFan, 26, remaining);
 	}
 

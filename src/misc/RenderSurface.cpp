@@ -53,7 +53,7 @@ namespace ALZ {
 
 	void RenderSurface::Render()
 	{
-		ImageShader->SetUniform1i("screenTexture", 0);
+		ImageShader->SetUniform1i("u_ScreenTexture", 0);
 		m_Texture->Bind();
 		Renderer::Draw(*m_VertexArray, *ImageShader, Primitive::Triangles, 6);
 	}

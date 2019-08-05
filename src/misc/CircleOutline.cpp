@@ -57,8 +57,8 @@ namespace ALZ {
 		model = glm::scale(model, glm::vec3(Radius * GlobalScaleFactor, Radius * GlobalScaleFactor, Radius * GlobalScaleFactor));
 
 		CircleOutlineShader->Bind();
-		CircleOutlineShader->SetUniformMat4("model", model);
-		CircleOutlineShader->SetUniformVec4("color", Color);
+		CircleOutlineShader->SetUniformMat4("u_Model", model);
+		CircleOutlineShader->SetUniformVec4("u_Color", Color);
 		VAO->Bind();
 
 		Renderer::Draw(*VAO, *CircleOutlineShader, Primitive::Lines, *EBO);

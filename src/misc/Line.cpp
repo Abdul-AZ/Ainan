@@ -46,7 +46,7 @@ namespace ALZ {
 	{
 		glm::vec2 vertices[] = { m_StartPoint, m_EndPoint };
 		VBO->UpdateData(0, sizeof(vertices), vertices);
-		LineShader->SetUniformVec4("color", Color);
+		LineShader->SetUniformVec4("u_Color", Color);
 		LineShader->Bind();
 		VAO->Bind();
 

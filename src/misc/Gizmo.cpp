@@ -129,8 +129,8 @@ namespace ALZ {
 		else
 			color = glm::vec4(0.75f, 0.0f, 0.0f, 1.0f);
 
-		GizmoShader->SetUniformVec4("color", color);
-		GizmoShader->SetUniformMat4("model", model);
+		GizmoShader->SetUniformVec4("u_Color", color);
+		GizmoShader->SetUniformMat4("u_Model", model);
 		Renderer::Draw(*VAO, *GizmoShader, Primitive::Triangles, *EBO);
 
 		model = glm::rotate(model, -PI / 2, glm::vec3(0.0f, 0.0f, -1.0f));
@@ -141,8 +141,8 @@ namespace ALZ {
 		else
 			color = glm::vec4(0.0f, 0.75f, 0.0f, 1.0f);
 
-		GizmoShader->SetUniformVec4("color", color);
-		GizmoShader->SetUniformMat4("model", model);
+		GizmoShader->SetUniformVec4("u_Color", color);
+		GizmoShader->SetUniformMat4("u_Model", model);
 		glm::vec2 mousePosWS = Renderer::m_CurrentSceneCamera->Position + mousePositionNDC * GlobalScaleFactor;
 		glm::vec2 objectPosWS = objectPositionWS * GlobalScaleFactor;
 

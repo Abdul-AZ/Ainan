@@ -86,7 +86,7 @@ namespace ALZ {
 		VAO->Bind();
 		LineShader->Bind();
 
-		LineShader->SetUniformVec4("color", glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
+		LineShader->SetUniformVec4("u_Color", glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
 
 		Renderer::Draw(*VAO, *LineShader, Primitive::Lines, *EBO);
 

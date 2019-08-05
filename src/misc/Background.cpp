@@ -74,28 +74,28 @@ namespace ALZ {
 		for (int i = m_SpotLightSubmissionCount; i < MAX_NUM_SPOT_LIGHTS; i++)
 			m_SpotLightIntensityBuffer[i] = 0.0f;
 		
-		BackgroundShader->SetUniformVec3("baseColor", BaseColor);
-		BackgroundShader->SetUniform1f("constant", Constant);
-		BackgroundShader->SetUniform1f("linear", Linear);
-		BackgroundShader->SetUniform1f("quadratic", Quadratic);
+		BackgroundShader->SetUniformVec3("u_BaseColor", BaseColor);
+		BackgroundShader->SetUniform1f("u_BaseLight", BaseLight);
+		BackgroundShader->SetUniform1f("u_Constant", Constant);
+		BackgroundShader->SetUniform1f("u_Linear", Linear);
+		BackgroundShader->SetUniform1f("u_Quadratic", Quadratic);
 
 		//radial light data
-		BackgroundShader->SetUniformVec2s("radialLights.Position", m_RadialLightPositionBuffer, MAX_NUM_RADIAL_LIGHTS);
-		BackgroundShader->SetUniformVec3s("radialLights.Color", m_RadialLightColorBuffer, MAX_NUM_RADIAL_LIGHTS);
-		BackgroundShader->SetUniform1fs("radialLights.Intensity", m_RadialLightIntensityBuffer, MAX_NUM_RADIAL_LIGHTS);
-		BackgroundShader->SetUniform1f("baseLight", BaseLight);
+		BackgroundShader->SetUniformVec2s("u_RadialLights.Position", m_RadialLightPositionBuffer, MAX_NUM_RADIAL_LIGHTS);
+		BackgroundShader->SetUniformVec3s("u_RadialLights.Color", m_RadialLightColorBuffer, MAX_NUM_RADIAL_LIGHTS);
+		BackgroundShader->SetUniform1fs("u_RadialLights.Intensity", m_RadialLightIntensityBuffer, MAX_NUM_RADIAL_LIGHTS);
 
 		//spot light data
-		BackgroundShader->SetUniformVec2s("spotLights.Position", m_SpotLightPositionBuffer, MAX_NUM_SPOT_LIGHTS);
-		BackgroundShader->SetUniformVec3s("spotLights.Color", m_SpotLightColorBuffer, MAX_NUM_SPOT_LIGHTS);
-		BackgroundShader->SetUniform1fs("spotLights.Angle", m_SpotLightAngleBuffer, MAX_NUM_SPOT_LIGHTS);
-		BackgroundShader->SetUniform1fs("spotLights.InnerCutoff", m_SpotLightInnerCutoffBuffer, MAX_NUM_SPOT_LIGHTS);
-		BackgroundShader->SetUniform1fs("spotLights.OuterCutoff", m_SpotLightOuterCutoffBuffer, MAX_NUM_SPOT_LIGHTS);
-		BackgroundShader->SetUniform1fs("spotLights.Intensity", m_SpotLightIntensityBuffer, MAX_NUM_SPOT_LIGHTS);
+		BackgroundShader->SetUniformVec2s("u_SpotLights.Position", m_SpotLightPositionBuffer, MAX_NUM_SPOT_LIGHTS);
+		BackgroundShader->SetUniformVec3s("u_SpotLights.Color", m_SpotLightColorBuffer, MAX_NUM_SPOT_LIGHTS);
+		BackgroundShader->SetUniform1fs("u_SpotLights.Angle", m_SpotLightAngleBuffer, MAX_NUM_SPOT_LIGHTS);
+		BackgroundShader->SetUniform1fs("u_SpotLights.InnerCutoff", m_SpotLightInnerCutoffBuffer, MAX_NUM_SPOT_LIGHTS);
+		BackgroundShader->SetUniform1fs("u_SpotLights.OuterCutoff", m_SpotLightOuterCutoffBuffer, MAX_NUM_SPOT_LIGHTS);
+		BackgroundShader->SetUniform1fs("u_SpotLights.Intensity", m_SpotLightIntensityBuffer, MAX_NUM_SPOT_LIGHTS);
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(5000.0f));
-		BackgroundShader->SetUniformMat4("model", model);
+		BackgroundShader->SetUniformMat4("u_Model", model);
 
 		Renderer::Draw(*VAO, *BackgroundShader, Primitive::Triangles, 6);
 
