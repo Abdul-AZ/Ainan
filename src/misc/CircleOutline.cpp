@@ -44,7 +44,7 @@ namespace ALZ {
 
 			VAO->Unbind();
 
-			CircleOutlineShader = Renderer::CreateShaderProgram("shaders/CircleOutline.vert", "shaders/CircleOutline.frag").release();
+			CircleOutlineShader = Renderer::CreateShaderProgram("shaders/CircleOutline.vert", "shaders/FlatColor.frag").release();
 
 			CircleOutlineBuffersInitilized = true;
 		}

@@ -75,7 +75,7 @@ namespace ALZ {
 
 			VAO->Unbind();
 
-			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/Line.frag").release();
+			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/FlatColor.frag").release();
 
 			GridBufferInitilized = true;
 		}

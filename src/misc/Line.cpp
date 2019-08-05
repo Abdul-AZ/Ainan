@@ -20,7 +20,7 @@ namespace ALZ {
 			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
 			VAO->Unbind();
-			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/Line.frag").release();
+			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/FlatColor.frag").release();
 			LineBufferInitilized = true;
 		}
 	}

@@ -66,7 +66,7 @@ namespace ALZ {
 
 		VAO->Unbind();
 
-		GizmoShader = Renderer::CreateShaderProgram("shaders/Gizmo.vert", "shaders/Gizmo.frag");
+		GizmoShader = Renderer::CreateShaderProgram("shaders/Gizmo.vert", "shaders/FlatColor.frag");
 	}
 
 	void Gizmo::Draw(glm::vec2& objectPosition, const glm::vec2& mousePositionNDC)
