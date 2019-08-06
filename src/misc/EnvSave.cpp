@@ -105,14 +105,21 @@ namespace ALZ {
 		j[id + "ColorInterpolationType"] = InterpolationTypeToString(ps.Customizer.m_ColorCustomizer.m_Interpolator.Type);
 
 		//Lifetime data
+		j[id + "IsLifetimeRandom"] = ps.Customizer.m_LifetimeCustomizer.m_RandomLifetime;
 		j[id + "DefinedLifetime"] = ps.Customizer.m_LifetimeCustomizer.m_DefinedLifetime;
 		j[id + "MinLifetime"] = ps.Customizer.m_LifetimeCustomizer.m_MinLifetime;
 		j[id + "MaxLifetime"] = ps.Customizer.m_LifetimeCustomizer.m_MaxLifetime;
 
 		//Velocity data
+		j[id + "IsStartingVelocityRandom"] = ps.Customizer.m_VelocityCustomizer.m_RandomVelocity;
 		j[id + "DefinedVelocity"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_DefinedVelocity);
 		j[id + "MinVelocity"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MinVelocity);
 		j[id + "MaxVelocity"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MaxVelocity);
+		j[id + "VelocityLimitType"] = LimitTypeToString(ps.Customizer.m_VelocityCustomizer.CurrentVelocityLimitType);
+		j[id + "MinNormalVelocityLimit"] = ps.Customizer.m_VelocityCustomizer.m_MinNormalVelocityLimit;
+		j[id + "MaxNormalVelocityLimit"] = ps.Customizer.m_VelocityCustomizer.m_MaxNormalVelocityLimit;
+		j[id + "MinPerAxisVelocityLimit"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MinPerAxisVelocityLimit);
+		j[id + "MaxPerAxisVelocityLimit"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MaxPerAxisVelocityLimit);
 
 		//Noise data
 		j[id + "NoiseEnabled"] = ps.Customizer.m_NoiseCustomizer.m_NoiseEnabled;

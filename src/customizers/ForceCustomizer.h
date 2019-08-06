@@ -51,7 +51,6 @@ namespace ALZ {
 			}
 		}
 
-		//helper functions
 		static ForceType StringToForceType(std::string type)
 		{
 			if (type == "Directional Force")
@@ -64,7 +63,6 @@ namespace ALZ {
 			assert(false);
 			return DirectionalForce;
 		}
-
 	};
 
 	class ForceCustomizer

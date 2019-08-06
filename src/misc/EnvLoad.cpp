@@ -118,23 +118,28 @@ namespace ALZ {
 		ps->Customizer.m_ScaleCustomizer.m_DefinedScale = data[id + "DefinedScale"].get<float>();
 		ps->Customizer.m_ScaleCustomizer.m_EndScale = data[id + "EndScale"].get<float>();
 		ps->Customizer.m_ScaleCustomizer.m_Interpolator.Type = StringToInterpolationType(data[id + "ScaleInterpolationType"].get<std::string>());
-		
 
 		//Color data
 		ps->Customizer.m_ColorCustomizer.m_DefinedColor = JSON_ARRAY_TO_VEC4(data[id + "DefinedColor"].get<std::vector<float>>());
 		ps->Customizer.m_ColorCustomizer.m_EndColor = JSON_ARRAY_TO_VEC4(data[id + "EndColor"].get<std::vector<float>>());
 		ps->Customizer.m_ColorCustomizer.m_Interpolator.Type = StringToInterpolationType(data[id + "ColorInterpolationType"].get<std::string>());
-		
 
 		//Lifetime data
+		ps->Customizer.m_LifetimeCustomizer.m_RandomLifetime = data[id + "IsLifetimeRandom"].get<bool>();
 		ps->Customizer.m_LifetimeCustomizer.m_DefinedLifetime = data[id + "DefinedLifetime"].get<float>();
 		ps->Customizer.m_LifetimeCustomizer.m_MinLifetime = data[id + "MinLifetime"].get<float>();
 		ps->Customizer.m_LifetimeCustomizer.m_MaxLifetime = data[id + "MaxLifetime"].get<float>();
 
 		//Velocity data
+		ps->Customizer.m_VelocityCustomizer.m_RandomVelocity = data[id + "IsStartingVelocityRandom"].get<bool>();
 		ps->Customizer.m_VelocityCustomizer.m_DefinedVelocity = JSON_ARRAY_TO_VEC2(data[id + "DefinedVelocity"].get<std::vector<float>>());
 		ps->Customizer.m_VelocityCustomizer.m_MinVelocity = JSON_ARRAY_TO_VEC2(data[id + "MinVelocity"].get<std::vector<float>>());
 		ps->Customizer.m_VelocityCustomizer.m_MaxVelocity = JSON_ARRAY_TO_VEC2(data[id + "MaxVelocity"].get<std::vector<float>>());
+		ps->Customizer.m_VelocityCustomizer.CurrentVelocityLimitType =  StringToLimitType(data[id + "VelocityLimitType"].get<std::string>());
+		ps->Customizer.m_VelocityCustomizer.m_MinNormalVelocityLimit = data[id + "MinNormalVelocityLimit"].get<float>();
+		ps->Customizer.m_VelocityCustomizer.m_MaxNormalVelocityLimit = data[id + "MaxNormalVelocityLimit"].get<float>();
+		ps->Customizer.m_VelocityCustomizer.m_MinPerAxisVelocityLimit = JSON_ARRAY_TO_VEC2(data[id + "MinPerAxisVelocityLimit"].get<std::vector<float>>());
+		ps->Customizer.m_VelocityCustomizer.m_MaxPerAxisVelocityLimit = JSON_ARRAY_TO_VEC2(data[id + "MaxPerAxisVelocityLimit"].get<std::vector<float>>());
 
 		//Noise data
 		ps->Customizer.m_NoiseCustomizer.m_NoiseEnabled = data[id + "NoiseEnabled"].get<bool>();

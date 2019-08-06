@@ -43,4 +43,7 @@ namespace ALZ {
 
 		EXPOSE_CUSTOMIZER_TO_JSON
 	};
+
+	std::string LimitTypeToString(VelocityCustomizer::VelocityLimitType type);
+	VelocityCustomizer::VelocityLimitType StringToLimitType(const std::string& type);
 }

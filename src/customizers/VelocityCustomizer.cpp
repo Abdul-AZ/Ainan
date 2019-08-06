@@ -3,7 +3,7 @@
 
 namespace ALZ {
 
-	static constexpr const char* LimitTypeToString(VelocityCustomizer::VelocityLimitType type) {
+	std::string LimitTypeToString(VelocityCustomizer::VelocityLimitType type) {
 		switch (type)
 		{
 		case VelocityCustomizer::NoLimit:
@@ -16,6 +16,19 @@ namespace ALZ {
 			assert(false);
 			return "";
 		}
+	}
+
+	VelocityCustomizer::VelocityLimitType StringToLimitType(const std::string& type) {
+
+		if (type == "No Limit")
+			return VelocityCustomizer::NoLimit;
+		else if (type == "Limit")
+			return VelocityCustomizer::NormalLimit;
+		else if (type == "Per Axis Limit")
+			return VelocityCustomizer::PerAxisLimit;
+
+		assert(false);
+		return VelocityCustomizer::NoLimit;
 	}
 
 	VelocityCustomizer::VelocityCustomizer() :
@@ -52,11 +65,11 @@ namespace ALZ {
 			ImGui::Spacing();
 			ImGui::Spacing();
 
-			if (ImGui::BeginCombo("Velocity Limit", LimitTypeToString(CurrentVelocityLimitType)))
+			if (ImGui::BeginCombo("Velocity Limit", LimitTypeToString(CurrentVelocityLimitType).c_str()))
 			{
 				{
 					bool is_active = CurrentVelocityLimitType == NoLimit;
-					if (ImGui::Selectable(LimitTypeToString(NoLimit), &is_active)) {
+					if (ImGui::Selectable(LimitTypeToString(NoLimit).c_str(), &is_active)) {
 						ImGui::SetItemDefaultFocus();
 						CurrentVelocityLimitType = NoLimit;
 					}
@@ -64,7 +77,7 @@ namespace ALZ {
 
 				{
 					bool is_active = CurrentVelocityLimitType == NormalLimit;
-					if (ImGui::Selectable(LimitTypeToString(NormalLimit), &is_active)) {
+					if (ImGui::Selectable(LimitTypeToString(NormalLimit).c_str(), &is_active)) {
 						ImGui::SetItemDefaultFocus();
 						CurrentVelocityLimitType = NormalLimit;
 					}
@@ -72,7 +85,7 @@ namespace ALZ {
 
 				{
 					bool is_active = CurrentVelocityLimitType == PerAxisLimit;
-					if (ImGui::Selectable(LimitTypeToString(PerAxisLimit), &is_active)) {
+					if (ImGui::Selectable(LimitTypeToString(PerAxisLimit).c_str(), &is_active)) {
 						ImGui::SetItemDefaultFocus();
 						CurrentVelocityLimitType = PerAxisLimit;
 					}
