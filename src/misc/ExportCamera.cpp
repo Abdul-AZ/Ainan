@@ -220,7 +220,8 @@ namespace ALZ {
 
 	void ExportCamera::Update(float deltaTime)
 	{
-		m_TimeSinceLastCapture += deltaTime;
+		if(m_ExportMode == SingleFrame || (m_ExportMode == MultipleFramesAsSeperateImages && StartedMultiFrameExport))
+			m_TimeSinceLastCapture += deltaTime;
 
 		if (m_TimeSinceLastCapture > m_TimeBetweenCaptures && RemainingFramesToBeCaptured > 0)
 		{
@@ -232,11 +233,16 @@ namespace ALZ {
 			NeedToExport = false;
 
 		ExportedEverything = RemainingFramesToBeCaptured <= 0;
+		if (ExportedEverything)
+			StartedMultiFrameExport = false;
 	}
 
 	void ExportCamera::StartExporting()
 	{
 		NeedToExport = true;
+
+		if (m_ExportMode == MultipleFramesAsSeperateImages)
+			StartedMultiFrameExport = true;
 	}
 
 	void ExportCamera::BeginExportScene() 

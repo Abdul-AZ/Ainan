@@ -49,6 +49,7 @@ namespace ALZ {
 
 		//only used in multiple frame capture
 		bool ExportedEverything = false;
+		bool StartedMultiFrameExport = false;
 
 		//only used in single frame capture
 		bool AlreadyExportedFrame = false;
