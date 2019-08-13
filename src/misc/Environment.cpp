@@ -116,17 +116,19 @@ namespace ALZ {
 				}
 
 		//Render world space gui here because we need camera information for that
-		for (Inspector_obj_ptr& obj : InspectorObjects)
-		{
-			if(obj->Selected)
-				if (obj->Type == InspectorObjectType::ParticleSystemType)
-				{
-					ParticleSystem* ps = (ParticleSystem*)obj.get();
-					if (ps->Customizer.Mode == SpawnMode::SpawnOnLine)
-						ps->Customizer.m_Line.Draw();
-					else if (ps->Customizer.Mode == SpawnMode::SpawnOnCircle || ps->Customizer.Mode == SpawnMode::SpawnInsideCircle && ps->Selected)
-						ps->Customizer.m_CircleOutline.Draw();
-				}
+		if (m_Status == EnvironmentStatus::None) {
+			for (Inspector_obj_ptr& obj : InspectorObjects)
+			{
+				if (obj->Selected)
+					if (obj->Type == InspectorObjectType::ParticleSystemType)
+					{
+						ParticleSystem* ps = (ParticleSystem*)obj.get();
+						if (ps->Customizer.Mode == SpawnMode::SpawnOnLine)
+							ps->Customizer.m_Line.Draw();
+						else if (ps->Customizer.Mode == SpawnMode::SpawnOnCircle || ps->Customizer.Mode == SpawnMode::SpawnInsideCircle && ps->Selected)
+							ps->Customizer.m_CircleOutline.Draw();
+					}
+			}
 		}
 
 		if (m_Status == EnvironmentStatus::None) {

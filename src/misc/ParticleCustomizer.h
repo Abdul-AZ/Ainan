@@ -64,7 +64,7 @@ namespace ALZ {
 		float m_LineAngle = 0.0f; //in degrees
 		Line m_Line;
 
-		//spawn particle on circle option
+		//spawn particle on/in circle option
 		CircleOutline m_CircleOutline;
 
 		//random number generator
