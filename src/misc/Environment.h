@@ -29,15 +29,15 @@
 
 namespace ALZ {
 
-	enum class EnvironmentStatus {
-		None,
-		PlayMode,
-		PauseMode,
-		ExportMode
-	};
-
 	class Environment
 	{
+		enum EnvironmentStatus {
+			Status_EditorMode,
+			Status_PlayMode,
+			Status_PauseMode,
+			Status_ExportMode
+		};
+
 	public:
 		Environment();
 		~Environment();
@@ -61,9 +61,7 @@ namespace ALZ {
 		void Resume();
 		void RegisterEnvironmentInputKeys();
 
-		void AddPS();
-		void AddRadialLight();
-		void AddSpotLight();
+		void AddInspectorObject(InspectorObjectType type);
 		void Duplicate(InspectorInterface& obj);
 		void FocusCameraOnObject(InspectorInterface& object);
 
@@ -86,7 +84,7 @@ namespace ALZ {
 		bool m_ObjectInspectorWindowOpen = true;
 		bool m_EnvironmentStatusWindowOpen = true;
 		bool m_EnvironmentControlsWindowOpen = true;
-		EnvironmentStatus m_Status = EnvironmentStatus::None;
+		EnvironmentStatus m_Status = Status_EditorMode;
 
 		std::unique_ptr<Texture> m_PlayButtonTexture;
 		std::unique_ptr<Texture> m_PauseButtonTexture;

@@ -29,7 +29,7 @@ namespace ALZ {
 		//Horizontal blur
 		static RenderSurface tempSurface;
 		tempSurface.SetSize(surface.GetSize());
-		tempSurface.m_FrameBuffer->Bind();
+		tempSurface.SurfaceFrameBuffer->Bind();
 
 		//this specifies that we are doing horizontal blur
 		BlurShader->SetUniformVec2("u_BlurDirection", glm::vec2(1.0f, 0.0f));
@@ -41,7 +41,7 @@ namespace ALZ {
 		BlurShader->SetUniformVec2("u_BlurDirection", glm::vec2(0.0f, 1.0f));
 
 		//clear the buffer we recieved
-		surface.m_FrameBuffer->Bind();
+		surface.SurfaceFrameBuffer->Bind();
 		Renderer::ClearScreen();
 
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved

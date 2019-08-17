@@ -20,7 +20,7 @@ namespace ALZ {
 
 	void Camera::Update(const float & deltaTime)
 	{
-		if (Window::WindowSizeChangedSinceLastFrame())
+		if (Window::WindowSizeChangedSinceLastFrame)
 		{
 			float aspectRatio = Window::FramebufferSize.x / Window::FramebufferSize.y;
 			ProjectionMatrix = glm::ortho(0.0f, GlobalScaleFactor * aspectRatio, 0.0f, GlobalScaleFactor);

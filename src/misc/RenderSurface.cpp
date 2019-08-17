@@ -9,9 +9,9 @@ namespace ALZ {
 
 	RenderSurface::RenderSurface()
 	{
-		m_FrameBuffer = Renderer::CreateFrameBuffer();
+		SurfaceFrameBuffer = Renderer::CreateFrameBuffer();
 
-		m_FrameBuffer->Bind();
+		SurfaceFrameBuffer->Bind();
 
 		m_Texture = Renderer::CreateTexture();
 
@@ -22,7 +22,7 @@ namespace ALZ {
 		m_Texture->SetDefaultTextureSettings();
 		m_Texture->Unbind();
 
-		m_FrameBuffer->SetActiveTexture(*m_Texture);
+		SurfaceFrameBuffer->SetActiveTexture(*m_Texture);
 
 		m_VertexArray = Renderer::CreateVertexArray();
 		m_VertexArray->Bind();
@@ -42,7 +42,7 @@ namespace ALZ {
 		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices));
 		m_VertexBuffer->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
 
-		m_FrameBuffer->Unbind();
+		SurfaceFrameBuffer->Unbind();
 
 		if (ImageShaderInitilized == false)
 		{
@@ -67,7 +67,7 @@ namespace ALZ {
 	void RenderSurface::RenderToScreen()
 	{
 		//nullptr means we are copying to the default render buffer (which is the one being displayed)
-		m_FrameBuffer->Blit(nullptr, m_Size, m_Size);
+		SurfaceFrameBuffer->Blit(nullptr, m_Size, m_Size);
 
 		Viewport screenViewport;
 		screenViewport.x = 0;
@@ -81,7 +81,7 @@ namespace ALZ {
 	void RenderSurface::SetSize(const glm::vec2 & size)
 	{
 		m_Size = size;
-		m_FrameBuffer->Bind();
+		SurfaceFrameBuffer->Bind();
 		
 		//delete old trexture
 		m_Texture.reset();
@@ -93,7 +93,7 @@ namespace ALZ {
 		m_Texture->SetDefaultTextureSettings();
 		m_Texture->Unbind();
 	
-		m_FrameBuffer->SetActiveTexture(*m_Texture);
-		m_FrameBuffer->Unbind();
+		SurfaceFrameBuffer->SetActiveTexture(*m_Texture);
+		SurfaceFrameBuffer->Unbind();
 	}
 }

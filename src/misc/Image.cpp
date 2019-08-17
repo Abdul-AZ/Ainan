@@ -95,7 +95,7 @@ namespace ALZ {
 		image.m_Data = new unsigned char[image.m_Width * image.m_Height * 4];
 		image.m_Comp = 4;
 
-		framebuffer.m_FrameBuffer->Bind();
+		framebuffer.SurfaceFrameBuffer->Bind();
 		glReadPixels(0, 0, image.m_Width, image.m_Height, GL_RGBA, GL_UNSIGNED_BYTE, image.m_Data);
 
 		return image;
@@ -111,12 +111,12 @@ namespace ALZ {
 
 		RenderSurface tempRenderSurface;
 		tempRenderSurface.SetSize(glm::vec2(width, height));
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, renderSurface.m_FrameBuffer->GetRendererID());
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tempRenderSurface.m_FrameBuffer->GetRendererID());
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, renderSurface.SurfaceFrameBuffer->GetRendererID());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tempRenderSurface.SurfaceFrameBuffer->GetRendererID());
 
 		glBlitFramebuffer(0, 0, (GLuint)renderSurface.GetSize().x, (GLuint)renderSurface.GetSize().y, 0, 0, (GLuint)tempRenderSurface.GetSize().x, (GLuint)tempRenderSurface.GetSize().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
-		tempRenderSurface.m_FrameBuffer->Bind();
+		tempRenderSurface.SurfaceFrameBuffer->Bind();
 		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image.m_Data);
 
 		return image;

@@ -6,14 +6,14 @@
 
 namespace ALZ {
 
-	bool Window::m_WindowSizeChanged = false;
+	bool Window::WindowSizeChangedSinceLastFrame = false;
 	glm::vec2 Window::FramebufferSize = { 0,0 };
 	glm::vec2 Window::Position = { 0,0 };
 	GLFWwindow* Window::Ptr = nullptr;
 
 	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	{
-		Window::m_WindowSizeChanged = true;
+		Window::WindowSizeChangedSinceLastFrame = true;
 		Window::FramebufferSize = { width, height };
 		glViewport(0, 0, width, height);
 	}
@@ -64,7 +64,7 @@ namespace ALZ {
 	void Window::Present()
 	{
 		glfwSwapBuffers(Ptr);
-		m_WindowSizeChanged = false;
+		WindowSizeChangedSinceLastFrame = false;
 	}
 
 	void Window::HandleWindowEvents()
@@ -104,7 +104,7 @@ namespace ALZ {
 		glfwSetWindowSize(&Window::GetWindow(), WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
 	}
 
-	GLFWwindow & Window::GetWindow()
+	GLFWwindow& Window::GetWindow()
 	{
 		return *Ptr;
 	}

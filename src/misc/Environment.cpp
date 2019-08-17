@@ -16,7 +16,8 @@ namespace ALZ {
 		m_ResumeButtonTexture->SetImage(Image::LoadFromFile("res/ResumeButton.png", 3));
 		m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 3));
 
-		AddPS();
+		//add starting particle system 
+		AddInspectorObject(ParticleSystemType); //NOTE: if this environment was loaded from a file the loader will delete this object
 
 		GaussianBlur::Init();
 		RegisterEnvironmentInputKeys();
@@ -40,24 +41,24 @@ namespace ALZ {
 		m_Camera.Update(deltaTime);
 		m_ExportCamera.Update(deltaTime);
 
+		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
 		for (int i = 0; i < InspectorObjects.size(); i++) {
+
+			if(m_Status == Status_PlayMode || m_Status == Status_ExportMode)
+				InspectorObjects[i]->Update(deltaTime);
+
 			if (InspectorObjects[i]->ToBeDeleted)
 				InspectorObjects.erase(InspectorObjects.begin() + i);
 		}
 
-		for (Inspector_obj_ptr& obj : InspectorObjects) {
-			if(m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::ExportMode)
-				obj->Update(deltaTime);
-		}
-
-		if (Window::WindowSizeChangedSinceLastFrame())
+		if (Window::WindowSizeChangedSinceLastFrame)
 			m_RenderSurface.SetSize(Window::FramebufferSize);
 
-		if (m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::ExportMode)
+		if (m_Status == Status_PlayMode || m_Status == Status_ExportMode)
 			m_TimeSincePlayModeStarted += deltaTime;
 
 		//this code will be changed and refactored, that is why it is strcutured badly
-		if (m_Status == EnvironmentStatus::ExportMode) {
+		if (m_Status == Status_ExportMode) {
 			if (m_TimeSincePlayModeStarted > m_ExportCamera.ImageCaptureTime && m_ExportCamera.NeedToExport == false && m_ExportCamera.AlreadyExportedFrame == false)
 				m_ExportCamera.StartExporting();
 			else if (m_TimeSincePlayModeStarted > m_ExportCamera.ImageCaptureTime && m_ExportCamera.NeedToExport == false && m_ExportCamera.ExportedEverything == false)
@@ -79,7 +80,7 @@ namespace ALZ {
 	void Environment::Render()
 	{
 		Renderer::BeginScene(m_Camera);
-		m_RenderSurface.m_FrameBuffer->Bind();
+		m_RenderSurface.SurfaceFrameBuffer->Bind();
 		Renderer::ClearScreen();
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
@@ -96,10 +97,10 @@ namespace ALZ {
 
 		m_Background.Draw();
 
-		if(m_Settings.ShowGrid && m_Status != EnvironmentStatus::PlayMode)
+		if(m_Settings.ShowGrid && m_Status != Status_PlayMode)
 			m_Grid.Draw();
 
-		if(m_Status == EnvironmentStatus::None)
+		if(m_Status == Status_EditorMode)
 			for (Inspector_obj_ptr& obj : InspectorObjects)
 				if (obj->Selected) {
 					//draw object position gizmo
@@ -116,7 +117,7 @@ namespace ALZ {
 				}
 
 		//Render world space gui here because we need camera information for that
-		if (m_Status == EnvironmentStatus::None) {
+		if (m_Status == Status_EditorMode) {
 			for (Inspector_obj_ptr& obj : InspectorObjects)
 			{
 				if (obj->Selected)
@@ -131,17 +132,16 @@ namespace ALZ {
 			}
 		}
 
-		if (m_Status == EnvironmentStatus::None) {
+		if (m_Status == Status_EditorMode) {
 			m_ExportCamera.DrawOutline();
 			m_RenderSurface.RenderToScreen();
-			m_RenderSurface.m_FrameBuffer->Unbind();
+			m_RenderSurface.SurfaceFrameBuffer->Unbind();
 			return;
 		}
 
 		//stuff to only render in play mode and export mode
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 			obj->Draw();
-
 
 		if (m_Settings.BlurEnabled)
 			GaussianBlur::Blur(m_RenderSurface, m_Settings.BlurRadius);
@@ -156,7 +156,7 @@ namespace ALZ {
 		if (m_ExportCamera.NeedToExport) 
 			m_ExportCamera.ExportFrame(m_Background, InspectorObjects,m_Settings.BlurEnabled ? m_Settings.BlurRadius : -1.0f );
 
-		m_RenderSurface.m_FrameBuffer->Unbind();
+		m_RenderSurface.SurfaceFrameBuffer->Unbind();
 	}
 
 	void Environment::RenderGUI()
@@ -286,15 +286,13 @@ namespace ALZ {
 		ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 90.0f);
 
 		if (ImGui::Button("Add Particle System"))
-		{
-			AddPS();
-		}
-		if (ImGui::Button("Add Radial Light")) {
-			AddRadialLight();
-		}
-		if (ImGui::Button("Add Spot Light")) {
-			AddSpotLight();
-		}
+			AddInspectorObject(ParticleSystemType);
+
+		if (ImGui::Button("Add Radial Light")) 
+			AddInspectorObject(RadiaLightType);
+
+		if (ImGui::Button("Add Spot Light"))
+			AddInspectorObject(SpotLightType);
 
 		ImGui::End();
 	}
@@ -368,7 +366,7 @@ namespace ALZ {
 			return;
 
 		ImGui::Begin("Controls", &m_EnvironmentControlsWindowOpen);
-		if (m_Status == EnvironmentStatus::ExportMode)
+		if (m_Status == Status_ExportMode)
 		{
 			ImGui::End();
 			return;
@@ -377,7 +375,7 @@ namespace ALZ {
 		int width = (int)ImGui::GetWindowSize().x;
 		ImGui::SetCursorPosX((float)width / 2 - 20);
 
-		if (m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode) {
+		if (m_Status == Status_PlayMode || m_Status == Status_PauseMode) {
 			if (ImGui::ImageButton((void*)(uintptr_t)m_StopButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
 				Stop();
 			}
@@ -395,11 +393,11 @@ namespace ALZ {
 		}
 
 		ImGui::SameLine();
-		if (m_Status == EnvironmentStatus::PlayMode) {
+		if (m_Status == Status_PlayMode) {
 			if (ImGui::ImageButton((void*)(uintptr_t)m_PauseButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 				Pause();
 		}
-		else if (m_Status == EnvironmentStatus::PauseMode) {
+		else if (m_Status == Status_PauseMode) {
 			if (ImGui::ImageButton((void*)(uintptr_t)m_ResumeButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 				Resume();
 		}
@@ -421,19 +419,13 @@ namespace ALZ {
 				}
 
 				if (ImGui::MenuItem("Save As"))
-				{
 					m_EnvironmentSaveBrowser.OpenWindow();
-				}
 
 				if (ImGui::MenuItem("Close Environment")) 
-				{
-					ShouldDelete = true;
-				}
+					ShouldDelete = true; //this means environment be closed when the time is right
 
 				if (ImGui::MenuItem("Exit"))
-				{
 					exit(0);
-				}
 
 				ImGui::EndMenu();
 			}
@@ -451,7 +443,7 @@ namespace ALZ {
 
 				ImGui::MenuItem("Environment Controls", nullptr, &m_EnvironmentControlsWindowOpen);
 				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
-				ImGui::MenuItem("General Settings",nullptr, &m_Settings.GeneralSettingsWindowOpen);
+				ImGui::MenuItem("General Settings", nullptr, &m_Settings.GeneralSettingsWindowOpen);
 				ImGui::MenuItem("Environment Status", nullptr, &m_EnvironmentStatusWindowOpen);
 				ImGui::MenuItem("Background Settings", nullptr, &m_Background.SettingsWindowOpen);
 				ImGui::MenuItem("ExportMode Settings", nullptr, &m_ExportCamera.SettingsWindowOpen);
@@ -494,23 +486,20 @@ namespace ALZ {
 
 	void Environment::PlayMode()
 	{
-		assert(m_Status == EnvironmentStatus::None);
-		m_Status = EnvironmentStatus::PlayMode;
+		m_Status = Status_PlayMode;
 		m_TimeSincePlayModeStarted = 0.0f;
 	}
 
 	void Environment::ExportMode()
 	{
-		assert(m_Status == EnvironmentStatus::None);
-		m_Status = EnvironmentStatus::ExportMode;
+		m_Status = Status_ExportMode;
 		m_TimeSincePlayModeStarted = 0.0f;
 		m_ExportCamera.BeginExportScene();
 	}
 
 	void Environment::Stop()
 	{
-		assert(m_Status == EnvironmentStatus::PlayMode || m_Status == EnvironmentStatus::PauseMode || m_Status == EnvironmentStatus::ExportMode);
-		m_Status = EnvironmentStatus::None;
+		m_Status = Status_EditorMode;
 
 		for (Inspector_obj_ptr& obj : InspectorObjects) {
 			if (obj->Type == InspectorObjectType::ParticleSystemType) {
@@ -522,22 +511,20 @@ namespace ALZ {
 
 	void Environment::Pause()
 	{
-		assert(m_Status == EnvironmentStatus::PlayMode);
-		m_Status = EnvironmentStatus::PauseMode;
+		m_Status = Status_PauseMode;
 	}
 
 	void Environment::Resume()
 	{
-		assert(m_Status == EnvironmentStatus::PauseMode);
-		m_Status = EnvironmentStatus::PlayMode;
+		m_Status = Status_PlayMode;
 	}
 
 	void Environment::RegisterEnvironmentInputKeys()
 	{
 		m_InputManager.RegisterKey(GLFW_KEY_F5, "PlayMode/Resume", [this]() {
-			if (m_Status == EnvironmentStatus::None)
+			if (m_Status == Status_EditorMode)
 				PlayMode();
-			if (m_Status == EnvironmentStatus::PauseMode)
+			if (m_Status == Status_PauseMode)
 				Resume();
 		});
 
@@ -572,28 +559,43 @@ namespace ALZ {
 
 	}
 
-	void Environment::AddPS()
+	void Environment::AddInspectorObject(InspectorObjectType type)
 	{
-		std::unique_ptr<ParticleSystem> startingPS = std::make_unique<ParticleSystem>();
-		Inspector_obj_ptr startingPSi((InspectorInterface*)(startingPS.release()));
+		//interface for the object to be added
+		Inspector_obj_ptr obj;
 
-		InspectorObjects.push_back(std::move(startingPSi));
-	}
+		//create the object depending on it's type
+		switch (type)
+		{
+		case ParticleSystemType: 
+			{
+			auto ps = std::make_unique<ParticleSystem>();
+			obj.reset(((InspectorInterface*)(ps.release())));
+			}
+			break;
 
-	void Environment::AddRadialLight()
-	{
-		std::unique_ptr<RadialLight> light = std::make_unique<RadialLight>();
-		Inspector_obj_ptr lightObj((InspectorInterface*)(light.release()));
+		case RadiaLightType:
+			{
+			auto light = std::make_unique<RadialLight>();
+			obj.reset(((InspectorInterface*)(light.release())));
+			}
+			break;
 
-		InspectorObjects.push_back(std::move(lightObj));
-	}
+		case SpotLightType:
+			{
+			auto light = std::make_unique<SpotLight>();
+			obj.reset(((InspectorInterface*)(light.release())));
+			}
+			break;
 
-	void Environment::AddSpotLight()
-	{
-		std::unique_ptr<SpotLight> light = std::make_unique<SpotLight>();
-		Inspector_obj_ptr lightObj((InspectorInterface*)(light.release()));
+		default:
+			//we should never reach here
+			assert(false);
+			return;
+		}
 
-		InspectorObjects.push_back(std::move(lightObj));
+		//add the object to the list of the environment objects
+		InspectorObjects.push_back(std::move(obj));
 	}
 
 	void Environment::Duplicate(InspectorInterface& obj)

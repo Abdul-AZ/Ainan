@@ -19,7 +19,7 @@ namespace ALZ {
 		glm::vec2 GetSize() { return m_Size; }
 
 	public:
-		std::unique_ptr<FrameBuffer> m_FrameBuffer;
+		std::unique_ptr<FrameBuffer> SurfaceFrameBuffer;
 	
 	private:
 		std::unique_ptr<Texture> m_Texture;

@@ -260,7 +260,7 @@ namespace ALZ {
 		Renderer::BeginScene(RealCamera);
 
 		m_RenderSurface.SetSize(m_ExportCameraSize * GlobalScaleFactor);
-		m_RenderSurface.m_FrameBuffer->Bind();
+		m_RenderSurface.SurfaceFrameBuffer->Bind();
 
 		for (Inspector_obj_ptr& obj : objects)
 		{
