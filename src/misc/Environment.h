@@ -10,6 +10,7 @@
 
 #include "ParticleCustomizer.h"
 #include "GeneralSettingsGUI.h"
+#include "AppStatusWindow.h"
 #include "file/FolderBrowser.h"
 #include "file/SaveItemBrowser.h"
 
@@ -96,6 +97,8 @@ namespace ALZ {
 		float m_TimeSincePlayModeStarted = 0.0f;
 
 		Background m_Background;
+
+		AppStatusWindow m_AppStatusWindow;
 
 		SaveItemBrowser m_EnvironmentSaveBrowser;
 		bool m_SaveLocationSelected = false;

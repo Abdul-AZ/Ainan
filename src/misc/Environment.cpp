@@ -172,8 +172,11 @@ namespace ALZ {
 		ImGuiViewport viewport;
 		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y -menuBarHeight);
 		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
-		ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
+		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
 
+		m_AppStatusWindow.Text = "Ready";
+		m_AppStatusWindow.DisplayGUI(viewportDockID);
+		
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
 		m_Settings.DisplayGUI();
