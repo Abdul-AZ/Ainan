@@ -34,7 +34,7 @@ namespace ALZ {
 				toJson(data, *(ParticleSystem*)env.InspectorObjects[i].get(), i);
 			}
 			//this means we are serializing a Radial Light
-			else if (env.InspectorObjects[i]->Type == RadiaLightType)
+			else if (env.InspectorObjects[i]->Type == RadialLightType)
 			{
 				toJson(data, *(RadialLight*)env.InspectorObjects[i].get(), i);
 			}
@@ -81,7 +81,7 @@ namespace ALZ {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
-		j[id + "Type"] = "Particle System";
+		j[id + "Type"] = InspectorObjectTypeToString(ParticleSystemType).c_str();
 		j[id + "Name"] = ps.m_Name;
 		j[id + "Mode"] = GetModeAsText(ps.Customizer.Mode);
 		j[id + "ParticlesPerSecond"] = ps.Customizer.m_ParticlesPerSecond;
@@ -151,7 +151,7 @@ namespace ALZ {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
-		j[id + "Type"] = "Radial Light";
+		j[id + "Type"] = InspectorObjectTypeToString(RadialLightType).c_str();
 		j[id + "Name"] = light.m_Name;
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
 		j[id + "Color"] = VEC3_TO_JSON_ARRAY(light.Color);
@@ -162,7 +162,7 @@ namespace ALZ {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
-		j[id + "Type"] = "Spot Light";
+		j[id + "Type"] = InspectorObjectTypeToString(SpotLightType).c_str();
 		j[id + "Name"] = light.m_Name;
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
 		j[id + "Color"] = VEC3_TO_JSON_ARRAY(light.Color);

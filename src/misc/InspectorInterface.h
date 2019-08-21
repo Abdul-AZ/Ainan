@@ -6,9 +6,12 @@ namespace ALZ {
 
 	enum InspectorObjectType {
 		ParticleSystemType,
-		RadiaLightType,
+		RadialLightType,
 		SpotLightType
 	};
+
+	InspectorObjectType StringToInspectorObjectType(const std::string& type);
+	std::string InspectorObjectTypeToString(InspectorObjectType type);
 
 	class InspectorInterface
 	{

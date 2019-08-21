@@ -264,7 +264,7 @@ namespace ALZ {
 
 		for (Inspector_obj_ptr& obj : objects)
 		{
-			if (obj->Type == InspectorObjectType::RadiaLightType) {
+			if (obj->Type == InspectorObjectType::RadialLightType) {
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
 				background.SubmitLight(*light);
 			}

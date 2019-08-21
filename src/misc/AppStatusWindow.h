@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Window.h"
 
 namespace ALZ {
 
@@ -7,8 +8,12 @@ namespace ALZ {
 	{
 	public:
 		void DisplayGUI(ImGuiID& viewportDockID);
+		void Update(float deltaTime);
 
-	public:
-		std::string Text;
+		void SetText(const std::string& text, float time = 1.0f);
+
+	private:
+		std::string m_Text;
+		float m_DisplayTime = 0.0f;
 	};
 }

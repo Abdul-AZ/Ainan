@@ -40,6 +40,7 @@ namespace ALZ {
 
 		m_Camera.Update(deltaTime);
 		m_ExportCamera.Update(deltaTime);
+		m_AppStatusWindow.Update(deltaTime);
 
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
 		for (int i = 0; i < InspectorObjects.size(); i++) {
@@ -47,8 +48,15 @@ namespace ALZ {
 			if(m_Status == Status_PlayMode || m_Status == Status_ExportMode)
 				InspectorObjects[i]->Update(deltaTime);
 
-			if (InspectorObjects[i]->ToBeDeleted)
+			if (InspectorObjects[i]->ToBeDeleted) 
+			{
+				//display status that we are deleting the object (for 2 seconds)
+				m_AppStatusWindow.SetText("Deleted Object : \"" + InspectorObjects[i]->m_Name + '"' + " of Type : \"" +
+										  InspectorObjectTypeToString(InspectorObjects[i]->Type) + '"', 2.0f);
+
+				//delete the object
 				InspectorObjects.erase(InspectorObjects.begin() + i);
+			}
 		}
 
 		if (Window::WindowSizeChangedSinceLastFrame)
@@ -85,7 +93,7 @@ namespace ALZ {
 
 		for (Inspector_obj_ptr& obj : InspectorObjects)
 		{
-			if (obj->Type == RadiaLightType) {
+			if (obj->Type == RadialLightType) {
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
 				m_Background.SubmitLight(*light);
 			}
@@ -174,7 +182,6 @@ namespace ALZ {
 		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
 		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
 
-		m_AppStatusWindow.Text = "Ready";
 		m_AppStatusWindow.DisplayGUI(viewportDockID);
 		
 		DisplayEnvironmentControlsGUI();
@@ -292,7 +299,7 @@ namespace ALZ {
 			AddInspectorObject(ParticleSystemType);
 
 		if (ImGui::Button("Add Radial Light")) 
-			AddInspectorObject(RadiaLightType);
+			AddInspectorObject(RadialLightType);
 
 		if (ImGui::Button("Add Spot Light"))
 			AddInspectorObject(SpotLightType);
@@ -543,10 +550,37 @@ namespace ALZ {
 			}
 		});
 
-		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -10.0f)); }, GLFW_REPEAT);
-		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, 10.0f)); }, GLFW_REPEAT);
-		m_InputManager.RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(-10.0f, 0.0f)); }, GLFW_REPEAT);
-		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() { m_Camera.SetPosition(m_Camera.Position + glm::vec2(10.0f, 0.0f)); }, GLFW_REPEAT);
+		//so we dont have to repeat those 2 lines
+#define DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW  std::string posStr = "(" + std::to_string(m_Camera.Position.x) + ", " + std::to_string(m_Camera.Position.y) + ")";\
+													  m_AppStatusWindow.SetText(("Moving Camera to Coordinates :" + posStr).c_str(), 0.1f)
+
+		//map WASD keys to move the camera in the environment
+
+		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { 
+			//actually move the camera
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -10.0f));
+			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW; },
+			//set mode as repeat because we want the camera to move smoothly
+			GLFW_REPEAT);
+		//the rest are the same with only a diffrent move direction, that is why they arent commented
+
+		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() {
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, 10.0f));
+			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW;
+			},
+			GLFW_REPEAT);
+
+		m_InputManager.RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() {
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(-10.0f, 0.0f));
+			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW;
+			},
+			GLFW_REPEAT);
+
+		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() {
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(10.0f, 0.0f));
+			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW;
+			},
+			GLFW_REPEAT);
 
 		//delete keyboard shortcut
 		m_InputManager.RegisterKey(GLFW_KEY_DELETE, "Delete Object", [this]() {
@@ -577,7 +611,7 @@ namespace ALZ {
 			}
 			break;
 
-		case RadiaLightType:
+		case RadialLightType:
 			{
 			auto light = std::make_unique<RadialLight>();
 			obj.reset(((InspectorInterface*)(light.release())));
@@ -597,6 +631,9 @@ namespace ALZ {
 			return;
 		}
 
+		//display text that we created the object (for 2 seconds)
+		m_AppStatusWindow.SetText("Created Object : \"" + obj->m_Name + '"' + " of Type : \"" +InspectorObjectTypeToString(obj->Type) + '"', 2.0f);
+
 		//add the object to the list of the environment objects
 		InspectorObjects.push_back(std::move(obj));
 	}
@@ -614,7 +651,7 @@ namespace ALZ {
 		}
 
 		//if this object is a radial light
-		else if (obj.Type == InspectorObjectType::RadiaLightType) 
+		else if (obj.Type == InspectorObjectType::RadialLightType) 
 		{
 			//make a new radial light
 			InspectorObjects.push_back(std::make_unique<RadialLight>(*static_cast<RadialLight*>(&obj)));

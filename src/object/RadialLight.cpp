@@ -6,7 +6,7 @@ namespace ALZ {
 
 	RadialLight::RadialLight()
 	{
-		Type = InspectorObjectType::RadiaLightType;
+		Type = InspectorObjectType::RadialLightType;
 		m_Name = "Radial Light";
 	}
 

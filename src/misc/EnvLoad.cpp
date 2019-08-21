@@ -62,15 +62,25 @@ namespace ALZ {
 		for (size_t i = 0; i < objectCount; i++)
 		{
 			std::string id = "obj" + std::to_string(i) + "_";
-			std::string type = data[id + "Type"].get<std::string>();
-			if (type == "Particle System")
+			std::string typeStr = data[id + "Type"].get<std::string>();
+
+			InspectorObjectType type = StringToInspectorObjectType(typeStr);
+
+			switch (type)
+			{
+			case ALZ::ParticleSystemType:
 				ParticleSystemFromJson(env, data, id);
-			else if (type == "Radial Light")
+				break;
+			case ALZ::RadialLightType:
 				RadialLightFromJson(env, data, id);
-			else if (type == "Spot Light")
+				break;
+			case ALZ::SpotLightType:
 				SpotLightFromJson(env, data, id);
-			else
+				break;
+			default:
 				assert(false);
+				break;
+			}
 		}
 
 		return env;
