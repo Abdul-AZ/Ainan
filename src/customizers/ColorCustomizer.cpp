@@ -14,9 +14,11 @@ namespace ALZ {
 	{
 		if (ImGui::TreeNode("Color")) {
 
-			ImGui::Text("Staring Color");
+			ImGui::Text("Starting Color");
 
-			ImGui::ColorPicker4("Color:", &m_DefinedColor.r);
+			ImGui::Text("Color: ");
+			ImGui::SameLine();
+			ImGui::ColorEdit4("##Color: ", &m_DefinedColor.r);
 
 			ImGui::Spacing();
 			ImGui::Spacing();
@@ -28,7 +30,9 @@ namespace ALZ {
 
 			if (m_Interpolator.Type != InterpolationType::Fixed)
 			{
-				ImGui::ColorPicker4("End Color:", &m_EndColor.r);
+				ImGui::Text("End Color: ");
+				ImGui::SameLine();
+				ImGui::ColorEdit4("##End Color: ", &m_EndColor.r);
 			}
 
 			ImGui::TreePop();

@@ -12,7 +12,9 @@ namespace ALZ {
 
 		if (ImGui::TreeNode("Blend Settings:"))
 		{
-			if (ImGui::BeginCombo("Mode", (m_ActiveBlendMode == BlendMode::Additive)? "Additive" : "Screen"))
+			ImGui::Text("Mode");
+			ImGui::SameLine();
+			if (ImGui::BeginCombo("##Mode", (m_ActiveBlendMode == BlendMode::Additive)? "Additive" : "Screen"))
 			{
 				{
 					bool is_Active = m_ActiveBlendMode == BlendMode::Additive;
@@ -44,18 +46,22 @@ namespace ALZ {
 
 			ImGui::TreePop();
 		}
+		ImGui::Text("Show Grid");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(100.0f);
+		ImGui::Checkbox("##Show Grid", &ShowGrid);
 
-		ImGui::Checkbox("Show Grid", &ShowGrid);
-		ImGui::Checkbox("Blur", &BlurEnabled);
+		ImGui::Text("Blur");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(100.0f);
+		ImGui::Checkbox("##Blur", &BlurEnabled);
 
 		if (BlurEnabled) {
-			if (ImGui::TreeNode("Blur Settings:")) {
+			if (ImGui::TreeNode("Blur Settings: ")) {
 
-				//ImGui::SliderFloat("Scale: ", &BlurScale, 1.0f, 3.0f);
-				//ImGui::SliderFloat("Strength: ", &BlurStrength, 1.0f, 5.0f);
-				//ImGui::SliderFloat("Gaussian Sigma: ", &BlurGaussianSigma, 1.0f, 5.0f);
-
-				ImGui::DragFloat("Blur Radius", &BlurRadius,0.01f, 0.0f, 5.0f);
+				ImGui::Text("Blur Radius: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Blur Radius: ", &BlurRadius,0.01f, 0.0f, 5.0f);
 
 				ImGui::TreePop();
 			}

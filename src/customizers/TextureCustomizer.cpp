@@ -36,7 +36,9 @@ namespace ALZ {
 	{
 		if (ImGui::TreeNode("Texture")) {
 
-			ImGui::Checkbox("Use Default Texture", &UseDefaultTexture);
+			ImGui::Text("Use Default Texture");
+			ImGui::SameLine();
+			ImGui::Checkbox("##Use Default Texture", &UseDefaultTexture);
 
 			if (!UseDefaultTexture) {
 				if (ImGui::Button("Select Texture")) {

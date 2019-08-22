@@ -17,13 +17,26 @@ namespace ALZ {
 
 		ImGui::PushID(this);
 
+		ImGui::SetNextWindowSizeConstraints(ImVec2(300.0f, 200.0f), ImVec2(std::numeric_limits<float>().max(), std::numeric_limits<float>().max()));
+
 		ImGui::Begin((m_Name + "##" + std::to_string(ImGui::GetID(this))).c_str(), &EditorOpen);
 
-		ImGui::DragFloat2("Position", &Position.x, 0.001f);
-		ImGui::ColorEdit3("Color", &Color.r);
+		ImGui::Text("Position: ");
+		ImGui::SameLine();
+		float xPos = ImGui::GetCursorPosX();
+		ImGui::DragFloat2("##Position: ", &Position.x, 0.001f);
+
+		ImGui::Text("Color: ");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(xPos);
+		ImGui::ColorEdit3("##Color: ", &Color.r);
+
 		ImGui::Spacing();
-		ImGui::Text("Light Strength :");
-		ImGui::DragFloat("Intensity", &Intensity, 0.1f);;
+
+		ImGui::Text("Intensity: ");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(xPos);
+		ImGui::DragFloat("##Intensity: ", &Intensity, 0.1f);;
 
 		ImGui::End();
 		

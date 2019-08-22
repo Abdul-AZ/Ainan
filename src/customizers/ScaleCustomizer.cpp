@@ -14,16 +14,25 @@ namespace ALZ {
 
 			ImGui::Text("Starting Scale");
 
+			ImGui::Text("Random Between 2 Numbers");
+			ImGui::SameLine();
 			ImGui::Checkbox("Random Between 2 Numbers", &m_RandomScale);
 
 			if (m_RandomScale)
 			{
-				ImGui::DragFloat("Minimum Scale:", &m_MinScale, 0.1f);
-				ImGui::DragFloat("Maximum Scale:", &m_MaxScale, 0.1f);
+				ImGui::Text("Minimum Scale: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Minimum Scale: ", &m_MinScale, 0.1f);
+
+				ImGui::Text("Maximum Scale: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Maximum Scale: ", &m_MaxScale, 0.1f);
 			}
 			else
 			{
-				ImGui::DragFloat("Scale:", &m_DefinedScale, 0.1f);
+				ImGui::Text("Scale: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Scale: ", &m_DefinedScale, 0.1f);
 			}
 
 			//to make sure scale doesn't go negative
@@ -46,8 +55,11 @@ namespace ALZ {
 
 			if (m_Interpolator.Type != InterpolationType::Fixed)
 			{
-				ImGui::DragFloat("End Scale:", &m_EndScale, 0.1f);
+				ImGui::Text("End Scale: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##End Scale: ", &m_EndScale, 0.1f);
 			}
+
 			//to make sure end scale doesn't go lower than 0
 			if (m_EndScale < 0.0f)
 				m_EndScale = 0.0f;

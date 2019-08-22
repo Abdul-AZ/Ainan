@@ -6,12 +6,17 @@ namespace ALZ {
 
 	void NoiseCustomizer::DisplayGUI()
 	{
-		if (ImGui::TreeNode("Noise")) {
+		if (ImGui::TreeNode("Noise")) 
+		{
+			ImGui::Text("Enabled: ");
+			ImGui::SameLine();
+			ImGui::Checkbox("##Enabled:", &m_NoiseEnabled);
 
-			ImGui::Checkbox("Enabled :", &m_NoiseEnabled);
-			if (m_NoiseEnabled)
+			if (m_NoiseEnabled) 
 			{
-				ImGui::DragFloat("Strength :", &m_NoiseStrength, 0.5f, 0.0f);
+				ImGui::Text("Strength: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Strength: ", &m_NoiseStrength, 0.5f, 0.0f);
 			}
 
 			ImGui::TreePop();

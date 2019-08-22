@@ -52,12 +52,29 @@ namespace ALZ {
 			return;
 
 		ImGui::Begin("Background", &SettingsWindowOpen);
-		ImGui::ColorEdit3("Base Background Color", &BaseColor.r);
-		ImGui::SliderFloat("Base Light", &BaseLight, 0.0f, 1.0f);
+		ImGui::Text("Background\nColor");
+		ImGui::SameLine();
+		ImGui::ColorEdit3("##Base Background Color", &BaseColor.r);
 
-		ImGui::DragFloat("Constant", &Constant, 0.01f);
-		ImGui::DragFloat("Linear", &Linear, 0.0001f);
-		ImGui::DragFloat("Quadratic", &Quadratic, 0.00001f);
+		ImGui::Text("Base Light");
+		ImGui::SameLine();
+		float xPos = ImGui::GetCursorPosX();
+		ImGui::SliderFloat("##Base Light", &BaseLight, 0.0f, 1.0f);
+
+		ImGui::Text("Constant");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(xPos);
+		ImGui::DragFloat("##Constant", &Constant, 0.01f);
+
+		ImGui::Text("Linear");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(xPos);
+		ImGui::DragFloat("##Linear", &Linear, 0.0001f);
+
+		ImGui::Text("Quadratic");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(xPos);
+		ImGui::DragFloat("##Quadratic", &Quadratic, 0.00001f);
 
 		ImGui::End();
 	}

@@ -71,9 +71,12 @@ namespace ALZ {
 
 	void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowOpen)
 	{
+		ImGui::SetNextWindowSizeConstraints(ImVec2(575.0f, 500.0f), ImVec2(std::numeric_limits<float>().max(), std::numeric_limits<float>().max()));
 		ImGui::Begin((windowName.size() > 0) ? (windowName + "##" +  std::to_string(ImGui::GetID(this))).c_str() : "No Name", &windowOpen);
 
-		if (ImGui::BeginCombo("Spawn Mode", GetModeAsText(Mode).c_str())) {
+		ImGui::Text("Spawn\n Mode");
+		ImGui::SameLine();
+		if (ImGui::BeginCombo("##Spawn Mode", GetModeAsText(Mode).c_str())) {
 
 			{
 				bool is_active = Mode == SpawnMode::SpawnOnPoint;
@@ -114,7 +117,9 @@ namespace ALZ {
 
 		if (ImGui::TreeNode("Emission")) {
 
-			ImGui::DragFloat("Particles Per Second", &m_ParticlesPerSecond, 1.0f, 0.1f, 1000.0f);
+			ImGui::Text("Particles\nPer Second: ");
+			ImGui::SameLine();
+			ImGui::DragFloat("##Particles\nPer Second: ", &m_ParticlesPerSecond, 1.0f, 0.1f, 1000.0f);
 
 			ImGui::TreePop();
 		}
@@ -122,7 +127,9 @@ namespace ALZ {
 		if (Mode == SpawnMode::SpawnOnPoint) {
 			if (ImGui::TreeNode("Position")) {
 
-				ImGui::DragFloat2("Starting Position :", &m_SpawnPosition.x, 0.001f);
+				ImGui::Text("Starting Position:");
+				ImGui::SameLine();
+				ImGui::DragFloat2("##Starting Position:", &m_SpawnPosition.x, 0.001f);
 
 				ImGui::TreePop();
 			}
@@ -131,19 +138,38 @@ namespace ALZ {
 		{
 			if (ImGui::TreeNode("Position")) {
 
-				ImGui::DragFloat2("Line Position :", &m_LinePosition.x, 0.001f);
-				ImGui::DragFloat("Line Length :", &m_LineLength, 0.001f);
-				ImGui::DragFloat("Line Rotation :", &m_LineAngle, 1.0f, 0.0f, 360.0f);
+				ImGui::Text("Line Position: ");
+				ImGui::SameLine();
+				float xPos = ImGui::GetCursorPosX();
+				ImGui::DragFloat2("##Line Position: ", &m_LinePosition.x, 0.001f);
+
+				ImGui::Text("Line Length: ");
+				ImGui::SameLine();
+				ImGui::SetCursorPosX(xPos);
+				ImGui::DragFloat("##Line Length: ", &m_LineLength, 0.001f);
+
+				ImGui::Text("Line Rotation :");
+				ImGui::SameLine();
+				ImGui::SetCursorPosX(xPos);
+				ImGui::DragFloat("##Line Rotation: ", &m_LineAngle, 1.0f, 0.0f, 360.0f);
 
 				ImGui::TreePop();
 			}
 		}
 		else if (Mode == SpawnMode::SpawnOnCircle || Mode == SpawnMode::SpawnInsideCircle)
 		{
-			if (ImGui::TreeNode("Position")) {
+			if (ImGui::TreeNode("Position")) 
+			{
 
-				ImGui::DragFloat2("Circle Position :", &m_CircleOutline.Position.x, 0.001f);
-				ImGui::DragFloat("Circle Radius :", &m_CircleOutline.Radius, 0.001f);
+				ImGui::Text("Circle Position: ");
+				ImGui::SameLine();
+				float xPos = ImGui::GetCursorPosX();
+				ImGui::DragFloat2("##Circle Position: ", &m_CircleOutline.Position.x, 0.001f);
+
+				ImGui::Text("Circle Radius: ");
+				ImGui::SameLine();
+				ImGui::SetCursorPosX(xPos);
+				ImGui::DragFloat("##Circle Radius: ", &m_CircleOutline.Radius, 0.001f);
 
 				m_CircleOutline.Radius = std::clamp(m_CircleOutline.Radius, 0.001f, 10000.0f);
 

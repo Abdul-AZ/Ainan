@@ -582,6 +582,8 @@ namespace ALZ {
 			},
 			GLFW_REPEAT);
 
+#undef DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW
+
 		//delete keyboard shortcut
 		m_InputManager.RegisterKey(GLFW_KEY_DELETE, "Delete Object", [this]() {
 

@@ -74,7 +74,9 @@ namespace ALZ {
 		//shows a drop box that has the interpolation options
 		void DisplayGUI(const std::string& title)
 		{
-			if (ImGui::BeginCombo(title.c_str(), InterpolationTypeToString(Type))) {
+			ImGui::Text(title.c_str());
+			ImGui::SameLine();
+			if (ImGui::BeginCombo(("##" + title).c_str(), InterpolationTypeToString(Type))) {
 
 				{
 					bool is_Active = Type == Fixed;

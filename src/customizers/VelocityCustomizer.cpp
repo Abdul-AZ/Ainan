@@ -41,7 +41,9 @@ namespace ALZ {
 
 			ImGui::Text("Starting Velocity");
 
-			ImGui::Checkbox("Random Between 2 Numbers", &m_RandomVelocity);
+			ImGui::Text("Random Between 2 Numbers");
+			ImGui::SameLine();
+			ImGui::Checkbox("##Random Between 2 Numbers", &m_RandomVelocity);
 
 			if (m_RandomVelocity)
 			{
@@ -51,12 +53,21 @@ namespace ALZ {
 				if (m_MaxVelocity.y < m_MinVelocity.y)
 					m_MaxVelocity.y = m_MinVelocity.y;
 
-				ImGui::DragFloat2("Minimum Velocity:", &m_MinVelocity.x);
-				ImGui::DragFloat2("Maximum Velocity:", &m_MaxVelocity.x);
+				ImGui::Text("Minimum Velocity: ");
+				ImGui::SameLine();
+				float xPos = ImGui::GetCursorPosX();
+				ImGui::DragFloat2("##Minimum Velocity : ", &m_MinVelocity.x);
+
+				ImGui::Text("Maximum Velocity: ");
+				ImGui::SameLine();
+				ImGui::SetCursorPosX(xPos);
+				ImGui::DragFloat2("##Maximum Velocity : ", &m_MaxVelocity.x);
 			}
 			else
 			{
-				ImGui::DragFloat2("Velocity:", &m_DefinedVelocity.x);
+				ImGui::Text("Velocity: ");
+				ImGui::SameLine();
+				ImGui::DragFloat2("##Velocity: ", &m_DefinedVelocity.x);
 			}
 
 
@@ -65,7 +76,9 @@ namespace ALZ {
 			ImGui::Spacing();
 			ImGui::Spacing();
 
-			if (ImGui::BeginCombo("Velocity Limit", LimitTypeToString(CurrentVelocityLimitType).c_str()))
+			ImGui::Text("Velocity Limit");
+			ImGui::SameLine();
+			if (ImGui::BeginCombo("##Velocity Limit", LimitTypeToString(CurrentVelocityLimitType).c_str()))
 			{
 				{
 					bool is_active = CurrentVelocityLimitType == NoLimit;
@@ -96,8 +109,13 @@ namespace ALZ {
 
 			if (CurrentVelocityLimitType == NormalLimit)
 			{
-				ImGui::DragFloat("Minimum Velocity Length", &m_MinNormalVelocityLimit);
-				ImGui::DragFloat("Maximum Velocity Length", &m_MaxNormalVelocityLimit);
+				ImGui::Text("Minimum Velocity\n Length: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Minimum Velocity\n Length: ", &m_MinNormalVelocityLimit);
+
+				ImGui::Text("Maximum Velocity\n Length: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Maximum Velocity\n Length: ", &m_MaxNormalVelocityLimit);
 
 				//clamp eveything so that the maximum is always bigger than the minimum and the opposite
 				m_MaxNormalVelocityLimit = std::clamp(m_MaxNormalVelocityLimit, m_MinNormalVelocityLimit, 100000.0f);
@@ -105,8 +123,13 @@ namespace ALZ {
 			}
 			else if (CurrentVelocityLimitType == PerAxisLimit)
 			{
-				ImGui::DragFloat2("Minimum Velocity", &m_MinPerAxisVelocityLimit.x);
-				ImGui::DragFloat2("Maximum Velocity", &m_MaxPerAxisVelocityLimit.x);
+				ImGui::Text("Minimum Velocity: ");
+				ImGui::SameLine();
+				ImGui::DragFloat2("##Minimum Velocity: ", &m_MinPerAxisVelocityLimit.x);
+
+				ImGui::Text("Maximum Velocity: ");
+				ImGui::SameLine();
+				ImGui::DragFloat2("##Maximum Velocity: ", &m_MaxPerAxisVelocityLimit.x);
 
 				//clamp eveything so that the maximum is always bigger than the minimum and the opposite
 				m_MinPerAxisVelocityLimit.x = std::clamp(m_MinPerAxisVelocityLimit.x, -100000.0f, m_MaxPerAxisVelocityLimit.x);

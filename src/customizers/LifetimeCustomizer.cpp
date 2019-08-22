@@ -12,19 +12,28 @@ namespace ALZ {
 	{
 		if (ImGui::TreeNode("Starting Lifetime")) {
 
-			ImGui::Checkbox("Random Between 2 Numbers", &m_RandomLifetime);
+			ImGui::Text("Random Between 2 Numbers");
+			ImGui::SameLine();
+			ImGui::Checkbox("##Random Between 2 Numbers", &m_RandomLifetime);
 
 			if (m_RandomLifetime)
 			{
 				if (m_MaxLifetime < m_MinLifetime)
 					m_MaxLifetime = m_MinLifetime;
 
-				ImGui::DragFloat("Minimum Lifetime:", &m_MinLifetime, 0.1f);
-				ImGui::DragFloat("Maximum Lifetime:", &m_MaxLifetime, 0.1f);
+				ImGui::Text("Minimum Lifetime: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Minimum Lifetime : ", &m_MinLifetime, 0.1f);
+
+				ImGui::Text("Maximum Lifetime: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Maximum Lifetime : ", &m_MaxLifetime, 0.1f);
 			}
 			else
 			{
-				ImGui::DragFloat("Lifetime:", &m_DefinedLifetime, 0.1f);
+				ImGui::Text("Lifetime: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Lifetime: ", &m_DefinedLifetime, 0.1f);
 			}
 			ImGui::TreePop();
 		}

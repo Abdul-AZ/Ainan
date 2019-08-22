@@ -28,7 +28,9 @@ namespace ALZ {
 
 			if (m_DisplayAddForceSettings)
 			{
-				if (ImGui::InputText("Name of the Force", &m_AddForceInputString, ImGuiInputTextFlags_EnterReturnsTrue))
+				ImGui::Text("Name of the Force");
+				ImGui::SameLine();
+				if (ImGui::InputText("##Name of the Force", &m_AddForceInputString, ImGuiInputTextFlags_EnterReturnsTrue))
 				{
 					if (m_AddForceInputString != "")
 					{
@@ -68,6 +70,8 @@ namespace ALZ {
 				ImGui::Text(m_CurrentSelectedForceName.c_str());
 
 				//display a dropdown displaying the types of forces
+				ImGui::Text("Force Type: ");
+				ImGui::SameLine();
 				if (ImGui::BeginCombo("Force Type", Force::ForceTypeToString(m_Forces[m_CurrentSelectedForceName].Type)))
 				{
 					{
@@ -85,16 +89,25 @@ namespace ALZ {
 					ImGui::EndCombo();
 				}
 
-				ImGui::Checkbox("Force Enabled", &m_Forces[m_CurrentSelectedForceName].Enabled);
+				ImGui::Text("Force Enable: ");
+				ImGui::SameLine();
+				ImGui::Checkbox("##Force Enabled: ", &m_Forces[m_CurrentSelectedForceName].Enabled);
 
 				if (m_Forces[m_CurrentSelectedForceName].Type == Force::DirectionalForce) 
 				{
-					ImGui::DragFloat2("Force Value", &m_Forces[m_CurrentSelectedForceName].DF_Value.x);
+					ImGui::Text("Force Value: ");
+					ImGui::SameLine();
+					ImGui::DragFloat2("##Force Value: ", &m_Forces[m_CurrentSelectedForceName].DF_Value.x);
 				}
 				else if ((m_Forces[m_CurrentSelectedForceName].Type == Force::RelativeForce))
 				{
-					ImGui::DragFloat2("Target Position", &m_Forces[m_CurrentSelectedForceName].RF_Target.x, 0.001f);
-					ImGui::DragFloat("Force Strength", &m_Forces[m_CurrentSelectedForceName].RF_Strength);
+					ImGui::Text("Target Position: ");
+					ImGui::SameLine();
+					ImGui::DragFloat2("##Target Position", &m_Forces[m_CurrentSelectedForceName].RF_Target.x, 0.001f);
+
+					ImGui::Text("Force Strength: ");
+					ImGui::SameLine();
+					ImGui::DragFloat("##Force Strength: ", &m_Forces[m_CurrentSelectedForceName].RF_Strength);
 				}
 			}
 
