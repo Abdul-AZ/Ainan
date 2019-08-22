@@ -19,7 +19,7 @@ namespace ALZ {
 
 		ImGui::SetNextWindowSizeConstraints(ImVec2(300.0f, 200.0f), ImVec2(std::numeric_limits<float>().max(), std::numeric_limits<float>().max()));
 
-		ImGui::Begin((m_Name + "##" + std::to_string(ImGui::GetID(this))).c_str(), &EditorOpen);
+		ImGui::Begin((m_Name + "##" + std::to_string(ImGui::GetID(this))).c_str(), &EditorOpen, ImGuiWindowFlags_NoSavedSettings);
 
 		ImGui::Text("Position: ");
 		ImGui::SameLine();
