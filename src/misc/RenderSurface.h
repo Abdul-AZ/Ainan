@@ -13,7 +13,7 @@ namespace ALZ {
 
 		void Render();
 		void Render(ShaderProgram& shader);
-		void RenderToScreen();
+		void RenderToScreen(const Viewport& viewport);
 
 		void SetSize(const glm::vec2& size);
 		glm::vec2 GetSize() { return m_Size; }

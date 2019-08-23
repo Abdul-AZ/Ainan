@@ -64,7 +64,7 @@ namespace ALZ {
 		Renderer::Draw(*m_VertexArray, shader, Primitive::Triangles, 6);
 	}
 
-	void RenderSurface::RenderToScreen()
+	void RenderSurface::RenderToScreen(const Viewport& viewport)
 	{
 		//nullptr means we are copying to the default render buffer (which is the one being displayed)
 		SurfaceFrameBuffer->Blit(nullptr, m_Size, m_Size);
@@ -75,7 +75,7 @@ namespace ALZ {
 		screenViewport.width  = (int)Window::FramebufferSize.x;
 		screenViewport.height = (int)Window::FramebufferSize.y;
 
-		Renderer::SetViewport(screenViewport);
+		Renderer::SetViewport(viewport);
 	}
 
 	void RenderSurface::SetSize(const glm::vec2 & size)

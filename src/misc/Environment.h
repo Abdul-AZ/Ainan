@@ -23,6 +23,7 @@
 #include "misc/Grid.h"
 #include "misc/Gizmo.h"
 #include "renderer/Renderer.h"
+#include "ViewportWindow.h"
 
 #include "InputManager.h"
 
@@ -97,6 +98,7 @@ namespace ALZ {
 		float m_TimeSincePlayModeStarted = 0.0f;
 
 		Background m_Background;
+		ViewportWindow m_ViewportWindow;
 
 		AppStatusWindow m_AppStatusWindow;
 

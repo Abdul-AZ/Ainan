@@ -142,7 +142,7 @@ namespace ALZ {
 
 		if (m_Status == Status_EditorMode) {
 			m_ExportCamera.DrawOutline();
-			m_RenderSurface.RenderToScreen();
+			m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
 			m_RenderSurface.SurfaceFrameBuffer->Unbind();
 			return;
 		}
@@ -157,7 +157,7 @@ namespace ALZ {
 		//draw this after post processing because we do not want the line blured
 		m_ExportCamera.DrawOutline();
 
-		m_RenderSurface.RenderToScreen();
+		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
 
 		Renderer::EndScene();
 
@@ -180,7 +180,11 @@ namespace ALZ {
 		ImGuiViewport viewport;
 		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y -menuBarHeight);
 		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
+
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
+		ImGui::PopStyleColor();
+
 
 		m_AppStatusWindow.DisplayGUI(viewportDockID);
 		
@@ -195,6 +199,7 @@ namespace ALZ {
 			obj->DisplayGUI();
 
 		m_InputManager.DisplayGUI();
+		m_ViewportWindow.DisplayGUI();
 
 		m_EnvironmentSaveBrowser.DisplayGUI([this](const std::string& path) {
 			SaveEnvironment(*this, path + ".env");
