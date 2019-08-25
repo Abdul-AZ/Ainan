@@ -56,7 +56,7 @@ namespace ALZ {
 		m_OutlineLines[2].SetPoints(m_Edges[2], m_Edges[3]); //top right to bottom right
 		m_OutlineLines[3].SetPoints(m_Edges[3], m_Edges[0]); //bottom right to bottom left
 
-		RealCamera.Update(0.0f);
+		RealCamera.Update(0.0f, Renderer::GetCurrentViewport());
 		glm::vec2 reversedPos = glm::vec2(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y);
 		RealCamera.SetPosition(reversedPos * GlobalScaleFactor);
 	}
@@ -257,10 +257,13 @@ namespace ALZ {
 
 	void ExportCamera::ExportFrame(Background& background, std::vector<Inspector_obj_ptr>& objects, float blurRadius)
 	{
+		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
 		Renderer::BeginScene(RealCamera);
 
 		m_RenderSurface.SetSize(m_ExportCameraSize * GlobalScaleFactor);
 		m_RenderSurface.SurfaceFrameBuffer->Bind();
+
+		glViewport(0, 0, (int)Window::FramebufferSize.x, (int)Window::FramebufferSize.y);
 
 		for (Inspector_obj_ptr& obj : objects)
 		{

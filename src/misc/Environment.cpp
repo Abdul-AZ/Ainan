@@ -38,7 +38,7 @@ namespace ALZ {
 		float deltaTime = (timeEnd - timeStart) / 1000.0f;
 		timeStart = timeEnd;
 
-		m_Camera.Update(deltaTime);
+		m_Camera.Update(deltaTime, m_ViewportWindow.RenderViewport);
 		m_ExportCamera.Update(deltaTime);
 		m_AppStatusWindow.Update(deltaTime);
 

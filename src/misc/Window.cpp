@@ -6,6 +6,7 @@
 
 namespace ALZ {
 
+	Viewport Window::WindowViewport = { 0 };
 	bool Window::WindowSizeChangedSinceLastFrame = false;
 	glm::vec2 Window::FramebufferSize = { 0,0 };
 	glm::vec2 Window::Position = { 0,0 };
@@ -15,6 +16,8 @@ namespace ALZ {
 	{
 		Window::WindowSizeChangedSinceLastFrame = true;
 		Window::FramebufferSize = { width, height };
+		Window::WindowViewport.width = width;
+		Window::WindowViewport.height = height;
 		glViewport(0, 0, width, height);
 	}
 
