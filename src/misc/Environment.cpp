@@ -112,7 +112,7 @@ namespace ALZ {
 			for (Inspector_obj_ptr& obj : InspectorObjects)
 				if (obj->Selected) {
 					//draw object position gizmo
-					m_Gizmo.Draw(obj->GetPositionRef(), m_InputManager.GetMousePositionNDC());
+					m_Gizmo.Draw(obj->GetPositionRef(), m_ViewportWindow.RenderViewport);
 
 					//if particle system needs to edit a force target (a world point), use a gimzo for it
 					if (obj->Type == InspectorObjectType::ParticleSystemType)
@@ -120,7 +120,7 @@ namespace ALZ {
 						auto ps = static_cast<ParticleSystem*>(obj.get());
 						if(ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "")
 							if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce)
-								m_Gizmo.Draw(ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target, m_InputManager.GetMousePositionNDC());
+								m_Gizmo.Draw(ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target, m_ViewportWindow.RenderViewport);
 					}
 				}
 
@@ -690,29 +690,29 @@ namespace ALZ {
 			case SpawnMode::SpawnOnPoint:
 
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_SpawnPosition.x * -GlobalScaleFactor, ps.Customizer.m_SpawnPosition.y * -GlobalScaleFactor, 0.0f)
-					+ glm::vec3(Window::FramebufferSize.x / 2, Window::FramebufferSize.y / 2, 0.0f));
+					+ glm::vec3(m_ViewportWindow.RenderViewport.width / 2, m_ViewportWindow.RenderViewport.height / 2, 0.0f));
 				break;
 
 			case SpawnMode::SpawnOnCircle:
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_CircleOutline.Position.x, ps.Customizer.m_CircleOutline.Position.y, 0.0f)
-								   + glm::vec3(Window::FramebufferSize.x / 2, Window::FramebufferSize.y / 2, 0.0f));
+								   + glm::vec3(m_ViewportWindow.RenderViewport.width / 2, m_ViewportWindow.RenderViewport.height / 2, 0.0f));
 				break;
 
 			case SpawnMode::SpawnInsideCircle:
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_CircleOutline.Position.x, ps.Customizer.m_CircleOutline.Position.y, 0.0f)
-					+ glm::vec3(Window::FramebufferSize.x / 2, Window::FramebufferSize.y / 2, 0.0f));
+					+ glm::vec3(m_ViewportWindow.RenderViewport.width / 2, m_ViewportWindow.RenderViewport.height / 2, 0.0f));
 				break;
 
 			case SpawnMode::SpawnOnLine:
 
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_LinePosition.x * -GlobalScaleFactor, ps.Customizer.m_LinePosition.y * -GlobalScaleFactor, 0.0f)
-								   + glm::vec3(Window::FramebufferSize.x / 2, Window::FramebufferSize.y / 2, 0.0f));
+								   + glm::vec3(m_ViewportWindow.RenderViewport.width / 2, m_ViewportWindow.RenderViewport.height / 2, 0.0f));
 				break;
 			}
 		}
 		else {
 			m_Camera.SetPosition(glm::vec3(object.GetPositionRef().x, object.GetPositionRef().y, 0.0f) * -GlobalScaleFactor
-							   + glm::vec3(Window::FramebufferSize.x / 2, Window::FramebufferSize.y / 2, 0.0f));
+							   + glm::vec3(m_ViewportWindow.RenderViewport.width / 2, m_ViewportWindow.RenderViewport.height / 2, 0.0f));
 		}
 	}
 }

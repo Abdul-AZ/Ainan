@@ -9,6 +9,7 @@ namespace ALZ {
 	Viewport Window::WindowViewport = { 0 };
 	bool Window::WindowSizeChangedSinceLastFrame = false;
 	glm::vec2 Window::FramebufferSize = { 0,0 };
+	glm::vec2 Window::Size = { 0,0 };
 	glm::vec2 Window::Position = { 0,0 };
 	GLFWwindow* Window::Ptr = nullptr;
 
@@ -19,6 +20,12 @@ namespace ALZ {
 		Window::WindowViewport.width = width;
 		Window::WindowViewport.height = height;
 		glViewport(0, 0, width, height);
+	}
+
+	void window_size_callback(GLFWwindow* window, int width, int height)
+	{
+		Window::Size.x = width;
+		Window::Size.y = height;
 	}
 
 	void pos_callback(GLFWwindow* window, int x, int y)
@@ -55,6 +62,7 @@ namespace ALZ {
 		glfwMakeContextCurrent(Ptr);
 		glfwSwapInterval(1);
 
+		glfwSetWindowSizeCallback(Ptr, window_size_callback);
 		glfwSetFramebufferSizeCallback(Ptr, framebuffer_size_callback);
 		glfwSetWindowPosCallback(Ptr, pos_callback);
 

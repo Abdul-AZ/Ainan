@@ -16,7 +16,7 @@ namespace ALZ {
 		};
 
 		Gizmo();
-		void Draw(glm::vec2& objectPosition, const glm::vec2& mousePositionNDC);
+		void Draw(glm::vec2& objectPosition, const Viewport& viewport);
 
 	private:
 		bool CheckIfInsideArrow(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point);
