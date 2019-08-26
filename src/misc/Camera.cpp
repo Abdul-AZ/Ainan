@@ -18,13 +18,10 @@ namespace ALZ {
 		}
 	}
 
-	void Camera::Update(const float & deltaTime)
+	void Camera::Update(float deltaTime, const Viewport& viewport)
 	{
-		if (Window::WindowSizeChangedSinceLastFrame)
-		{
-			float aspectRatio = Window::FramebufferSize.x / Window::FramebufferSize.y;
-			ProjectionMatrix = glm::ortho(0.0f, GlobalScaleFactor * aspectRatio, 0.0f, GlobalScaleFactor);
-		}
+		float aspectRatio = (float)viewport.width / viewport.height;
+		ProjectionMatrix = glm::ortho(0.0f, GlobalScaleFactor * aspectRatio, 0.0f, GlobalScaleFactor);
 	}
 
 	void Camera::SetPosition(const glm::vec2& newPos)

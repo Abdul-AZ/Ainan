@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include "Window.h"
+#include "renderer/Viewport.h"
 
 namespace ALZ {
 
@@ -17,7 +18,7 @@ namespace ALZ {
 		Camera(CameraMode mode = CameraMode::Orthographic);
 
 		//this only sets the camera size to the screen size
-		void Update(const float& deltaTime);
+		void Update(float deltaTime, const Viewport& viewport);
 		void SetPosition(const glm::vec2& newPos);
 
 	public:

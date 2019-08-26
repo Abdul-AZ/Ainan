@@ -69,14 +69,36 @@ namespace ALZ {
 		GizmoShader = Renderer::CreateShaderProgram("shaders/Gizmo.vert", "shaders/FlatColor.frag");
 	}
 
-	void Gizmo::Draw(glm::vec2& objectPosition, const glm::vec2& mousePositionNDC)
+	void Gizmo::Draw(glm::vec2& objectPosition, const Viewport& viewport)
 	{
+		double xpos, ypos;
+		glfwGetCursorPos(&Window::GetWindow(), &xpos, &ypos);
+
+		//change from being relative to top left to being relative to bottom left
+		ypos = -ypos + Window::Size.y;
+
+		if (xpos < viewport.x || xpos > viewport.x + viewport.width ||
+			ypos < viewport.y || ypos > viewport.y + viewport.height)
+		{
+			xpos = -1000000;
+			ypos = -1000000;
+		}
+
+		//change from being relative to the bottom left of the screen
+		//to being relative to bottom left of the viewport
+		xpos -= viewport.x;
+		ypos -= viewport.y;
+
+		float NDC_xpos = (float)xpos * 2 / viewport.width - 1.0f;
+		float NDC_ypos = (float)ypos * 2 / viewport.height - 1.0f;
+
 		glm::vec2 objectPositionWS = objectPosition * GlobalScaleFactor;
+		glm::vec2 realMousePositionNDC = glm::vec2(NDC_xpos, NDC_ypos);
 
 		glm::mat4 invView = glm::inverse(Renderer::m_CurrentSceneCamera->ViewMatrix);
 		glm::mat4 invProj = glm::inverse(Renderer::m_CurrentSceneCamera->ProjectionMatrix);
 
-		glm::vec4 result = invView * invProj * glm::vec4(mousePositionNDC.x, mousePositionNDC.y, 0.0f, 1.0f);
+		glm::vec4 result = invView * invProj * glm::vec4(realMousePositionNDC.x, realMousePositionNDC.y, 0.0f, 1.0f);
 
 		//check collision inside arrow rectangle(the part before the wings)
 
@@ -143,7 +165,7 @@ namespace ALZ {
 
 		GizmoShader->SetUniformVec4("u_Color", color);
 		GizmoShader->SetUniformMat4("u_Model", model);
-		glm::vec2 mousePosWS = Renderer::m_CurrentSceneCamera->Position + mousePositionNDC * GlobalScaleFactor;
+		glm::vec2 mousePosWS = Renderer::m_CurrentSceneCamera->Position + realMousePositionNDC * GlobalScaleFactor;
 		glm::vec2 objectPosWS = objectPositionWS * GlobalScaleFactor;
 
 		Renderer::Draw(*VAO, *GizmoShader, Primitive::Triangles, *EBO);
