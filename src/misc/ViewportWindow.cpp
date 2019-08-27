@@ -2,9 +2,6 @@
 
 #include "ViewportWindow.h"
 
-//TEMPORARY
-#include <GLFW/glfw3.h>
-
 namespace ALZ {
 
 	void ViewportWindow::DisplayGUI()
@@ -17,13 +14,13 @@ namespace ALZ {
 
 		RenderViewport.x = ImGui::GetWindowPos().x;
 
-		int height;
-		glfwGetWindowSize(&Window::GetWindow(),nullptr, &height);
-
-		RenderViewport.y = Window::FramebufferSize.y - (ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMax().y);
+		RenderViewport.y = Window::FramebufferSize.y - (ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMax().y + ImGui::GetFrameHeightWithSpacing());
 
 		RenderViewport.width = ImGui::GetWindowSize().x;
 		RenderViewport.height = ImGui::GetWindowSize().y;
+
+		RenderViewport.x -= Window::Position.x;
+		RenderViewport.y += Window::Position.y; //negative because y axis is inverted in screen coordinates
 
 		ImGui::End();
 	}
