@@ -115,8 +115,8 @@ namespace ALZ {
 		// Setup display size (every frame to accommodate for window resizing)
 		int w, h;
 		int display_w, display_h;
-		glfwGetWindowSize(&Window::GetWindow(), &w, &h);
-		glfwGetFramebufferSize(&Window::GetWindow(), &display_w, &display_h);
+		glfwGetWindowSize(Window::Ptr, &w, &h);
+		glfwGetFramebufferSize(Window::Ptr, &display_w, &display_h);
 		io.DisplaySize = ImVec2((float)w, (float)h);
 		if (w > 0 && h > 0)
 			io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
@@ -191,7 +191,7 @@ namespace ALZ {
 
 		io.SetClipboardTextFn = Glfw_SetClipboardText;
 		io.GetClipboardTextFn = Glfw_GetClipboardText;
-		io.ClipboardUserData = (void*)&Window::GetWindow();
+		io.ClipboardUserData = (void*)Window::Ptr;
 
 		MouseCursors[ImGuiMouseCursor_Arrow] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
 		MouseCursors[ImGuiMouseCursor_TextInput] = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
@@ -207,14 +207,14 @@ namespace ALZ {
 		PrevUserCallbackScroll = NULL;
 		PrevUserCallbackKey = NULL;
 		PrevUserCallbackChar = NULL;
-		PrevUserCallbackMousebutton = glfwSetMouseButtonCallback(&Window::GetWindow(), MouseButtonCallback);
-		PrevUserCallbackScroll = glfwSetScrollCallback(&Window::GetWindow(), Glfw_ScrollCallback);
-		PrevUserCallbackKey = glfwSetKeyCallback(&Window::GetWindow(), Glfw_KeyCallback);
-		PrevUserCallbackChar = glfwSetCharCallback(&Window::GetWindow(), CharCallback);
+		PrevUserCallbackMousebutton = glfwSetMouseButtonCallback(Window::Ptr, MouseButtonCallback);
+		PrevUserCallbackScroll = glfwSetScrollCallback(Window::Ptr, Glfw_ScrollCallback);
+		PrevUserCallbackKey = glfwSetKeyCallback(Window::Ptr, Glfw_KeyCallback);
+		PrevUserCallbackChar = glfwSetCharCallback(Window::Ptr, CharCallback);
 
 		// Our mouse update function expect PlatformHandle to be filled for the main viewport
 		ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-		main_viewport->PlatformHandle = (void*)&Window::GetWindow();
+		main_viewport->PlatformHandle = (void*)Window::Ptr;
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 			Glfw_InitPlatformInterface();
 
@@ -279,10 +279,10 @@ namespace ALZ {
 		// Register main window handle (which is owned by the main application, not by us)
 		ImGuiViewport* main_viewport = ImGui::GetMainViewport();
 		ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
-		data->Window = &Window::GetWindow();
+		data->Window = Window::Ptr;
 		data->WindowOwned = false;
 		main_viewport->PlatformUserData = data;
-		main_viewport->PlatformHandle = (void*)&Window::GetWindow();
+		main_viewport->PlatformHandle = (void*)Window::Ptr;
 	}
 
 	static void UpdateMousePosAndButtons()
@@ -292,7 +292,7 @@ namespace ALZ {
 		for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
 		{
 			// If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-			io.MouseDown[i] = MouseJustPressed[i] || glfwGetMouseButton(&Window::GetWindow(), i) != 0;
+			io.MouseDown[i] = MouseJustPressed[i] || glfwGetMouseButton(Window::Ptr, i) != 0;
 			MouseJustPressed[i] = false;
 		}
 
@@ -353,7 +353,7 @@ namespace ALZ {
 	static void UpdateMouseCursor()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		if ((io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) || glfwGetInputMode(&Window::GetWindow(), GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
+		if ((io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) || glfwGetInputMode(Window::Ptr, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
 			return;
 
 		ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
@@ -446,7 +446,7 @@ namespace ALZ {
 		glfwWindowHint(GLFW_VISIBLE, false);
 		glfwWindowHint(GLFW_FOCUSED, false);
 		glfwWindowHint(GLFW_DECORATED, (viewport->Flags & ImGuiViewportFlags_NoDecoration) ? false : true);
-		GLFWwindow* share_window = &Window::GetWindow();
+		GLFWwindow* share_window = Window::Ptr;
 		data->Window = glfwCreateWindow((int)viewport->Size.x, (int)viewport->Size.y, "No Title Yet", NULL, share_window);
 		data->WindowOwned = true;
 		viewport->PlatformHandle = (void*)data->Window;
@@ -722,7 +722,7 @@ namespace ALZ {
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
 		using namespace ALZ;
-		if (PrevUserCallbackMousebutton != NULL && window == &Window::GetWindow())
+		if (PrevUserCallbackMousebutton != NULL && window == Window::Ptr)
 			PrevUserCallbackMousebutton(window, button, action, mods);
 
 		if (action == GLFW_PRESS && button >= 0 && button < IM_ARRAYSIZE(MouseJustPressed))
@@ -732,7 +732,7 @@ namespace ALZ {
 	static void Glfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
 		using namespace ALZ;
-		if (PrevUserCallbackScroll != NULL && window == &Window::GetWindow())
+		if (PrevUserCallbackScroll != NULL && window == Window::Ptr)
 			PrevUserCallbackScroll(window, xoffset, yoffset);
 	
 		ImGuiIO& io = ImGui::GetIO();
@@ -743,7 +743,7 @@ namespace ALZ {
 	static void Glfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		using namespace ALZ;
-		if (PrevUserCallbackKey != NULL && window == &Window::GetWindow())
+		if (PrevUserCallbackKey != NULL && window == Window::Ptr)
 			PrevUserCallbackKey(window, key, scancode, action, mods);
 	
 		ImGuiIO& io = ImGui::GetIO();
@@ -762,7 +762,7 @@ namespace ALZ {
 	void CharCallback(GLFWwindow* window, unsigned int c)
 	{
 		using namespace ALZ;
-		if (PrevUserCallbackChar != NULL && window == &Window::GetWindow())
+		if (PrevUserCallbackChar != NULL && window == Window::Ptr)
 			PrevUserCallbackChar(window, c);
 	
 		ImGuiIO& io = ImGui::GetIO();

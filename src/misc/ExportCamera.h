@@ -8,6 +8,7 @@
 #include "object/ParticleSystem.h"
 #include "Background.h"
 #include "GaussianBlur.h"
+#include "EnvironmentObjectInterface.h"
 
 namespace ALZ {
 
@@ -19,7 +20,7 @@ namespace ALZ {
 		void Update(float deltaTime);
 		void StartExporting();
 		//TODO change blur radius argument to it's own struct called PosProcessingSettings or something like that
-		void ExportFrame(Background& background, std::vector<Inspector_obj_ptr>& objects, float blurRadius);
+		void ExportFrame(Background& background, std::vector<pEnvironmentObject>& objects, float blurRadius);
 		void BeginExportScene();
 
 	public:

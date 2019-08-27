@@ -27,7 +27,7 @@ namespace ALZ {
 	Environment::~Environment()
 	{
 		InspectorObjects.clear();
-		glfwRestoreWindow(&Window::GetWindow());
+		glfwRestoreWindow(Window::Ptr);
 		Window::SetWindowLaunchSize();
 		Window::CenterWindow();
 	}
@@ -91,7 +91,7 @@ namespace ALZ {
 		m_RenderSurface.SurfaceFrameBuffer->Bind();
 		Renderer::ClearScreen();
 
-		for (Inspector_obj_ptr& obj : InspectorObjects)
+		for (pEnvironmentObject& obj : InspectorObjects)
 		{
 			if (obj->Type == RadialLightType) {
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
@@ -109,13 +109,13 @@ namespace ALZ {
 			m_Grid.Draw();
 
 		if(m_Status == Status_EditorMode)
-			for (Inspector_obj_ptr& obj : InspectorObjects)
+			for (pEnvironmentObject& obj : InspectorObjects)
 				if (obj->Selected) {
 					//draw object position gizmo
 					m_Gizmo.Draw(obj->GetPositionRef(), m_ViewportWindow.RenderViewport);
 
 					//if particle system needs to edit a force target (a world point), use a gimzo for it
-					if (obj->Type == InspectorObjectType::ParticleSystemType)
+					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
 					{
 						auto ps = static_cast<ParticleSystem*>(obj.get());
 						if(ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "")
@@ -126,10 +126,10 @@ namespace ALZ {
 
 		//Render world space gui here because we need camera information for that
 		if (m_Status == Status_EditorMode) {
-			for (Inspector_obj_ptr& obj : InspectorObjects)
+			for (pEnvironmentObject& obj : InspectorObjects)
 			{
 				if (obj->Selected)
-					if (obj->Type == InspectorObjectType::ParticleSystemType)
+					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
 					{
 						ParticleSystem* ps = (ParticleSystem*)obj.get();
 						if (ps->Customizer.Mode == SpawnMode::SpawnOnLine)
@@ -148,7 +148,7 @@ namespace ALZ {
 		}
 
 		//stuff to only render in play mode and export mode
-		for (Inspector_obj_ptr& obj : InspectorObjects)
+		for (pEnvironmentObject& obj : InspectorObjects)
 			obj->Draw();
 
 		if (m_Settings.BlurEnabled)
@@ -195,7 +195,7 @@ namespace ALZ {
 		DisplayEnvironmentStatusGUI();
 		m_Background.DisplayGUI();
 
-		for (Inspector_obj_ptr& obj : InspectorObjects)
+		for (pEnvironmentObject& obj : InspectorObjects)
 			obj->DisplayGUI();
 
 		m_InputManager.DisplayGUI();
@@ -323,10 +323,10 @@ namespace ALZ {
 		ImGui::SameLine();
 
 		unsigned int activeParticleCount = 0;
-		for (Inspector_obj_ptr& object : InspectorObjects)
+		for (pEnvironmentObject& object : InspectorObjects)
 		{
 			//if object is a particle system
-			if (object->Type == InspectorObjectType::ParticleSystemType) {
+			if (object->Type == EnvironmentObjectType::ParticleSystemType) {
 				//cast it to a particle system pointer
 				ParticleSystem* ps = static_cast<ParticleSystem*>(object.get());
 
@@ -338,9 +338,9 @@ namespace ALZ {
 
 		ImGui::Separator();
 
-		for (Inspector_obj_ptr& pso : InspectorObjects)
+		for (pEnvironmentObject& pso : InspectorObjects)
 		{
-			if (pso->Type == InspectorObjectType::ParticleSystemType) {
+			if (pso->Type == EnvironmentObjectType::ParticleSystemType) {
 
 				ParticleSystem* ps = static_cast<ParticleSystem*>(pso.get());
 
@@ -516,8 +516,8 @@ namespace ALZ {
 	{
 		m_Status = Status_EditorMode;
 
-		for (Inspector_obj_ptr& obj : InspectorObjects) {
-			if (obj->Type == InspectorObjectType::ParticleSystemType) {
+		for (pEnvironmentObject& obj : InspectorObjects) {
+			if (obj->Type == EnvironmentObjectType::ParticleSystemType) {
 				ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
 				ps->ClearParticles();
 			}
@@ -547,8 +547,8 @@ namespace ALZ {
 
 		m_InputManager.RegisterKey(GLFW_KEY_SPACE, "Clear All Particles", [this]()
 		{
-			for (Inspector_obj_ptr& obj : InspectorObjects) {
-				if (obj->Type == InspectorObjectType::ParticleSystemType) {
+			for (pEnvironmentObject& obj : InspectorObjects) {
+				if (obj->Type == EnvironmentObjectType::ParticleSystemType) {
 					ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
 					ps->ClearParticles();
 				}
@@ -603,10 +603,10 @@ namespace ALZ {
 
 	}
 
-	void Environment::AddInspectorObject(InspectorObjectType type)
+	void Environment::AddInspectorObject(EnvironmentObjectType type)
 	{
 		//interface for the object to be added
-		Inspector_obj_ptr obj;
+		pEnvironmentObject obj;
 
 		//create the object depending on it's type
 		switch (type)
@@ -614,21 +614,21 @@ namespace ALZ {
 		case ParticleSystemType: 
 			{
 			auto ps = std::make_unique<ParticleSystem>();
-			obj.reset(((InspectorInterface*)(ps.release())));
+			obj.reset(((EnvironmentObjectInterface*)(ps.release())));
 			}
 			break;
 
 		case RadialLightType:
 			{
 			auto light = std::make_unique<RadialLight>();
-			obj.reset(((InspectorInterface*)(light.release())));
+			obj.reset(((EnvironmentObjectInterface*)(light.release())));
 			}
 			break;
 
 		case SpotLightType:
 			{
 			auto light = std::make_unique<SpotLight>();
-			obj.reset(((InspectorInterface*)(light.release())));
+			obj.reset(((EnvironmentObjectInterface*)(light.release())));
 			}
 			break;
 
@@ -645,10 +645,10 @@ namespace ALZ {
 		InspectorObjects.push_back(std::move(obj));
 	}
 
-	void Environment::Duplicate(InspectorInterface& obj)
+	void Environment::Duplicate(EnvironmentObjectInterface& obj)
 	{
 		//if this object is a particle system
-		if (obj.Type == InspectorObjectType::ParticleSystemType) 
+		if (obj.Type == EnvironmentObjectType::ParticleSystemType) 
 		{
 			//make a new particle system
 			InspectorObjects.push_back(std::make_unique<ParticleSystem>(*static_cast<ParticleSystem*>(&obj)));
@@ -658,7 +658,7 @@ namespace ALZ {
 		}
 
 		//if this object is a radial light
-		else if (obj.Type == InspectorObjectType::RadialLightType) 
+		else if (obj.Type == EnvironmentObjectType::RadialLightType) 
 		{
 			//make a new radial light
 			InspectorObjects.push_back(std::make_unique<RadialLight>(*static_cast<RadialLight*>(&obj)));
@@ -668,7 +668,7 @@ namespace ALZ {
 		}
 
 		//if this object is a spot light
-		else if (obj.Type == InspectorObjectType::SpotLightType)
+		else if (obj.Type == EnvironmentObjectType::SpotLightType)
 		{
 			//make a new radial light
 			InspectorObjects.push_back(std::make_unique<SpotLight>(*static_cast<SpotLight*>(&obj)));
@@ -678,9 +678,9 @@ namespace ALZ {
 		}
 	}
 
-	void Environment::FocusCameraOnObject(InspectorInterface& object)
+	void Environment::FocusCameraOnObject(EnvironmentObjectInterface& object)
 	{
-		InspectorObjectType type = object.Type;
+		EnvironmentObjectType type = object.Type;
 
 		if (type == ALZ::ParticleSystemType) {
 			ParticleSystem& ps = *static_cast<ParticleSystem*>(&object);

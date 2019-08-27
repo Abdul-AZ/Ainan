@@ -102,21 +102,16 @@ namespace ALZ {
 		glfwGetMonitorPos(monitor, &monitorX, &monitorY);
 
 		int windowWidth, windowHeight;
-		glfwGetWindowSize(&Window::GetWindow(), &windowWidth, &windowHeight);
+		glfwGetWindowSize(Ptr, &windowWidth, &windowHeight);
 
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-		glfwSetWindowPos(&Window::GetWindow(),
+		glfwSetWindowPos(Ptr,
 			monitorX + (mode->width - windowWidth) / 2,
 			monitorY + (mode->height - windowHeight) / 2);
 	}
 
 	void Window::SetWindowLaunchSize()
 	{
-		glfwSetWindowSize(&Window::GetWindow(), WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
-	}
-
-	GLFWwindow& Window::GetWindow()
-	{
-		return *Ptr;
+		glfwSetWindowSize(Ptr, WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
 	}
 }

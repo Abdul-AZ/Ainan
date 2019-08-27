@@ -35,5 +35,5 @@ namespace ALZ {
 		EnvironmentObjectType Type;
 	};
 
-	using Inspector_obj_ptr = std::unique_ptr<EnvironmentObjectInterface>;
+	using pEnvironmentObject = std::unique_ptr<EnvironmentObjectInterface>;
 }

@@ -11,7 +11,7 @@ namespace ALZ {
 
 	ParticleSystem::ParticleSystem()
 	{
-		Type = InspectorObjectType::ParticleSystemType;
+		Type = EnvironmentObjectType::ParticleSystemType;
 
 		m_Name = "Particle System";
 

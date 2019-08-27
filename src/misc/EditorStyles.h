@@ -1,6 +1,5 @@
 #pragma once
 
-
 namespace ALZ 
 {
 	enum class EditorStyle 

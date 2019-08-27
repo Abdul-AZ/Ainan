@@ -1,10 +1,10 @@
 #pragma once
 
-#include "misc/InspectorInterface.h"
+#include "misc/EnvironmentObjectInterface.h"
 
 namespace ALZ {
 
-	class SpotLight : public InspectorInterface
+	class SpotLight : public EnvironmentObjectInterface
 	{
 	public:
 		SpotLight();

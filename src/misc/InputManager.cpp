@@ -24,7 +24,7 @@ namespace ALZ {
 	{
 		for (RegisteredKey& key : m_Keys)
 		{
-			int state = glfwGetKey(&Window::GetWindow(), key.GLFWKeyCode);
+			int state = glfwGetKey(Window::Ptr, key.GLFWKeyCode);
 
 			int& currentState = m_KeyStates[key.GLFWKeyCode];
 
@@ -47,7 +47,7 @@ namespace ALZ {
 				key.OnClickFunction();
 
 		for (RegisteredKey& key : m_MouseKeys)
-			if (glfwGetMouseButton(&Window::GetWindow(), key.GLFWKeyCode) == key.EventTrigger)
+			if (glfwGetMouseButton(Window::Ptr, key.GLFWKeyCode) == key.EventTrigger)
 				key.OnClickFunction();
 	}
 
@@ -90,10 +90,10 @@ namespace ALZ {
 	glm::vec2 InputManager::GetMousePositionNDC()
 	{
 		double xpos, ypos;
-		glfwGetCursorPos(&Window::GetWindow(), &xpos, &ypos);
+		glfwGetCursorPos(Window::Ptr, &xpos, &ypos);
 
 		int width, height;
-		glfwGetWindowSize(&Window::GetWindow(), &width, &height);
+		glfwGetWindowSize(Window::Ptr, &width, &height);
 
 		//change from being relative to top left to being relative to bottom left
 		ypos = -ypos + height;

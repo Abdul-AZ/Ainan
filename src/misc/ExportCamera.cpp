@@ -255,7 +255,7 @@ namespace ALZ {
 		}
 	}
 
-	void ExportCamera::ExportFrame(Background& background, std::vector<Inspector_obj_ptr>& objects, float blurRadius)
+	void ExportCamera::ExportFrame(Background& background, std::vector<pEnvironmentObject>& objects, float blurRadius)
 	{
 		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
 		Renderer::BeginScene(RealCamera);
@@ -265,9 +265,9 @@ namespace ALZ {
 
 		glViewport(0, 0, (int)Window::FramebufferSize.x, (int)Window::FramebufferSize.y);
 
-		for (Inspector_obj_ptr& obj : objects)
+		for (pEnvironmentObject& obj : objects)
 		{
-			if (obj->Type == InspectorObjectType::RadialLightType) {
+			if (obj->Type == EnvironmentObjectType::RadialLightType) {
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
 				background.SubmitLight(*light);
 			}
@@ -275,7 +275,7 @@ namespace ALZ {
 
 		background.Draw();
 
-		for (Inspector_obj_ptr& obj : objects)
+		for (pEnvironmentObject& obj : objects)
 			obj->Draw();
 
 		if (blurRadius > 0.0f)

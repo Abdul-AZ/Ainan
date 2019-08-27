@@ -111,7 +111,7 @@ namespace ALZ {
 		//Draw line from startpoint to controlpoint2
 		drawList->AddLine(endpointPos, controlpoint2Pos, ControlPointColor);
 
-		bool mouseButtonDown = glfwGetMouseButton(&Window::GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+		bool mouseButtonDown = glfwGetMouseButton(Window::Ptr, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
 
 		//if the mouse is not pressed returns because no point is selected
 		if (!mouseButtonDown)

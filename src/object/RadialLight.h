@@ -1,11 +1,11 @@
 #pragma once
 
 #include "renderer/ShaderProgram.h"
-#include "misc/InspectorInterface.h"
+#include "misc/EnvironmentObjectInterface.h"
 
 namespace ALZ {
 
-	class RadialLight : public InspectorInterface
+	class RadialLight : public EnvironmentObjectInterface
 	{
 	public:
 		RadialLight();

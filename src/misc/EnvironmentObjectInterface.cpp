@@ -4,7 +4,7 @@
 
 namespace ALZ {
 
-	InspectorObjectType StringToInspectorObjectType(const std::string& type)
+	EnvironmentObjectType StringToInspectorObjectType(const std::string& type)
 	{
 		if (type == "Particle System")
 			return ParticleSystemType;
@@ -18,7 +18,7 @@ namespace ALZ {
 		return ParticleSystemType;
 	}
 
-	std::string InspectorObjectTypeToString(InspectorObjectType type)
+	std::string InspectorObjectTypeToString(EnvironmentObjectType type)
 	{
 		switch (type)
 		{

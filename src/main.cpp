@@ -19,7 +19,7 @@ int main(int argc, const char* argv[]) {
 	Environment* env = nullptr;
 	StartMenu startMenu;
 
-	while (!glfwWindowShouldClose(&Window::GetWindow()))
+	while (!glfwWindowShouldClose(Window::Ptr))
 	{
 		Window::HandleWindowEvents();
 
@@ -29,7 +29,8 @@ int main(int argc, const char* argv[]) {
 			env->Render();
 			env->RenderGUI();
 		
-			if (env->ShouldDelete) {
+			if (env->ShouldDelete) 
+			{
 				delete env;
 				env = nullptr;
 			}
@@ -40,10 +41,10 @@ int main(int argc, const char* argv[]) {
 		Window::Present();
 		Window::Clear();
 	}
-	
 
 	if(env)
 		delete env;
+
 	ImGuiWrapper::Terminate();
 	Window::Terminate();
 }

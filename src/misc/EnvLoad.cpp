@@ -64,7 +64,7 @@ namespace ALZ {
 			std::string id = "obj" + std::to_string(i) + "_";
 			std::string typeStr = data[id + "Type"].get<std::string>();
 
-			InspectorObjectType type = StringToInspectorObjectType(typeStr);
+			EnvironmentObjectType type = StringToInspectorObjectType(typeStr);
 
 			switch (type)
 			{
@@ -186,7 +186,7 @@ namespace ALZ {
 		}
 		
 		//add particle system to environment
-		Inspector_obj_ptr startingPSi((InspectorInterface*)(ps.release()));
+		pEnvironmentObject startingPSi((EnvironmentObjectInterface*)(ps.release()));
 		env->InspectorObjects.push_back(std::move(startingPSi));
 	}
 
@@ -202,7 +202,7 @@ namespace ALZ {
 		light->Intensity = data[id + "Intensity"].get<float>();
 
 		//add radial light to environment
-		Inspector_obj_ptr startingPSi((InspectorInterface*)(light.release()));
+		pEnvironmentObject startingPSi((EnvironmentObjectInterface*)(light.release()));
 		env->InspectorObjects.push_back(std::move(startingPSi));
 	}
 
@@ -220,7 +220,7 @@ namespace ALZ {
 		light->Intensity = data[id + "Intensity"].get<float>();
 
 		//add radial light to environment
-		Inspector_obj_ptr obj((InspectorInterface*)(light.release()));
+		pEnvironmentObject obj((EnvironmentObjectInterface*)(light.release()));
 		env->InspectorObjects.push_back(std::move(obj));
 	}
 }

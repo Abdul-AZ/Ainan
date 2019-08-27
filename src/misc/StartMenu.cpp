@@ -12,7 +12,7 @@ namespace ALZ {
 	{
 		LoadEnvironmentPath.Filter.push_back(".env");
 		LoadEnvironmentPath.OnCloseWindow = []() {
-			glfwSetWindowSize(&Window::GetWindow(), WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
+			glfwSetWindowSize(Window::Ptr, WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
 			Window::CenterWindow();
 		};
 	}
@@ -23,7 +23,7 @@ namespace ALZ {
 
 		if(LoadEnvironmentPath.OnCloseWindow == nullptr)
 			LoadEnvironmentPath.OnCloseWindow = []() {
-			glfwSetWindowSize(&Window::GetWindow(), WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
+			glfwSetWindowSize(Window::Ptr, WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
 			Window::CenterWindow();
 		};
 
@@ -31,7 +31,7 @@ namespace ALZ {
 		
 		ImGui::SetNextWindowPos({ 0,0 });
 		int screenSizeX, screenSizeY;
-		glfwGetWindowSize(&Window::GetWindow(), &screenSizeX, &screenSizeY);
+		glfwGetWindowSize(Window::Ptr, &screenSizeX, &screenSizeY);
 		ImGui::SetNextWindowSize({ (float)screenSizeX , (float)screenSizeY });
 
 		ImGui::SetNextWindowDockID(ImGui::DockSpaceOverViewport(), ImGuiCond_::ImGuiCond_Always);
@@ -43,7 +43,7 @@ namespace ALZ {
 
 		if (ImGui::Button("Create New Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
-			glfwMaximizeWindow(&Window::GetWindow());
+			glfwMaximizeWindow(Window::Ptr);
 			currentEnv = new Environment();
 		}
 
@@ -58,7 +58,7 @@ namespace ALZ {
 
 		if (ImGui::Button("Exit App", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
-			glfwSetWindowShouldClose(&Window::GetWindow(), true);
+			glfwSetWindowShouldClose(Window::Ptr, true);
 		}
 
 		ImGui::End();
@@ -74,7 +74,7 @@ namespace ALZ {
 						//remove minimizing event on file browser window close
 						LoadEnvironmentPath.OnCloseWindow = nullptr;
 
-						glfwMaximizeWindow(&Window::GetWindow());
+						glfwMaximizeWindow(Window::Ptr);
 						currentEnv = LoadEnvironment(path);
 					}
 				}

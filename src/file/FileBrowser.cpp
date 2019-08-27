@@ -83,6 +83,13 @@ namespace ALZ {
 					bool is_selected = (m_CurrentselectedFilePath == entry.path().u8string());
 					if (ImGui::Selectable(entry.path().filename().u8string().c_str(), &is_selected))
 						m_CurrentselectedFilePath = entry.path().u8string();
+
+					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+					{
+						if (func != nullptr)
+							func(m_CurrentselectedFilePath);
+						m_WindowOpen = false;
+					}
 				}
 			}
 

@@ -72,7 +72,7 @@ namespace ALZ {
 	void Gizmo::Draw(glm::vec2& objectPosition, const Viewport& viewport)
 	{
 		double xpos, ypos;
-		glfwGetCursorPos(&Window::GetWindow(), &xpos, &ypos);
+		glfwGetCursorPos(Window::Ptr, &xpos, &ypos);
 
 		//change from being relative to top left to being relative to bottom left
 		ypos = -ypos + Window::Size.y;
@@ -102,7 +102,7 @@ namespace ALZ {
 
 		//check collision inside arrow rectangle(the part before the wings)
 
-		bool mouseButtonDown = glfwGetMouseButton(&Window::GetWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+		bool mouseButtonDown = glfwGetMouseButton(Window::Ptr, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
 
 		GizmoArrow mouseOver = None;
 

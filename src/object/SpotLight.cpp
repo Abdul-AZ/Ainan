@@ -5,7 +5,7 @@
 namespace ALZ {
 	SpotLight::SpotLight()
 	{
-		Type = InspectorObjectType::SpotLightType;
+		Type = EnvironmentObjectType::SpotLightType;
 		m_Name = "Spot Light";
 	}
 

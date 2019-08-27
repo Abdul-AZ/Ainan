@@ -19,16 +19,13 @@ namespace ALZ {
 		static void CenterWindow();
 		static void SetWindowLaunchSize();
 
-		static GLFWwindow& GetWindow();
+		//do NOT modify these ever
+		//they are only updated from functions inside Window.cpp
 		static glm::vec2 FramebufferSize;
 		static glm::vec2 Size;
 		static glm::vec2 Position;
-
 		static bool WindowSizeChangedSinceLastFrame;
 		static Viewport WindowViewport;
-	private:
 		static GLFWwindow* Ptr;
-		friend void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-		friend void window_size_callback(GLFWwindow* window, int width, int height);
 	};
 }

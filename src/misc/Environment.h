@@ -63,9 +63,9 @@ namespace ALZ {
 		void Resume();
 		void RegisterEnvironmentInputKeys();
 
-		void AddInspectorObject(InspectorObjectType type);
-		void Duplicate(InspectorInterface& obj);
-		void FocusCameraOnObject(InspectorInterface& object);
+		void AddInspectorObject(EnvironmentObjectType type);
+		void Duplicate(EnvironmentObjectInterface& obj);
+		void FocusCameraOnObject(EnvironmentObjectInterface& object);
 
 	public:
 		bool ShouldDelete = false;
@@ -80,7 +80,7 @@ namespace ALZ {
 		InputManager m_InputManager;
 		Grid m_Grid;
 		Gizmo m_Gizmo;
-		std::vector<std::unique_ptr<InspectorInterface>> InspectorObjects;
+		std::vector<std::unique_ptr<EnvironmentObjectInterface>> InspectorObjects;
 
 		bool m_HideGUI = false;
 		bool m_ObjectInspectorWindowOpen = true;
