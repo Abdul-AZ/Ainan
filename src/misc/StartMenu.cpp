@@ -12,7 +12,7 @@ namespace ALZ {
 	{
 		LoadEnvironmentPath.Filter.push_back(".env");
 		LoadEnvironmentPath.OnCloseWindow = []() {
-			glfwSetWindowSize(Window::Ptr, WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
+			Window::SetSize({ WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 });
 			Window::CenterWindow();
 		};
 	}
@@ -23,42 +23,40 @@ namespace ALZ {
 
 		if(LoadEnvironmentPath.OnCloseWindow == nullptr)
 			LoadEnvironmentPath.OnCloseWindow = []() {
-			glfwSetWindowSize(Window::Ptr, WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
+			Window::SetSize({ WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 });
 			Window::CenterWindow();
 		};
 
 		ImGuiWrapper::NewFrame();	
 		
 		ImGui::SetNextWindowPos({ 0,0 });
-		int screenSizeX, screenSizeY;
-		glfwGetWindowSize(Window::Ptr, &screenSizeX, &screenSizeY);
-		ImGui::SetNextWindowSize({ (float)screenSizeX , (float)screenSizeY });
+		ImGui::SetNextWindowSize({ (float)Window::FramebufferSize.x , Window::FramebufferSize.y });
 
 		ImGui::SetNextWindowDockID(ImGui::DockSpaceOverViewport(), ImGuiCond_::ImGuiCond_Always);
 		ImGui::Begin("Start Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
 		
-		ImGui::SetWindowSize(ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y));
+		ImGui::SetWindowSize(ImVec2(Window::Size.x, Window::FramebufferSize.y));
 
-		ImGui::SetCursorPosX((float)screenSizeX / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
+		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
 
 		if (ImGui::Button("Create New Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
-			glfwMaximizeWindow(Window::Ptr);
+			Window::Maximize();
 			currentEnv = new Environment();
 		}
 
-		ImGui::SetCursorPosX((float)screenSizeX / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
+		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
 
 		if (ImGui::Button("Load Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
 			LoadEnvironmentPath.OpenWindow();
 		}
 
-		ImGui::SetCursorPosX((float)screenSizeX / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
+		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
 
 		if (ImGui::Button("Exit App", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
-			glfwSetWindowShouldClose(Window::Ptr, true);
+			Window::SetShouldClose();
 		}
 
 		ImGui::End();
@@ -74,7 +72,7 @@ namespace ALZ {
 						//remove minimizing event on file browser window close
 						LoadEnvironmentPath.OnCloseWindow = nullptr;
 
-						glfwMaximizeWindow(Window::Ptr);
+						Window::Maximize();
 						currentEnv = LoadEnvironment(path);
 					}
 				}

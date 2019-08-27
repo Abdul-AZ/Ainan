@@ -6,6 +6,7 @@
 
 namespace ALZ {
 
+	bool Window::ShouldClose = false;
 	Viewport Window::WindowViewport = { 0 };
 	bool Window::WindowSizeChangedSinceLastFrame = false;
 	glm::vec2 Window::FramebufferSize = { 0,0 };
@@ -81,6 +82,7 @@ namespace ALZ {
 	void Window::HandleWindowEvents()
 	{
 		glfwPollEvents();
+		ShouldClose = glfwWindowShouldClose(Ptr);
 	}
 
 	void Window::Clear()
@@ -113,5 +115,25 @@ namespace ALZ {
 	void Window::SetWindowLaunchSize()
 	{
 		glfwSetWindowSize(Ptr, WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
+	}
+
+	void Window::Restore()
+	{
+		glfwRestoreWindow(Ptr);
+	}
+
+	void Window::Maximize()
+	{
+		glfwMaximizeWindow(Ptr);
+	}
+
+	void Window::SetSize(const glm::ivec2& size)
+	{
+		glfwSetWindowSize(Ptr, size.x, size.y);
+	}
+
+	void Window::SetShouldClose()
+	{
+		glfwSetWindowShouldClose(Ptr, true);
 	}
 }

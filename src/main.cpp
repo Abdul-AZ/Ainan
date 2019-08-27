@@ -19,7 +19,7 @@ int main(int argc, const char* argv[]) {
 	Environment* env = nullptr;
 	StartMenu startMenu;
 
-	while (!glfwWindowShouldClose(Window::Ptr))
+	while (Window::ShouldClose == false)
 	{
 		Window::HandleWindowEvents();
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Window.h"
-#include "GLFWKeyToString.h"
+#include "GLFWKey.h"
 
 namespace ALZ {
 
@@ -16,22 +16,25 @@ namespace ALZ {
 	class InputManager {
 	public:
 		//eventTrigger is either GLFW_PRESS, GLFW_REPEAT or GLFW_RELEASE.
-		void RegisterKey(int glfwKeyCode, std::string description, std::function<void()> func, int eventTrigger = GLFW_PRESS);
-		void RegisterMouseKey(int glfwMouseKeyCode, std::string description, std::function<void()> func, int eventTrigger = GLFW_PRESS);
-		void ClearKeys();
-		void HandleInput();
-		void DisplayGUI();
-		glm::vec2 GetMousePositionNDC();
+		static void RegisterKey(int glfwKeyCode, std::string description, std::function<void()> func, int eventTrigger = GLFW_PRESS);
+		static void RegisterMouseKey(int glfwMouseKeyCode, std::string description, std::function<void()> func, int eventTrigger = GLFW_PRESS);
+		static void ClearKeys();
+		static void HandleInput();
+		static void DisplayGUI();
+		static glm::vec2 GetMousePositionNDC();
+
+		//returns either GLFW_PRESS or GLFW_REPEAT or GLFW_RELEASE
+		static int GetKey(int glfwKey);
 
 	public:
-		bool ControlsWindowOpen = false;
+		static bool ControlsWindowOpen;
 
 	private:
-		std::vector<RegisteredKey> m_Keys;
-		std::vector<RegisteredKey> m_MouseKeys;
+		static std::vector<RegisteredKey> m_Keys;
+		static std::vector<RegisteredKey> m_MouseKeys;
 		
 		//the key(int) is key code from glfw example : GLFW_KEY_A.
 		//the value(int) has the following values, GLFW_PRESS, GLFW_REPEAT and GLFW_RELEASE.
-		std::unordered_map<int, int> m_KeyStates;
+		static std::unordered_map<int, int> m_KeyStates;
 	};
 }

@@ -77,7 +77,6 @@ namespace ALZ {
 		RenderSurface m_RenderSurface;
 		Camera m_Camera;
 		ExportCamera m_ExportCamera;
-		InputManager m_InputManager;
 		Grid m_Grid;
 		Gizmo m_Gizmo;
 		std::vector<std::unique_ptr<EnvironmentObjectInterface>> InspectorObjects;

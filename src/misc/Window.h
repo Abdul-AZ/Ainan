@@ -18,9 +18,17 @@ namespace ALZ {
 		static void Terminate();
 		static void CenterWindow();
 		static void SetWindowLaunchSize();
+		static void Restore();
+		static void Maximize();
 
-		//do NOT modify these ever
+		static void SetSize(const glm::ivec2& size);
+		static void SetShouldClose();
+
+	public:
+
+		//do NOT modify these ever, use Setxxx functions for that
 		//they are only updated from functions inside Window.cpp
+		static bool ShouldClose;
 		static glm::vec2 FramebufferSize;
 		static glm::vec2 Size;
 		static glm::vec2 Position;

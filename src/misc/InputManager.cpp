@@ -1,8 +1,14 @@
 #include <pch.h>
 
 #include "InputManager.h"
+#include <GLFW/glfw3.h>
 
 namespace ALZ {
+
+	bool InputManager::ControlsWindowOpen = false;
+	std::vector<RegisteredKey> InputManager::m_Keys;
+	std::vector<RegisteredKey> InputManager::m_MouseKeys;
+	std::unordered_map<int, int> InputManager::m_KeyStates;
 
 	void InputManager::RegisterKey(int glfwKeyCode, std::string description, std::function<void()> func, int eventTrigger)
 	{
@@ -24,7 +30,7 @@ namespace ALZ {
 	{
 		for (RegisteredKey& key : m_Keys)
 		{
-			int state = glfwGetKey(Window::Ptr, key.GLFWKeyCode);
+			int state = InputManager::GetKey(key.GLFWKeyCode);
 
 			int& currentState = m_KeyStates[key.GLFWKeyCode];
 
@@ -102,5 +108,10 @@ namespace ALZ {
 		float NDC_ypos = (float)ypos * 2 / height - 1.0f;
 
 		return glm::vec2(NDC_xpos, NDC_ypos);
+	}
+
+	int InputManager::GetKey(int glfwKey)
+	{
+		return glfwGetKey(Window::Ptr, glfwKey);
 	}
 }

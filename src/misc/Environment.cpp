@@ -27,7 +27,7 @@ namespace ALZ {
 	Environment::~Environment()
 	{
 		InspectorObjects.clear();
-		glfwRestoreWindow(Window::Ptr);
+		Window::Restore();
 		Window::SetWindowLaunchSize();
 		Window::CenterWindow();
 	}
@@ -198,7 +198,7 @@ namespace ALZ {
 		for (pEnvironmentObject& obj : InspectorObjects)
 			obj->DisplayGUI();
 
-		m_InputManager.DisplayGUI();
+		InputManager::DisplayGUI();
 		m_ViewportWindow.DisplayGUI();
 
 		m_EnvironmentSaveBrowser.DisplayGUI([this](const std::string& path) {
@@ -211,7 +211,7 @@ namespace ALZ {
 
 	void Environment::HandleInput()
 	{
-		m_InputManager.HandleInput();	
+		InputManager::HandleInput();
 	}
 
 	void Environment::DisplayObjectInspecterGUI()
@@ -490,7 +490,7 @@ namespace ALZ {
 			if (ImGui::BeginMenu("Help")) {
 
 				if (ImGui::MenuItem("Controls"))
-					m_InputManager.ControlsWindowOpen = !m_InputManager.ControlsWindowOpen;
+					InputManager::ControlsWindowOpen = !InputManager::ControlsWindowOpen;
 					
 				ImGui::EndMenu();
 			}
@@ -536,16 +536,16 @@ namespace ALZ {
 
 	void Environment::RegisterEnvironmentInputKeys()
 	{
-		m_InputManager.RegisterKey(GLFW_KEY_F5, "PlayMode/Resume", [this]() {
+		InputManager::RegisterKey(GLFW_KEY_F5, "PlayMode/Resume", [this]() {
 			if (m_Status == Status_EditorMode)
 				PlayMode();
 			if (m_Status == Status_PauseMode)
 				Resume();
 		});
 
-		m_InputManager.RegisterKey(GLFW_KEY_F1, "Hide Menus", [this]() { m_HideGUI = !m_HideGUI; });
+		InputManager::RegisterKey(GLFW_KEY_F1, "Hide Menus", [this]() { m_HideGUI = !m_HideGUI; });
 
-		m_InputManager.RegisterKey(GLFW_KEY_SPACE, "Clear All Particles", [this]()
+		InputManager::RegisterKey(GLFW_KEY_SPACE, "Clear All Particles", [this]()
 		{
 			for (pEnvironmentObject& obj : InspectorObjects) {
 				if (obj->Type == EnvironmentObjectType::ParticleSystemType) {
@@ -561,7 +561,7 @@ namespace ALZ {
 
 		//map WASD keys to move the camera in the environment
 
-		m_InputManager.RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() { 
+		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() {
 			//actually move the camera
 			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -10.0f));
 			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW; },
@@ -569,19 +569,19 @@ namespace ALZ {
 			GLFW_REPEAT);
 		//the rest are the same with only a diffrent move direction, that is why they arent commented
 
-		m_InputManager.RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() {
+		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() {
 			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, 10.0f));
 			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW;
 			},
 			GLFW_REPEAT);
 
-		m_InputManager.RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() {
+		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() {
 			m_Camera.SetPosition(m_Camera.Position + glm::vec2(-10.0f, 0.0f));
 			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW;
 			},
 			GLFW_REPEAT);
 
-		m_InputManager.RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() {
+		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() {
 			m_Camera.SetPosition(m_Camera.Position + glm::vec2(10.0f, 0.0f));
 			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW;
 			},
@@ -590,7 +590,7 @@ namespace ALZ {
 #undef DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW
 
 		//delete keyboard shortcut
-		m_InputManager.RegisterKey(GLFW_KEY_DELETE, "Delete Object", [this]() {
+		InputManager::RegisterKey(GLFW_KEY_DELETE, "Delete Object", [this]() {
 
 			for (int i = 0; i < InspectorObjects.size(); i++)
 			{
