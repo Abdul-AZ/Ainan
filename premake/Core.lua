@@ -16,8 +16,6 @@ project "Core"
 
   includedirs { "../src", "../imgui", "../imgui/examples", "../imgui/misc/cpp", "../glm", "../src/vendor" }
 
-  defines { "_CRT_SECURE_NO_WARNINGS" }
-
   links { "OpenGL32.lib", "glfw", "imgui" }
 
   filter "configurations:Debug"

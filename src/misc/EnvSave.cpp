@@ -49,11 +49,14 @@ namespace ALZ {
 
 		std::string jsonString = data.dump(4);
 
-		FILE* file = fopen(path.c_str(), "w");
-
-		fwrite(jsonString.c_str(), 1, jsonString.size(), file);
-
-		fclose(file);
+		FILE* file = (FILE*)1;
+		auto error = fopen_s(&file, path.c_str(), "w");
+		if (error == 0) {
+			fwrite(jsonString.c_str(), 1, jsonString.size(), file);
+			fclose(file);
+		}
+		else
+			assert(false, "Error while trying to save environment");
 		
 		return true;
 	}

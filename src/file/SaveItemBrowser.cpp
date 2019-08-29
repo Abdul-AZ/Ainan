@@ -69,7 +69,7 @@ namespace ALZ {
 
 		ImGui::PushItemWidth(BROWSER_WINDOW_WIDTH - 70);
 
-		if (ImGui::InputText("##FileName", &m_FileName, ImGuiInputTextFlags_EnterReturnsTrue)) {
+		if (ImGui::InputText("##FileName", &m_FileName)) {
 			if (m_FileName.size() > 0)
 				m_FileNameChosen = true;
 			else
@@ -80,7 +80,8 @@ namespace ALZ {
 
 		if (ImGui::Button("Save"))
 		{
-			if (func != nullptr && m_FileNameChosen) {
+			if (func != nullptr && m_FileNameChosen) 
+			{
 				func(GetSelectedSavePath());
 				m_WindowOpen = false;
 			}
