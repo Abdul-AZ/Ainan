@@ -267,8 +267,12 @@ namespace ALZ {
 
 		for (pEnvironmentObject& obj : objects)
 		{
-			if (obj->Type == EnvironmentObjectType::RadialLightType) {
+			if (obj->Type == RadialLightType) {
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
+				background.SubmitLight(*light);
+			}
+			else if (obj->Type == SpotLightType) {
+				SpotLight* light = static_cast<SpotLight*>(obj.get());
 				background.SubmitLight(*light);
 			}
 		}
