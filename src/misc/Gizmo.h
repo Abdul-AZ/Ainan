@@ -25,9 +25,9 @@ namespace ALZ {
 		std::unordered_map<void*, GizmoArrow> m_ArrowPressedMap;
 		std::unordered_map<void*, float> m_ArrowPressLocationDistanceFromArrowOriginMap;
 
-		std::unique_ptr<IndexBuffer> EBO;
-		std::unique_ptr<VertexBuffer> VBO;
-		std::unique_ptr<VertexArray> VAO;
-		std::unique_ptr<ShaderProgram> GizmoShader;
+		std::shared_ptr<IndexBuffer> EBO;
+		std::shared_ptr<VertexBuffer> VBO;
+		std::shared_ptr<VertexArray> VAO;
+		std::shared_ptr<ShaderProgram> GizmoShader;
 	};
 }

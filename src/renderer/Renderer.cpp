@@ -86,12 +86,12 @@ namespace ALZ {
 		}
 	}
 
-	std::unique_ptr<VertexArray> Renderer::CreateVertexArray()
+	std::shared_ptr<VertexArray> Renderer::CreateVertexArray()
 	{
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGL::OpenGLVertexArray>();
+			return std::make_shared<OpenGL::OpenGLVertexArray>();
 
 		default:
 			assert(false);
@@ -99,12 +99,12 @@ namespace ALZ {
 		}
 	}
 
-	std::unique_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, unsigned int size)
+	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, unsigned int size)
 	{
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGL::OpenGLVertexBuffer>(data, size);
+			return std::make_shared<OpenGL::OpenGLVertexBuffer>(data, size);
 
 		default:
 			assert(false);
@@ -112,12 +112,12 @@ namespace ALZ {
 		}
 	}
 
-	std::unique_ptr<IndexBuffer> Renderer::CreateIndexBuffer(unsigned int* data, const int& count)
+	std::shared_ptr<IndexBuffer> Renderer::CreateIndexBuffer(unsigned int* data, const int& count)
 	{
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGL::OpenGLIndexBuffer>(data, count);
+			return std::make_shared<OpenGL::OpenGLIndexBuffer>(data, count);
 
 		default:
 			assert(false);
@@ -125,12 +125,12 @@ namespace ALZ {
 		}
 	}
 
-	std::unique_ptr<ShaderProgram> Renderer::CreateShaderProgram(const std::string& vertPath, const std::string& fragPath)
+	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgram(const std::string& vertPath, const std::string& fragPath)
 	{
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGL::OpenGLShaderProgram>(vertPath, fragPath);
+			return std::make_shared<OpenGL::OpenGLShaderProgram>(vertPath, fragPath);
 
 		default:
 			assert(false);
@@ -138,12 +138,12 @@ namespace ALZ {
 		}
 	}
 
-	std::unique_ptr<FrameBuffer> Renderer::CreateFrameBuffer()
+	std::shared_ptr<FrameBuffer> Renderer::CreateFrameBuffer()
 	{
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGL::OpenGLFrameBuffer>();
+			return std::make_shared<OpenGL::OpenGLFrameBuffer>();
 
 		default:
 			assert(false);
@@ -151,12 +151,12 @@ namespace ALZ {
 		}
 	}
 
-	std::unique_ptr<Texture> Renderer::CreateTexture()
+	std::shared_ptr<Texture> Renderer::CreateTexture()
 	{
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_unique<OpenGL::OpenGLTexture>();
+			return std::make_shared<OpenGL::OpenGLTexture>();
 
 		default:
 			assert(false);

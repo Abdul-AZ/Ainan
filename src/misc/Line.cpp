@@ -5,22 +5,22 @@
 namespace ALZ {
 
 	static bool LineBufferInitilized = false;
-	static VertexArray* VAO = nullptr;
-	static VertexBuffer* VBO = nullptr;
-	static ShaderProgram* LineShader = nullptr;
+	static std::shared_ptr<VertexArray> VAO = nullptr;
+	static std::shared_ptr<VertexBuffer> VBO = nullptr;
+	static std::shared_ptr<ShaderProgram> LineShader = nullptr;
 
 	Line::Line()
 	{
 		if (!LineBufferInitilized) {
 
-			VAO = Renderer::CreateVertexArray().release();
+			VAO = Renderer::CreateVertexArray();
 			VAO->Bind();
 
-			VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2).release();
+			VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2);
 			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
 			VAO->Unbind();
-			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/FlatColor.frag").release();
+			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/FlatColor.frag");
 			LineBufferInitilized = true;
 		}
 	}

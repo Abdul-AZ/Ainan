@@ -3,11 +3,11 @@
 
 namespace ALZ {
 	static bool InitilizedCircleVertices = false;
-	static VertexArray* VAO = nullptr;
-	static VertexBuffer* VBO = nullptr;
-	static ShaderProgram* CircleInstancedShader = nullptr;
+	static std::shared_ptr<VertexArray> VAO = nullptr;
+	static std::shared_ptr<VertexBuffer> VBO = nullptr;
+	static std::shared_ptr<ShaderProgram> CircleInstancedShader = nullptr;
 
-	static Texture* DefaultTexture;
+	static std::shared_ptr<Texture> DefaultTexture;
 
 	ParticleSystem::ParticleSystem()
 	{
@@ -28,7 +28,7 @@ namespace ALZ {
 		//initilize the vertices only the first time a particle system is created
 		if (!InitilizedCircleVertices) {
 
-			VAO = Renderer::CreateVertexArray().release();
+			VAO = Renderer::CreateVertexArray();
 			VAO->Bind();
 
 			//						 Position				  Texture Coordinates
@@ -41,7 +41,7 @@ namespace ALZ {
 									 glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0) };
 
 
-			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices)).release();
+			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices));
 
 			//				 Position					Texture Coordinates
 			VBO->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
@@ -49,11 +49,11 @@ namespace ALZ {
 			VBO->Unbind();
 			VAO->Unbind();
 
-			DefaultTexture = Renderer::CreateTexture().release();
+			DefaultTexture = Renderer::CreateTexture();
 			DefaultTexture->SetImage(Image::LoadFromFile("res/Circle.png"));
 			DefaultTexture->Bind();
 
-			CircleInstancedShader = Renderer::CreateShaderProgram("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag").release();
+			CircleInstancedShader = Renderer::CreateShaderProgram("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag");
 
 			InitilizedCircleVertices = true;
 		}

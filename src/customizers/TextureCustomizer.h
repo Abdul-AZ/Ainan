@@ -17,7 +17,7 @@ namespace ALZ {
 
 	public:
 		bool UseDefaultTexture = true;
-		std::unique_ptr<Texture> ParticleTexture;
+		std::shared_ptr<Texture> ParticleTexture;
 
 	private:
 		FileBrowser m_FileBrowser;

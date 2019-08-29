@@ -31,9 +31,9 @@ namespace ALZ {
 		float Quadratic = 0.0075f;
 	private:
 
-		std::unique_ptr<VertexArray> VAO;
-		std::unique_ptr<VertexBuffer> VBO;
-		std::unique_ptr<ShaderProgram> BackgroundShader;
+		std::shared_ptr<VertexArray> VAO;
+		std::shared_ptr<VertexBuffer> VBO;
+		std::shared_ptr<ShaderProgram> BackgroundShader;
 
 		//RadialLight data
 		unsigned int m_RadialLightSubmissionCount = 0;

@@ -3,11 +3,11 @@
 
 namespace ALZ {
 
-	ShaderProgram* BlurShader;
+	std::shared_ptr<ShaderProgram> BlurShader;
 
 	void GaussianBlur::Init()
 	{
-		BlurShader = Renderer::CreateShaderProgram("shaders/Image.vert", "shaders/Blur.frag").release();
+		BlurShader = Renderer::CreateShaderProgram("shaders/Image.vert", "shaders/Blur.frag");
 	}
 
 	void GaussianBlur::Blur(RenderSurface& surface, float radius)

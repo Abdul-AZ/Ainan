@@ -8,10 +8,10 @@
 namespace ALZ {
 
 	static bool GridBufferInitilized = false;
-	static VertexArray* VAO = nullptr;
-	static VertexBuffer* VBO = nullptr;
-	static IndexBuffer* EBO = nullptr;
-	static ShaderProgram* LineShader = nullptr;
+	static std::shared_ptr<VertexArray> VAO = nullptr;
+	static std::shared_ptr<VertexBuffer> VBO = nullptr;
+	static std::shared_ptr<IndexBuffer> EBO = nullptr;
+	static std::shared_ptr<ShaderProgram> LineShader = nullptr;
 
 	static std::vector<glm::vec2> vertices;
 	static std::vector<unsigned int> indecies;
@@ -65,17 +65,17 @@ namespace ALZ {
 				indecies.push_back((unsigned int)i + VERTICES_PER_AXIS * 3 + 1);
 			}
 
-			VAO = Renderer::CreateVertexArray().release();
+			VAO = Renderer::CreateVertexArray();
 			VAO->Bind();
 
-			VBO = Renderer::CreateVertexBuffer(vertices.data(),(unsigned int)sizeof(glm::vec2) * (unsigned int)vertices.size()).release();
+			VBO = Renderer::CreateVertexBuffer(vertices.data(),(unsigned int)sizeof(glm::vec2) * (unsigned int)vertices.size());
 			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
-			EBO = Renderer::CreateIndexBuffer(indecies.data(), (unsigned int)indecies.size()).release();
+			EBO = Renderer::CreateIndexBuffer(indecies.data(), (unsigned int)indecies.size());
 
 			VAO->Unbind();
 
-			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/FlatColor.frag").release();
+			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/FlatColor.frag");
 
 			GridBufferInitilized = true;
 		}

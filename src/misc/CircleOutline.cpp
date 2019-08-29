@@ -5,17 +5,17 @@
 namespace ALZ {
 
 	static bool CircleOutlineBuffersInitilized = false;
-	static IndexBuffer* EBO = nullptr;
-	static VertexBuffer* VBO = nullptr;
-	static VertexArray* VAO = nullptr;
-	static ShaderProgram* CircleOutlineShader = nullptr;
+	static std::shared_ptr<IndexBuffer> EBO = nullptr;
+	static std::shared_ptr<VertexBuffer> VBO = nullptr;
+	static std::shared_ptr<VertexArray> VAO = nullptr;
+	static std::shared_ptr<ShaderProgram> CircleOutlineShader = nullptr;
 
 	static const int vertexCount = 60;
 	CircleOutline::CircleOutline()
 	{
 		if (!CircleOutlineBuffersInitilized){
 
-			VAO = Renderer::CreateVertexArray().release();
+			VAO = Renderer::CreateVertexArray();
 			VAO->Bind();
 
 			glm::vec2 vertices[vertexCount];
@@ -37,14 +37,14 @@ namespace ALZ {
 			}
 			vertices[vertexCount - 1] = vertices[0];
 
-			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * vertexCount).release();
+			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * vertexCount);
 			VBO->SetLayout({ ShaderVariableType::Vec2 });
 
-			EBO = Renderer::CreateIndexBuffer(indecies, vertexCount * 2 - 2).release();
+			EBO = Renderer::CreateIndexBuffer(indecies, vertexCount * 2 - 2);
 
 			VAO->Unbind();
 
-			CircleOutlineShader = Renderer::CreateShaderProgram("shaders/CircleOutline.vert", "shaders/FlatColor.frag").release();
+			CircleOutlineShader = Renderer::CreateShaderProgram("shaders/CircleOutline.vert", "shaders/FlatColor.frag");
 
 			CircleOutlineBuffersInitilized = true;
 		}

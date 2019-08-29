@@ -4,7 +4,7 @@
 
 namespace ALZ {
 
-	static ShaderProgram* ImageShader = nullptr;
+	static std::shared_ptr<ShaderProgram> ImageShader = nullptr;
 	static bool ImageShaderInitilized = false;
 
 	RenderSurface::RenderSurface()
@@ -46,7 +46,7 @@ namespace ALZ {
 
 		if (ImageShaderInitilized == false)
 		{
-			ImageShader = Renderer::CreateShaderProgram("shaders/Image.vert", "shaders/Image.frag").release();
+			ImageShader = Renderer::CreateShaderProgram("shaders/Image.vert", "shaders/Image.frag");
 			ImageShaderInitilized = true;
 		}
 	}

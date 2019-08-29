@@ -87,10 +87,10 @@ namespace ALZ {
 		bool m_EnvironmentControlsWindowOpen = true;
 		EnvironmentStatus m_Status = Status_EditorMode;
 
-		std::unique_ptr<Texture> m_PlayButtonTexture;
-		std::unique_ptr<Texture> m_PauseButtonTexture;
-		std::unique_ptr<Texture> m_ResumeButtonTexture;
-		std::unique_ptr<Texture> m_StopButtonTexture;
+		std::shared_ptr<Texture> m_PlayButtonTexture;
+		std::shared_ptr<Texture> m_PauseButtonTexture;
+		std::shared_ptr<Texture> m_ResumeButtonTexture;
+		std::shared_ptr<Texture> m_StopButtonTexture;
 
 		bool m_MousePressedLastFrame = false;
 

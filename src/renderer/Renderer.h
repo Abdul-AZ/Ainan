@@ -47,13 +47,13 @@ namespace ALZ {
 		static void SetViewport(const Viewport viewport);
 		static Viewport GetCurrentViewport();
 
-		static std::unique_ptr<VertexArray> CreateVertexArray();
-		static std::unique_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size);
+		static std::shared_ptr<VertexArray> CreateVertexArray();
+		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size);
 		//data should ALWAYS an UNSIGNED INT array
-		static std::unique_ptr<IndexBuffer> CreateIndexBuffer(unsigned int* data, const int& count);
-		static std::unique_ptr<ShaderProgram> CreateShaderProgram(const std::string& vertPath, const std::string& fragPath);
-		static std::unique_ptr<FrameBuffer> CreateFrameBuffer();
-		static std::unique_ptr<Texture> CreateTexture();
+		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(unsigned int* data, const int& count);
+		static std::shared_ptr<ShaderProgram> CreateShaderProgram(const std::string& vertPath, const std::string& fragPath);
+		static std::shared_ptr<FrameBuffer> CreateFrameBuffer();
+		static std::shared_ptr<Texture> CreateTexture();
 		static Camera* m_CurrentSceneCamera;
 	private:
 		static glm::mat4 m_CurrentViewProjection;
