@@ -7,7 +7,8 @@ namespace ALZ {
 	enum EnvironmentObjectType {
 		ParticleSystemType,
 		RadialLightType,
-		SpotLightType
+		SpotLightType,
+		SpriteType
 	};
 
 	EnvironmentObjectType StringToInspectorObjectType(const std::string& type);

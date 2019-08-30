@@ -309,6 +309,9 @@ namespace ALZ {
 		if (ImGui::Button("Add Spot Light"))
 			AddInspectorObject(SpotLightType);
 
+		if (ImGui::Button("Add Sprite"))
+			AddInspectorObject(SpriteType);
+
 		ImGui::End();
 	}
 
@@ -629,6 +632,13 @@ namespace ALZ {
 			{
 			auto light = std::make_unique<SpotLight>();
 			obj.reset(((EnvironmentObjectInterface*)(light.release())));
+			}
+			break;
+
+		case SpriteType:
+			{
+			auto sprite = std::make_unique<Sprite>();
+			obj.reset(((EnvironmentObjectInterface*)(sprite.release())));
 			}
 			break;
 
