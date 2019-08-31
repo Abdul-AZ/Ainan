@@ -29,6 +29,15 @@ namespace ALZ {
 		m_VertexBuffer->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
 
 		m_ShaderProgram = Renderer::CreateShaderProgram("shaders/Sprite.vert", "shaders/Sprite.frag");
+
+		m_Texture = Renderer::CreateTexture();
+
+		Image img = Image::LoadFromFile("res/CheckerBoard.png");
+
+		Image::GrayScaleToRGB(img);
+
+		m_Texture->SetImage(img);
+
 	}
 
 	void Sprite::Update(const float& deltaTime)
@@ -47,6 +56,12 @@ namespace ALZ {
 		ImGui::PushID(this);
 
 		ImGui::Begin((m_Name + "##" + std::to_string(ImGui::GetID(this))).c_str(), &EditorOpen, ImGuiWindowFlags_NoSavedSettings);
+
+		ImGui::Text("Texture: ");
+		ImGui::SameLine();
+		ImGui::Image((ImTextureID)m_Texture->GetRendererID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
+
+		ImGui::Spacing();
 
 		ImGui::Text("Position: ");
 		ImGui::SameLine();
