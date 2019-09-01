@@ -4,6 +4,7 @@
 #include "stb/stb_image_write.h"
 
 #include "object/ParticleSystem.h"
+#include "object/Sprite.h"
 #include "Camera.h"
 #include "EditorStyles.h"
 #include "ExportCamera.h"

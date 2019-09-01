@@ -1,6 +1,6 @@
 #include <pch.h>
 
-#include "InspectorInterface.h"
+#include "EnvironmentObjectInterface.h"
 
 namespace ALZ {
 
@@ -12,6 +12,8 @@ namespace ALZ {
 			return RadialLightType;
 		else if (type == "Spot Light")
 			return SpotLightType;
+		else if (type == "Sprite")
+			return SpriteType;
 
 		//we should never reach here
 		assert(false);
@@ -30,6 +32,9 @@ namespace ALZ {
 
 		case SpotLightType:
 			return "Spot Light";
+
+		case SpriteType:
+			return "Sprite";
 		}
 
 		//we should never reach here

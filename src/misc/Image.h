@@ -20,7 +20,7 @@ namespace ALZ {
 		Image() {};
 		~Image();
 
-		static Image LoadFromFile(const std::string& pathAndName, int desiredComp = 4);
+		static Image LoadFromFile(const std::string& pathAndName, int desiredComp = 0);
 		void SaveToFile(const std::string& pathAndName, const ImageFormat& format);
 
 		Image(const Image& image);
@@ -31,6 +31,10 @@ namespace ALZ {
 		static Image FromFrameBuffer(RenderSurface& framebuffer, const unsigned int& width, const unsigned int& height);
 		//for convenience
 		static Image FromFrameBuffer(RenderSurface& framebuffer, const glm::ivec2& size);
+
+		//this is because modern OpenGL does not render GrayscaleImages well(as it treats it as RGB but G = 0 and B = 0)
+		//that is why we change it to RGB so that grayscale colors are rendered correctly and dont look red
+		static void GrayScaleToRGB(Image& image);
 
 	public:
 		//pointer to the image pixel array

@@ -45,6 +45,9 @@ namespace ALZ {
 
 		image.m_Data = stbi_load(pathAndName.c_str(), &image.m_Width, &image.m_Height, &image.m_Comp, desiredComp);
 
+		if (desiredComp != 0)
+			image.m_Comp = desiredComp;
+
 		return image;
 	}
 
@@ -125,5 +128,25 @@ namespace ALZ {
 	Image Image::FromFrameBuffer(RenderSurface& renderSurface, const glm::ivec2& size)
 	{
 		return FromFrameBuffer(renderSurface, size.x, size.y);
+	}
+
+	void Image::GrayScaleToRGB(Image& image)
+	{
+		assert(image.m_Comp == 1);
+
+		size_t pixelCount = image.m_Width * image.m_Height;
+
+		unsigned char* buffer = (unsigned char* )malloc(sizeof(unsigned char) * pixelCount * 3);
+
+		for (size_t i = 0; i < pixelCount; i++)
+		{
+			buffer[i * 3] = image.m_Data[i];
+			buffer[i * 3 + 1] = image.m_Data[i];
+			buffer[i * 3 + 2] = image.m_Data[i];
+		}
+
+		image.m_Comp = 3;
+		free(image.m_Data);
+		image.m_Data = buffer;
 	}
 }
