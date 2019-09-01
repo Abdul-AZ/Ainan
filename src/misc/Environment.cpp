@@ -105,6 +105,12 @@ namespace ALZ {
 
 		m_Background.Draw();
 
+		for (pEnvironmentObject& obj : InspectorObjects)
+		{
+			if (obj->Type == SpriteType)
+				obj->Draw();
+		}
+
 		if(m_Settings.ShowGrid && m_Status != Status_PlayMode)
 			m_Grid.Draw();
 
@@ -148,8 +154,13 @@ namespace ALZ {
 		}
 
 		//stuff to only render in play mode and export mode
-		for (pEnvironmentObject& obj : InspectorObjects)
+		for (pEnvironmentObject& obj : InspectorObjects) 
+		{
+			//because we already drawed all the sprites
+			if (obj->Type == SpriteType)
+				continue;
 			obj->Draw();
+		}
 
 		if (m_Settings.BlurEnabled)
 			GaussianBlur::Blur(m_RenderSurface, m_Settings.BlurRadius);
