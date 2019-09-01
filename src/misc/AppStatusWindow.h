@@ -13,7 +13,7 @@ namespace ALZ {
 		void SetText(const std::string& text, float time = 1.0f);
 
 	private:
-		std::string m_Text;
+		std::string m_Text = "";
 		float m_DisplayTime = 0.0f;
 	};
 }

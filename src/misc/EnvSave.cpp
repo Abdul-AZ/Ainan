@@ -17,6 +17,7 @@ namespace ALZ {
 	static void toJson(json& j, const SpotLight& light, size_t objectOrder);
 	static void toJson(json& j, const GeneralSettingsGUI& settings);
 	static void toJson(json& j, const Background& background);
+	static void toJson(json& j, const Sprite& sprite, size_t objectOrder);
 
 	bool SaveEnvironment(const Environment& env, std::string path)
 	{
@@ -28,22 +29,31 @@ namespace ALZ {
 		//serialize inspector objects
 		for (size_t i = 0; i < env.InspectorObjects.size(); i++)
 		{
-			//this means we are serializing a Particle System
-			if (env.InspectorObjects[i]->Type == ParticleSystemType)
+			//save object depending on what type it is
+			switch (env.InspectorObjects[i]->Type)
 			{
+			case ParticleSystemType:
 				toJson(data, *(ParticleSystem*)env.InspectorObjects[i].get(), i);
-			}
-			//this means we are serializing a Radial Light
-			else if (env.InspectorObjects[i]->Type == RadialLightType)
-			{
+				break;
+
+			case RadialLightType:
 				toJson(data, *(RadialLight*)env.InspectorObjects[i].get(), i);
-			}
-			//this means we are serializing a Spot Light
-			else if (env.InspectorObjects[i]->Type == SpotLightType)
-			{
-				toJson(data, *(SpotLight*)env.InspectorObjects[i].get(), (int)i);
+				break;
+
+			case SpotLightType:
+				toJson(data, *(SpotLight*)env.InspectorObjects[i].get(), i);
+				break;
+
+			case SpriteType:
+				toJson(data, *(Sprite*)env.InspectorObjects[i].get(), i);
+				break;
+
+			default: //this means we have a type that we haven't implemented how to save it
+				assert(false);
+				break;
 			}
 		}
+
 		toJson(data, env.m_Settings);
 		toJson(data, env.m_Background);
 
@@ -154,7 +164,7 @@ namespace ALZ {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
-		j[id + "Type"] = InspectorObjectTypeToString(RadialLightType).c_str();
+		j[id + "Type"] = InspectorObjectTypeToString(RadialLightType);
 		j[id + "Name"] = light.m_Name;
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
 		j[id + "Color"] = VEC3_TO_JSON_ARRAY(light.Color);
@@ -165,13 +175,26 @@ namespace ALZ {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
-		j[id + "Type"] = InspectorObjectTypeToString(SpotLightType).c_str();
+		j[id + "Type"] = InspectorObjectTypeToString(SpotLightType);
 		j[id + "Name"] = light.m_Name;
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
 		j[id + "Color"] = VEC3_TO_JSON_ARRAY(light.Color);
 		j[id + "OuterCutoff"] = light.OuterCutoff;
 		j[id + "InnerCutoff"] = light.InnerCutoff;
 		j[id + "Intensity"] = light.Intensity;
+	}
+
+	void toJson(json& j, const Sprite& sprite, size_t objectOrder)
+	{
+		std::string id = "obj" + std::to_string(objectOrder) + "_";
+
+		j[id + "Type"] = InspectorObjectTypeToString(SpriteType);
+		j[id + "Name"] = sprite.m_Name;
+		j[id + "Position"] = VEC2_TO_JSON_ARRAY(sprite.Position);
+		j[id + "Scale"] = VEC2_TO_JSON_ARRAY(sprite.Scale);
+		j[id + "Rotation"] = sprite.Rotation;
+		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.Tint);
+		j[id + "TextureImagePath"] = sprite.TextureImagePath;
 	}
 
 }

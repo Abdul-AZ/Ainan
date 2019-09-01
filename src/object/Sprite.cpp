@@ -39,6 +39,7 @@ namespace ALZ {
 		m_Texture = Renderer::CreateTexture();
 
 		Image img = Image::LoadFromFile("res/CheckerBoard.png");
+		TextureImagePath = "res/CheckerBoard.png";
 
 		Image::GrayScaleToRGB(img);
 
@@ -82,16 +83,7 @@ namespace ALZ {
 
 		m_FileBrowser.DisplayGUI([this](const std::string& targetFile)
 			{
-				m_Texture.reset();
-
-				m_Texture = Renderer::CreateTexture();
-
-				Image img = Image::LoadFromFile(targetFile);
-
-				if (img.m_Comp == 1)
-					Image::GrayScaleToRGB(img);
-
-				m_Texture->SetImage(img);
+				LoadTextureFromFile(targetFile);
 			}
 		);
 
@@ -121,6 +113,21 @@ namespace ALZ {
 		ImGui::End();
 
 		ImGui::PopID();
+	}
+
+	void Sprite::LoadTextureFromFile(const std::string& path)
+	{
+		m_Texture.reset();
+
+		m_Texture = Renderer::CreateTexture();
+
+		Image img = Image::LoadFromFile(path);
+		TextureImagePath = path;
+
+		if (img.m_Comp == 1)
+			Image::GrayScaleToRGB(img);
+
+		m_Texture->SetImage(img);
 	}
 
 }

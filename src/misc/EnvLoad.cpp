@@ -68,15 +68,22 @@ namespace ALZ {
 
 			switch (type)
 			{
-			case ALZ::ParticleSystemType:
+			case ParticleSystemType:
 				ParticleSystemFromJson(env, data, id);
 				break;
-			case ALZ::RadialLightType:
+
+			case RadialLightType:
 				RadialLightFromJson(env, data, id);
 				break;
-			case ALZ::SpotLightType:
+
+			case SpotLightType:
 				SpotLightFromJson(env, data, id);
 				break;
+
+			case SpriteType:
+				SpriteFromJson(env, data, id);
+				break;
+
 			default:
 				assert(false);
 				break;
@@ -221,6 +228,23 @@ namespace ALZ {
 
 		//add radial light to environment
 		pEnvironmentObject obj((EnvironmentObjectInterface*)(light.release()));
+		env->InspectorObjects.push_back(std::move(obj));
+	}
+
+	void SpriteFromJson(Environment* env, json& data, std::string id)
+	{
+		//create sprite
+		std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
+
+		//populate with data
+		sprite->m_Name = data[id + "Name"].get<std::string>();
+		sprite->Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
+		sprite->Scale = JSON_ARRAY_TO_VEC2(data[id + "Scale"].get<std::vector<float>>());
+		sprite->Rotation = data[id + "Rotation"].get<float>();
+		sprite->Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
+		sprite->LoadTextureFromFile(data[id + "TextureImagePath"].get<std::string>());
+
+		pEnvironmentObject obj((EnvironmentObjectInterface*)(sprite.release()));
 		env->InspectorObjects.push_back(std::move(obj));
 	}
 }

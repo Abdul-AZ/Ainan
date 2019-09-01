@@ -112,6 +112,7 @@ namespace ALZ {
 		friend void ParticleSystemFromJson(Environment* env, nlohmann::json& data, std::string id);
 		friend void RadialLightFromJson(Environment* env, nlohmann::json& data, std::string id);
 		friend void SpotLightFromJson(Environment* env, nlohmann::json& data, std::string id);
+		friend void SpriteFromJson(Environment* env, nlohmann::json& data, std::string id);
 	};
 
 
