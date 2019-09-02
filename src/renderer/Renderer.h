@@ -55,6 +55,7 @@ namespace ALZ {
 		static std::shared_ptr<FrameBuffer> CreateFrameBuffer();
 		static std::shared_ptr<Texture> CreateTexture();
 		static Camera* m_CurrentSceneCamera;
+		static unsigned int NumberOfDrawCallsLastScene;
 	private:
 		static glm::mat4 m_CurrentViewProjection;
 		static RendererAPI* m_CurrentActiveAPI;

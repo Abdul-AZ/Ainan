@@ -7,6 +7,9 @@ namespace ALZ {
 	RendererAPI* Renderer::m_CurrentActiveAPI = nullptr;
 	Camera* Renderer::m_CurrentSceneCamera = nullptr;
 	glm::mat4 Renderer::m_CurrentViewProjection = glm::mat4(1.0f);
+	unsigned int Renderer::NumberOfDrawCallsLastScene = 0;
+
+	static unsigned int s_CurrentNumberOfDrawCalls = 0;
 
 	void Renderer::Init()
 	{
@@ -17,6 +20,7 @@ namespace ALZ {
 	{
 		m_CurrentSceneCamera = &camera;
 		m_CurrentViewProjection = camera.ProjectionMatrix * camera.ViewMatrix;
+		s_CurrentNumberOfDrawCalls = 0;
 	}
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
@@ -30,6 +34,8 @@ namespace ALZ {
 
 		vertexArray.Unbind();
 		shader.Unbind();
+
+		s_CurrentNumberOfDrawCalls++;
 	}
 
 	void Renderer::DrawInstanced(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount, const unsigned int& objectCount)
@@ -43,11 +49,14 @@ namespace ALZ {
 
 		vertexArray.Unbind();
 		shader.Unbind();
+
+		s_CurrentNumberOfDrawCalls++;
 	}
 
 	void Renderer::EndScene()
 	{
 		m_CurrentSceneCamera = nullptr;
+		NumberOfDrawCallsLastScene = s_CurrentNumberOfDrawCalls;
 	}
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
@@ -61,6 +70,8 @@ namespace ALZ {
 
 		vertexArray.Unbind();
 		shader.Unbind();
+
+		s_CurrentNumberOfDrawCalls++;
 	}
 
 	void Renderer::ClearScreen()

@@ -373,19 +373,33 @@ namespace ALZ {
 
 		ImGui::End();
 
-		ImGui::SetNextWindowDockID(id, ImGuiCond_Always);
+		{
+			ImGui::SetNextWindowDockID(id, ImGuiCond_Always);
 
-		ImGui::Begin("PlayMode Mode Status", nullptr, ImGuiWindowFlags_NoSavedSettings);
+			ImGui::Begin("PlayMode Mode Status", nullptr, ImGuiWindowFlags_NoSavedSettings);
 
-		//this is to control how many decimal points we want to display
-		std::stringstream stream;
-		//we want 3 decimal places
-		stream << std::setprecision(3) << m_TimeSincePlayModeStarted;
-		ImGui::Text("Time Since PlayMode Mode Started :" );
-		ImGui::SameLine();
-		ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, stream.str().c_str());
+			//this is to control how many decimal points we want to display
+			std::stringstream stream;
+			//we want 3 decimal places
+			stream << std::setprecision(3) << m_TimeSincePlayModeStarted;
+			ImGui::Text("Time Since PlayMode Mode Started :");
+			ImGui::SameLine();
+			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, stream.str().c_str());
 
-		ImGui::End();
+			ImGui::End();
+		}
+
+		{
+			ImGui::SetNextWindowDockID(id, ImGuiCond_Always);
+
+			ImGui::Begin("Rendering Status", nullptr, ImGuiWindowFlags_NoSavedSettings);
+
+			ImGui::Text("Draw Calls: ");
+			ImGui::SameLine();
+			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(Renderer::NumberOfDrawCallsLastScene).c_str());
+
+			ImGui::End();
+		}
 	}
 
 	void Environment::DisplayEnvironmentControlsGUI()
