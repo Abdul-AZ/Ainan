@@ -74,10 +74,7 @@ namespace ALZ {
 	void toJson(json& j, const GeneralSettingsGUI& settings)
 	{
 		j["BlurEnabled"] = settings.BlurEnabled;
-		j["BlurScale"] = settings.BlurScale;
-		j["BlurStrength"] = settings.BlurStrength;
-		j["BlurGaussianSigma"] = settings.BlurGaussianSigma;
-
+		j["BlurRadius"] = settings.BlurRadius;
 		j["ShowGrid"] = settings.ShowGrid;
 	}
 

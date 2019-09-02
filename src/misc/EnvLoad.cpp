@@ -96,10 +96,7 @@ namespace ALZ {
 	void SettingsFromJson(Environment* env, json& data)
 	{
 		env->m_Settings.BlurEnabled = data["BlurEnabled"].get<bool>();
-		env->m_Settings.BlurScale = data["BlurScale"].get<float>();
-		env->m_Settings.BlurStrength = data["BlurStrength"].get<float>();
-		env->m_Settings.BlurGaussianSigma = data["BlurGaussianSigma"].get<float>();
-
+		env->m_Settings.BlurRadius = data["BlurRadius"].get<float>();
 		env->m_Settings.ShowGrid = data["ShowGrid"].get<bool>();
 	}
 
@@ -169,7 +166,6 @@ namespace ALZ {
 		{
 			ps->Customizer.m_TextureCustomizer.ParticleTexture = Renderer::CreateTexture();
 			ps->Customizer.m_TextureCustomizer.ParticleTexture->SetImage(Image::LoadFromFile(ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath));
-			//ps->Customizer.m_TextureCustomizer.ParticleTexture.Init(ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath, 4);
 		}
 
 		//Force data
