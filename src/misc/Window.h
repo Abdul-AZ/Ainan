@@ -23,6 +23,7 @@ namespace ALZ {
 
 		static void SetSize(const glm::ivec2& size);
 		static void SetShouldClose();
+		static void SetTitle(const std::string& title);
 
 	public:
 

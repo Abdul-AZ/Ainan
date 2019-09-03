@@ -136,4 +136,9 @@ namespace ALZ {
 	{
 		glfwSetWindowShouldClose(Ptr, true);
 	}
+
+	void Window::SetTitle(const std::string& title)
+	{
+		glfwSetWindowTitle(Ptr, title.c_str());
+	}
 }

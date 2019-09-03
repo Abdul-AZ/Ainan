@@ -67,6 +67,7 @@ namespace ALZ {
 		void AddInspectorObject(EnvironmentObjectType type);
 		void Duplicate(EnvironmentObjectInterface& obj);
 		void FocusCameraOnObject(EnvironmentObjectInterface& object);
+		void UpdateTitle();
 
 	public:
 		bool ShouldDelete = false;

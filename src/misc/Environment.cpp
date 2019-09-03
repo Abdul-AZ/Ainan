@@ -22,6 +22,7 @@ namespace ALZ {
 		GaussianBlur::Init();
 		RegisterEnvironmentInputKeys();
 
+		UpdateTitle();
 	}
 
 	Environment::~Environment()
@@ -30,6 +31,7 @@ namespace ALZ {
 		Window::Restore();
 		Window::SetWindowLaunchSize();
 		Window::CenterWindow();
+		Window::SetTitle("ALZ Particles");
 	}
 
 	void Environment::Update()
@@ -215,6 +217,7 @@ namespace ALZ {
 		m_EnvironmentSaveBrowser.DisplayGUI([this](const std::string& path) {
 			SaveEnvironment(*this, path + ".env");
 			m_SaveLocationSelected = true;
+			UpdateTitle();
 			});
 
 		ImGuiWrapper::Render();
@@ -459,6 +462,8 @@ namespace ALZ {
 						SaveEnvironment(*this, m_EnvironmentSaveBrowser.GetSelectedSavePath() + ".env");
 					else
 						m_EnvironmentSaveBrowser.OpenWindow();
+
+					UpdateTitle();
 				}
 
 				if (ImGui::MenuItem("Save As"))
@@ -748,6 +753,20 @@ namespace ALZ {
 		else {
 			m_Camera.SetPosition(glm::vec3(object.GetPositionRef().x, object.GetPositionRef().y, 0.0f) * -GlobalScaleFactor
 							   + glm::vec3(m_ViewportWindow.RenderViewport.width / 2, m_ViewportWindow.RenderViewport.height / 2, 0.0f));
+		}
+	}
+
+	void Environment::UpdateTitle()
+	{
+		RendererType currentRendererType = Renderer::m_CurrentActiveAPI->GetType();
+
+		auto projectName = m_SaveLocationSelected ? m_EnvironmentSaveBrowser.m_FileName : "Untitled Project";
+
+		switch (currentRendererType)
+		{
+		case RendererType::OpenGL:
+			Window::SetTitle("ALZ Particles - OpenGL (3.3) - " + projectName);
+			break;
 		}
 	}
 }

@@ -90,6 +90,18 @@ namespace ALZ {
 			}
 		}
 
+		size_t lastBackslash = path.find_last_of("\\");
+
+		std::string fileName = path.substr(lastBackslash + 1, path.size() - lastBackslash + 1);
+		fileName = fileName.substr(0, fileName.find_first_of('.')); //remove extension ".env"
+		std::string folderPath = path.substr(0, lastBackslash);
+
+		env->m_SaveLocationSelected = true;
+		env->m_EnvironmentSaveBrowser.m_CurrentselectedFolder = folderPath;
+		env->m_EnvironmentSaveBrowser.m_FileName = fileName;
+		
+		env->UpdateTitle();
+
 		return env;
 	}
 

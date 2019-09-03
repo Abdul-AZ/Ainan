@@ -33,6 +33,4 @@ namespace ALZ {
 		virtual Viewport GetCurrentViewport() = 0;
 		virtual RendererType GetType() const = 0;
 	};
-
-
 }
