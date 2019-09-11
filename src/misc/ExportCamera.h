@@ -62,7 +62,7 @@ namespace ALZ {
 	private:
 		bool m_DrawExportCamera = false;
 		glm::vec2 m_Edges[4];
-		Line m_OutlineLines[4];
+		Line m_Outline;
 		SaveItemBrowser m_ImageLocationBrowser;
 
 		//These are only used when exporting multiple frames

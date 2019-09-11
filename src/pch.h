@@ -10,6 +10,7 @@
 #include <iterator>
 #include <filesystem>
 #include <functional>
+#include <array>
 
 //std c
 #include <direct.h>

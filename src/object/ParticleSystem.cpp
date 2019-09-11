@@ -288,7 +288,14 @@ namespace ALZ {
 		//update editor line
 		if (Customizer.Mode == SpawnMode::SpawnOnLine)
 		{
-			Customizer.m_Line.SetPoints(Customizer.m_LinePosition, Customizer.m_LineLength,Customizer.m_LineAngle);
+			glm::vec2 pointOffset = Customizer.m_LineLength * glm::vec2(cos(glm::radians(Customizer.m_LineAngle)), sin(glm::radians(Customizer.m_LineAngle)));
+
+			std::vector<glm::vec2> lineVertices;
+			lineVertices.reserve(2);
+			lineVertices.push_back(Customizer.m_LinePosition + pointOffset);
+			lineVertices.push_back(Customizer.m_LinePosition - pointOffset);
+
+			Customizer.m_Line.SetVertices(lineVertices);
 		}
 	}
 

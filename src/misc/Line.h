@@ -13,18 +13,21 @@ namespace ALZ {
 		Line();
 
 		void Draw();
-		float GetSlope();
-		float GetYIntercept();
-		glm::vec2 GetPointInLine(const float& t);
-		void SetPoints(glm::vec2 startPoint, glm::vec2 endPoint);
-		void SetPoints(glm::vec2 linePosition, float lineLength, float lineAngle); //angle in degrees NOT radians
+		void SetVertices(const std::vector<glm::vec2> vertices);
+
+		float GetSlope(size_t startVertex = 0, size_t endVertex = 1);
+		float GetYIntercept(size_t startVertex = 0, size_t endVertex = 1);
+		glm::vec2 GetPointInLine(const float t, size_t startVertex = 0, size_t endVertex = 1);
 
 	public:
 		glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	private:
-		glm::vec2 m_StartPoint;
-		glm::vec2 m_EndPoint;
+		std::vector<glm::vec2> m_Vertices;
+
+		std::shared_ptr<VertexArray> VAO = nullptr;
+		std::shared_ptr<VertexBuffer> VBO = nullptr;
+		std::shared_ptr<ShaderProgram> LineShader = nullptr;
 
 		friend class ParticleCustomizer;
 	};

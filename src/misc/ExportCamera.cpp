@@ -27,9 +27,6 @@ namespace ALZ {
 		m_ImageLocationBrowser(FileManager::ApplicationFolder, "Save Image")
 	{
 		memset(m_Edges, 0, sizeof(m_Edges));
-		memset(m_OutlineLines, 0, sizeof(m_OutlineLines));
-		for (size_t i = 0; i < 4; i++)
-			m_OutlineLines[i].Color = { 1.0f,1.0f,1.0f,1.0f };
 
 		ImageSavePath = FileManager::ApplicationFolder + '\\';
 		SetSize();
@@ -40,8 +37,7 @@ namespace ALZ {
 		if (!m_DrawExportCamera)
 			return;
 
-		for (size_t i = 0; i < 4; i++)
-			m_OutlineLines[i].Draw();
+		m_Outline.Draw();
 	}
 
 	void ExportCamera::SetSize()
@@ -51,10 +47,14 @@ namespace ALZ {
 		m_Edges[2] = glm::vec2(m_ExportCameraPosition.x + m_ExportCameraSize.x, m_ExportCameraPosition.y + m_ExportCameraSize.y);     //top right
 		m_Edges[3] = glm::vec2(m_ExportCameraPosition.x + m_ExportCameraSize.x, m_ExportCameraPosition.y);                            //bottom right
 
-		m_OutlineLines[0].SetPoints(m_Edges[0], m_Edges[1]); //bottom left to top left
-		m_OutlineLines[1].SetPoints(m_Edges[1], m_Edges[2]); //top left to top right
-		m_OutlineLines[2].SetPoints(m_Edges[2], m_Edges[3]); //top right to bottom right
-		m_OutlineLines[3].SetPoints(m_Edges[3], m_Edges[0]); //bottom right to bottom left
+		std::array<glm::vec2, 8> vertices =
+		{
+			m_Edges[0], m_Edges[1], //bottom left to top left
+			m_Edges[1], m_Edges[2], //top left to top right
+			m_Edges[2], m_Edges[3], //top right to bottom right
+			m_Edges[3], m_Edges[0]  //bottom right to bottom left
+		};
+		m_Outline.SetVertices(std::vector<glm::vec2>(vertices.begin(), vertices.end()));
 
 		RealCamera.Update(0.0f, Renderer::GetCurrentViewport());
 		glm::vec2 reversedPos = glm::vec2(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y);
