@@ -1,16 +1,10 @@
 #include <pch.h>
+
 #include "GaussianBlur.h"
 
 namespace ALZ {
 
-	std::shared_ptr<ShaderProgram> BlurShader;
-
-	void GaussianBlur::Init()
-	{
-		BlurShader = Renderer::CreateShaderProgram("shaders/Image.vert", "shaders/Blur.frag");
-	}
-
-	void GaussianBlur::Blur(RenderSurface& surface, float radius)
+	void GaussianBlur(RenderSurface& surface, float radius)
 	{
 		Viewport lastViewport = Renderer::GetCurrentViewport();
 
@@ -21,10 +15,11 @@ namespace ALZ {
 		viewport.height = (int)surface.GetSize().y;
 
 		Renderer::SetViewport(viewport);
+		auto& shader = Renderer::ShaderLibrary["BlurShader"];
 
-		BlurShader->SetUniformVec2("u_Resolution", surface.GetSize());
-		BlurShader->SetUniform1f("u_Radius", radius);
-		BlurShader->SetUniform1i("u_BlurTarget", 0);
+		shader->SetUniformVec2("u_Resolution", surface.GetSize());
+		shader->SetUniform1f("u_Radius", radius);
+		shader->SetUniform1i("u_BlurTarget", 0);
 
 		//Horizontal blur
 		static RenderSurface tempSurface;
@@ -32,20 +27,20 @@ namespace ALZ {
 		tempSurface.SurfaceFrameBuffer->Bind();
 
 		//this specifies that we are doing horizontal blur
-		BlurShader->SetUniformVec2("u_BlurDirection", glm::vec2(1.0f, 0.0f));
+		shader->SetUniformVec2("u_BlurDirection", glm::vec2(1.0f, 0.0f));
 
 		//do the horizontal blur to the surface we revieved and put the result in tempSurface
-		surface.Render(*BlurShader);
+		surface.Render(*shader);
 
 		//this specifies that we are doing vertical blur
-		BlurShader->SetUniformVec2("u_BlurDirection", glm::vec2(0.0f, 1.0f));
+		shader->SetUniformVec2("u_BlurDirection", glm::vec2(0.0f, 1.0f));
 
 		//clear the buffer we recieved
 		surface.SurfaceFrameBuffer->Bind();
 		Renderer::ClearScreen();
 
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
-		tempSurface.Render(*BlurShader);
+		tempSurface.Render(*shader);
 
 		Renderer::SetViewport(lastViewport);
 	}

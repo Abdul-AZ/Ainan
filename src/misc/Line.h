@@ -27,7 +27,6 @@ namespace ALZ {
 
 		std::shared_ptr<VertexArray> VAO = nullptr;
 		std::shared_ptr<VertexBuffer> VBO = nullptr;
-		std::shared_ptr<ShaderProgram> LineShader = nullptr;
 
 		friend class ParticleCustomizer;
 	};

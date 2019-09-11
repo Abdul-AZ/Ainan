@@ -5,7 +5,6 @@ namespace ALZ {
 	static bool InitilizedCircleVertices = false;
 	static std::shared_ptr<VertexArray> VAO = nullptr;
 	static std::shared_ptr<VertexBuffer> VBO = nullptr;
-	static std::shared_ptr<ShaderProgram> CircleInstancedShader = nullptr;
 
 	static std::shared_ptr<Texture> DefaultTexture;
 
@@ -52,8 +51,6 @@ namespace ALZ {
 			DefaultTexture = Renderer::CreateTexture();
 			DefaultTexture->SetImage(Image::LoadFromFile("res/Circle.png"));
 			DefaultTexture->Bind();
-
-			CircleInstancedShader = Renderer::CreateShaderProgram("shaders/CircleInstanced.vert", "shaders/CircleInstanced.frag");
 
 			InitilizedCircleVertices = true;
 		}
@@ -121,10 +118,10 @@ namespace ALZ {
 	{
 		//bind vertex array and shader
 		VAO->Bind();
-		CircleInstancedShader->Bind();
+		Renderer::ShaderLibrary["ParticleSystemShader"]->Bind();
 
 		//set texture uniform (Sampler2D) to 0
-		CircleInstancedShader->SetUniform1i("u_Texture", 0);
+		Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniform1i("u_Texture", 0);
 
 		//if we are using the default texture
 		if (Customizer.m_TextureCustomizer.UseDefaultTexture) {
@@ -182,9 +179,9 @@ namespace ALZ {
 		//draw 40 particles
 		for (int i = 0; i < drawCount; i++)
 		{
-			CircleInstancedShader->SetUniformMat4s("u_ModelArr", &m_ParticleDrawTransformationBuffer[i * 40], 40);
-			CircleInstancedShader->SetUniformVec4s("u_ColorArr", &m_ParticleDrawColorBuffer[i * 40], 40);
-			Renderer::DrawInstanced(*VAO, *CircleInstancedShader, Primitive::TriangleFan, 26, 40);
+			Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformMat4s("u_ModelArr", &m_ParticleDrawTransformationBuffer[i * 40], 40);
+			Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformVec4s("u_ColorArr", &m_ParticleDrawColorBuffer[i * 40], 40);
+			Renderer::DrawInstanced(*VAO, *Renderer::ShaderLibrary["ParticleSystemShader"], Primitive::TriangleFan, 26, 40);
 		}
 
 		//get the remaining particles (because we draw 40 at a time and not every number is divisble by 40)
@@ -195,9 +192,9 @@ namespace ALZ {
 			return;
 
 		//draw them
-		CircleInstancedShader->SetUniformMat4s("u_ModelArr", &m_ParticleDrawTransformationBuffer[drawCount * 40], remaining);
-		CircleInstancedShader->SetUniformVec4s("u_ColorArr", &m_ParticleDrawColorBuffer[drawCount * 40], remaining);
-		Renderer::DrawInstanced(*VAO, *CircleInstancedShader, Primitive::TriangleFan, 26, remaining);
+		Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformMat4s("u_ModelArr", &m_ParticleDrawTransformationBuffer[drawCount * 40], remaining);
+		Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformVec4s("u_ColorArr", &m_ParticleDrawColorBuffer[drawCount * 40], remaining);
+		Renderer::DrawInstanced(*VAO, *Renderer::ShaderLibrary["ParticleSystemShader"], Primitive::TriangleFan, 26, remaining);
 	}
 
 	void ParticleSystem::SpawnParticle(const Particle& particle)

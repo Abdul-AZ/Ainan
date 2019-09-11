@@ -25,7 +25,11 @@ namespace ALZ {
 	class Renderer 
 	{
 	public:
+		//this will initilize all the shaders and put them in the shader library member
 		static void Init();
+
+		//this will destroy all the shaders in the shader library member
+		static void Terminate();
 
 		//This will be changed to only render in end scene by putting draw commands to a command buffer 
 		static void BeginScene(Camera& camera);
@@ -48,16 +52,25 @@ namespace ALZ {
 		static Viewport GetCurrentViewport();
 
 		static std::shared_ptr<VertexArray> CreateVertexArray();
+
 		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size);
+
 		//data should ALWAYS an UNSIGNED INT array
 		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(unsigned int* data, const int& count);
+
+		//manually create a shader program (mostly used for testing new shaders)
+		//to properly add shaders add them to the CompileOnInit list in the cpp file and access them from the ShaderLibrary member
 		static std::shared_ptr<ShaderProgram> CreateShaderProgram(const std::string& vertPath, const std::string& fragPath);
+
 		static std::shared_ptr<FrameBuffer> CreateFrameBuffer();
+
 		static std::shared_ptr<Texture> CreateTexture();
+
 		static Camera* m_CurrentSceneCamera;
 		static unsigned int NumberOfDrawCallsLastScene;
 		static glm::mat4 m_CurrentViewProjection;
 		static RendererAPI* m_CurrentActiveAPI;
+		static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary;
 	};
 
 }

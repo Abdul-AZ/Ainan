@@ -65,8 +65,6 @@ namespace ALZ {
 		EBO->Bind();
 
 		VAO->Unbind();
-
-		GizmoShader = Renderer::CreateShaderProgram("shaders/Gizmo.vert", "shaders/FlatColor.frag");
 	}
 
 	void Gizmo::Draw(glm::vec2& objectPosition, const Viewport& viewport)
@@ -151,9 +149,11 @@ namespace ALZ {
 		else
 			color = glm::vec4(0.75f, 0.0f, 0.0f, 1.0f);
 
-		GizmoShader->SetUniformVec4("u_Color", color);
-		GizmoShader->SetUniformMat4("u_Model", model);
-		Renderer::Draw(*VAO, *GizmoShader, Primitive::Triangles, *EBO);
+		auto& shader = Renderer::ShaderLibrary["GizmoShader"];
+
+		shader->SetUniformVec4("u_Color", color);
+		shader->SetUniformMat4("u_Model", model);
+		Renderer::Draw(*VAO, *shader, Primitive::Triangles, *EBO);
 
 		model = glm::rotate(model, -PI / 2, glm::vec3(0.0f, 0.0f, -1.0f));
 
@@ -163,12 +163,12 @@ namespace ALZ {
 		else
 			color = glm::vec4(0.0f, 0.75f, 0.0f, 1.0f);
 
-		GizmoShader->SetUniformVec4("u_Color", color);
-		GizmoShader->SetUniformMat4("u_Model", model);
+		shader->SetUniformVec4("u_Color", color);
+		shader->SetUniformMat4("u_Model", model);
 		glm::vec2 mousePosWS = Renderer::m_CurrentSceneCamera->Position + realMousePositionNDC * GlobalScaleFactor;
 		glm::vec2 objectPosWS = objectPositionWS * GlobalScaleFactor;
 
-		Renderer::Draw(*VAO, *GizmoShader, Primitive::Triangles, *EBO);
+		Renderer::Draw(*VAO, *shader, Primitive::Triangles, *EBO);
 	}
 
 	bool Gizmo::CheckIfInsideArrow(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point)

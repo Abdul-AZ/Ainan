@@ -13,7 +13,6 @@ namespace ALZ {
 		VBO->SetLayout({ ShaderVariableType::Vec2 });
 
 		VAO->Unbind();
-		LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/FlatColor.frag");
 	}
 
 	void Line::SetVertices(const std::vector<glm::vec2> vertices)
@@ -40,14 +39,17 @@ namespace ALZ {
 	void Line::Draw()
 	{
 		VBO->UpdateData(0, sizeof(glm::vec2) * m_Vertices.size(), m_Vertices.data());
-		LineShader->SetUniformVec4("u_Color", Color);
-		LineShader->Bind();
+
+		auto& shader = Renderer::ShaderLibrary["LineShader"];
+
+		shader->SetUniformVec4("u_Color", Color);
+		shader->Bind();
 		VAO->Bind();
 
-		Renderer::Draw(*VAO, *LineShader, Primitive::Lines, m_Vertices.size());
+		Renderer::Draw(*VAO, *shader, Primitive::Lines, m_Vertices.size());
 
 		VAO->Unbind();
-		LineShader->Unbind();
+		shader->Unbind();
 	}
 
 	float Line::GetSlope(size_t startVertex, size_t endVertex)

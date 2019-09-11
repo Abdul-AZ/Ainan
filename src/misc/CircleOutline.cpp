@@ -8,7 +8,6 @@ namespace ALZ {
 	static std::shared_ptr<IndexBuffer> EBO = nullptr;
 	static std::shared_ptr<VertexBuffer> VBO = nullptr;
 	static std::shared_ptr<VertexArray> VAO = nullptr;
-	static std::shared_ptr<ShaderProgram> CircleOutlineShader = nullptr;
 
 	static const int vertexCount = 60;
 	CircleOutline::CircleOutline()
@@ -44,8 +43,6 @@ namespace ALZ {
 
 			VAO->Unbind();
 
-			CircleOutlineShader = Renderer::CreateShaderProgram("shaders/CircleOutline.vert", "shaders/FlatColor.frag");
-
 			CircleOutlineBuffersInitilized = true;
 		}
 	}
@@ -56,15 +53,17 @@ namespace ALZ {
 		model = glm::translate(model, glm::vec3(Position.x * GlobalScaleFactor, Position.y * GlobalScaleFactor, 0.0f));
 		model = glm::scale(model, glm::vec3(Radius * GlobalScaleFactor, Radius * GlobalScaleFactor, Radius * GlobalScaleFactor));
 
-		CircleOutlineShader->Bind();
-		CircleOutlineShader->SetUniformMat4("u_Model", model);
-		CircleOutlineShader->SetUniformVec4("u_Color", Color);
+		auto& shader = Renderer::ShaderLibrary["CircleOutlineShader"];
+
+		shader->Bind();
+		shader->SetUniformMat4("u_Model", model);
+		shader->SetUniformVec4("u_Color", Color);
 		VAO->Bind();
 
-		Renderer::Draw(*VAO, *CircleOutlineShader, Primitive::Lines, *EBO);
+		Renderer::Draw(*VAO, *shader, Primitive::Lines, *EBO);
 
 		VAO->Unbind();
-		CircleOutlineShader->Unbind();
+		shader->Unbind();
 	}
 
 	glm::vec2 CircleOutline::GetPointByAngle(const float & angle_in_radians)

@@ -34,8 +34,6 @@ namespace ALZ {
 		m_VertexBuffer->Bind();
 		m_VertexBuffer->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
 
-		m_ShaderProgram = Renderer::CreateShaderProgram("shaders/Sprite.vert", "shaders/Sprite.frag");
-
 		m_Texture = Renderer::CreateTexture();
 
 		Image img = Image::LoadFromFile("res/CheckerBoard.png");
@@ -58,12 +56,14 @@ namespace ALZ {
 		u_Model = glm::rotate(u_Model, glm::radians(Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
 		u_Model = glm::scale(u_Model, glm::vec3(Scale.x, Scale.y, 1.0f) * GlobalScaleFactor);
 
-		m_ShaderProgram->SetUniformMat4("u_Model", u_Model);
-		m_ShaderProgram->SetUniform1i("u_SpriteTexture", 0);
-		m_ShaderProgram->SetUniformVec4("u_Tint", Tint);
+		auto& shader = Renderer::ShaderLibrary["SpriteShader"];
+
+		shader->SetUniformMat4("u_Model", u_Model);
+		shader->SetUniform1i("u_SpriteTexture", 0);
+		shader->SetUniformVec4("u_Tint", Tint);
 		m_Texture->Bind(0);
 
-		Renderer::Draw(*m_VertexArray, *m_ShaderProgram, Primitive::Triangles, 6);
+		Renderer::Draw(*m_VertexArray, *shader, Primitive::Triangles, 6);
 
 		m_Texture->Unbind();
 	}

@@ -19,7 +19,6 @@ namespace ALZ {
 		//add starting particle system 
 		AddInspectorObject(ParticleSystemType); //NOTE: if this environment was loaded from a file the loader will delete this object
 
-		GaussianBlur::Init();
 		RegisterEnvironmentInputKeys();
 
 		UpdateTitle();
@@ -165,7 +164,7 @@ namespace ALZ {
 		}
 
 		if (m_Settings.BlurEnabled)
-			GaussianBlur::Blur(m_RenderSurface, m_Settings.BlurRadius);
+			GaussianBlur(m_RenderSurface, m_Settings.BlurRadius);
 
 		//draw this after post processing because we do not want the line blured
 		m_ExportCamera.DrawOutline();

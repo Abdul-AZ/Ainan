@@ -11,7 +11,6 @@ namespace ALZ {
 	static std::shared_ptr<VertexArray> VAO = nullptr;
 	static std::shared_ptr<VertexBuffer> VBO = nullptr;
 	static std::shared_ptr<IndexBuffer> EBO = nullptr;
-	static std::shared_ptr<ShaderProgram> LineShader = nullptr;
 
 	static std::vector<glm::vec2> vertices;
 	static std::vector<unsigned int> indecies;
@@ -75,8 +74,6 @@ namespace ALZ {
 
 			VAO->Unbind();
 
-			LineShader = Renderer::CreateShaderProgram("shaders/Line.vert", "shaders/FlatColor.frag");
-
 			GridBufferInitilized = true;
 		}
 	}
@@ -84,13 +81,15 @@ namespace ALZ {
 	void Grid::Draw()
 	{
 		VAO->Bind();
-		LineShader->Bind();
 
-		LineShader->SetUniformVec4("u_Color", glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
+		auto& shader = Renderer::ShaderLibrary["LineShader"];
+		shader->Bind();
 
-		Renderer::Draw(*VAO, *LineShader, Primitive::Lines, *EBO);
+		shader->SetUniformVec4("u_Color", glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
+
+		Renderer::Draw(*VAO, *shader, Primitive::Lines, *EBO);
 
 		VAO->Unbind();
-		LineShader->Unbind();
+		shader->Unbind();
 	}
 }

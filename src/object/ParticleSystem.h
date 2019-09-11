@@ -41,7 +41,6 @@ namespace ALZ {
 		std::vector<glm::vec4> m_ParticleDrawColorBuffer;
 		size_t m_ParticleDrawCount = 0;
 
-
 		std::vector<Particle> m_Particles;
 		unsigned int m_ParticleCount;
 		PerlinNoise2D m_Noise;

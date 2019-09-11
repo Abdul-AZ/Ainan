@@ -28,7 +28,6 @@ namespace ALZ {
 	private:
 		std::shared_ptr<VertexBuffer> m_VertexBuffer;
 		std::shared_ptr<VertexArray> m_VertexArray;
-		std::shared_ptr<ShaderProgram> m_ShaderProgram;
 		std::shared_ptr<Texture> m_Texture;
 		FileBrowser m_FileBrowser;
 	};

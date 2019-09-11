@@ -283,7 +283,7 @@ namespace ALZ {
 			obj->Draw();
 
 		if (blurRadius > 0.0f)
-			GaussianBlur::Blur(m_RenderSurface, blurRadius);
+			GaussianBlur(m_RenderSurface, blurRadius);
 
 		Renderer::EndScene();
 

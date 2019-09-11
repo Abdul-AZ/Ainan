@@ -45,6 +45,7 @@ int main(int argc, const char* argv[]) {
 	if(env)
 		delete env;
 
+	Renderer::Terminate();
 	ImGuiWrapper::Terminate();
 	Window::Terminate();
 }

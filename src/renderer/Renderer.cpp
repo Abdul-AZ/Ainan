@@ -8,12 +8,46 @@ namespace ALZ {
 	Camera* Renderer::m_CurrentSceneCamera = nullptr;
 	glm::mat4 Renderer::m_CurrentViewProjection = glm::mat4(1.0f);
 	unsigned int Renderer::NumberOfDrawCallsLastScene = 0;
+	std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> Renderer::ShaderLibrary;
 
 	static unsigned int s_CurrentNumberOfDrawCalls = 0;
 
+	struct ShaderLoadInfo
+	{
+		std::string Name;
+		std::string VertexCodePath;
+		std::string FragmentCodePath;
+	};
+
+	//shaders that are compiled on renderer initilization
+	std::vector<ShaderLoadInfo> CompileOnInit =
+	{
+		//name                  //vertex shader                //fragment shader
+		{ "ParticleSystemShader", "shaders/ParticleSystem.vert", "shaders/ParticleSystem.frag" },
+		{ "BackgroundShader"    , "shaders/Background.vert"    , "shaders/Background.frag"     },
+		{ "SpriteShader"        , "shaders/Sprite.vert"        , "shaders/Sprite.frag"         },
+		{ "CircleOutlineShader" , "shaders/CircleOutline.vert" , "shaders/FlatColor.frag"      },
+		{ "LineShader"          , "shaders/Line.vert"          , "shaders/FlatColor.frag"      },
+		{ "BlurShader"          , "shaders/Image.vert"         , "shaders/Blur.frag"           },
+		{ "GizmoShader"         , "shaders/Gizmo.vert"         , "shaders/FlatColor.frag"      },
+		{ "ImageShader"         , "shaders/Image.vert"         , "shaders/Image.frag"          }
+	};
+
 	void Renderer::Init()
 	{
+		//initilize the renderer api
 		m_CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
+
+		//load shaders
+		for (auto& shaderInfo : CompileOnInit)
+		{
+			ShaderLibrary[shaderInfo.Name] = Renderer::CreateShaderProgram(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
+		}
+	}
+
+	void Renderer::Terminate()
+	{
+		ShaderLibrary.erase(ShaderLibrary.begin(), ShaderLibrary.end());
 	}
 
 	void Renderer::BeginScene(Camera& camera)

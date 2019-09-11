@@ -4,9 +4,6 @@
 
 namespace ALZ {
 
-	static std::shared_ptr<ShaderProgram> ImageShader = nullptr;
-	static bool ImageShaderInitilized = false;
-
 	RenderSurface::RenderSurface()
 	{
 		SurfaceFrameBuffer = Renderer::CreateFrameBuffer();
@@ -43,19 +40,14 @@ namespace ALZ {
 		m_VertexBuffer->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
 
 		SurfaceFrameBuffer->Unbind();
-
-		if (ImageShaderInitilized == false)
-		{
-			ImageShader = Renderer::CreateShaderProgram("shaders/Image.vert", "shaders/Image.frag");
-			ImageShaderInitilized = true;
-		}
 	}
 
 	void RenderSurface::Render()
 	{
-		ImageShader->SetUniform1i("u_ScreenTexture", 0);
+		auto& shader = Renderer::ShaderLibrary["ImageShader"];
+		shader->SetUniform1i("u_ScreenTexture", 0);
 		m_Texture->Bind();
-		Renderer::Draw(*m_VertexArray, *ImageShader, Primitive::Triangles, 6);
+		Renderer::Draw(*m_VertexArray, *shader, Primitive::Triangles, 6);
 	}
 
 	void RenderSurface::Render(ShaderProgram& shader)
