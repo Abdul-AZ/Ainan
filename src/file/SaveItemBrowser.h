@@ -17,10 +17,10 @@ namespace ALZ {
 		std::string m_FileName;
 		std::function<void()> OnCloseWindow = nullptr;
 
-	private:
 		std::string m_CurrentFolder;
-		std::string m_WindowName;
 		std::string m_InputFolder;
+	private:
+		std::string m_WindowName;
 		bool m_FileNameChosen;
 
 		bool m_WindowOpen = false;
