@@ -25,6 +25,7 @@ namespace ALZ {
 		std::string m_EnvironmentCreateName;
 		Status m_CurrentStatus = DisplayingMainGUI;
 		std::string m_EnvironmentLoadError;
+		bool m_CreateEvironmentDirectory = false;
 	};
 
 }

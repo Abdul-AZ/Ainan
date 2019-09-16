@@ -129,49 +129,79 @@ namespace ALZ {
 		ImGui::InputText("##Environment Folder", &m_EnvironmentCreateFolderPath);
 
 		bool fileExists = false, fileIsDirectory = false, fileIsEmpty = false;
+		ImGui::Text("Create Directory For Environment: ");
+		ImGui::SameLine();
+		ImGui::Checkbox("##Create Directory For Environment: ", &m_CreateEvironmentDirectory);
+		bool canCreateDirectory = !std::filesystem::exists(m_EnvironmentCreateFolderPath + m_EnvironmentCreateName + "\\");
 
 		fileExists = std::filesystem::exists(m_EnvironmentCreateFolderPath);
-		if (fileExists) {
+
+		if (fileExists) 
+		{
 			fileIsDirectory = std::filesystem::is_directory(m_EnvironmentCreateFolderPath);
 			if(fileIsDirectory)
 				fileIsEmpty = std::filesystem::is_empty(m_EnvironmentCreateFolderPath);
 		}
 
-		if (fileExists && fileIsDirectory && fileIsEmpty) 
+		bool unsupportedEnvironmentName = 
+			   m_EnvironmentCreateName.find(" ") != std::string::npos
+			|| m_EnvironmentCreateName.find(".") != std::string::npos
+			|| m_EnvironmentCreateName == "";
+
+		ImGui::Text("Environment Name");
+		ImGui::SameLine();
+		ImGui::InputTextWithHint("##Environment Name", "MyEnvironment", &m_EnvironmentCreateName);
+
+		bool canSaveEnvironment = false;
+
+		if (   fileExists     //the directory we create our environment in or the directory that we create the folder that holds our environment exists
+			&& fileIsDirectory //make sure it is a directory
+			&& (fileIsEmpty || m_CreateEvironmentDirectory)  //make sure the directory is not empty if aren't making a seperate directory for the environment
+			&& (!m_CreateEvironmentDirectory || (m_CreateEvironmentDirectory && canCreateDirectory)) //if we are making a directory make sure there is no one like it
+			&& !unsupportedEnvironmentName ) //environment name is not valid
 		{
 			//change create button color to green to show that the path given is valid
 			ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 1.0f, 0.0f, 1.0f });
+			canSaveEnvironment = true;
 		}
 		else
 		{
 			//change create button color to red to show that the path given is not valid
 			ImGui::PushStyleColor(ImGuiCol_Button, { 1.0f, 0.0f, 0.0f, 1.0f });
 
+			ImVec4 redColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+
 			//display why the path is not valid
 			if (!fileExists)
-				ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "Directoy does not exists");
+				ImGui::TextColored(redColor, "Directoy does not exists");
 			else if (!fileIsDirectory)
 				ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "File is not a Directory");
-			else if (!fileIsEmpty)
-				ImGui::TextColored({ 1.0f,0.0f,0.0f,1.0f }, "Directory is not empty");
+			else if (!fileIsEmpty && !m_CreateEvironmentDirectory)
+				ImGui::TextColored(redColor, "Directory is not empty");
+			else if (m_CreateEvironmentDirectory && !canCreateDirectory)
+				ImGui::TextColored(redColor, "Directory already exists");
+			else if (unsupportedEnvironmentName)
+				ImGui::TextColored(redColor, "Name is not valid");
 			else
 				assert(false); //we should never get to here
+
+			canSaveEnvironment = false;
 		}
 
-		ImGui::Text("Environment Name");
-		ImGui::SameLine();
-		ImGui::InputTextWithHint("##Environment Name", "MyEnvironment", &m_EnvironmentCreateName);
+		if (canSaveEnvironment) {
+			if (ImGui::Button("Create"))
+			{
+				Window::Maximize();
 
-		if (ImGui::Button("Create"))
-		{
-			Window::Maximize();
-			currentEnv = new Environment();
-			currentEnv->m_SaveLocationSelected = true;
-			currentEnv->m_EnvironmentSaveBrowser.m_CurrentselectedFolder = m_EnvironmentCreateFolderPath;
-			currentEnv->m_EnvironmentSaveBrowser.m_CurrentFolder = m_EnvironmentCreateFolderPath;
-			currentEnv->m_EnvironmentSaveBrowser.m_InputFolder = m_EnvironmentCreateFolderPath;
-			currentEnv->m_EnvironmentSaveBrowser.m_FileName = m_EnvironmentCreateName;
-			currentEnv->UpdateTitle();
+				std::string dirPath = m_EnvironmentCreateFolderPath + m_EnvironmentCreateName + "\\";
+
+				if (m_CreateEvironmentDirectory) {
+					std::filesystem::create_directory(dirPath);
+				}
+
+				currentEnv = new Environment(dirPath, m_EnvironmentCreateName);
+				m_CurrentStatus = DisplayingMainGUI;
+			}
 		}
 
 		ImGui::PopStyleColor();

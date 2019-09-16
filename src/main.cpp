@@ -23,7 +23,8 @@ int main(int argc, const char* argv[]) {
 	{
 		Window::HandleWindowEvents();
 
-		if (env) {
+		if (env) 
+		{
 			env->Update();
 			env->HandleInput();
 			env->Render();

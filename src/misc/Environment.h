@@ -42,7 +42,7 @@ namespace ALZ {
 		};
 
 	public:
-		Environment();
+		Environment(const std::string& environmentFolderPath, const std::string& environmentName);
 		~Environment();
 
 		void Update();
@@ -89,6 +89,9 @@ namespace ALZ {
 		bool m_EnvironmentControlsWindowOpen = true;
 		EnvironmentStatus m_Status = Status_EditorMode;
 
+		std::string m_EnvironmentName;
+		std::string m_EnvironmentFolderPath;
+
 		std::shared_ptr<Texture> m_PlayButtonTexture;
 		std::shared_ptr<Texture> m_PauseButtonTexture;
 		std::shared_ptr<Texture> m_ResumeButtonTexture;
@@ -104,7 +107,6 @@ namespace ALZ {
 		AppStatusWindow m_AppStatusWindow;
 
 		SaveItemBrowser m_EnvironmentSaveBrowser;
-		bool m_SaveLocationSelected = false;
 
 		//expose private parameters for environment serilization (saving and loading environments)
 		friend bool SaveEnvironment(const Environment& env, std::string path);
