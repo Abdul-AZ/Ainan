@@ -31,7 +31,7 @@ namespace ALZ {
 		InputManager::ClearKeys();
 		InspectorObjects.clear();
 		Window::Restore();
-		Window::SetWindowLaunchSize();
+		Window::SetSize(glm::ivec2(WINDOW_SIZE_ON_LAUNCH_X, WINDOW_SIZE_ON_LAUNCH_Y));
 		Window::CenterWindow();
 		Window::SetTitle("ALZ Particles");
 	}

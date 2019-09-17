@@ -59,8 +59,8 @@ namespace ALZ {
 		if (ImGui::Button("Create New Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
 			m_CurrentStatus = DisplayingCreateEnvironmentGUI;
-			//Window::Maximize();
-			//currentEnv = new Environment();
+			Window::SetSize({ WINDOW_SIZE_ON_CREATE_ENVIRONMENT_X, WINDOW_SIZE_ON_CREATE_ENVIRONMENT_Y });
+			Window::CenterWindow();
 		}
 
 		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
@@ -96,24 +96,6 @@ namespace ALZ {
 				}
 			});
 
-		if (m_EnvironmentLoadError != "")
-			ImGui::OpenPopup("Error Loading Env");
-		ImGui::SetNextWindowSize(ImVec2(400, 200));
-
-		if (ImGui::BeginPopupModal("Error Loading Env")) {
-			ImGui::TextWrapped(m_EnvironmentLoadError.c_str());
-
-			ImGui::SetCursorPosX(ImGui::GetWindowSize().x / 2 - 75 / 2);
-			ImGui::SetCursorPosY(ImGui::GetWindowSize().y - 75);
-
-			if (ImGui::Button("Ok", ImVec2(75, 50))) {
-				m_EnvironmentLoadError = "";
-				ImGui::CloseCurrentPopup();
-			}
-
-			ImGui::EndPopup();
-		}
-
 		ImGuiWrapper::Render();
 	}
 
@@ -127,6 +109,11 @@ namespace ALZ {
 		ImGui::Text("Environment Folder");
 		ImGui::SameLine();
 		ImGui::InputText("##Environment Folder", &m_EnvironmentCreateFolderPath);
+		ImGui::SameLine();
+		if (ImGui::Button("Browser"))
+		{
+			m_FolderBrowser.WindowOpen = true;
+		}
 
 		bool fileExists = false, fileIsDirectory = false, fileIsEmpty = false;
 		ImGui::Text("Create Directory For Environment: ");
@@ -146,6 +133,10 @@ namespace ALZ {
 		bool unsupportedEnvironmentName = 
 			   m_EnvironmentCreateName.find(" ") != std::string::npos
 			|| m_EnvironmentCreateName.find(".") != std::string::npos
+			|| m_EnvironmentCreateName.find("\\") != std::string::npos
+			|| m_EnvironmentCreateName.find("/") != std::string::npos
+			|| m_EnvironmentCreateName.find("\'") != std::string::npos
+			|| m_EnvironmentCreateName.find("\"") != std::string::npos
 			|| m_EnvironmentCreateName == "";
 
 		ImGui::Text("Environment Name");
@@ -160,16 +151,11 @@ namespace ALZ {
 			&& (!m_CreateEvironmentDirectory || (m_CreateEvironmentDirectory && canCreateDirectory)) //if we are making a directory make sure there is no one like it
 			&& !unsupportedEnvironmentName ) //environment name is not valid
 		{
-			//change create button color to green to show that the path given is valid
-			ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 1.0f, 0.0f, 1.0f });
 			canSaveEnvironment = true;
 		}
 		else
 		{
-			//change create button color to red to show that the path given is not valid
-			ImGui::PushStyleColor(ImGuiCol_Button, { 1.0f, 0.0f, 0.0f, 1.0f });
-
-			ImVec4 redColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+			ImVec4 redColor = { 0.8f, 0.0f, 0.0f, 1.0f };
 
 			//display why the path is not valid
 			if (!fileExists)
@@ -178,25 +164,53 @@ namespace ALZ {
 				ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "File is not a Directory");
 			else if (!fileIsEmpty && !m_CreateEvironmentDirectory)
 				ImGui::TextColored(redColor, "Directory is not empty");
-			else if (m_CreateEvironmentDirectory && !canCreateDirectory)
-				ImGui::TextColored(redColor, "Directory already exists");
 			else if (unsupportedEnvironmentName)
 				ImGui::TextColored(redColor, "Name is not valid");
+			else if (m_CreateEvironmentDirectory && !canCreateDirectory)
+				ImGui::TextColored(redColor, "Directory already exists");
 			else
 				assert(false); //we should never get to here
 
 			canSaveEnvironment = false;
 		}
 
-		if (canSaveEnvironment) {
-			if (ImGui::Button("Create"))
-			{
+		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - (START_MENU_BUTTON_HEIGHT + 10));
+
+		if (ImGui::Button("Cancel", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		{
+			m_CurrentStatus = DisplayingMainGUI;
+			Window::SetSize({ WINDOW_SIZE_ON_LAUNCH_X, WINDOW_SIZE_ON_LAUNCH_Y });
+			Window::CenterWindow();
+		}
+
+		//change create button color to green to show that the path given is valid
+		if(canSaveEnvironment)
+			ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.8f, 0.0f, 1.0f });
+		//change create button color to red to show that the path given is not valid
+		else
+			ImGui::PushStyleColor(ImGuiCol_Button, { 0.8f, 0.0f, 0.0f, 1.0f });
+
+		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - (START_MENU_BUTTON_HEIGHT + 10));
+		ImGui::SetCursorPosX(ImGui::GetWindowSize().x - (START_MENU_BUTTON_WIDTH + 10));
+
+		if (ImGui::Button("Create", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		{
+			if (canSaveEnvironment) {
 				Window::Maximize();
 
-				std::string dirPath = m_EnvironmentCreateFolderPath + m_EnvironmentCreateName + "\\";
+				//make sure the folder path has a backslash at the end
+				if (m_EnvironmentCreateFolderPath[m_EnvironmentCreateFolderPath.size() - 1] != '\\')
+					m_EnvironmentCreateFolderPath = m_EnvironmentCreateFolderPath + "\\";
 
-				if (m_CreateEvironmentDirectory) {
+				std::string dirPath = "";
+				if (m_CreateEvironmentDirectory)
+				{
+					dirPath = m_EnvironmentCreateFolderPath + m_EnvironmentCreateName + "\\";
 					std::filesystem::create_directory(dirPath);
+				}
+				else
+				{
+					dirPath = m_EnvironmentCreateFolderPath;
 				}
 
 				currentEnv = new Environment(dirPath, m_EnvironmentCreateName);
@@ -206,10 +220,12 @@ namespace ALZ {
 
 		ImGui::PopStyleColor();
 
-		if (ImGui::Button("Cancel"))
-			m_CurrentStatus = DisplayingMainGUI;
-
 		ImGui::End();
+
+		m_FolderBrowser.DisplayGUI([this](const std::string& dir) {
+			m_EnvironmentCreateFolderPath = dir;
+			});
+
 		ImGuiWrapper::Render();
 	}
 }

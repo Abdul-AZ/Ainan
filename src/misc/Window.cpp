@@ -56,8 +56,11 @@ namespace ALZ {
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif // !NDEBUG
 
-		Ptr = glfwCreateWindow(WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16, "ALZ Particles", nullptr, nullptr);
-		FramebufferSize = { WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 };
+		Ptr = glfwCreateWindow(500, 500 * 9 / 16, "ALZ Particles", nullptr, nullptr);
+		int fbWidth = 0;
+		int fbHeight = 0;
+		glfwGetFramebufferSize(Ptr, &fbWidth, &fbHeight);
+		FramebufferSize = { fbWidth, fbHeight };
 		CenterWindow();
 
 		glfwMakeContextCurrent(Ptr);
@@ -110,11 +113,6 @@ namespace ALZ {
 		glfwSetWindowPos(Ptr,
 			monitorX + (mode->width - windowWidth) / 2,
 			monitorY + (mode->height - windowHeight) / 2);
-	}
-
-	void Window::SetWindowLaunchSize()
-	{
-		glfwSetWindowSize(Ptr, WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16);
 	}
 
 	void Window::Restore()

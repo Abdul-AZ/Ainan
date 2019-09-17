@@ -18,10 +18,12 @@ namespace ALZ {
 		m_InputFolder = m_CurrentFolder;
 	}
 
-	void FolderBrowser::DisplayGUI()
+	void FolderBrowser::DisplayGUI(std::function<void(const std::string&)> onSelect)
 	{
 		if (!WindowOpen)
 			return;
+
+		ImGui::PushID(this);
 
 		ImGui::SetNextWindowSizeConstraints(ImVec2(BROWSER_WINDOW_WIDTH, BROWSER_MIN_WINDOW_HEIGHT), ImVec2(1000, 1000), BrowserWindowSizeCallback);
 		
@@ -60,6 +62,16 @@ namespace ALZ {
 			}
 			ImGui::ListBoxFooter();
 		}
+
+		if (ImGui::Button("Select"))
+		{
+			if (onSelect != nullptr)
+				onSelect(m_CurrentFolder);
+			WindowOpen = false;
+		}
+
 		ImGui::End();
+
+		ImGui::PopID();
 	}
 }

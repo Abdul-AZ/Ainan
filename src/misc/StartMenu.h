@@ -1,4 +1,7 @@
 #include "Environment.h"
+#include "file/FolderBrowser.h"
+
+#define WINDOW_SIZE_FACTOR_ON_LAUNCH 500
 
 namespace ALZ {
 	class StartMenu
@@ -26,6 +29,7 @@ namespace ALZ {
 		Status m_CurrentStatus = DisplayingMainGUI;
 		std::string m_EnvironmentLoadError;
 		bool m_CreateEvironmentDirectory = false;
+		FolderBrowser m_FolderBrowser;
 	};
 
 }
