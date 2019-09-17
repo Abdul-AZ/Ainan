@@ -1,5 +1,6 @@
 # ALZparticles
-ALZparticles is an app developed in OpenGL and c++ to make cool graphics easily through particle systems and lights.
+ALZparticles is an app developed in c++ that uses graphic API's like OpenGL (support for other API's is planned) to make cool graphics easily and export them.
+This app is meant to be used by game artists and hobbyists.
 
 At the moment it only runs on windows.
 
@@ -25,9 +26,9 @@ Still to be made, I'm planning to slowly build it through time. It will be avail
 ![](github/appScreenshot.PNG)
 
 # Contribute
-Every contribution is welcome even if it is not planned but we will have a discussion about it to see if it fits the project or you can chose something from the To Do list [here](https://github.com/AbdullrahmanAlzeidi/ALZparticles/projects) and work on it (you don't havet to notify me however it would be prefered so we don't have more than 1 guy working on something).
+Every contribution is accepted however we will have a discussion on contributions that add new features. But other contributions like bug fixes, documentation and code cleaning/refactoring are more than welcomed.
 
-Issues are more than welcome aswell.
+Also do not be afraid to open an issue on the slightest issue/question/bug or whatever you have.
 
 # Libraries used
 * GLFW
