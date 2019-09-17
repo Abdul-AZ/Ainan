@@ -2,7 +2,10 @@
 
 #include "renderer/Viewport.h"
 
-#define WINDOW_SIZE_FACTOR_ON_LAUNCH 500
+#define WINDOW_SIZE_ON_LAUNCH_X 500
+#define WINDOW_SIZE_ON_LAUNCH_Y 500 * 9 / 16
+#define WINDOW_SIZE_ON_CREATE_ENVIRONMENT_X 700
+#define WINDOW_SIZE_ON_CREATE_ENVIRONMENT_Y 700 * 9 / 16
 
 namespace ALZ {
 
@@ -17,7 +20,6 @@ namespace ALZ {
 		static void Clear();
 		static void Terminate();
 		static void CenterWindow();
-		static void SetWindowLaunchSize();
 		static void Restore();
 		static void Maximize();
 

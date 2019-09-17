@@ -23,6 +23,8 @@ namespace ALZ {
 	{
 		json data;
 
+		data["EnvironmentName"] = env.m_EnvironmentName;
+
 		//serialize inspector objects count int
 		data["objectCount"] = env.InspectorObjects.size();
 		

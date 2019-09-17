@@ -10,7 +10,7 @@ namespace ALZ {
 		FolderBrowser(const std::string& startingFolder, const std::string& windowName = "Folder Browser");
 		FolderBrowser();
 
-		void DisplayGUI();
+		void DisplayGUI(std::function<void(const std::string&)> onSelect = nullptr);
 
 		std::string GetChosenFolderPath() { return m_CurrentFolder; }
 

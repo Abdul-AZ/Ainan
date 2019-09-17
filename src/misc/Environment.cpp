@@ -3,8 +3,10 @@
 
 namespace ALZ {
 
-	Environment::Environment() : 
-		m_EnvironmentSaveBrowser(FileManager::ApplicationFolder, "Save Environment")
+	Environment::Environment(const std::string& environmentFolderPath, const std::string& environmentName) :
+		m_EnvironmentSaveBrowser(environmentFolderPath, "Save Environment"),
+		m_EnvironmentFolderPath(environmentFolderPath),
+		m_EnvironmentName(environmentName)
 	{
 		m_PlayButtonTexture = Renderer::CreateTexture();
 		m_PauseButtonTexture = Renderer::CreateTexture();
@@ -26,9 +28,10 @@ namespace ALZ {
 
 	Environment::~Environment()
 	{
+		InputManager::ClearKeys();
 		InspectorObjects.clear();
 		Window::Restore();
-		Window::SetWindowLaunchSize();
+		Window::SetSize(glm::ivec2(WINDOW_SIZE_ON_LAUNCH_X, WINDOW_SIZE_ON_LAUNCH_Y));
 		Window::CenterWindow();
 		Window::SetTitle("ALZ Particles");
 	}
@@ -215,7 +218,6 @@ namespace ALZ {
 
 		m_EnvironmentSaveBrowser.DisplayGUI([this](const std::string& path) {
 			SaveEnvironment(*this, path + ".env");
-			m_SaveLocationSelected = true;
 			UpdateTitle();
 			});
 
@@ -457,10 +459,7 @@ namespace ALZ {
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Save"))
 				{
-					if (m_SaveLocationSelected)
-						SaveEnvironment(*this, m_EnvironmentSaveBrowser.GetSelectedSavePath() + ".env");
-					else
-						m_EnvironmentSaveBrowser.OpenWindow();
+					SaveEnvironment(*this, m_EnvironmentFolderPath + m_EnvironmentName + ".env");
 
 					UpdateTitle();
 				}
@@ -759,12 +758,10 @@ namespace ALZ {
 	{
 		RendererType currentRendererType = Renderer::m_CurrentActiveAPI->GetType();
 
-		auto projectName = m_SaveLocationSelected ? m_EnvironmentSaveBrowser.m_FileName : "Untitled Project";
-
 		switch (currentRendererType)
 		{
 		case RendererType::OpenGL:
-			Window::SetTitle("ALZ Particles - OpenGL (3.3) - " + projectName);
+			Window::SetTitle("ALZ Particles - OpenGL (3.3) - " + m_EnvironmentName);
 			break;
 		}
 	}
