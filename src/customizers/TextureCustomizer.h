@@ -3,7 +3,7 @@
 #include "renderer/Renderer.h"
 #include "file/FileBrowser.h"
 #include "misc/ExposeToJson.h"
-#include "misc/EnvironmentFileExplorer.h"
+#include "misc/AssetManager.h"
 
 namespace ALZ {
 
@@ -14,7 +14,7 @@ namespace ALZ {
 		TextureCustomizer(const TextureCustomizer& customizer);
 		TextureCustomizer operator=(const TextureCustomizer& customizer);
 
-		void DisplayGUI(EnvironmentFileExplorer& fileExplorer);
+		void DisplayGUI();
 
 	public:
 		bool UseDefaultTexture = true;

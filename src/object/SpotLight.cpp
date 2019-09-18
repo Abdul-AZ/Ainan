@@ -9,7 +9,7 @@ namespace ALZ {
 		m_Name = "Spot Light";
 	}
 
-	void SpotLight::DisplayGUI(EnvironmentFileExplorer& fileExplorer)
+	void SpotLight::DisplayGUI()
 	{
 		if (!EditorOpen)
 			return;

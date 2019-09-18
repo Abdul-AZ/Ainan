@@ -13,7 +13,7 @@ namespace ALZ {
 
 		virtual void Update(const float& deltaTime) override;
 		virtual void Draw() override;
-		virtual void DisplayGUI(EnvironmentFileExplorer& fileExplorer) override;
+		virtual void DisplayGUI() override;
 		virtual glm::vec2& GetPositionRef() override { return Position; };
 
 		void LoadTextureFromFile(const std::string& path);

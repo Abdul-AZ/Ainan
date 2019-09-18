@@ -10,7 +10,7 @@ namespace ALZ {
 		m_Name = "Radial Light";
 	}
 
-	void RadialLight::DisplayGUI(EnvironmentFileExplorer& fileExplorer)
+	void RadialLight::DisplayGUI()
 	{
 		if (!EditorOpen)
 			return;

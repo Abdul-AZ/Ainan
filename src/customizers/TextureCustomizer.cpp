@@ -25,13 +25,13 @@ namespace ALZ {
 		return TextureCustomizer(customizer);
 	}
 
-	void TextureCustomizer::DisplayGUI(EnvironmentFileExplorer& fileExplorer)
+	void TextureCustomizer::DisplayGUI()
 	{
 		if (ImGui::TreeNode("Texture")) 
 		{
 			if (ImGui::BeginCombo("Texture", UseDefaultTexture ? "Default" : std::filesystem::path(m_CurrentTexture).filename().u8string().c_str()))
 			{
-				auto textures = fileExplorer.GetAllTextures();
+				auto textures = AssetManager::GetAll2DTextures();
 				bool selected = false;
 				if (ImGui::Selectable("Default", &selected))
 				{

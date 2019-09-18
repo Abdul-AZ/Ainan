@@ -32,7 +32,7 @@ namespace ALZ {
 		ParticleCustomizer(const ParticleCustomizer& customizer);
 		ParticleCustomizer operator=(const ParticleCustomizer& customizer);
 
-		void DisplayGUI(const std::string& windowName, bool& windowOpen, EnvironmentFileExplorer& fileExplorer);
+		void DisplayGUI(const std::string& windowName, bool& windowOpen);
 		void Update();
 		Particle& GetParticle();
 

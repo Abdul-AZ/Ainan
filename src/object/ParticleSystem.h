@@ -22,7 +22,7 @@ namespace ALZ {
 		void SpawnAllParticlesOnQue(const float& deltaTime);
 		void SpawnParticle(const Particle& particle);
 		void ClearParticles();
-		void DisplayGUI(EnvironmentFileExplorer& fileExplorer) override;
+		void DisplayGUI() override;
 
 		glm::vec2& GetPositionRef() override;
 		ParticleSystem(const ParticleSystem& Psystem);

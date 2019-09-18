@@ -10,7 +10,7 @@ namespace ALZ {
 	public:
 		RadialLight();
 
-		void DisplayGUI(EnvironmentFileExplorer& fileExplorer) override;
+		void DisplayGUI() override;
 
 		glm::vec2& GetPositionRef() override { return Position; }
 

@@ -68,7 +68,7 @@ namespace ALZ {
 		m_Texture->Unbind();
 	}
 
-	void Sprite::DisplayGUI(EnvironmentFileExplorer& fileExplorer)
+	void Sprite::DisplayGUI()
 	{
 		if (!EditorOpen)
 			return;

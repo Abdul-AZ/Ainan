@@ -4,10 +4,8 @@
 namespace ALZ {
 
 	Environment::Environment(const std::string& environmentFolderPath, const std::string& environmentName) :
-		m_EnvironmentSaveBrowser(environmentFolderPath, "Save Environment"),
 		m_EnvironmentFolderPath(environmentFolderPath),
-		m_EnvironmentName(environmentName),
-		m_FileExplorer(environmentFolderPath)
+		m_EnvironmentName(environmentName)
 	{
 		m_PlayButtonTexture = Renderer::CreateTexture();
 		m_PauseButtonTexture = Renderer::CreateTexture();
@@ -24,12 +22,15 @@ namespace ALZ {
 
 		RegisterEnvironmentInputKeys();
 
+		AssetManager::Init(environmentFolderPath);
+
 		UpdateTitle();
 	}
 
 	Environment::~Environment()
 	{
 		InputManager::ClearKeys();
+		AssetManager::Terminate();
 		InspectorObjects.clear();
 		Window::Restore();
 		Window::SetSize(glm::ivec2(WINDOW_SIZE_ON_LAUNCH_X, WINDOW_SIZE_ON_LAUNCH_Y));
@@ -204,7 +205,7 @@ namespace ALZ {
 
 		m_AppStatusWindow.DisplayGUI(viewportDockID);
 		
-		m_FileExplorer.DisplayGUI();
+		AssetManager::DisplayGUI();
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
 		m_Settings.DisplayGUI();
@@ -213,15 +214,10 @@ namespace ALZ {
 		m_Background.DisplayGUI();
 
 		for (pEnvironmentObject& obj : InspectorObjects)
-			obj->DisplayGUI(m_FileExplorer);
+			obj->DisplayGUI();
 
 		InputManager::DisplayGUI();
 		m_ViewportWindow.DisplayGUI();
-
-		m_EnvironmentSaveBrowser.DisplayGUI([this](const std::string& path) {
-			SaveEnvironment(*this, path + ".env");
-			UpdateTitle();
-			});
 
 		ImGuiWrapper::Render();
 	}
@@ -460,14 +456,7 @@ namespace ALZ {
 
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Save"))
-				{
 					SaveEnvironment(*this, m_EnvironmentFolderPath + m_EnvironmentName + ".env");
-
-					UpdateTitle();
-				}
-
-				if (ImGui::MenuItem("Save As"))
-					m_EnvironmentSaveBrowser.OpenWindow();
 
 				if (ImGui::MenuItem("Close Environment")) 
 					ShouldDelete = true; //this means environment be closed when the time is right

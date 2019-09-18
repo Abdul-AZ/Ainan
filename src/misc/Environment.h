@@ -8,7 +8,7 @@
 #include "Camera.h"
 #include "EditorStyles.h"
 #include "ExportCamera.h"
-#include "EnvironmentFileExplorer.h"
+#include "AssetManager.h"
 
 #include "ParticleCustomizer.h"
 #include "GeneralSettingsGUI.h"
@@ -106,9 +106,6 @@ namespace ALZ {
 		ViewportWindow m_ViewportWindow;
 
 		AppStatusWindow m_AppStatusWindow;
-
-		SaveItemBrowser m_EnvironmentSaveBrowser;
-		EnvironmentFileExplorer m_FileExplorer;
 
 		//expose private parameters for environment serilization (saving and loading environments)
 		friend bool SaveEnvironment(const Environment& env, std::string path);
