@@ -30,6 +30,7 @@ namespace ALZ {
 		std::string m_EnvironmentLoadError;
 		bool m_CreateEvironmentDirectory = false;
 		FolderBrowser m_FolderBrowser;
+		bool m_IncludeStarterAssets = false;
 	};
 
 }

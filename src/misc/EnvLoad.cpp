@@ -165,11 +165,11 @@ namespace ALZ {
 
 		//Texture data
 		ps->Customizer.m_TextureCustomizer.UseDefaultTexture = data[id + "UseDefaultTexture"].get<bool>();
-		ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath = data[id + "TexturePath"].get<std::string>();
+		//ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath = data[id + "TexturePath"].get<std::string>();
 		if (!ps->Customizer.m_TextureCustomizer.UseDefaultTexture)
 		{
 			ps->Customizer.m_TextureCustomizer.ParticleTexture = Renderer::CreateTexture();
-			ps->Customizer.m_TextureCustomizer.ParticleTexture->SetImage(Image::LoadFromFile(ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath));
+			//ps->Customizer.m_TextureCustomizer.ParticleTexture->SetImage(Image::LoadFromFile(ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath));
 		}
 
 		//Force data

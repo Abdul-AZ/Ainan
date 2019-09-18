@@ -69,7 +69,7 @@ namespace ALZ {
 		}
 	}
 
-	void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowOpen)
+	void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowOpen, EnvironmentFileExplorer& fileExplorer)
 	{
 		ImGui::SetNextWindowSizeConstraints(ImVec2(575.0f, 500.0f), ImVec2(std::numeric_limits<float>().max(), std::numeric_limits<float>().max()));
 		ImGui::Begin((windowName.size() > 0) ? (windowName + "##" +  std::to_string(ImGui::GetID(this))).c_str() : "No Name", &windowOpen, ImGuiWindowFlags_NoSavedSettings);
@@ -113,7 +113,7 @@ namespace ALZ {
 			ImGui::EndCombo();
 		}
 
-		m_TextureCustomizer.DisplayGUI();
+		m_TextureCustomizer.DisplayGUI(fileExplorer);
 
 		if (ImGui::TreeNode("Emission")) {
 

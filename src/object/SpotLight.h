@@ -9,7 +9,7 @@ namespace ALZ {
 	public:
 		SpotLight();
 
-		void DisplayGUI() override;
+		void DisplayGUI(EnvironmentFileExplorer& fileExplorer) override;
 		glm::vec2& GetPositionRef() override { return Position; }
 
 		glm::vec2 Position = glm::vec2(0.0f, 0.0f);

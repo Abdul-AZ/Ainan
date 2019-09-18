@@ -275,11 +275,11 @@ namespace ALZ {
 		return ParticleSystem(Psystem);
 	}
 
-	void ParticleSystem::DisplayGUI()
+	void ParticleSystem::DisplayGUI(EnvironmentFileExplorer& fileExplorer)
 	{
 		ImGui::PushID(this);
 		if (EditorOpen)
-			Customizer.DisplayGUI(m_Name, EditorOpen);
+			Customizer.DisplayGUI(m_Name, EditorOpen, fileExplorer);
 		ImGui::PopID();
 
 		//update editor line

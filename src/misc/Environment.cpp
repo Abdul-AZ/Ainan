@@ -6,7 +6,8 @@ namespace ALZ {
 	Environment::Environment(const std::string& environmentFolderPath, const std::string& environmentName) :
 		m_EnvironmentSaveBrowser(environmentFolderPath, "Save Environment"),
 		m_EnvironmentFolderPath(environmentFolderPath),
-		m_EnvironmentName(environmentName)
+		m_EnvironmentName(environmentName),
+		m_FileExplorer(environmentFolderPath)
 	{
 		m_PlayButtonTexture = Renderer::CreateTexture();
 		m_PauseButtonTexture = Renderer::CreateTexture();
@@ -203,6 +204,7 @@ namespace ALZ {
 
 		m_AppStatusWindow.DisplayGUI(viewportDockID);
 		
+		m_FileExplorer.DisplayGUI();
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
 		m_Settings.DisplayGUI();
@@ -211,7 +213,7 @@ namespace ALZ {
 		m_Background.DisplayGUI();
 
 		for (pEnvironmentObject& obj : InspectorObjects)
-			obj->DisplayGUI();
+			obj->DisplayGUI(m_FileExplorer);
 
 		InputManager::DisplayGUI();
 		m_ViewportWindow.DisplayGUI();

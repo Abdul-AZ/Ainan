@@ -174,6 +174,10 @@ namespace ALZ {
 			canSaveEnvironment = false;
 		}
 
+		ImGui::Text("Include Starter Assets");
+		ImGui::SameLine();
+		ImGui::Checkbox("##Include Starter Assets", &m_IncludeStarterAssets);
+
 		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - (START_MENU_BUTTON_HEIGHT + 10));
 
 		if (ImGui::Button("Cancel", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
@@ -214,6 +218,10 @@ namespace ALZ {
 				}
 
 				currentEnv = new Environment(dirPath, m_EnvironmentCreateName);
+
+				if (m_IncludeStarterAssets)
+					std::filesystem::copy("res\\StarterAssets", dirPath + "\\StarterAssets");
+
 				m_CurrentStatus = DisplayingMainGUI;
 			}
 		}

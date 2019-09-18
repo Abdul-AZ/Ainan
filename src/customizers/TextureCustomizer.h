@@ -3,6 +3,7 @@
 #include "renderer/Renderer.h"
 #include "file/FileBrowser.h"
 #include "misc/ExposeToJson.h"
+#include "misc/EnvironmentFileExplorer.h"
 
 namespace ALZ {
 
@@ -13,14 +14,12 @@ namespace ALZ {
 		TextureCustomizer(const TextureCustomizer& customizer);
 		TextureCustomizer operator=(const TextureCustomizer& customizer);
 
-		void DisplayGUI();
+		void DisplayGUI(EnvironmentFileExplorer& fileExplorer);
 
 	public:
 		bool UseDefaultTexture = true;
 		std::shared_ptr<Texture> ParticleTexture;
-
-	private:
-		FileBrowser m_FileBrowser;
+		std::string m_CurrentTexture = "";
 
 		EXPOSE_CUSTOMIZER_TO_JSON
 	};
