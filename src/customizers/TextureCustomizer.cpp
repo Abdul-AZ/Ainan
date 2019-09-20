@@ -29,7 +29,9 @@ namespace ALZ {
 	{
 		if (ImGui::TreeNode("Texture")) 
 		{
-			if (ImGui::BeginCombo("Texture", UseDefaultTexture ? "Default" : std::filesystem::path(m_CurrentTexture).filename().u8string().c_str()))
+			ImGui::Text("Texture: ");
+			ImGui::SameLine();
+			if (ImGui::BeginCombo("##Texture: ", UseDefaultTexture ? "Default" : std::filesystem::path(m_CurrentTexture).filename().u8string().c_str()))
 			{
 				auto textures = AssetManager::GetAll2DTextures();
 				bool selected = false;
@@ -48,7 +50,8 @@ namespace ALZ {
 							ParticleTexture = Renderer::CreateTexture();
 							ParticleTexture->SetImage(Image::LoadFromFile(tex));
 							UseDefaultTexture = false;
-							m_CurrentTexture = tex;
+							std::string absolutePathToEnv = AssetManager::GetAbsolutePath();
+							m_CurrentTexture = tex.substr(absolutePathToEnv.size(), tex.size() - absolutePathToEnv.size());
 						}
 					}
 				}

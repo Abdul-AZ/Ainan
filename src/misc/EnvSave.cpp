@@ -193,7 +193,7 @@ namespace ALZ {
 		j[id + "Scale"] = VEC2_TO_JSON_ARRAY(sprite.Scale);
 		j[id + "Rotation"] = sprite.Rotation;
 		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.Tint);
-		j[id + "TextureImagePath"] = sprite.TextureImagePath;
+		//j[id + "TextureImagePath"] = sprite.TextureImagePath;
 	}
 
 }
