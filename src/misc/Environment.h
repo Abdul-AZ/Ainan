@@ -57,6 +57,7 @@ namespace ALZ {
 		void DisplayEnvironmentStatusGUI();
 		void DisplayEnvironmentControlsGUI();
 		void DisplayMainMenuBarGUI();
+		void RefreshObjectOrdering();
 
 		void PlayMode();
 		void ExportMode();

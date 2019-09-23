@@ -240,17 +240,41 @@ namespace ALZ {
 
 			for (int i = 0; i < InspectorObjects.size(); i++)
 			{
-
 				ImGui::PushID(InspectorObjects[i].get());
 
-				if (ImGui::Selectable((InspectorObjects[i]->m_Name.size() > 0) ? InspectorObjects[i]->m_Name.c_str() : "No Name", &InspectorObjects[i]->Selected)) {
-
+				if (ImGui::Selectable((InspectorObjects[i]->m_Name.size() > 0) ? InspectorObjects[i]->m_Name.c_str() : "No Name", &InspectorObjects[i]->Selected)) 
+				{
 					//if this is selected. deselect all other particle systems
 					for (auto& particle : InspectorObjects) {
 						if (particle.get() != InspectorObjects[i].get())
 							particle->Selected = false;
 					}
 				}
+
+				if (ImGui::BeginDragDropSource())
+				{
+					ImGui::Text(("Moving: " + InspectorObjects[i]->m_Name).c_str());
+					ImGui::SetDragDropPayload("re-order", &InspectorObjects[i]->Order, sizeof(int), ImGuiCond_Once);
+					ImGui::EndDragDropSource();
+				}
+
+				if (ImGui::BeginDragDropTarget())
+				{
+					if (const ImGuiPayload * payload = ImGui::AcceptDragDropPayload("re-order"))
+					{
+						size_t switchTarget1 = *(int*)payload->Data;
+						size_t switchTarget2 = i;
+
+						EnvironmentObjectInterface* temp = InspectorObjects[switchTarget1].release();
+						InspectorObjects[switchTarget1] = std::unique_ptr<EnvironmentObjectInterface>(InspectorObjects[switchTarget2].release());
+						InspectorObjects[switchTarget2] = std::unique_ptr<EnvironmentObjectInterface>(temp);
+
+						RefreshObjectOrdering();
+					}
+
+					ImGui::EndDragDropTarget();
+				}
+
 
 				//show menu when right clicking
 				if (ImGui::BeginPopupContextItem("Object Popup"))
@@ -521,6 +545,12 @@ namespace ALZ {
 		}
 	}
 
+	void Environment::RefreshObjectOrdering()
+	{
+		for (size_t i = 0; i < InspectorObjects.size(); i++)
+			InspectorObjects[i]->Order = i;
+	}
+
 	void Environment::PlayMode()
 	{
 		m_Status = Status_PlayMode;
@@ -672,6 +702,8 @@ namespace ALZ {
 
 		//add the object to the list of the environment objects
 		InspectorObjects.push_back(std::move(obj));
+
+		RefreshObjectOrdering();
 	}
 
 	void Environment::Duplicate(EnvironmentObjectInterface& obj)

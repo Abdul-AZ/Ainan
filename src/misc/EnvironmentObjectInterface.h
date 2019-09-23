@@ -29,6 +29,7 @@ namespace ALZ {
 		bool EditorOpen = false;
 		bool RenameTextOpen = false;
 		bool Selected = false;
+		int Order = 0; //this should ONLY be used and edited by the Environment class and NOT be used by inherited classes.
 
 		//set this to true if you want to delete the object because it can't be deleted at certain times
 		bool ToBeDeleted = false;
