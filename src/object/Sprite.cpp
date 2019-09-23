@@ -4,17 +4,11 @@
 
 namespace ALZ {
 
-	Sprite::Sprite() :
-		m_FileBrowser(FileManager::ApplicationFolder, "Load Texture")
+	Sprite::Sprite()
 	{
 		Type = SpriteType;
 		m_Name = "Sprite";
 		EditorOpen = false;
-
-		m_FileBrowser.Filter.push_back(".png");
-		m_FileBrowser.Filter.push_back(".jpeg");
-		m_FileBrowser.Filter.push_back(".jpg");
-		m_FileBrowser.Filter.push_back(".bmp");
 
 		m_VertexArray = Renderer::CreateVertexArray();
 		m_VertexArray->Bind();
@@ -37,7 +31,6 @@ namespace ALZ {
 		m_Texture = Renderer::CreateTexture();
 
 		Image img = Image::LoadFromFile("res/CheckerBoard.png");
-		TextureImagePath = "res/CheckerBoard.png";
 
 		Image::GrayScaleToRGB(img);
 
@@ -81,14 +74,33 @@ namespace ALZ {
 		ImGui::SameLine();
 		ImGui::Image((ImTextureID)m_Texture->GetRendererID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 
-		m_FileBrowser.DisplayGUI([this](const std::string& targetFile)
+		if (ImGui::BeginCombo("##Texture: ", m_TexturePath == "" ? "None" : std::filesystem::path(m_TexturePath).filename().u8string().c_str()))
+		{
+			auto textures = AssetManager::GetAll2DTextures();
+			bool selected = false;
+			if (ImGui::Selectable("None", &selected))
 			{
-				LoadTextureFromFile(targetFile);
+				LoadTextureFromFile("res/CheckerBoard.png");
+				m_TexturePath = "";
 			}
-		);
+			for (auto& tex : textures)
+			{
+				std::string textureFileName = std::filesystem::path(tex).filename().u8string();
+				if (ImGui::Selectable(textureFileName.c_str(), &selected))
+				{
+					if (textureFileName != "Default")
+					{
+						LoadTextureFromFile(tex);
+						std::string absolutePathToEnv = AssetManager::GetAbsolutePath();
+						m_TexturePath = tex.substr(absolutePathToEnv.size(), tex.size() - absolutePathToEnv.size());
+					}
+				}
+			}
 
-		if (ImGui::Button("Load Texture"))
-			m_FileBrowser.OpenWindow();
+			ImGui::EndCombo();
+		}
+
+
 
 		ImGui::Spacing();
 
@@ -122,7 +134,6 @@ namespace ALZ {
 		m_Texture = Renderer::CreateTexture();
 
 		Image img = Image::LoadFromFile(path);
-		TextureImagePath = path;
 
 		if (img.m_Comp == 1)
 			Image::GrayScaleToRGB(img);

@@ -3,6 +3,7 @@
 #include "renderer/Renderer.h"
 #include "file/FileBrowser.h"
 #include "misc/ExposeToJson.h"
+#include "misc/AssetManager.h"
 
 namespace ALZ {
 
@@ -18,9 +19,7 @@ namespace ALZ {
 	public:
 		bool UseDefaultTexture = true;
 		std::shared_ptr<Texture> ParticleTexture;
-
-	private:
-		FileBrowser m_FileBrowser;
+		std::string m_TexturePath = "";
 
 		EXPOSE_CUSTOMIZER_TO_JSON
 	};

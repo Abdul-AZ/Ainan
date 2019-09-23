@@ -5,25 +5,18 @@
 namespace ALZ {
 
 	TextureCustomizer::TextureCustomizer() :
-		m_FileBrowser("res/"),
 		UseDefaultTexture(true)
 	{
-		m_FileBrowser.Filter.reserve(4);
-		m_FileBrowser.Filter.push_back(".png");
-		m_FileBrowser.Filter.push_back(".bmp");
-		m_FileBrowser.Filter.push_back(".jpg");
-		m_FileBrowser.Filter.push_back(".jpeg");
 	}
 
-	TextureCustomizer::TextureCustomizer(const TextureCustomizer& customizer) :
-		m_FileBrowser(customizer.m_FileBrowser)
+	TextureCustomizer::TextureCustomizer(const TextureCustomizer& customizer)
 	{
 		UseDefaultTexture = customizer.UseDefaultTexture;
 
 		if (!UseDefaultTexture)
 		{
 			ParticleTexture = Renderer::CreateTexture();
-			ParticleTexture->SetImage(Image::LoadFromFile(customizer.m_FileBrowser.m_CurrentselectedFilePath));
+			ParticleTexture->SetImage(Image::LoadFromFile(customizer.m_TexturePath));
 		}
 	}
 
@@ -34,23 +27,37 @@ namespace ALZ {
 
 	void TextureCustomizer::DisplayGUI()
 	{
-		if (ImGui::TreeNode("Texture")) {
-
-			ImGui::Text("Use Default Texture");
+		if (ImGui::TreeNode("Texture")) 
+		{
+			ImGui::Text("Texture: ");
 			ImGui::SameLine();
-			ImGui::Checkbox("##Use Default Texture", &UseDefaultTexture);
-
-			if (!UseDefaultTexture) {
-				if (ImGui::Button("Select Texture")) {
-					m_FileBrowser.OpenWindow();
+			if (ImGui::BeginCombo("##Texture: ", UseDefaultTexture ? "Default" : std::filesystem::path(m_TexturePath).filename().u8string().c_str()))
+			{
+				auto textures = AssetManager::GetAll2DTextures();
+				bool selected = false;
+				if (ImGui::Selectable("Default", &selected))
+				{
+					UseDefaultTexture = true;
+					m_TexturePath = "";
 				}
-			}
+				for (auto& tex : textures) 
+				{
+					std::string textureFileName = std::filesystem::path(tex).filename().u8string();
+					if (ImGui::Selectable(textureFileName.c_str(), &selected))
+					{
+						if (textureFileName != "Default") 
+						{
+							ParticleTexture = Renderer::CreateTexture();
+							ParticleTexture->SetImage(Image::LoadFromFile(tex));
+							UseDefaultTexture = false;
+							std::string absolutePathToEnv = AssetManager::GetAbsolutePath();
+							m_TexturePath = tex.substr(absolutePathToEnv.size(), tex.size() - absolutePathToEnv.size());
+						}
+					}
+				}
 
-			m_FileBrowser.DisplayGUI([this](const std::string& filePath) {
-				ParticleTexture = Renderer::CreateTexture();
-				ParticleTexture->SetImage(Image::LoadFromFile(filePath));
-				UseDefaultTexture = false;
-			});
+				ImGui::EndCombo();
+			}
 
 			if (!UseDefaultTexture) {
 				ImGui::Text("Current Selected Texture");

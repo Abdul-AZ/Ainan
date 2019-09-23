@@ -8,10 +8,10 @@
 namespace ALZ {
 	
 	StartMenu::StartMenu() :
-	LoadEnvironmentPath(FileManager::ApplicationFolder, "Load Environment")
+	m_LoadEnvironmentBrowser(FileManager::ApplicationFolder, "Load Environment")
 	{
-		LoadEnvironmentPath.Filter.push_back(".env");
-		LoadEnvironmentPath.OnCloseWindow = []() {
+		m_LoadEnvironmentBrowser.Filter.push_back(".env");
+		m_LoadEnvironmentBrowser.OnCloseWindow = []() {
 			Window::SetSize({ WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 });
 			Window::CenterWindow();
 		};
@@ -38,8 +38,8 @@ namespace ALZ {
 
 	inline void StartMenu::DisplayMainGUI(Environment*& currentEnv)
 	{
-		if (LoadEnvironmentPath.OnCloseWindow == nullptr)
-			LoadEnvironmentPath.OnCloseWindow = []() {
+		if (m_LoadEnvironmentBrowser.OnCloseWindow == nullptr)
+			m_LoadEnvironmentBrowser.OnCloseWindow = []() {
 			Window::SetSize({ WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 });
 			Window::CenterWindow();
 		};
@@ -67,7 +67,7 @@ namespace ALZ {
 
 		if (ImGui::Button("Load Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
-			LoadEnvironmentPath.OpenWindow();
+			m_LoadEnvironmentBrowser.OpenWindow();
 		}
 
 		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
@@ -79,7 +79,7 @@ namespace ALZ {
 
 		ImGui::End();
 
-		LoadEnvironmentPath.DisplayGUI([&currentEnv, this](const std::string& path)
+		m_LoadEnvironmentBrowser.DisplayGUI([&currentEnv, this](const std::string& path)
 			{
 				//check if file is selected
 				if (path.find(".env") != std::string::npos) {
@@ -88,7 +88,7 @@ namespace ALZ {
 					//if there are no errors load environment
 					if (m_EnvironmentLoadError == "") {
 						//remove minimizing event on file browser window close
-						LoadEnvironmentPath.OnCloseWindow = nullptr;
+						m_LoadEnvironmentBrowser.OnCloseWindow = nullptr;
 
 						Window::Maximize();
 						currentEnv = LoadEnvironment(path);
@@ -174,6 +174,10 @@ namespace ALZ {
 			canSaveEnvironment = false;
 		}
 
+		ImGui::Text("Include Starter Assets");
+		ImGui::SameLine();
+		ImGui::Checkbox("##Include Starter Assets", &m_IncludeStarterAssets);
+
 		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - (START_MENU_BUTTON_HEIGHT + 10));
 
 		if (ImGui::Button("Cancel", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
@@ -214,6 +218,10 @@ namespace ALZ {
 				}
 
 				currentEnv = new Environment(dirPath, m_EnvironmentCreateName);
+
+				if (m_IncludeStarterAssets)
+					std::filesystem::copy("res\\StarterAssets", dirPath + "\\StarterAssets");
+
 				m_CurrentStatus = DisplayingMainGUI;
 			}
 		}

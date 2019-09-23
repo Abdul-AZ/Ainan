@@ -17,8 +17,6 @@ namespace ALZ {
 
 		void Update(Environment*& currentEnv);
 
-		FileBrowser LoadEnvironmentPath;
-
 	private: //helper functions to display gui in each state
 		inline void DisplayMainGUI(Environment*& currentEnv);
 		inline void DisplayCreateEnvironmentGUI(Environment*& currentEnv);
@@ -30,6 +28,8 @@ namespace ALZ {
 		std::string m_EnvironmentLoadError;
 		bool m_CreateEvironmentDirectory = false;
 		FolderBrowser m_FolderBrowser;
+		FileBrowser m_LoadEnvironmentBrowser;
+		bool m_IncludeStarterAssets = false;
 	};
 
 }

@@ -11,23 +11,6 @@ using json = nlohmann::json;
 
 namespace ALZ {
 
-	static InterpolationType StringToInterpolationType(const std::string& type)
-	{
-		if (type == "Fixed")
-			return InterpolationType::Fixed;
-		else if (type == "Linear")
-			return InterpolationType::Linear;
-		else if (type == "Cubic")
-			return InterpolationType::Cubic;
-		else if (type == "Smoothstep")
-			return InterpolationType::Smoothstep;
-		else
-		{
-			assert(false);
-			return InterpolationType::Fixed;
-		}
-	}
-
 	std::string CheckEnvironmentFile(const std::string& path) {
 
 		json data;
@@ -165,11 +148,11 @@ namespace ALZ {
 
 		//Texture data
 		ps->Customizer.m_TextureCustomizer.UseDefaultTexture = data[id + "UseDefaultTexture"].get<bool>();
-		ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath = data[id + "TexturePath"].get<std::string>();
+		ps->Customizer.m_TextureCustomizer.m_TexturePath = data[id + "TexturePath"].get<std::string>();
 		if (!ps->Customizer.m_TextureCustomizer.UseDefaultTexture)
 		{
 			ps->Customizer.m_TextureCustomizer.ParticleTexture = Renderer::CreateTexture();
-			ps->Customizer.m_TextureCustomizer.ParticleTexture->SetImage(Image::LoadFromFile(ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath));
+			ps->Customizer.m_TextureCustomizer.ParticleTexture->SetImage(Image::LoadFromFile(AssetManager::GetAbsolutePath() + ps->Customizer.m_TextureCustomizer.m_TexturePath));
 		}
 
 		//Force data
@@ -242,7 +225,9 @@ namespace ALZ {
 		sprite->Scale = JSON_ARRAY_TO_VEC2(data[id + "Scale"].get<std::vector<float>>());
 		sprite->Rotation = data[id + "Rotation"].get<float>();
 		sprite->Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
-		sprite->LoadTextureFromFile(data[id + "TextureImagePath"].get<std::string>());
+		sprite->m_TexturePath = data[id + "TexturePath"].get<std::string>();
+		if(sprite->m_TexturePath != "")
+			sprite->LoadTextureFromFile(AssetManager::GetAbsolutePath() + sprite->m_TexturePath);
 
 		pEnvironmentObject obj((EnvironmentObjectInterface*)(sprite.release()));
 		env->InspectorObjects.push_back(std::move(obj));

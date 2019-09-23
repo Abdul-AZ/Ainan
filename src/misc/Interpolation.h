@@ -14,6 +14,23 @@ namespace ALZ {
 		Custom
 	};
 
+	static InterpolationType StringToInterpolationType(const std::string& type)
+	{
+		if (type == "Fixed")
+			return InterpolationType::Fixed;
+		else if (type == "Linear")
+			return InterpolationType::Linear;
+		else if (type == "Cubic")
+			return InterpolationType::Cubic;
+		else if (type == "Smoothstep")
+			return InterpolationType::Smoothstep;
+		else
+		{
+			assert(false);
+			return InterpolationType::Fixed;
+		}
+	}
+
 	namespace Interpolation {
 
 		//Basic linear interpolation
