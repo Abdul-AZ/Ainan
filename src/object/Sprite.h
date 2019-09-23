@@ -24,11 +24,10 @@ namespace ALZ {
 		float Rotation = 0.0f; //in degrees
 		glm::vec4 Tint = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
+		std::string m_TexturePath;
 	private:
 		std::shared_ptr<VertexBuffer> m_VertexBuffer;
 		std::shared_ptr<VertexArray> m_VertexArray;
 		std::shared_ptr<Texture> m_Texture;
-		//FileBrowser m_FileBrowser;
-		std::string m_TexturePath;
 	};
 }

@@ -165,11 +165,11 @@ namespace ALZ {
 
 		//Texture data
 		ps->Customizer.m_TextureCustomizer.UseDefaultTexture = data[id + "UseDefaultTexture"].get<bool>();
-		//ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath = data[id + "TexturePath"].get<std::string>();
+		ps->Customizer.m_TextureCustomizer.m_TexturePath = data[id + "TexturePath"].get<std::string>();
 		if (!ps->Customizer.m_TextureCustomizer.UseDefaultTexture)
 		{
 			ps->Customizer.m_TextureCustomizer.ParticleTexture = Renderer::CreateTexture();
-			//ps->Customizer.m_TextureCustomizer.ParticleTexture->SetImage(Image::LoadFromFile(ps->Customizer.m_TextureCustomizer.m_FileBrowser.m_CurrentselectedFilePath));
+			ps->Customizer.m_TextureCustomizer.ParticleTexture->SetImage(Image::LoadFromFile(AssetManager::GetAbsolutePath() + ps->Customizer.m_TextureCustomizer.m_TexturePath));
 		}
 
 		//Force data
@@ -242,7 +242,9 @@ namespace ALZ {
 		sprite->Scale = JSON_ARRAY_TO_VEC2(data[id + "Scale"].get<std::vector<float>>());
 		sprite->Rotation = data[id + "Rotation"].get<float>();
 		sprite->Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
-		sprite->LoadTextureFromFile(data[id + "TextureImagePath"].get<std::string>());
+		sprite->m_TexturePath = data[id + "TexturePath"].get<std::string>();
+		if(sprite->m_TexturePath != "")
+			sprite->LoadTextureFromFile(AssetManager::GetAbsolutePath() + sprite->m_TexturePath);
 
 		pEnvironmentObject obj((EnvironmentObjectInterface*)(sprite.release()));
 		env->InspectorObjects.push_back(std::move(obj));

@@ -16,7 +16,7 @@ namespace ALZ {
 		if (!UseDefaultTexture)
 		{
 			ParticleTexture = Renderer::CreateTexture();
-			ParticleTexture->SetImage(Image::LoadFromFile(customizer.m_CurrentTexture));
+			ParticleTexture->SetImage(Image::LoadFromFile(customizer.m_TexturePath));
 		}
 	}
 
@@ -31,14 +31,14 @@ namespace ALZ {
 		{
 			ImGui::Text("Texture: ");
 			ImGui::SameLine();
-			if (ImGui::BeginCombo("##Texture: ", UseDefaultTexture ? "Default" : std::filesystem::path(m_CurrentTexture).filename().u8string().c_str()))
+			if (ImGui::BeginCombo("##Texture: ", UseDefaultTexture ? "Default" : std::filesystem::path(m_TexturePath).filename().u8string().c_str()))
 			{
 				auto textures = AssetManager::GetAll2DTextures();
 				bool selected = false;
 				if (ImGui::Selectable("Default", &selected))
 				{
 					UseDefaultTexture = true;
-					m_CurrentTexture = "";
+					m_TexturePath = "";
 				}
 				for (auto& tex : textures) 
 				{
@@ -51,7 +51,7 @@ namespace ALZ {
 							ParticleTexture->SetImage(Image::LoadFromFile(tex));
 							UseDefaultTexture = false;
 							std::string absolutePathToEnv = AssetManager::GetAbsolutePath();
-							m_CurrentTexture = tex.substr(absolutePathToEnv.size(), tex.size() - absolutePathToEnv.size());
+							m_TexturePath = tex.substr(absolutePathToEnv.size(), tex.size() - absolutePathToEnv.size());
 						}
 					}
 				}

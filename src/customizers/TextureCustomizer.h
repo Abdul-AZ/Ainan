@@ -19,7 +19,7 @@ namespace ALZ {
 	public:
 		bool UseDefaultTexture = true;
 		std::shared_ptr<Texture> ParticleTexture;
-		std::string m_CurrentTexture = "";
+		std::string m_TexturePath = "";
 
 		EXPOSE_CUSTOMIZER_TO_JSON
 	};
