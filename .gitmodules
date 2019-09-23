@@ -1,12 +1,12 @@
 [submodule "imgui"]
-	path = imgui
+	path = submodules/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
 [submodule "glm"]
-	path = glm
+	path = submodules/glm
 	url = https://github.com/g-truc/glm.git
 	branch = stable
 [submodule "glfw"]
-	path = glfw
+	path = submodules/glfw
 	url = https://github.com/glfw/glfw.git
 	branch = 3.3-stable

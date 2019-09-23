@@ -5,16 +5,13 @@ project "Core"
   compileas "C++"
 
   files { 
-    --project files
     "../src/**.h", "../src/**.hpp", "../src/**.cpp", "../src/**.c", "../shaders/**.vert", "../shaders/**.frag",
-    --glm files
-    "glm/glm/**.hpp"
    }
 
   pchheader "pch.h"
   pchsource "../src/pch.cpp"
 
-  includedirs { "../src", "../imgui", "../imgui/examples", "../imgui/misc/cpp", "../glm", "../src/vendor" }
+  includedirs { "../src", "../submodules/imgui", "../submodules/imgui/examples", "../submodules/imgui/misc/cpp", "../submodules/glm", "../src/vendor" }
 
   links { "OpenGL32.lib", "glfw", "imgui" }
 
