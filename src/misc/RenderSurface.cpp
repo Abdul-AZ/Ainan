@@ -14,7 +14,7 @@ namespace ALZ {
 
 		m_Size = Window::FramebufferSize;
 		
-		m_Texture->SetImage(m_Size, 3);
+		m_Texture->SetImage(m_Size, 4);
 
 		m_Texture->SetDefaultTextureSettings();
 		m_Texture->Unbind();
@@ -80,7 +80,7 @@ namespace ALZ {
 	
 		//create a new one with the window size
 		m_Texture = Renderer::CreateTexture();
-		m_Texture->SetImage(size, 3);
+		m_Texture->SetImage(size, 4);
 	
 		m_Texture->SetDefaultTextureSettings();
 		m_Texture->Unbind();
