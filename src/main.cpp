@@ -5,14 +5,6 @@
 #include "misc/StartMenu.h"
 #include "renderer/Renderer.h"
 
-void clearArea(const ALZ::Viewport& vp)
-{
-	glEnable(GL_SCISSOR_TEST);
-	glScissor(vp.x, vp.y, vp.width, vp.height);
-	glClear(GL_COLOR_BUFFER_BIT);
-	glDisable(GL_SCISSOR_TEST);
-}
-
 int main(int argc, const char* argv[]) {
 
 	using namespace ALZ;
@@ -36,30 +28,19 @@ int main(int argc, const char* argv[]) {
 			env->Update();
 			env->HandleInput();
 			env->Render();
-
-			int redraws = ImGuiWrapper::RedrawsRequired();
-			env->RenderGUI(redraws > 0);
+			env->RenderGUI();
 		
 			if (env->ShouldDelete) 
 			{
 				delete env;
 				env = nullptr;
 			}
-
-			Window::Present();
-
-			//if (redraws > 1)
-			//	Window::Clear();
-			//else
-			//	clearArea(env->m_ViewportWindow.RenderViewport);
 		}
-		else 
-		{
+		else
 			startMenu.Update(env);
-			Window::Present();
-			Window::Clear();
-		}
 
+		Window::Present();
+		Window::Clear();
 	}
 
 	if(env)

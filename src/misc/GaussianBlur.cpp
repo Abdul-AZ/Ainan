@@ -37,7 +37,7 @@ namespace ALZ {
 
 		//clear the buffer we recieved
 		surface.SurfaceFrameBuffer->Bind();
-		Renderer::Clear();
+		Renderer::ClearScreen();
 
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
 		tempSurface.Render(*shader);

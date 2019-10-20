@@ -108,7 +108,7 @@ namespace ALZ {
 		s_CurrentNumberOfDrawCalls++;
 	}
 
-	void Renderer::Clear()
+	void Renderer::ClearScreen()
 	{
 		m_CurrentActiveAPI->ClearScreen();
 	}

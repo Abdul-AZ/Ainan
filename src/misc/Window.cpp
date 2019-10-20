@@ -90,8 +90,7 @@ namespace ALZ {
 
 	void Window::Clear()
 	{
-		
-		(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	void Window::Terminate()

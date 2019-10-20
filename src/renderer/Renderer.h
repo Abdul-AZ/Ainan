@@ -47,7 +47,7 @@ namespace ALZ {
 		static void Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive,
 						 const IndexBuffer& indexBuffer);
 
-		static void Clear();
+		static void ClearScreen();
 		static void SetViewport(const Viewport viewport);
 		static Viewport GetCurrentViewport();
 

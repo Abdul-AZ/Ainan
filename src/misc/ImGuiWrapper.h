@@ -11,6 +11,5 @@ namespace ALZ {
 		static void Terminate();
 		static void NewFrame();
 		static void Render();
-		static int RedrawsRequired();
 	};
 }

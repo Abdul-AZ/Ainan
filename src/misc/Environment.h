@@ -48,7 +48,7 @@ namespace ALZ {
 
 		void Update();
 		void Render();
-		void RenderGUI(bool redraw);
+		void RenderGUI();
 		void HandleInput();
 
 	private:
@@ -104,9 +104,7 @@ namespace ALZ {
 		float m_TimeSincePlayModeStarted = 0.0f;
 
 		Background m_Background;
-	public:
 		ViewportWindow m_ViewportWindow;
-		RenderSurface m_ImGuiSurface;
 
 		AppStatusWindow m_AppStatusWindow;
 

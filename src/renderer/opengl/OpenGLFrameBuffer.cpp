@@ -19,7 +19,6 @@ namespace ALZ {
 		void OpenGLFrameBuffer::Bind() const
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_RendererID);
 		}
 
 		void OpenGLFrameBuffer::Unbind() const

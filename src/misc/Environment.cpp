@@ -3,9 +3,6 @@
 
 namespace ALZ {
 
-	std::shared_ptr<VertexArray> ui_VA = nullptr;
-	std::shared_ptr<VertexBuffer> ui_VB = nullptr;
-
 	Environment::Environment(const std::string& environmentFolderPath, const std::string& environmentName) :
 		m_EnvironmentFolderPath(environmentFolderPath),
 		m_EnvironmentName(environmentName)
@@ -28,22 +25,6 @@ namespace ALZ {
 		AssetManager::Init(environmentFolderPath);
 
 		UpdateTitle();
-
-		ui_VA = Renderer::CreateVertexArray();
-		ui_VA->Bind();
-		float quadVertices[] = {
-			// positions   // texCoords
-			-1.0f,  1.0f,  0.0f, 1.0f,
-			-1.0f, -1.0f,  0.0f, 0.0f,
-			 1.0f, -1.0f,  1.0f, 0.0f,
-
-			-1.0f,  1.0f,  0.0f, 1.0f,
-			 1.0f, -1.0f,  1.0f, 0.0f,
-			 1.0f,  1.0f,  1.0f, 1.0f
-		};
-
-		ui_VB = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices));
-		ui_VB->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
 	}
 
 	Environment::~Environment()
@@ -114,10 +95,7 @@ namespace ALZ {
 	{
 		Renderer::BeginScene(m_Camera);
 		m_RenderSurface.SurfaceFrameBuffer->Bind();
-		glEnable(GL_SCISSOR_TEST);
-		glScissor(m_ViewportWindow.RenderViewport.x, m_ViewportWindow.RenderViewport.y, m_ViewportWindow.RenderViewport.width, m_ViewportWindow.RenderViewport.height);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glDisable(GL_SCISSOR_TEST);
+		Renderer::ClearScreen();
 
 		for (pEnvironmentObject& obj : InspectorObjects)
 		{
@@ -174,18 +152,7 @@ namespace ALZ {
 			}
 		}
 
-		auto& shader = Renderer::ShaderLibrary["ImageShader"];
-
-		if (m_Status == Status_EditorMode) 
-		{
-
-			Renderer::SetViewport({ 0, 0, (int)Window::FramebufferSize.x, (int)Window::FramebufferSize.y });
-			
-			m_ImGuiSurface.m_Texture->Bind();
-			shader->SetUniform1i("u_ScreenTexture", 0);
-			
-			Renderer::Draw(*ui_VA, *shader, Primitive::Triangles, 6);
-
+		if (m_Status == Status_EditorMode) {
 			m_ExportCamera.DrawOutline();
 			m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
 			m_RenderSurface.SurfaceFrameBuffer->Unbind();
@@ -204,13 +171,6 @@ namespace ALZ {
 		if (m_Settings.BlurEnabled)
 			GaussianBlur(m_RenderSurface, m_Settings.BlurRadius);
 
-		Renderer::SetViewport({ 0, 0, (int)Window::FramebufferSize.x, (int)Window::FramebufferSize.y });
-
-		m_ImGuiSurface.m_Texture->Bind();
-		shader->SetUniform1i("u_ScreenTexture", 0);
-
-		Renderer::Draw(*ui_VA, *shader, Primitive::Triangles, 6);
-
 		//draw this after post processing because we do not want the line blured
 		m_ExportCamera.DrawOutline();
 
@@ -224,14 +184,10 @@ namespace ALZ {
 		m_RenderSurface.SurfaceFrameBuffer->Unbind();
 	}
 
-	void Environment::RenderGUI(bool redraw)
+	void Environment::RenderGUI()
 	{
 		if (m_HideGUI)
 			return;
-
-		m_ImGuiSurface.SurfaceFrameBuffer->Bind();
-		if(redraw)
-			Renderer::Clear();
 
 		ImGuiWrapper::NewFrame();
 
@@ -263,14 +219,7 @@ namespace ALZ {
 		InputManager::DisplayGUI();
 		m_ViewportWindow.DisplayGUI();
 
-		if (redraw)
-			ImGuiWrapper::Render();
-		else {
-			ImGui::EndFrame();
-			ImGui::UpdatePlatformWindows();
-		}
-
-		m_ImGuiSurface.SurfaceFrameBuffer->Unbind();
+		ImGuiWrapper::Render();
 	}
 
 	void Environment::HandleInput()

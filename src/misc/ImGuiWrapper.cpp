@@ -17,8 +17,6 @@
 
 namespace ALZ {
 
-	static int s_RedrawsRequired = 1;
-
 	static double               Time = 0.0;
 	static bool                 MouseJustPressed[5] = { false, false, false, false, false };
 	static GLFWcursor*          MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
@@ -151,21 +149,6 @@ namespace ALZ {
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 		}
-
-		s_RedrawsRequired--;
-	}
-
-	int ImGuiWrapper::RedrawsRequired()
-	{
-		if (ImGui::IsMouseClicked(0, true) || ImGui::GetIO().MouseDown[0])
-			if (s_RedrawsRequired < 3)
-				s_RedrawsRequired = 3;
-
-		if(ImGui::GetIO().MouseDelta.x != 0 || ImGui::GetIO().MouseDelta.y != 0)
-			if (s_RedrawsRequired < 1)
-				s_RedrawsRequired = 1;
-
-		return s_RedrawsRequired;
 	}
 
 	static bool ImGuiInit(const char* glsl_version)
@@ -701,7 +684,7 @@ namespace ALZ {
 		{
 			ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 			glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-			//glClear(GL_COLOR_BUFFER_BIT);
+			glClear(GL_COLOR_BUFFER_BIT);
 		}
 		ALZ::RenderDrawData(viewport->DrawData);
 	}
