@@ -16,6 +16,8 @@ void main()
     float blurX = u_Radius / u_Resolution.x;
     float blurY = u_Radius / u_Resolution.y;
 
+	FragColor = vec4(0.0);
+
     FragColor += texture2D(u_BlurTarget, vec2(TexCoords.x - 4.0 * blurX * u_BlurDirection.x,TexCoords.y - 4.0 * blurY * u_BlurDirection.y)) * 0.017867;
     FragColor += texture2D(u_BlurTarget, vec2(TexCoords.x - 3.0 * blurX * u_BlurDirection.x,TexCoords.y - 3.0 * blurY * u_BlurDirection.y)) * 0.054364;
     FragColor += texture2D(u_BlurTarget, vec2(TexCoords.x - 2.0 * blurX * u_BlurDirection.x,TexCoords.y - 2.0 * blurY * u_BlurDirection.y)) * 0.120338;
