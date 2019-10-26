@@ -66,7 +66,7 @@ namespace ALZ {
 		void Resume();
 		void RegisterEnvironmentInputKeys();
 
-		void AddInspectorObject(EnvironmentObjectType type);
+		void AddInspectorObject(EnvironmentObjectType type, const std::string& name);
 		void Duplicate(EnvironmentObjectInterface& obj);
 		void FocusCameraOnObject(EnvironmentObjectInterface& object);
 		void UpdateTitle();
@@ -89,6 +89,9 @@ namespace ALZ {
 		bool m_ObjectInspectorWindowOpen = true;
 		bool m_EnvironmentStatusWindowOpen = true;
 		bool m_EnvironmentControlsWindowOpen = true;
+		bool m_AddObjectWindowOpen = false;
+		std::string m_AddObjectWindowObjectName = "Example Name";
+		EnvironmentObjectType m_AddObjectWindowObjectType = SpriteType;
 		EnvironmentStatus m_Status = Status_EditorMode;
 
 		std::string m_EnvironmentName;

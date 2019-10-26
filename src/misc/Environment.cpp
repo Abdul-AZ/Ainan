@@ -18,7 +18,7 @@ namespace ALZ {
 		m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 3));
 
 		//add starting particle system 
-		AddInspectorObject(ParticleSystemType); //NOTE: if this environment was loaded from a file the loader will delete this object
+		AddInspectorObject(ParticleSystemType, "particle system"); //NOTE: if this environment was loaded from a file the loader will delete this object
 
 		RegisterEnvironmentInputKeys();
 
@@ -337,17 +337,59 @@ namespace ALZ {
 
 		ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 90.0f);
 
-		if (ImGui::Button("Add Particle System"))
-			AddInspectorObject(ParticleSystemType);
+		if (ImGui::Button("Add Object"))
+			m_AddObjectWindowOpen = true;
 
-		if (ImGui::Button("Add Radial Light")) 
-			AddInspectorObject(RadialLightType);
+		ImGui::End();
 
-		if (ImGui::Button("Add Spot Light"))
-			AddInspectorObject(SpotLightType);
+		if (!m_AddObjectWindowOpen)
+			return;
 
-		if (ImGui::Button("Add Sprite"))
-			AddInspectorObject(SpriteType);
+		//if we are adding a new object display a window for it's settings
+		ImGui::Begin("Add Object", &m_AddObjectWindowOpen, ImGuiWindowFlags_NoDocking);
+
+		ImGui::Text("NewObjectName");
+		ImGui::SameLine();
+		ImGui::InputText("##NewObjectName", &m_AddObjectWindowObjectName);
+
+		ImGui::Text("NewObjectType");
+		ImGui::SameLine();
+		if (ImGui::BeginCombo("##NewObjectType", InspectorObjectTypeToString(m_AddObjectWindowObjectType).c_str()))
+		{
+			{
+				bool selected = m_AddObjectWindowObjectType == ParticleSystemType;
+				if (ImGui::Selectable(InspectorObjectTypeToString(ParticleSystemType).c_str(), &selected))
+					m_AddObjectWindowObjectType = ParticleSystemType;
+			}
+
+			{
+				bool selected = m_AddObjectWindowObjectType == SpriteType;
+				if (ImGui::Selectable(InspectorObjectTypeToString(SpriteType).c_str(), &selected))
+					m_AddObjectWindowObjectType = SpriteType;
+			}
+
+			{
+				bool selected = m_AddObjectWindowObjectType == RadialLightType;
+				if (ImGui::Selectable(InspectorObjectTypeToString(RadialLightType).c_str(), &selected))
+					m_AddObjectWindowObjectType = RadialLightType;
+			}
+
+			{
+				bool selected = m_AddObjectWindowObjectType == SpotLightType;
+				if (ImGui::Selectable(InspectorObjectTypeToString(SpotLightType).c_str(), &selected))
+					m_AddObjectWindowObjectType = SpotLightType;
+			}
+
+			ImGui::EndCombo();
+		}
+
+		if (ImGui::Button("Add Object"))
+		{
+			AddInspectorObject(m_AddObjectWindowObjectType, m_AddObjectWindowObjectName);
+
+			//close the window after adding the object
+			m_AddObjectWindowOpen = false;
+		}
 
 		ImGui::End();
 	}
@@ -655,7 +697,7 @@ namespace ALZ {
 
 	}
 
-	void Environment::AddInspectorObject(EnvironmentObjectType type)
+	void Environment::AddInspectorObject(EnvironmentObjectType type, const std::string& name)
 	{
 		//interface for the object to be added
 		pEnvironmentObject obj;
@@ -696,6 +738,8 @@ namespace ALZ {
 			assert(false);
 			return;
 		}
+		
+		obj->m_Name = name;
 
 		//display text that we created the object (for 2 seconds)
 		m_AppStatusWindow.SetText("Created Object : \"" + obj->m_Name + '"' + " of Type : \"" +InspectorObjectTypeToString(obj->Type) + '"', 2.0f);
