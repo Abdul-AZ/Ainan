@@ -93,7 +93,7 @@ namespace ALZ {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
-		j[id + "Type"] = InspectorObjectTypeToString(ParticleSystemType).c_str();
+		j[id + "Type"] = EnvironmentObjectTypeToString(ParticleSystemType).c_str();
 		j[id + "Name"] = ps.m_Name;
 		j[id + "Mode"] = GetModeAsText(ps.Customizer.Mode);
 		j[id + "ParticlesPerSecond"] = ps.Customizer.m_ParticlesPerSecond;
@@ -163,7 +163,7 @@ namespace ALZ {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
-		j[id + "Type"] = InspectorObjectTypeToString(RadialLightType);
+		j[id + "Type"] = EnvironmentObjectTypeToString(RadialLightType);
 		j[id + "Name"] = light.m_Name;
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
 		j[id + "Color"] = VEC3_TO_JSON_ARRAY(light.Color);
@@ -174,7 +174,7 @@ namespace ALZ {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
-		j[id + "Type"] = InspectorObjectTypeToString(SpotLightType);
+		j[id + "Type"] = EnvironmentObjectTypeToString(SpotLightType);
 		j[id + "Name"] = light.m_Name;
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
 		j[id + "Color"] = VEC3_TO_JSON_ARRAY(light.Color);
@@ -187,7 +187,7 @@ namespace ALZ {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
-		j[id + "Type"] = InspectorObjectTypeToString(SpriteType);
+		j[id + "Type"] = EnvironmentObjectTypeToString(SpriteType);
 		j[id + "Name"] = sprite.m_Name;
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(sprite.Position);
 		j[id + "Scale"] = VEC2_TO_JSON_ARRAY(sprite.Scale);

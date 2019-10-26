@@ -50,7 +50,7 @@ namespace ALZ {
 			std::string id = "obj" + std::to_string(i) + "_";
 			std::string typeStr = data[id + "Type"].get<std::string>();
 
-			EnvironmentObjectType type = StringToInspectorObjectType(typeStr);
+			EnvironmentObjectType type = StringToEnvironmentObjectType(typeStr);
 
 			switch (type)
 			{

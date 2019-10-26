@@ -11,8 +11,8 @@ namespace ALZ {
 		SpriteType
 	};
 
-	EnvironmentObjectType StringToInspectorObjectType(const std::string& type);
-	std::string InspectorObjectTypeToString(EnvironmentObjectType type);
+	EnvironmentObjectType StringToEnvironmentObjectType(const std::string& type);
+	std::string EnvironmentObjectTypeToString(EnvironmentObjectType type);
 
 	class EnvironmentObjectInterface
 	{

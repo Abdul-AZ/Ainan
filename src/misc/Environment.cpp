@@ -58,7 +58,7 @@ namespace ALZ {
 			{
 				//display status that we are deleting the object (for 2 seconds)
 				m_AppStatusWindow.SetText("Deleted Object : \"" + InspectorObjects[i]->m_Name + '"' + " of Type : \"" +
-										  InspectorObjectTypeToString(InspectorObjects[i]->Type) + '"', 2.0f);
+										  EnvironmentObjectTypeToString(InspectorObjects[i]->Type) + '"', 2.0f);
 
 				//delete the object
 				InspectorObjects.erase(InspectorObjects.begin() + i);
@@ -354,29 +354,29 @@ namespace ALZ {
 
 		ImGui::Text("NewObjectType");
 		ImGui::SameLine();
-		if (ImGui::BeginCombo("##NewObjectType", InspectorObjectTypeToString(m_AddObjectWindowObjectType).c_str()))
+		if (ImGui::BeginCombo("##NewObjectType", EnvironmentObjectTypeToString(m_AddObjectWindowObjectType).c_str()))
 		{
 			{
 				bool selected = m_AddObjectWindowObjectType == ParticleSystemType;
-				if (ImGui::Selectable(InspectorObjectTypeToString(ParticleSystemType).c_str(), &selected))
+				if (ImGui::Selectable(EnvironmentObjectTypeToString(ParticleSystemType).c_str(), &selected))
 					m_AddObjectWindowObjectType = ParticleSystemType;
 			}
 
 			{
 				bool selected = m_AddObjectWindowObjectType == SpriteType;
-				if (ImGui::Selectable(InspectorObjectTypeToString(SpriteType).c_str(), &selected))
+				if (ImGui::Selectable(EnvironmentObjectTypeToString(SpriteType).c_str(), &selected))
 					m_AddObjectWindowObjectType = SpriteType;
 			}
 
 			{
 				bool selected = m_AddObjectWindowObjectType == RadialLightType;
-				if (ImGui::Selectable(InspectorObjectTypeToString(RadialLightType).c_str(), &selected))
+				if (ImGui::Selectable(EnvironmentObjectTypeToString(RadialLightType).c_str(), &selected))
 					m_AddObjectWindowObjectType = RadialLightType;
 			}
 
 			{
 				bool selected = m_AddObjectWindowObjectType == SpotLightType;
-				if (ImGui::Selectable(InspectorObjectTypeToString(SpotLightType).c_str(), &selected))
+				if (ImGui::Selectable(EnvironmentObjectTypeToString(SpotLightType).c_str(), &selected))
 					m_AddObjectWindowObjectType = SpotLightType;
 			}
 
@@ -742,7 +742,7 @@ namespace ALZ {
 		obj->m_Name = name;
 
 		//display text that we created the object (for 2 seconds)
-		m_AppStatusWindow.SetText("Created Object : \"" + obj->m_Name + '"' + " of Type : \"" +InspectorObjectTypeToString(obj->Type) + '"', 2.0f);
+		m_AppStatusWindow.SetText("Created Object : \"" + obj->m_Name + '"' + " of Type : \"" +EnvironmentObjectTypeToString(obj->Type) + '"', 2.0f);
 
 		//add the object to the list of the environment objects
 		InspectorObjects.push_back(std::move(obj));
