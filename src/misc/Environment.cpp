@@ -17,9 +17,6 @@ namespace Ainan {
 		m_ResumeButtonTexture->SetImage(Image::LoadFromFile("res/ResumeButton.png", 3));
 		m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 3));
 
-		//add starting particle system 
-		AddInspectorObject(ParticleSystemType, "particle system"); //NOTE: if this environment was loaded from a file the loader will delete this object
-
 		RegisterEnvironmentInputKeys();
 
 		AssetManager::Init(environmentFolderPath);

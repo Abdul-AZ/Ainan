@@ -219,6 +219,9 @@ namespace Ainan {
 
 				currentEnv = new Environment(dirPath, m_EnvironmentCreateName);
 
+				//add starting object
+				currentEnv->AddInspectorObject(ParticleSystemType, "Particle System");
+
 				if (m_IncludeStarterAssets)
 					std::filesystem::copy("res\\StarterAssets", dirPath + "\\StarterAssets");
 
