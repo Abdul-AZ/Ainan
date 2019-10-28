@@ -1,5 +1,5 @@
-# ALZparticles
-ALZparticles is an app developed in c++ that uses graphic API's like OpenGL (support for other API's is planned) to make cool graphics easily and export them.
+# Ainan
+Ainan is an app developed in c++ that uses graphic API's like OpenGL (support for other API's is planned) to make cool graphics easily and export them.
 This app is meant to be used by game artists and hobbyists.
 
 At the moment it only runs on windows.
