@@ -2,7 +2,7 @@
 
 #include "GaussianBlur.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	void GaussianBlur(RenderSurface& surface, float radius)
 	{

@@ -3,7 +3,7 @@
 
 #include "OpenGLTexture.h"
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		OpenGLTexture::OpenGLTexture()

@@ -2,7 +2,7 @@
 
 #include "file/FileManager.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	//ONLY create this using Renderer::CreateShaderProgram
 	class ShaderProgram

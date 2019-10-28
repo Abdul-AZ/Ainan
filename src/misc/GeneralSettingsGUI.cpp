@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "GeneralSettingsGUI.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	void GeneralSettingsGUI::DisplayGUI()
 	{

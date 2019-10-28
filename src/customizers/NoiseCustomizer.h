@@ -2,7 +2,7 @@
 
 #include "misc/ExposeToJson.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class NoiseCustomizer
 	{

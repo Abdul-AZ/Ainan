@@ -2,7 +2,7 @@
 
 #include "misc/EnvironmentObjectInterface.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class SpotLight : public EnvironmentObjectInterface
 	{

@@ -4,7 +4,7 @@
 
 #include "imgui_internal.h"
 
-void ALZ::AppStatusWindow::DisplayGUI(ImGuiID& viewportDockID)
+void Ainan::AppStatusWindow::DisplayGUI(ImGuiID& viewportDockID)
 {
 	auto parentNode = ImGui::DockBuilderGetNode(viewportDockID);
 	ImGuiID downNode = parentNode->ChildNodes[1]->ID;
@@ -31,12 +31,12 @@ void ALZ::AppStatusWindow::DisplayGUI(ImGuiID& viewportDockID)
 
 }
 
-void ALZ::AppStatusWindow::Update(float deltaTime)
+void Ainan::AppStatusWindow::Update(float deltaTime)
 {
 	m_DisplayTime -= deltaTime;
 }
 
-void ALZ::AppStatusWindow::SetText(const std::string& text, float time)
+void Ainan::AppStatusWindow::SetText(const std::string& text, float time)
 {
 	m_Text = text;
 	m_DisplayTime = time;

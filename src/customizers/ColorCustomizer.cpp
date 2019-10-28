@@ -3,7 +3,7 @@
 #include "VelocityCustomizer.h"
 #include "ColorCustomizer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	ColorCustomizer::ColorCustomizer() :
 		mt(std::random_device{}()),

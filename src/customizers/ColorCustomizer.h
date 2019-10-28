@@ -3,7 +3,7 @@
 #include "misc/InterpolationSelector.h"
 #include "misc/ExposeToJson.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class ColorCustomizer
 	{

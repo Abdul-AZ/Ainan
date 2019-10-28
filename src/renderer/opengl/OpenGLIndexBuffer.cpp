@@ -3,7 +3,7 @@
 
 #include "OpenGLIndexBuffer.h"
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		OpenGLIndexBuffer::OpenGLIndexBuffer(unsigned int* data, const int& count) :

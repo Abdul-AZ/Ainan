@@ -2,7 +2,7 @@
 
 #include "EnvironmentObjectInterface.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	EnvironmentObjectType StringToEnvironmentObjectType(const std::string& type)
 	{

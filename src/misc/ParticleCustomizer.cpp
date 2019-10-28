@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "ParticleCustomizer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	ParticleCustomizer::ParticleCustomizer() :
 		mt(std::random_device{}())

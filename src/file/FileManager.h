@@ -4,7 +4,7 @@
 #define BROWSER_WINDOW_WIDTH   400
 #define BROWSER_MIN_WINDOW_HEIGHT  350
 
-namespace ALZ {
+namespace Ainan {
 
 	class FileManager
 	{

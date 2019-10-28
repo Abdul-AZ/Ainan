@@ -9,7 +9,7 @@ using json = nlohmann::json;
 #define VEC3_TO_JSON_ARRAY(vec) { vec.x, vec.y, vec.z }
 #define VEC2_TO_JSON_ARRAY(vec) { vec.x, vec.y }
 
-namespace ALZ {
+namespace Ainan {
 
 	//forward declarations
 	static void toJson(json& j, const ParticleSystem& ps, size_t objectOrder);

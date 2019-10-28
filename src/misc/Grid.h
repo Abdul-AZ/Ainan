@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "Window.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class Grid
 	{

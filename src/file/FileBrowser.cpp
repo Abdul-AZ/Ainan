@@ -2,7 +2,7 @@
 
 #include "FileBrowser.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	namespace fs = std::filesystem;
 

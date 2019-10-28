@@ -1,6 +1,6 @@
 #include "renderer/ShaderProgram.h"
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		class OpenGLShaderProgram : public ShaderProgram

@@ -3,7 +3,7 @@
 
 #include "OpenGLFrameBuffer.h"
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		OpenGLFrameBuffer::OpenGLFrameBuffer()

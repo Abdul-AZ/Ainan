@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "FolderBrowser.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	namespace fs = std::filesystem;
 

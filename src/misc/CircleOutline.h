@@ -2,7 +2,7 @@
 
 #include "renderer/Renderer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class CircleOutline {
 	public:

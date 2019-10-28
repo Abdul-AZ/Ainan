@@ -138,7 +138,7 @@
 #define GLFW_PRESS                  1
 #define GLFW_REPEAT                 2
 
-namespace ALZ {
+namespace Ainan {
 
 #define KeyCase(x) case GLFW_KEY_##x :\
 					     return #x;

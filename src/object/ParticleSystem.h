@@ -10,7 +10,7 @@
 #include "misc/Gizmo.h"
 #include "renderer/Renderer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class ParticleSystem : public EnvironmentObjectInterface
 	{

@@ -15,7 +15,7 @@
 #define GLFW_HAS_VULKAN             (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3200) // 3.2+ glfwCreateWindowSurface
 #define GLFW_HAS_FOCUS_WINDOW       (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 >= 3200) // 3.2+ glfwFocusWindow
 
-namespace ALZ {
+namespace Ainan {
 
 	static double               Time = 0.0;
 	static bool                 MouseJustPressed[5] = { false, false, false, false, false };
@@ -140,7 +140,7 @@ namespace ALZ {
 	void ImGuiWrapper::Render()
 	{
 		ImGui::Render();
-		ALZ::RenderDrawData(ImGui::GetDrawData());
+		Ainan::RenderDrawData(ImGui::GetDrawData());
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
@@ -686,12 +686,12 @@ namespace ALZ {
 			glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
 			glClear(GL_COLOR_BUFFER_BIT);
 		}
-		ALZ::RenderDrawData(viewport->DrawData);
+		Ainan::RenderDrawData(viewport->DrawData);
 	}
 
 	static bool ImGui_ImplOpenGL3_CreateFontsTexture()
 	{
-		using namespace ALZ;
+		using namespace Ainan;
 		// Build texture atlas
 		ImGuiIO& io = ImGui::GetIO();
 		unsigned char* pixels;
@@ -721,7 +721,7 @@ namespace ALZ {
 
 	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
-		using namespace ALZ;
+		using namespace Ainan;
 		if (PrevUserCallbackMousebutton != NULL && window == Window::Ptr)
 			PrevUserCallbackMousebutton(window, button, action, mods);
 
@@ -731,7 +731,7 @@ namespace ALZ {
 	
 	static void Glfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 	{
-		using namespace ALZ;
+		using namespace Ainan;
 		if (PrevUserCallbackScroll != NULL && window == Window::Ptr)
 			PrevUserCallbackScroll(window, xoffset, yoffset);
 	
@@ -742,7 +742,7 @@ namespace ALZ {
 	
 	static void Glfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
-		using namespace ALZ;
+		using namespace Ainan;
 		if (PrevUserCallbackKey != NULL && window == Window::Ptr)
 			PrevUserCallbackKey(window, key, scancode, action, mods);
 	
@@ -761,7 +761,7 @@ namespace ALZ {
 	
 	void CharCallback(GLFWwindow* window, unsigned int c)
 	{
-		using namespace ALZ;
+		using namespace Ainan;
 		if (PrevUserCallbackChar != NULL && window == Window::Ptr)
 			PrevUserCallbackChar(window, c);
 	
@@ -793,7 +793,7 @@ namespace ALZ {
 	// If you get an error please report on GitHub. You may try different GL context version or GLSL version.
 	static bool CheckProgram(GLuint handle, const char* desc)
 	{
-		using namespace ALZ;
+		using namespace Ainan;
 
 		GLint status = 0, log_length = 0;
 		glGetProgramiv(handle, GL_LINK_STATUS, &status);
@@ -812,7 +812,7 @@ namespace ALZ {
 
 	static void ImGui_ImplOpenGL3_DestroyFontsTexture()
 	{
-		using namespace ALZ;
+		using namespace Ainan;
 		if (FontTexture)
 		{
 			ImGuiIO& io = ImGui::GetIO();
@@ -824,7 +824,7 @@ namespace ALZ {
 
 	static bool CreateDeviceObjects()
 	{
-		using namespace ALZ;
+		using namespace Ainan;
 
 		// Backup GL state
 		GLint last_texture, last_array_buffer;
@@ -1006,7 +1006,7 @@ namespace ALZ {
 		glGenBuffers(1, &VboHandle);
 		glGenBuffers(1, &ElementsHandle);
 
-		ALZ::ImGui_ImplOpenGL3_CreateFontsTexture();
+		Ainan::ImGui_ImplOpenGL3_CreateFontsTexture();
 
 		// Restore modified GL state
 		glBindTexture(GL_TEXTURE_2D, last_texture);
@@ -1017,7 +1017,7 @@ namespace ALZ {
 
 	static void DestroyDeviceObjects()
 	{
-		using namespace ALZ;
+		using namespace Ainan;
 		if (VboHandle) glDeleteBuffers(1, &VboHandle);
 		if (ElementsHandle) glDeleteBuffers(1, &ElementsHandle);
 		VboHandle = ElementsHandle = 0;
@@ -1033,12 +1033,12 @@ namespace ALZ {
 		if (ShaderHandle) glDeleteProgram(ShaderHandle);
 		ShaderHandle = 0;
 
-		ALZ::ImGui_ImplOpenGL3_DestroyFontsTexture();
+		Ainan::ImGui_ImplOpenGL3_DestroyFontsTexture();
 	}
 
 	static void Glfw_Shutdown()
 	{
-		using namespace ALZ;
+		using namespace Ainan;
 		Glfw_ShutdownPlatformInterface();
 
 		for (ImGuiMouseCursor cursor_n = 0; cursor_n < ImGuiMouseCursor_COUNT; cursor_n++)
@@ -1054,7 +1054,7 @@ namespace ALZ {
 	// Note that this implementation is little overcomplicated because we are saving/setting up/restoring every OpenGL state explicitly, in order to be able to run within any OpenGL engine that doesn't do so.
 	static void RenderDrawData(ImDrawData* draw_data)
 	{
-		using namespace ALZ;
+		using namespace Ainan;
 
 		// Avoid rendering when minimized, scale coordinates for retina displays (screen coordinates != framebuffer coordinates)
 		int fb_width = (int)(draw_data->DisplaySize.x * draw_data->FramebufferScale.x);

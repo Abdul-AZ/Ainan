@@ -3,7 +3,7 @@
 #include "InterpolationSelector.h"
 #include "CurveEditor.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class Particle
 	{

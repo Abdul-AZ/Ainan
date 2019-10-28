@@ -4,7 +4,7 @@
 #include "renderer/Renderer.h"
 #include "misc/AssetManager.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class Sprite : public EnvironmentObjectInterface
 	{

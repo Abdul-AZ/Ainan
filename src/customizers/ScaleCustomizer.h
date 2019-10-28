@@ -4,7 +4,7 @@
 #include "misc/CurveEditor.h"
 #include "misc/ExposeToJson.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class ScaleCustomizer
 	{

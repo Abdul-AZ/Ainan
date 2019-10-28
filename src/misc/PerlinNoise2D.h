@@ -4,7 +4,7 @@
 #include "InterpolationSelector.h"
 #include "Interpolation.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class PerlinNoise2D
 	{

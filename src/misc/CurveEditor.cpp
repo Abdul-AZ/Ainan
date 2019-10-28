@@ -4,7 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace ALZ {
+namespace Ainan {
 
 	static float smoothStepWrapper(void* data, int idx)
 	{

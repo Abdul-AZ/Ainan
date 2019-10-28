@@ -31,7 +31,7 @@
 
 #include "vendor/json/json_fwd.hpp"
 
-namespace ALZ {
+namespace Ainan {
 
 	class Environment
 	{

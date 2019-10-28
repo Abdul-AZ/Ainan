@@ -7,7 +7,7 @@
 #define WINDOW_SIZE_ON_CREATE_ENVIRONMENT_X 700
 #define WINDOW_SIZE_ON_CREATE_ENVIRONMENT_Y 700 * 9 / 16
 
-namespace ALZ {
+namespace Ainan {
 
 	const float GlobalScaleFactor = 1000.0f;
 

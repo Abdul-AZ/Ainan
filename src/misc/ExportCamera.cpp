@@ -2,7 +2,7 @@
 
 #include "ExportCamera.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	constexpr const char* ExportModeToString(ExportCamera::ExportMode mode)
 	{

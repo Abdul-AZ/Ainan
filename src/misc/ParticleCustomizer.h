@@ -12,7 +12,7 @@
 #include "misc/Line.h"
 #include "misc/CircleOutline.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	enum class SpawnMode {
 		SpawnOnPoint,

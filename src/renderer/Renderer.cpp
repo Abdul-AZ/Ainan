@@ -2,7 +2,7 @@
 
 #include "Renderer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	RendererAPI* Renderer::m_CurrentActiveAPI = nullptr;
 	Camera* Renderer::m_CurrentSceneCamera = nullptr;

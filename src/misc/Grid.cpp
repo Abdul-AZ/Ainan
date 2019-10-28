@@ -5,7 +5,7 @@
 #define VERTICES_PER_AXIS 75
 #define GRID_SCALE        5.0f
 
-namespace ALZ {
+namespace Ainan {
 
 	static bool GridBufferInitilized = false;
 	static std::shared_ptr<VertexArray> VAO = nullptr;

@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "FileManager.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	std::string FileManager::ApplicationFolder = "";
 

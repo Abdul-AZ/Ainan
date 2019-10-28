@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "Camera.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	Camera::Camera(CameraMode mode)
 	{

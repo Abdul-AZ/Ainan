@@ -3,7 +3,7 @@
 #include "renderer/ShaderProgram.h"
 #include "misc/EnvironmentObjectInterface.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class RadialLight : public EnvironmentObjectInterface
 	{

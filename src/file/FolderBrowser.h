@@ -2,7 +2,7 @@
 
 #include "FileManager.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class FolderBrowser
 	{

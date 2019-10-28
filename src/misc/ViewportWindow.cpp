@@ -2,7 +2,7 @@
 
 #include "ViewportWindow.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	void ViewportWindow::DisplayGUI()
 	{

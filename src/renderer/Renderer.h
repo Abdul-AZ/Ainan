@@ -19,7 +19,7 @@
 #include "opengl/OpenGLTexture.h"
 #include "opengl/OpenGLFrameBuffer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	//this class is completely api agnostic, meaning NO gl calls, NO direct3D calls etc
 	class Renderer 

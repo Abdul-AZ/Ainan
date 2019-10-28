@@ -3,7 +3,7 @@
 #include "misc/ExposeToJson.h"
 #include "misc/Window.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	struct Force 
 	{

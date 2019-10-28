@@ -2,7 +2,7 @@
 
 #include "TextureCustomizer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	TextureCustomizer::TextureCustomizer() :
 		UseDefaultTexture(true)

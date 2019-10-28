@@ -5,7 +5,7 @@
 #include "misc/ExposeToJson.h"
 #include "misc/AssetManager.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class TextureCustomizer
 	{

@@ -3,7 +3,7 @@
 #include "Window.h"
 #include "GLFWKey.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	struct RegisteredKey
 	{

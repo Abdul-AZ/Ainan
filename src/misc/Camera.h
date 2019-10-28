@@ -4,7 +4,7 @@
 #include "Window.h"
 #include "renderer/Viewport.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	enum class CameraMode
 	{

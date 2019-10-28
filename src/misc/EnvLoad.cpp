@@ -9,7 +9,7 @@ using json = nlohmann::json;
 #define JSON_ARRAY_TO_VEC3(arr) glm::vec3(arr[0], arr[1], arr[2])
 #define JSON_ARRAY_TO_VEC2(arr) glm::vec2(arr[0], arr[1])
 
-namespace ALZ {
+namespace Ainan {
 
 	std::string CheckEnvironmentFile(const std::string& path) {
 

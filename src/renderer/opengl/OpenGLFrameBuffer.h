@@ -3,7 +3,7 @@
 #include "renderer/Texture.h"
 #include "renderer/FrameBuffer.h"
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		class OpenGLFrameBuffer : public FrameBuffer

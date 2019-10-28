@@ -2,7 +2,7 @@
 
 #include "Window.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class ImGuiWrapper
 	{

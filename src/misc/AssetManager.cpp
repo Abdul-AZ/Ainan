@@ -2,7 +2,7 @@
 
 #include "AssetManager.h"
 
-namespace ALZ 
+namespace Ainan 
 {
 	std::string AssetManager::s_EnvironmentPath = "";
 	std::string AssetManager::s_CurrentDirectory = "";

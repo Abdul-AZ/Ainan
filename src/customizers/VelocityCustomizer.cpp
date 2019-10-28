@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "VelocityCustomizer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	std::string LimitTypeToString(VelocityCustomizer::VelocityLimitType type) {
 		switch (type)

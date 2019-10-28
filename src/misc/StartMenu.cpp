@@ -5,7 +5,7 @@
 #define START_MENU_BUTTON_WIDTH 200
 #define START_MENU_BUTTON_HEIGHT 75
 
-namespace ALZ {
+namespace Ainan {
 	
 	StartMenu::StartMenu() :
 	m_LoadEnvironmentBrowser(FileManager::ApplicationFolder, "Load Environment")

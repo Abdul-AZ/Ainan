@@ -2,7 +2,7 @@
 
 #include "Line.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	Line::Line()
 	{

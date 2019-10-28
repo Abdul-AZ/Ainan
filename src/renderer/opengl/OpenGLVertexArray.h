@@ -1,6 +1,6 @@
 #include "renderer/VertexArray.h"
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		class OpenGLVertexArray : public VertexArray

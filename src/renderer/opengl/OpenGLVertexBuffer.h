@@ -1,6 +1,6 @@
 #include "renderer/VertexBuffer.h"
 
-namespace ALZ
+namespace Ainan
 {
 	namespace OpenGL {
 		class OpenGLVertexBuffer : public VertexBuffer

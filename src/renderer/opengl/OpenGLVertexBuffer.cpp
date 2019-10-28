@@ -3,7 +3,7 @@
 
 #include "OpenGLVertexBuffer.h"
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		constexpr GLenum GetOpenglTypeFromShaderType(const ShaderVariableType& type)

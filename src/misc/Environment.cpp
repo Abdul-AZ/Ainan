@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "Environment.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	Environment::Environment(const std::string& environmentFolderPath, const std::string& environmentName) :
 		m_EnvironmentFolderPath(environmentFolderPath),
@@ -35,7 +35,7 @@ namespace ALZ {
 		Window::Restore();
 		Window::SetSize(glm::ivec2(WINDOW_SIZE_ON_LAUNCH_X, WINDOW_SIZE_ON_LAUNCH_Y));
 		Window::CenterWindow();
-		Window::SetTitle("ALZ Particles");
+		Window::SetTitle("Ainan");
 	}
 
 	void Environment::Update()
@@ -787,7 +787,7 @@ namespace ALZ {
 	{
 		EnvironmentObjectType type = object.Type;
 
-		if (type == ALZ::ParticleSystemType) {
+		if (type == Ainan::ParticleSystemType) {
 			ParticleSystem& ps = *static_cast<ParticleSystem*>(&object);
 
 			switch (ps.Customizer.Mode)
@@ -828,7 +828,7 @@ namespace ALZ {
 		switch (currentRendererType)
 		{
 		case RendererType::OpenGL:
-			Window::SetTitle("ALZ Particles - OpenGL (3.3) - " + m_EnvironmentName);
+			Window::SetTitle("Ainan - OpenGL (3.3) - " + m_EnvironmentName);
 			break;
 		}
 	}

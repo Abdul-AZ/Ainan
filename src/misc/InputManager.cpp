@@ -3,7 +3,7 @@
 #include "InputManager.h"
 #include <GLFW/glfw3.h>
 
-namespace ALZ {
+namespace Ainan {
 
 	bool InputManager::ControlsWindowOpen = false;
 	std::vector<RegisteredKey> InputManager::m_Keys;

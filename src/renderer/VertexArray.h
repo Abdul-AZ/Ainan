@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ALZ {
+namespace Ainan {
 
 	//IMPORTANT: this should only be created using the CreateVertexArray function inside the Renderer
 	//This is an interface that each graphics api should implement

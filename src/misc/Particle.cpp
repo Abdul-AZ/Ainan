@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "Particle.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	Particle::Particle() :
 		m_Position(0.0f, 0.0f),

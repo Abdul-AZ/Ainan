@@ -1,6 +1,6 @@
 #pragma once
 
-namespace ALZ {
+namespace Ainan {
 
 	class Texture;
 

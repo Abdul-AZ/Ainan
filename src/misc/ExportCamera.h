@@ -10,7 +10,7 @@
 #include "GaussianBlur.h"
 #include "EnvironmentObjectInterface.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class ExportCamera {
 	public:

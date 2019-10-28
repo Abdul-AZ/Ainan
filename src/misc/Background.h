@@ -10,7 +10,7 @@
 #define MAX_NUM_RADIAL_LIGHTS 10
 #define MAX_NUM_SPOT_LIGHTS 10
 
-namespace ALZ {
+namespace Ainan {
 
 	class Background {
 	public:

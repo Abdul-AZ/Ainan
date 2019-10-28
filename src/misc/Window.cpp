@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-namespace ALZ {
+namespace Ainan {
 
 	bool Window::ShouldClose = false;
 	Viewport Window::WindowViewport = { 0 };
@@ -56,7 +56,7 @@ namespace ALZ {
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif // !NDEBUG
 
-		Ptr = glfwCreateWindow(500, 500 * 9 / 16, "ALZ Particles", nullptr, nullptr);
+		Ptr = glfwCreateWindow(500, 500 * 9 / 16, "Ainan", nullptr, nullptr);
 		int fbWidth = 0;
 		int fbHeight = 0;
 		glfwGetFramebufferSize(Ptr, &fbWidth, &fbHeight);

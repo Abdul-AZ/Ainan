@@ -2,7 +2,7 @@
 
 #include "LifetimeCustomizer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	LifetimeCustomizer::LifetimeCustomizer() :
 		mt(std::random_device{}())

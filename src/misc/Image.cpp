@@ -2,7 +2,7 @@
 #include "Image.h"
 #include <thread>
 
-namespace ALZ {
+namespace Ainan {
 
 	//this should not be called outside of this file
 	//this runs on a seperate thread to not block the program

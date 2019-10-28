@@ -3,7 +3,7 @@
 #include "renderer/ShaderProgram.h"
 #include "renderer/Renderer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class Gizmo
 	{

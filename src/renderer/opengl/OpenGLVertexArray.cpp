@@ -4,7 +4,7 @@
 
 #include "OpenGLVertexArray.h"
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		OpenGLVertexArray::OpenGLVertexArray()

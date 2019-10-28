@@ -2,7 +2,7 @@
 
 #include "renderer/IndexBuffer.h"
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		class OpenGLIndexBuffer : public IndexBuffer

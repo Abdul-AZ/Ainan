@@ -2,7 +2,7 @@
 
 #include "Camera.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	enum EnvironmentObjectType {
 		ParticleSystemType,

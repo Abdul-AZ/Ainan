@@ -4,7 +4,7 @@
 #include "stb/stb_image_write.h"
 #include "stb/stb_image.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	enum class ImageFormat {
 		png,

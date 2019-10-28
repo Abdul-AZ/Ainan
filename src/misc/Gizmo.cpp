@@ -4,7 +4,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace ALZ {
+namespace Ainan {
 
 #define GIZMO_LINE_LENGTH_TILL_TIP 1.0f
 #define GIZMO_LINE_LENGTH_TILL_WINGS 0.9f

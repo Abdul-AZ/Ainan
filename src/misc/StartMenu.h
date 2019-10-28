@@ -3,7 +3,7 @@
 
 #define WINDOW_SIZE_FACTOR_ON_LAUNCH 500
 
-namespace ALZ {
+namespace Ainan {
 	class StartMenu
 	{
 		enum Status

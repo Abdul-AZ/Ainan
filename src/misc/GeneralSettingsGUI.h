@@ -3,7 +3,7 @@
 #include "Image.h"
 #include "file/SaveItemBrowser.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	enum class BlendMode {
 		Additive,

@@ -4,7 +4,7 @@
 #include "ImGuiWrapper.h"
 #include "Interpolation.h"
 
-namespace ALZ {
+namespace Ainan {
 	struct BezierCurve
 	{
 		glm::vec2 StartPoint;

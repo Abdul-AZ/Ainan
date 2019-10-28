@@ -3,7 +3,7 @@
 #include "renderer/Texture.h"
 #include "misc/Image.h"
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		class OpenGLTexture : public Texture

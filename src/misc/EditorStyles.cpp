@@ -2,7 +2,7 @@
 
 #include "EditorStyles.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	void SetEditorStyle(const EditorStyle& style)
 	{

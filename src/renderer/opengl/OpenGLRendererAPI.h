@@ -7,7 +7,7 @@
 
 #include <glad/glad.h>
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		constexpr GLenum GetOpenGLPrimitive(const Primitive& primitive)

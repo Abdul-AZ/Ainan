@@ -2,7 +2,7 @@
 
 #include "RenderSurface.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	RenderSurface::RenderSurface()
 	{

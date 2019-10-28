@@ -2,7 +2,7 @@
 
 #include "Interpolation.h"
 
-namespace ALZ {
+namespace Ainan {
 	
 	//convertes InterpolationType enum to string just to make the code cleaner
 	constexpr const char* InterpolationTypeToString(InterpolationType e) noexcept

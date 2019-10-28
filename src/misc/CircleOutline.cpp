@@ -2,7 +2,7 @@
 
 #include "CircleOutline.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	static bool CircleOutlineBuffersInitilized = false;
 	static std::shared_ptr<IndexBuffer> EBO = nullptr;

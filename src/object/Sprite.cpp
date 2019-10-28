@@ -2,7 +2,7 @@
 
 #include "Sprite.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	Sprite::Sprite()
 	{

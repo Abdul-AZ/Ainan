@@ -2,7 +2,7 @@
 
 #include "PerlinNoise2D.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	void PerlinNoise2D::Init(int maxSizeX, int maxSizeY)
 	{

@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "ParticleSystem.h"
 
-namespace ALZ {
+namespace Ainan {
 	static bool InitilizedCircleVertices = false;
 	static std::shared_ptr<VertexArray> VAO = nullptr;
 	static std::shared_ptr<VertexBuffer> VBO = nullptr;

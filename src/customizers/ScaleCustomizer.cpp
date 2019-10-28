@@ -1,7 +1,7 @@
 #include <pch.h>
 #include "ScaleCustomizer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	ScaleCustomizer::ScaleCustomizer() :
 		mt(std::random_device{}()),

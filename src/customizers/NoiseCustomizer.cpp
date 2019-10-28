@@ -2,7 +2,7 @@
 
 #include "NoiseCustomizer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	void NoiseCustomizer::DisplayGUI()
 	{

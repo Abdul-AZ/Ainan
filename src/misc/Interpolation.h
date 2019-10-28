@@ -3,7 +3,7 @@
 //NOTE: t goes from 0 to 1 on all algorithms.
 //		if t is 0 start is returned and if t is 1 end is returned.
 
-namespace ALZ {
+namespace Ainan {
 
 	enum InterpolationType
 	{

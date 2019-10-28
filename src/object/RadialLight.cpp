@@ -2,7 +2,7 @@
 
 #include "RadialLight.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	RadialLight::RadialLight()
 	{

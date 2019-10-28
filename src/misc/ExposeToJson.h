@@ -1,7 +1,7 @@
 #pragma once
 //for declaring friend to json serializer
 #include "json/json_fwd.hpp"
-namespace ALZ {
+namespace Ainan {
 	class Environment;
 	class ParticleSystem;
 }

@@ -5,7 +5,7 @@
 #include "Window.h"
 #include "renderer/Renderer.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class Line
 	{

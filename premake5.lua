@@ -1,4 +1,4 @@
-workspace "ALZparticles"
+workspace "Ainan"
     configurations { "Debug", "Release" }
     platforms { "64bit", "32bit" }
     startproject "Core"

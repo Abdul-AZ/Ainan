@@ -3,7 +3,7 @@
 
 #include "OpenGLShaderProgram.h"
 
-namespace ALZ {
+namespace Ainan {
 	namespace OpenGL {
 
 		OpenGLShaderProgram::OpenGLShaderProgram(const std::string& vertPath, const std::string& fragPath)

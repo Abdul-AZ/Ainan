@@ -2,7 +2,7 @@
 
 #include "Background.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	Background::Background()
 	{

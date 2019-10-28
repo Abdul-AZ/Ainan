@@ -3,7 +3,7 @@
 #include "renderer/Viewport.h"
 #include "Window.h"
 
-namespace ALZ {
+namespace Ainan {
 
 	class ViewportWindow
 	{
