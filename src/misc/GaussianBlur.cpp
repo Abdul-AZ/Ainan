@@ -6,13 +6,13 @@ namespace Ainan {
 
 	void GaussianBlur(RenderSurface& surface, float radius)
 	{
-		Viewport lastViewport = Renderer::GetCurrentViewport();
+		Rectangle lastViewport = Renderer::GetCurrentViewport();
 
-		Viewport viewport;
-		viewport.x = 0;
-		viewport.y = 0;
-		viewport.width  = (int)surface.GetSize().x;
-		viewport.height = (int)surface.GetSize().y;
+		Rectangle viewport;
+		viewport.X = 0;
+		viewport.Y = 0;
+		viewport.Width  = (int)surface.GetSize().x;
+		viewport.Height = (int)surface.GetSize().y;
 
 		Renderer::SetViewport(viewport);
 		auto& shader = Renderer::ShaderLibrary["BlurShader"];

@@ -113,12 +113,12 @@ namespace Ainan {
 		m_CurrentActiveAPI->ClearScreen();
 	}
 
-	void Renderer::SetViewport(const Viewport viewport)
+	void Renderer::SetViewport(const Rectangle viewport)
 	{
 		m_CurrentActiveAPI->SetViewport(viewport);
 	}
 
-	Viewport Renderer::GetCurrentViewport()
+	Rectangle Renderer::GetCurrentViewport()
 	{
 		switch (m_CurrentActiveAPI->GetType())
 		{
@@ -127,7 +127,7 @@ namespace Ainan {
 
 		default:
 			assert(false);
-			return Viewport();
+			return Rectangle();
 		}
 	}
 

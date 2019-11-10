@@ -18,9 +18,9 @@ namespace Ainan {
 		}
 	}
 
-	void Camera::Update(float deltaTime, const Viewport& viewport)
+	void Camera::Update(float deltaTime, const Rectangle& viewport)
 	{
-		float aspectRatio = (float)viewport.width / viewport.height;
+		float aspectRatio = (float)viewport.Width / viewport.Height;
 		ProjectionMatrix = glm::ortho(0.0f, GlobalScaleFactor * aspectRatio, 0.0f, GlobalScaleFactor);
 	}
 

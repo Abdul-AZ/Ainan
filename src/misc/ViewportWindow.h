@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/Viewport.h"
+#include "renderer/Rectangle.h"
 #include "Window.h"
 
 namespace Ainan {
@@ -11,6 +11,6 @@ namespace Ainan {
 		void DisplayGUI();
 
 	public:
-		Viewport RenderViewport = {0};
+		Rectangle RenderViewport = {0};
 	};
 }

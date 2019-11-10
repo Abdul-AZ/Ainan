@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/Viewport.h"
+#include "renderer/Rectangle.h"
 
 #define WINDOW_SIZE_ON_LAUNCH_X 500
 #define WINDOW_SIZE_ON_LAUNCH_Y 500 * 9 / 16
@@ -35,7 +35,7 @@ namespace Ainan {
 		static glm::vec2 Size;
 		static glm::vec2 Position;
 		static bool WindowSizeChangedSinceLastFrame;
-		static Viewport WindowViewport;
+		static Rectangle WindowViewport;
 		static GLFWwindow* Ptr;
 	};
 }

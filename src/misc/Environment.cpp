@@ -792,29 +792,29 @@ namespace Ainan {
 			case SpawnMode::SpawnOnPoint:
 
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_SpawnPosition.x * -GlobalScaleFactor, ps.Customizer.m_SpawnPosition.y * -GlobalScaleFactor, 0.0f)
-					+ glm::vec3(m_ViewportWindow.RenderViewport.width / 2, m_ViewportWindow.RenderViewport.height / 2, 0.0f));
+					+ glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
 				break;
 
 			case SpawnMode::SpawnOnCircle:
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_CircleOutline.Position.x, ps.Customizer.m_CircleOutline.Position.y, 0.0f)
-								   + glm::vec3(m_ViewportWindow.RenderViewport.width / 2, m_ViewportWindow.RenderViewport.height / 2, 0.0f));
+								   + glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
 				break;
 
 			case SpawnMode::SpawnInsideCircle:
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_CircleOutline.Position.x, ps.Customizer.m_CircleOutline.Position.y, 0.0f)
-					+ glm::vec3(m_ViewportWindow.RenderViewport.width / 2, m_ViewportWindow.RenderViewport.height / 2, 0.0f));
+					+ glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
 				break;
 
 			case SpawnMode::SpawnOnLine:
 
 				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_LinePosition.x * -GlobalScaleFactor, ps.Customizer.m_LinePosition.y * -GlobalScaleFactor, 0.0f)
-								   + glm::vec3(m_ViewportWindow.RenderViewport.width / 2, m_ViewportWindow.RenderViewport.height / 2, 0.0f));
+								   + glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
 				break;
 			}
 		}
 		else {
 			m_Camera.SetPosition(glm::vec3(object.GetPositionRef().x, object.GetPositionRef().y, 0.0f) * -GlobalScaleFactor
-							   + glm::vec3(m_ViewportWindow.RenderViewport.width / 2, m_ViewportWindow.RenderViewport.height / 2, 0.0f));
+							   + glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
 		}
 	}
 

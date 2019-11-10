@@ -16,7 +16,7 @@ namespace Ainan {
 		};
 
 		Gizmo();
-		void Draw(glm::vec2& objectPosition, const Viewport& viewport);
+		void Draw(glm::vec2& objectPosition, const Rectangle& viewport);
 
 	private:
 		bool CheckIfInsideArrow(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point);

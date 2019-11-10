@@ -20,7 +20,7 @@ namespace Ainan {
 		bool ShowGrid = true;
 
 		//blur
-		bool  BlurEnabled       = false;
+		bool  BlurEnabled = false;
 		float BlurRadius = 1.0f;
 
 	private:

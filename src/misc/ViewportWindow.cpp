@@ -12,15 +12,15 @@ namespace Ainan {
 		ImGui::Begin("Viewport",nullptr ,ImGuiWindowFlags_NoBackground);
 		ImGui::PopStyleVar();
 
-		RenderViewport.x = ImGui::GetWindowPos().x;
+		RenderViewport.X = ImGui::GetWindowPos().x;
 
-		RenderViewport.y = Window::FramebufferSize.y - (ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMax().y + ImGui::GetFrameHeightWithSpacing());
+		RenderViewport.Y = Window::FramebufferSize.y - (ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMax().y + ImGui::GetFrameHeightWithSpacing());
 
-		RenderViewport.width = ImGui::GetWindowSize().x;
-		RenderViewport.height = ImGui::GetWindowSize().y;
+		RenderViewport.Width = ImGui::GetWindowSize().x;
+		RenderViewport.Height = ImGui::GetWindowSize().y;
 
-		RenderViewport.x -= Window::Position.x;
-		RenderViewport.y += Window::Position.y; //negative because y axis is inverted in screen coordinates
+		RenderViewport.X -= Window::Position.x;
+		RenderViewport.Y += Window::Position.y; //negative because y axis is inverted in screen coordinates
 
 		ImGui::End();
 	}

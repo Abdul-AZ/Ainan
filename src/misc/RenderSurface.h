@@ -13,7 +13,7 @@ namespace Ainan {
 
 		void Render();
 		void Render(ShaderProgram& shader);
-		void RenderToScreen(const Viewport& viewport);
+		void RenderToScreen(const Rectangle& viewport);
 
 		void SetSize(const glm::vec2& size);
 		glm::vec2 GetSize() { return m_Size; }

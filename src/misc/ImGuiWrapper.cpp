@@ -1074,7 +1074,7 @@ namespace Ainan {
 #ifdef GL_POLYGON_MODE
 		GLint last_polygon_mode[2]; glGetIntegerv(GL_POLYGON_MODE, last_polygon_mode);
 #endif
-		GLint last_viewport[4]; glGetIntegerv(GL_VIEWPORT, last_viewport);
+		Rectangle lastViewport = Renderer::GetCurrentViewport();
 		GLint last_scissor_box[4]; glGetIntegerv(GL_SCISSOR_BOX, last_scissor_box);
 		GLenum last_blend_src_rgb; glGetIntegerv(GL_BLEND_SRC_RGB, (GLint*)&last_blend_src_rgb);
 		GLenum last_blend_dst_rgb; glGetIntegerv(GL_BLEND_DST_RGB, (GLint*)&last_blend_dst_rgb);
@@ -1106,7 +1106,7 @@ namespace Ainan {
 
 		// Setup viewport, orthographic projection matrix
 		// Our visible imgui space lies from draw_data->DisplayPos (top left) to draw_data->DisplayPos+data_data->DisplaySize (bottom right). DisplayMin is (0,0) for single viewport apps.
-		glViewport(0, 0, (GLsizei)fb_width, (GLsizei)fb_height);
+		Renderer::SetViewport({ 0,0, (GLsizei)fb_width, (GLsizei)fb_height });
 		float L = draw_data->DisplayPos.x;
 		float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
 		float T = draw_data->DisplayPos.y;
@@ -1207,7 +1207,7 @@ namespace Ainan {
 #ifdef GL_POLYGON_MODE
 		glPolygonMode(GL_FRONT_AND_BACK, (GLenum)last_polygon_mode[0]);
 #endif
-		glViewport(last_viewport[0], last_viewport[1], (GLsizei)last_viewport[2], (GLsizei)last_viewport[3]);
+		Renderer::SetViewport(lastViewport);
 		glScissor(last_scissor_box[0], last_scissor_box[1], (GLsizei)last_scissor_box[2], (GLsizei)last_scissor_box[3]);
 	}
 

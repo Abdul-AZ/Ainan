@@ -34,16 +34,16 @@ namespace Ainan {
 			glClear(GL_COLOR_BUFFER_BIT);
 		}
 
-		void OpenGLRendererAPI::SetViewport(const Viewport& viewport)
+		void OpenGLRendererAPI::SetViewport(const Rectangle& viewport)
 		{
-			glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+			glViewport(viewport.X, viewport.Y, viewport.Width, viewport.Height);
 		}
 
-		Viewport OpenGLRendererAPI::GetCurrentViewport()
+		Rectangle OpenGLRendererAPI::GetCurrentViewport()
 		{
-			Viewport viewport;
+			Rectangle viewport;
 
-			glGetIntegerv(GL_VIEWPORT, &viewport.x);
+			glGetIntegerv(GL_VIEWPORT, &viewport.X);
 
 			return viewport;
 		}

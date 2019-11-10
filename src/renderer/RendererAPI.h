@@ -5,7 +5,7 @@ namespace Ainan {
 	class ShaderProgram;
 	class IndexBuffer;
 	class Texture;
-	struct Viewport;
+	struct Rectangle;
 
 	enum class RendererType {
 		OpenGL
@@ -29,8 +29,8 @@ namespace Ainan {
 		virtual void Draw(ShaderProgram& shader, const Primitive& mode,
 						  const IndexBuffer& indexBuffer) = 0;
 		virtual void ClearScreen() = 0;
-		virtual void SetViewport(const Viewport& viewport) = 0;
-		virtual Viewport GetCurrentViewport() = 0;
+		virtual void SetViewport(const Rectangle& viewport) = 0;
+		virtual Rectangle GetCurrentViewport() = 0;
 		virtual RendererType GetType() const = 0;
 	};
 }

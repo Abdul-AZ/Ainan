@@ -67,7 +67,7 @@ namespace Ainan {
 		VAO->Unbind();
 	}
 
-	void Gizmo::Draw(glm::vec2& objectPosition, const Viewport& viewport)
+	void Gizmo::Draw(glm::vec2& objectPosition, const Rectangle& viewport)
 	{
 		double xpos, ypos;
 		glfwGetCursorPos(Window::Ptr, &xpos, &ypos);
@@ -75,8 +75,8 @@ namespace Ainan {
 		//change from being relative to top left to being relative to bottom left
 		ypos = -ypos + Window::Size.y;
 
-		if (xpos < viewport.x || xpos > viewport.x + viewport.width ||
-			ypos < viewport.y || ypos > viewport.y + viewport.height)
+		if (xpos < viewport.X || xpos > viewport.X + viewport.Width ||
+			ypos < viewport.Y || ypos > viewport.Y + viewport.Height)
 		{
 			xpos = -1000000;
 			ypos = -1000000;
@@ -84,11 +84,11 @@ namespace Ainan {
 
 		//change from being relative to the bottom left of the screen
 		//to being relative to bottom left of the viewport
-		xpos -= viewport.x;
-		ypos -= viewport.y;
+		xpos -= viewport.X;
+		ypos -= viewport.Y;
 
-		float NDC_xpos = (float)xpos * 2 / viewport.width - 1.0f;
-		float NDC_ypos = (float)ypos * 2 / viewport.height - 1.0f;
+		float NDC_xpos = (float)xpos * 2 / viewport.Width - 1.0f;
+		float NDC_ypos = (float)ypos * 2 / viewport.Height - 1.0f;
 
 		glm::vec2 objectPositionWS = objectPosition * GlobalScaleFactor;
 		glm::vec2 realMousePositionNDC = glm::vec2(NDC_xpos, NDC_ypos);

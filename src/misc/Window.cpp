@@ -7,7 +7,7 @@
 namespace Ainan {
 
 	bool Window::ShouldClose = false;
-	Viewport Window::WindowViewport = { 0 };
+	Rectangle Window::WindowViewport = { 0 };
 	bool Window::WindowSizeChangedSinceLastFrame = false;
 	glm::vec2 Window::FramebufferSize = { 0,0 };
 	glm::vec2 Window::Size = { 0,0 };
@@ -18,8 +18,8 @@ namespace Ainan {
 	{
 		Window::WindowSizeChangedSinceLastFrame = true;
 		Window::FramebufferSize = { width, height };
-		Window::WindowViewport.width = width;
-		Window::WindowViewport.height = height;
+		Window::WindowViewport.Width = width;
+		Window::WindowViewport.Height = height;
 		glViewport(0, 0, width, height);
 	}
 

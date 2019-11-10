@@ -2,6 +2,8 @@
 
 #include "Window.h"
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 
 	class ImGuiWrapper

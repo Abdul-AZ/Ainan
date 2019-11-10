@@ -9,7 +9,7 @@
 #include "IndexBuffer.h"
 #include "Texture.h"
 #include "FrameBuffer.h"
-#include "Viewport.h"
+#include "Rectangle.h"
 
 #include "opengl/OpenGLRendererAPI.h"
 #include "opengl/OpenGLShaderProgram.h"
@@ -48,8 +48,8 @@ namespace Ainan {
 						 const IndexBuffer& indexBuffer);
 
 		static void ClearScreen();
-		static void SetViewport(const Viewport viewport);
-		static Viewport GetCurrentViewport();
+		static void SetViewport(const Rectangle viewport);
+		static Rectangle GetCurrentViewport();
 
 		static std::shared_ptr<VertexArray> CreateVertexArray();
 
