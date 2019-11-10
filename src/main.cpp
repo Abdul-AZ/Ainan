@@ -40,7 +40,7 @@ int main(int argc, const char* argv[]) {
 			startMenu.Update(env);
 
 		Window::Present();
-		Window::Clear();
+		Renderer::ClearScreen();
 	}
 
 	if(env)

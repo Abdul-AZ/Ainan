@@ -88,11 +88,6 @@ namespace Ainan {
 		ShouldClose = glfwWindowShouldClose(Ptr);
 	}
 
-	void Window::Clear()
-	{
-		glClear(GL_COLOR_BUFFER_BIT);
-	}
-
 	void Window::Terminate()
 	{
 		glfwDestroyWindow(Ptr);
