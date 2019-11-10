@@ -48,8 +48,12 @@ namespace Ainan {
 						 const IndexBuffer& indexBuffer);
 
 		static void ClearScreen();
-		static void SetViewport(const Rectangle viewport);
+
+		static void SetViewport(const Rectangle& viewport);
 		static Rectangle GetCurrentViewport();
+
+		static void SetScissor(const Rectangle& scissor);
+		static Rectangle GetCurrentScissor();
 
 		static std::shared_ptr<VertexArray> CreateVertexArray();
 

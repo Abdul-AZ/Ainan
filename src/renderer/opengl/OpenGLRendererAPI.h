@@ -40,8 +40,13 @@ namespace Ainan {
 			virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer) override;
 
 			virtual void ClearScreen() override;
+
 			virtual void SetViewport(const Rectangle& viewport) override;
 			virtual Rectangle GetCurrentViewport() override;
+
+			virtual void SetScissor(const Rectangle& scissor) override;
+			virtual Rectangle GetCurrentScissor() override;
+
 			virtual RendererType GetType() const override { return RendererType::OpenGL; }
 		};
 	}

@@ -48,6 +48,20 @@ namespace Ainan {
 			return viewport;
 		}
 
+		void OpenGLRendererAPI::SetScissor(const Rectangle& scissor)
+		{
+			glScissor(scissor.X, scissor.Y, scissor.Width, scissor.Height);
+		}
+
+		Rectangle OpenGLRendererAPI::GetCurrentScissor()
+		{
+			Rectangle scissor;
+
+			glGetIntegerv(GL_SCISSOR_BOX, &scissor.X);
+
+			return scissor;
+		}
+
 		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount)
 		{
 			glDrawArrays(GetOpenGLPrimitive(primitive), 0, vertexCount);

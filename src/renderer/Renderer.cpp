@@ -113,7 +113,7 @@ namespace Ainan {
 		m_CurrentActiveAPI->ClearScreen();
 	}
 
-	void Renderer::SetViewport(const Rectangle viewport)
+	void Renderer::SetViewport(const Rectangle& viewport)
 	{
 		m_CurrentActiveAPI->SetViewport(viewport);
 	}
@@ -124,6 +124,24 @@ namespace Ainan {
 		{
 		case RendererType::OpenGL:
 			return m_CurrentActiveAPI->GetCurrentViewport();
+
+		default:
+			assert(false);
+			return Rectangle();
+		}
+	}
+
+	void Renderer::SetScissor(const Rectangle& scissor)
+	{
+		m_CurrentActiveAPI->SetScissor(scissor);
+	}
+
+	Rectangle Renderer::GetCurrentScissor()
+	{
+		switch (m_CurrentActiveAPI->GetType())
+		{
+		case RendererType::OpenGL:
+			return m_CurrentActiveAPI->GetCurrentScissor();
 
 		default:
 			assert(false);
