@@ -23,10 +23,12 @@ namespace Ainan {
 	static bool                 WantUpdateMonitors = true;
 	static char					GlslVersionString[32] = "";
 	static GLuint				FontTexture = 0;
-	static GLuint				ShaderHandle = 0, VertHandle = 0, FragHandle = 0;
-	static int					AttribLocationTex = 0, AttribLocationProjMtx = 0;                                // Uniforms location
+
+	static std::shared_ptr<ShaderProgram> ImGuiShader = nullptr;
+	static std::shared_ptr<IndexBuffer> ImGuiIndexBuffer = nullptr;
+	static std::shared_ptr<VertexBuffer> ImGuiVertexBuffer = nullptr;
+
 	static int					AttribLocationVtxPos = 0, AttribLocationVtxUV = 0, AttribLocationVtxColor = 0; // Vertex attributes location
-	static unsigned int			VboHandle = 0, ElementsHandle = 0;
 
 	// Chain GLFW callbacks for main viewport: our callbacks will call the user's previously installed callbacks, if any.
 	static GLFWmousebuttonfun   PrevUserCallbackMousebutton = NULL;
@@ -70,8 +72,6 @@ namespace Ainan {
 	static void RenderDrawData(ImDrawData* draw_data);
 	static void UpdateMousePosAndButtons();
 	static void UpdateMouseCursor();
-	static void UpdateGamepads();
-	static void ImGui_ImplWin32_OnChangedViewport(ImGuiViewport* viewport);
 
 	struct ImGuiViewportDataGlfw
 	{
@@ -131,9 +131,6 @@ namespace Ainan {
 		UpdateMousePosAndButtons();
 		UpdateMouseCursor();
 
-		// Gamepad navigation mapping
-		UpdateGamepads();
-		
 		ImGui::NewFrame();
 	}
 
@@ -376,43 +373,6 @@ namespace Ainan {
 		}
 	}
 
-	static void UpdateGamepads()
-	{
-		ImGuiIO& io = ImGui::GetIO();
-		memset(io.NavInputs, 0, sizeof(io.NavInputs));
-		if ((io.ConfigFlags & ImGuiConfigFlags_NavEnableGamepad) == 0)
-			return;
-
-		// Update gamepad inputs
-#define MAP_BUTTON(NAV_NO, BUTTON_NO)       { if (buttons_count > BUTTON_NO && buttons[BUTTON_NO] == GLFW_PRESS) io.NavInputs[NAV_NO] = 1.0f; }
-#define MAP_ANALOG(NAV_NO, AXIS_NO, V0, V1) { float v = (axes_count > AXIS_NO) ? axes[AXIS_NO] : V0; v = (v - V0) / (V1 - V0); if (v > 1.0f) v = 1.0f; if (io.NavInputs[NAV_NO] < v) io.NavInputs[NAV_NO] = v; }
-		int axes_count = 0, buttons_count = 0;
-		const float* axes = glfwGetJoystickAxes(GLFW_JOYSTICK_1, &axes_count);
-		const unsigned char* buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1, &buttons_count);
-		MAP_BUTTON(ImGuiNavInput_Activate, 0);     // Cross / A
-		MAP_BUTTON(ImGuiNavInput_Cancel, 1);     // Circle / B
-		MAP_BUTTON(ImGuiNavInput_Menu, 2);     // Square / X
-		MAP_BUTTON(ImGuiNavInput_Input, 3);     // Triangle / Y
-		MAP_BUTTON(ImGuiNavInput_DpadLeft, 13);    // D-Pad Left
-		MAP_BUTTON(ImGuiNavInput_DpadRight, 11);    // D-Pad Right
-		MAP_BUTTON(ImGuiNavInput_DpadUp, 10);    // D-Pad Up
-		MAP_BUTTON(ImGuiNavInput_DpadDown, 12);    // D-Pad Down
-		MAP_BUTTON(ImGuiNavInput_FocusPrev, 4);     // L1 / LB
-		MAP_BUTTON(ImGuiNavInput_FocusNext, 5);     // R1 / RB
-		MAP_BUTTON(ImGuiNavInput_TweakSlow, 4);     // L1 / LB
-		MAP_BUTTON(ImGuiNavInput_TweakFast, 5);     // R1 / RB
-		MAP_ANALOG(ImGuiNavInput_LStickLeft, 0, -0.3f, -0.9f);
-		MAP_ANALOG(ImGuiNavInput_LStickRight, 0, +0.3f, +0.9f);
-		MAP_ANALOG(ImGuiNavInput_LStickUp, 1, +0.3f, +0.9f);
-		MAP_ANALOG(ImGuiNavInput_LStickDown, 1, -0.3f, -0.9f);
-#undef MAP_BUTTON
-#undef MAP_ANALOG
-		if (axes_count > 0 && buttons_count > 0)
-			io.BackendFlags |= ImGuiBackendFlags_HasGamepad;
-		else
-			io.BackendFlags &= ~ImGuiBackendFlags_HasGamepad;
-	}
-
 	//--------------------------------------------------------------------------------------------------------
 	// MULTI-VIEWPORT / PLATFORM INTERFACE SUPPORT
 	// This is an _advanced_ and _optional_ feature, allowing the back-end to create and handle multiple viewports simultaneously.
@@ -480,25 +440,6 @@ namespace Ainan {
 		}
 		viewport->PlatformUserData = viewport->PlatformHandle = NULL;
 	}
-
-	// FIXME-VIEWPORT: Implement same work-around for Linux/OSX in the meanwhile.
-#if defined(_WIN32) && GLFW_HAS_GLFW_HOVERED
-	static WNDPROC g_GlfwWndProc = NULL;
-	static LRESULT CALLBACK WndProcNoInputs(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-	{
-		if (msg == WM_NCHITTEST)
-		{
-			// Let mouse pass-through the window. This will allow the back-end to set io.MouseHoveredViewport properly (which is OPTIONAL).
-			// The ImGuiViewportFlags_NoInputs flag is set while dragging a viewport, as want to detect the window behind the one we are dragging.
-			// If you cannot easily access those viewport flags from your windowing/event code: you may manually synchronize its state e.g. in
-			// your main loop after calling UpdatePlatformWindows(). Iterate all viewports/platform windows and pass the flag to your windowing system.
-			ImGuiViewport* viewport = (ImGuiViewport*)::GetPropA(hWnd, "IMGUI_VIEWPORT");
-			if (viewport->Flags & ImGuiViewportFlags_NoInputs)
-				return HTTRANSPARENT;
-		}
-		return ::CallWindowProc(g_GlfwWndProc, hWnd, msg, wParam, lParam);
-	}
-#endif
 
 	static void Glfw_ShowWindow(ImGuiViewport* viewport)
 	{
@@ -977,34 +918,18 @@ namespace Ainan {
 			fragment_shader = fragment_shader_glsl_130;
 		}
 
-		// Create shaders
-		const GLchar* vertex_shader_with_version[2] = { GlslVersionString, vertex_shader };
-		VertHandle = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(VertHandle, 2, vertex_shader_with_version, NULL);
-		glCompileShader(VertHandle);
-		CheckShader(VertHandle, "vertex shader");
+		std::string vertSrc = (std::string)GlslVersionString + (std::string)vertex_shader;
+		std::string fragSrc = (std::string)GlslVersionString + (std::string)fragment_shader;
 
-		const GLchar* fragment_shader_with_version[2] = { GlslVersionString, fragment_shader };
-		FragHandle = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(FragHandle, 2, fragment_shader_with_version, NULL);
-		glCompileShader(FragHandle);
-		CheckShader(FragHandle, "fragment shader");
+		ImGuiShader = Renderer::CreateShaderProgramRaw(vertSrc, fragSrc);
 
-		ShaderHandle = glCreateProgram();
-		glAttachShader(ShaderHandle, VertHandle);
-		glAttachShader(ShaderHandle, FragHandle);
-		glLinkProgram(ShaderHandle);
-		CheckProgram(ShaderHandle, "shader program");
-
-		AttribLocationTex = glGetUniformLocation(ShaderHandle, "Texture");
-		AttribLocationProjMtx = glGetUniformLocation(ShaderHandle, "ProjMtx");
-		AttribLocationVtxPos = glGetAttribLocation(ShaderHandle, "Position");
-		AttribLocationVtxUV = glGetAttribLocation(ShaderHandle, "UV");
-		AttribLocationVtxColor = glGetAttribLocation(ShaderHandle, "Color");
+		AttribLocationVtxPos = glGetAttribLocation(ImGuiShader->GetRendererID(), "Position");
+		AttribLocationVtxUV = glGetAttribLocation(ImGuiShader->GetRendererID(), "UV");
+		AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->GetRendererID(), "Color");
 
 		// Create buffers
-		glGenBuffers(1, &VboHandle);
-		glGenBuffers(1, &ElementsHandle);
+		ImGuiVertexBuffer = Renderer::CreateVertexBuffer(nullptr, 0);
+		ImGuiIndexBuffer = Renderer::CreateIndexBuffer(nullptr, 0);
 
 		Ainan::ImGui_ImplOpenGL3_CreateFontsTexture();
 
@@ -1018,20 +943,10 @@ namespace Ainan {
 	static void DestroyDeviceObjects()
 	{
 		using namespace Ainan;
-		if (VboHandle) glDeleteBuffers(1, &VboHandle);
-		if (ElementsHandle) glDeleteBuffers(1, &ElementsHandle);
-		VboHandle = ElementsHandle = 0;
-
-		if (ShaderHandle && VertHandle) glDetachShader(ShaderHandle, VertHandle);
-		if (VertHandle) glDeleteShader(VertHandle);
-		VertHandle = 0;
-
-		if (ShaderHandle && FragHandle) glDetachShader(ShaderHandle, FragHandle);
-		if (FragHandle) glDeleteShader(FragHandle);
-		FragHandle = 0;
-
-		if (ShaderHandle) glDeleteProgram(ShaderHandle);
-		ShaderHandle = 0;
+		ImGuiVertexBuffer.reset();
+		ImGuiIndexBuffer.reset();
+		
+		ImGuiShader.reset();
 
 		Ainan::ImGui_ImplOpenGL3_DestroyFontsTexture();
 	}
@@ -1111,27 +1026,27 @@ namespace Ainan {
 		float R = draw_data->DisplayPos.x + draw_data->DisplaySize.x;
 		float T = draw_data->DisplayPos.y;
 		float B = draw_data->DisplayPos.y + draw_data->DisplaySize.y;
-		const float ortho_projection[4][4] =
+		glm::mat4 orthoProjection =
 		{
 			{ 2.0f / (R - L),   0.0f,         0.0f,   0.0f },
 			{ 0.0f,         2.0f / (T - B),   0.0f,   0.0f },
 			{ 0.0f,         0.0f,        -1.0f,   0.0f },
 			{ (R + L) / (L - R),  (T + B) / (B - T),  0.0f,   1.0f },
 		};
-		glUseProgram(ShaderHandle);
-		glUniform1i(AttribLocationTex, 0);
-		glUniformMatrix4fv(AttribLocationProjMtx, 1, GL_FALSE, &ortho_projection[0][0]);
+
+		ImGuiShader->Bind();
+		ImGuiShader->SetUniform1i("Texture", 0);
+		ImGuiShader->SetUniformMat4("ProjMtx", orthoProjection);
 #ifdef GL_SAMPLER_BINDING
 		glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 #endif
 
-		GLuint vertex_array_object = 0;
-		glGenVertexArrays(1, &vertex_array_object);
-		glBindVertexArray(vertex_array_object);
+		std::shared_ptr<VertexArray> tempVA = Renderer::CreateVertexArray();
+		tempVA->Bind();
 
 		// Bind vertex/index buffers and setup attributes for ImDrawVert
-		glBindBuffer(GL_ARRAY_BUFFER, VboHandle);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ElementsHandle);
+		ImGuiVertexBuffer->Bind();
+		ImGuiIndexBuffer->Bind();
 		glEnableVertexAttribArray(AttribLocationVtxPos);
 		glEnableVertexAttribArray(AttribLocationVtxUV);
 		glEnableVertexAttribArray(AttribLocationVtxColor);
@@ -1186,9 +1101,6 @@ namespace Ainan {
 				idx_buffer_offset += pcmd->ElemCount * sizeof(ImDrawIdx);
 			}
 		}
-
-		// Destroy the temporary VAO
-		glDeleteVertexArrays(1, &vertex_array_object);
 
 		// Restore modified GL state
 		glUseProgram(last_program);

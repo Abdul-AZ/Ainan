@@ -201,6 +201,19 @@ namespace Ainan {
 		}
 	}
 
+	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgramRaw(const std::string& vertSrc, const std::string& fragSrc)
+	{
+		switch (m_CurrentActiveAPI->GetType())
+		{
+		case RendererType::OpenGL:
+			return OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
+
+		default:
+			assert(false);
+			return nullptr;
+		}
+	}
+
 	std::shared_ptr<FrameBuffer> Renderer::CreateFrameBuffer()
 	{
 		switch (m_CurrentActiveAPI->GetType())

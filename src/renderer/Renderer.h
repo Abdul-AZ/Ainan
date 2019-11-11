@@ -65,6 +65,8 @@ namespace Ainan {
 		//manually create a shader program (mostly used for testing new shaders)
 		//to properly add shaders add them to the CompileOnInit list in the cpp file and access them from the ShaderLibrary member
 		static std::shared_ptr<ShaderProgram> CreateShaderProgram(const std::string& vertPath, const std::string& fragPath);
+		//this is used when you want to create shaders with source code and not from files
+		static std::shared_ptr<ShaderProgram> CreateShaderProgramRaw(const std::string& vertSrc, const std::string& fragSrc);
 
 		static std::shared_ptr<FrameBuffer> CreateFrameBuffer();
 

@@ -24,5 +24,6 @@ namespace Ainan {
 		virtual void SetUniformMat4s(const char* name, const glm::mat4* const value, const int& count) = 0;
 		
 		virtual int GetUniformLocation(const char* name) = 0;
+		virtual int GetRendererID() const = 0;
 	};
 }

@@ -17,8 +17,8 @@ namespace Ainan {
 			glCompileShader(vertex);
 
 
-			std::string fShaderCode = FileManager::ReadEntireTextFile(fragPath);
 			fragment = glCreateShader(GL_FRAGMENT_SHADER);
+			std::string fShaderCode = FileManager::ReadEntireTextFile(fragPath);
 			const char* c_fShaderCode = fShaderCode.c_str();
 			glShaderSource(fragment, 1, &c_fShaderCode, NULL);
 			glCompileShader(fragment);
@@ -35,6 +35,39 @@ namespace Ainan {
 			glDeleteShader(fragment);
 
 			Bind();
+		}
+
+		std::shared_ptr<OpenGLShaderProgram> OpenGLShaderProgram::CreateRaw(const std::string& vertSrc, const std::string& fragSrc)
+		{
+			auto shader = std::make_shared<OpenGLShaderProgram>();
+
+			unsigned int vertex, fragment;
+
+			vertex = glCreateShader(GL_VERTEX_SHADER);
+			const char* c_vShaderCode = vertSrc.c_str();
+			glShaderSource(vertex, 1, &c_vShaderCode, NULL);
+			glCompileShader(vertex);
+
+
+			fragment = glCreateShader(GL_FRAGMENT_SHADER);
+			const char* c_fShaderCode = fragSrc.c_str();
+			glShaderSource(fragment, 1, &c_fShaderCode, NULL);
+			glCompileShader(fragment);
+
+
+			// shader Program
+			shader->m_RendererID = glCreateProgram();
+			glAttachShader(shader->m_RendererID, vertex);
+			glAttachShader(shader->m_RendererID, fragment);
+
+			glLinkProgram(shader->m_RendererID);
+			// delete the shaders as they're linked into our program now and no longer necessery
+			glDeleteShader(vertex);
+			glDeleteShader(fragment);
+
+			shader->Bind();
+
+			return shader;
 		}
 
 		OpenGLShaderProgram::~OpenGLShaderProgram()
@@ -125,6 +158,11 @@ namespace Ainan {
 
 			m_UniformLocationMap[name] = glGetUniformLocation(m_RendererID, name);
 			return m_UniformLocationMap[name];
+		}
+
+		int OpenGLShaderProgram::GetRendererID() const
+		{
+			return m_RendererID;
 		}
 	}
 }

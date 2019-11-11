@@ -7,6 +7,8 @@ namespace Ainan {
 		{
 		public:
 			OpenGLShaderProgram(const std::string& vertPath, const std::string& fragPath);
+			OpenGLShaderProgram() { m_RendererID = 0; }
+			static std::shared_ptr<OpenGLShaderProgram> CreateRaw(const std::string& vertSrc, const std::string& fragSrc);
 			~OpenGLShaderProgram();
 
 			void Bind() const override;
@@ -24,7 +26,8 @@ namespace Ainan {
 			void SetUniformMat4(const char* name, const glm::mat4& value)                          override;
 			void SetUniformMat4s(const char* name, const glm::mat4* const value, const int& count) override;
 
-			int GetUniformLocation(const char* name);
+			int GetUniformLocation(const char* name) override;
+			virtual int GetRendererID() const override;
 
 		private:
 			unsigned int m_RendererID;
