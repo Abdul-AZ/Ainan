@@ -200,14 +200,14 @@ namespace Ainan {
 		ImGui::PopStyleColor();
 
 
-		m_AppStatusWindow.DisplayGUI(viewportDockID);
 		
 		AssetManager::DisplayGUI();
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
+		DisplayProfilerGUI();
+		m_AppStatusWindow.DisplayGUI(viewportDockID);
 		m_Settings.DisplayGUI();
 		m_ExportCamera.DisplayGUI();
-		DisplayEnvironmentStatusGUI();
 		m_Background.DisplayGUI();
 
 		for (pEnvironmentObject& obj : InspectorObjects)
@@ -391,80 +391,121 @@ namespace Ainan {
 		ImGui::End();
 	}
 
-	void Environment::DisplayEnvironmentStatusGUI()
+	void Environment::DisplayProfilerGUI()
 	{
-		if (!m_EnvironmentStatusWindowOpen)
+		if (!m_ProfilerWindowOpen)
 			return;
 
-		ImGui::Begin("Particle Status", &m_EnvironmentStatusWindowOpen);
+		ImGui::Begin("Profiler");
 
-		ImGui::Text("Global Particle Count :");
+		ImVec4 activeColor = { 0.6f,0.6f,0.6f,1.0f };
+		ImVec4 inactiveColor = { 0.2f,0.2f,0.2f,1.0f };
+
+		{
+			if (m_ActiveProfiler == Profiler::RenderingProfiler) 
+				ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
+			else 
+				ImGui::PushStyleColor(ImGuiCol_Button, inactiveColor);
+
+			if (ImGui::Button("Rendering"))
+				m_ActiveProfiler = Profiler::RenderingProfiler;
+
+			ImGui::PopStyleColor();
+		}
+
 		ImGui::SameLine();
 
-		unsigned int activeParticleCount = 0;
-		for (pEnvironmentObject& object : InspectorObjects)
 		{
-			//if object is a particle system
-			if (object->Type == EnvironmentObjectType::ParticleSystemType) {
-				//cast it to a particle system pointer
-				ParticleSystem* ps = static_cast<ParticleSystem*>(object.get());
+			if (m_ActiveProfiler == Profiler::ParticleProfiler)
+				ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
+			else
+				ImGui::PushStyleColor(ImGuiCol_Button, inactiveColor);
 
-				//increment active particles by how many particles are active in this particle system
-				activeParticleCount += ps->ActiveParticleCount;
-			}
+			if (ImGui::Button("Particles"))
+				m_ActiveProfiler = Profiler::ParticleProfiler;
+
+			ImGui::PopStyleColor();
 		}
-		ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, std::to_string(activeParticleCount).c_str());
 
-		ImGui::Separator();
+		ImGui::SameLine();
 
-		for (pEnvironmentObject& pso : InspectorObjects)
 		{
-			if (pso->Type == EnvironmentObjectType::ParticleSystemType) {
+			if (m_ActiveProfiler == Profiler::PlaymodeProfiler)
+				ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
+			else
+				ImGui::PushStyleColor(ImGuiCol_Button, inactiveColor);
 
-				ParticleSystem* ps = static_cast<ParticleSystem*>(pso.get());
+			if (ImGui::Button("Environment"))
+				m_ActiveProfiler = Profiler::PlaymodeProfiler;
 
-				ImGui::Text((pso->m_Name + ":").c_str());
+			ImGui::PopStyleColor();
+		}
+
+		switch (m_ActiveProfiler)
+		{
+		case Profiler::RenderingProfiler:
+			{
+				ImGui::Text("Draw Calls: ");
 				ImGui::SameLine();
-				ImGui::Text("Particle Count = ");
+				ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(Renderer::NumberOfDrawCallsLastScene).c_str());
+			}
+			break;
+
+		case Profiler::ParticleProfiler:
+			{
+				ImGui::Text("Global Particle Count :");
 				ImGui::SameLine();
-				ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, std::to_string(ps->ActiveParticleCount).c_str());
+
+				unsigned int activeParticleCount = 0;
+				for (pEnvironmentObject& object : InspectorObjects)
+				{
+					//if object is a particle system
+					if (object->Type == EnvironmentObjectType::ParticleSystemType) {
+						//cast it to a particle system pointer
+						ParticleSystem* ps = static_cast<ParticleSystem*>(object.get());
+
+						//increment active particles by how many particles are active in this particle system
+						activeParticleCount += ps->ActiveParticleCount;
+					}
+				}
+				ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, std::to_string(activeParticleCount).c_str());
+
 				ImGui::Separator();
+
+				for (pEnvironmentObject& pso : InspectorObjects)
+				{
+					if (pso->Type == EnvironmentObjectType::ParticleSystemType) {
+
+						ParticleSystem* ps = static_cast<ParticleSystem*>(pso.get());
+
+						ImGui::Text((pso->m_Name + ":").c_str());
+						ImGui::SameLine();
+						ImGui::Text("Particle Count = ");
+						ImGui::SameLine();
+						ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, std::to_string(ps->ActiveParticleCount).c_str());
+						ImGui::Separator();
+					}
+
+					ImGui::Spacing();
+				}
+
 			}
+			break;
 
-			ImGui::Spacing();
+		case Profiler::PlaymodeProfiler:
+			{
+				//this is to control how many decimal points we want to display
+				std::stringstream stream;
+				//we want 3 decimal places
+				stream << std::setprecision(3) << m_TimeSincePlayModeStarted;
+				ImGui::Text("Time Since PlayMode Mode Started :");
+				ImGui::SameLine();
+				ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, stream.str().c_str());
+			}
+			break;
 		}
-
-		auto id = ImGui::GetWindowDockID();
 
 		ImGui::End();
-
-		{
-			ImGui::SetNextWindowDockID(id, ImGuiCond_Always);
-
-			ImGui::Begin("PlayMode Mode Status", nullptr, ImGuiWindowFlags_NoSavedSettings);
-
-			//this is to control how many decimal points we want to display
-			std::stringstream stream;
-			//we want 3 decimal places
-			stream << std::setprecision(3) << m_TimeSincePlayModeStarted;
-			ImGui::Text("Time Since PlayMode Mode Started :");
-			ImGui::SameLine();
-			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, stream.str().c_str());
-
-			ImGui::End();
-		}
-
-		{
-			ImGui::SetNextWindowDockID(id, ImGuiCond_Always);
-
-			ImGui::Begin("Rendering Status", nullptr, ImGuiWindowFlags_NoSavedSettings);
-
-			ImGui::Text("Draw Calls: ");
-			ImGui::SameLine();
-			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(Renderer::NumberOfDrawCallsLastScene).c_str());
-
-			ImGui::End();
-		}
 	}
 
 	void Environment::DisplayEnvironmentControlsGUI()
@@ -532,9 +573,8 @@ namespace Ainan {
 
 			if (ImGui::BeginMenu("Edit")) {
 
-				if (ImGui::MenuItem("Clear Particle Systems")) {
+				if (ImGui::MenuItem("Clear Particle Systems"))
 					InspectorObjects.clear();
-				}
 
 				ImGui::EndMenu();
 			}
@@ -544,7 +584,7 @@ namespace Ainan {
 				ImGui::MenuItem("Environment Controls", nullptr, &m_EnvironmentControlsWindowOpen);
 				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
 				ImGui::MenuItem("General Settings", nullptr, &m_Settings.GeneralSettingsWindowOpen);
-				ImGui::MenuItem("Environment Status", nullptr, &m_EnvironmentStatusWindowOpen);
+				ImGui::MenuItem("Profiler", nullptr, &m_ProfilerWindowOpen);
 				ImGui::MenuItem("Background Settings", nullptr, &m_Background.SettingsWindowOpen);
 				ImGui::MenuItem("ExportMode Settings", nullptr, &m_ExportCamera.SettingsWindowOpen);
 

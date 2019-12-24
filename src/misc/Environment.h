@@ -42,6 +42,13 @@ namespace Ainan {
 			Status_ExportMode
 		};
 
+		enum class Profiler
+		{
+			ParticleProfiler,
+			PlaymodeProfiler,
+			RenderingProfiler
+		};
+
 	public:
 		Environment(const std::string& environmentFolderPath, const std::string& environmentName);
 		~Environment();
@@ -54,7 +61,7 @@ namespace Ainan {
 	private:
 		//helper functions to spread code around
 		void DisplayObjectInspecterGUI();
-		void DisplayEnvironmentStatusGUI();
+		void DisplayProfilerGUI();
 		void DisplayEnvironmentControlsGUI();
 		void DisplayMainMenuBarGUI();
 		void RefreshObjectOrdering();
@@ -87,12 +94,13 @@ namespace Ainan {
 
 		bool m_HideGUI = false;
 		bool m_ObjectInspectorWindowOpen = true;
-		bool m_EnvironmentStatusWindowOpen = true;
+		bool m_ProfilerWindowOpen = true;
 		bool m_EnvironmentControlsWindowOpen = true;
 		bool m_AddObjectWindowOpen = false;
 		std::string m_AddObjectWindowObjectName = "Example Name";
 		EnvironmentObjectType m_AddObjectWindowObjectType = SpriteType;
 		EnvironmentStatus m_Status = Status_EditorMode;
+		Profiler m_ActiveProfiler = Profiler::RenderingProfiler;
 
 		std::string m_EnvironmentName;
 		std::string m_EnvironmentFolderPath;
