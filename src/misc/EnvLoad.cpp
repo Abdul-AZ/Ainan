@@ -16,7 +16,7 @@ namespace Ainan {
 		json data;
 		try
 		{
-			data = json::parse(FileManager::ReadEntireTextFile(path));
+			data = json::parse(AssetManager::ReadEntireTextFile(path));
 			return "";
 		}
 		catch (const std::exception& e)
@@ -32,7 +32,7 @@ namespace Ainan {
 
 	Environment* LoadEnvironment(const std::string& path)
 	{
-		json data = json::parse(FileManager::ReadEntireTextFile(path));
+		json data = json::parse(AssetManager::ReadEntireTextFile(path));
 
 		size_t lastBackslash = path.find_last_of("\\");
 		std::string environmentFolder = path.substr(0, lastBackslash) + "\\";

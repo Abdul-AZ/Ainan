@@ -2,7 +2,7 @@
 
 #include "misc/EnvironmentObjectInterface.h"
 #include "renderer/Renderer.h"
-#include "misc/AssetManager.h"
+#include "file/AssetManager.h"
 
 namespace Ainan {
 

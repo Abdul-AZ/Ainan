@@ -1,7 +1,5 @@
 #pragma once
 
-#include "file/FileManager.h"
-
 namespace Ainan {
 
 	//ONLY create this using Renderer::CreateShaderProgram

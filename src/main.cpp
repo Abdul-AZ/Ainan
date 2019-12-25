@@ -5,12 +5,11 @@
 #include "misc/StartMenu.h"
 #include "renderer/Renderer.h"
 
-int main(int argc, const char* argv[]) {
-
+int main() 
+{
 	using namespace Ainan;
 
 	Window::Init();
-	FileManager::Init(argv[0]);
 	Renderer::Init();
 	
 	ImGuiWrapper::Init();

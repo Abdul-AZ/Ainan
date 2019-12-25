@@ -1,6 +1,5 @@
 #pragma once
 
-#include "file/FileManager.h"
 #include "stb/stb_image_write.h"
 
 #include "object/ParticleSystem.h"
@@ -8,7 +7,7 @@
 #include "Camera.h"
 #include "EditorStyles.h"
 #include "ExportCamera.h"
-#include "AssetManager.h"
+#include "file/AssetManager.h"
 
 #include "ParticleCustomizer.h"
 #include "GeneralSettingsGUI.h"

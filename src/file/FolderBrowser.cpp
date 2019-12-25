@@ -13,7 +13,7 @@ namespace Ainan {
 
 	FolderBrowser::FolderBrowser()
 	{
-		m_CurrentFolder = FileManager::ApplicationFolder;
+		m_CurrentFolder = STARTING_BROWSER_DIRECTORY;
 		m_WindowName = "Folder Browser";
 		m_InputFolder = m_CurrentFolder;
 	}

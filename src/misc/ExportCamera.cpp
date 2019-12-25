@@ -23,12 +23,13 @@ namespace Ainan {
 		}
 	}
 
+	//TODO use environment directory instead of default
 	ExportCamera::ExportCamera() :
-		m_ImageLocationBrowser(FileManager::ApplicationFolder, "Save Image")
+		m_ImageLocationBrowser(AssetManager::GetAbsolutePath(), "Save Image")
 	{
 		memset(m_Edges, 0, sizeof(m_Edges));
 
-		ImageSavePath = FileManager::ApplicationFolder + '\\';
+		ImageSavePath = AssetManager::GetAbsolutePath();
 		SetSize();
 	}
 

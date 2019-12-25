@@ -8,7 +8,7 @@
 namespace Ainan {
 	
 	StartMenu::StartMenu() :
-	m_LoadEnvironmentBrowser(FileManager::ApplicationFolder, "Load Environment")
+	m_LoadEnvironmentBrowser(STARTING_BROWSER_DIRECTORY, "Load Environment")
 	{
 		m_LoadEnvironmentBrowser.Filter.push_back(".env");
 		m_LoadEnvironmentBrowser.OnCloseWindow = []() {

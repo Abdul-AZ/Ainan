@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 
 #include "OpenGLShaderProgram.h"
+#include "file/AssetManager.h" //for reading shader files
 
 namespace Ainan {
 	namespace OpenGL {
@@ -11,14 +12,14 @@ namespace Ainan {
 			unsigned int vertex, fragment;
 
 			vertex = glCreateShader(GL_VERTEX_SHADER);
-			std::string vShaderCode = FileManager::ReadEntireTextFile(vertPath);
+			std::string vShaderCode = AssetManager::ReadEntireTextFile(vertPath);
 			const char* c_vShaderCode = vShaderCode.c_str();
 			glShaderSource(vertex, 1, &c_vShaderCode, NULL);
 			glCompileShader(vertex);
 
 
 			fragment = glCreateShader(GL_FRAGMENT_SHADER);
-			std::string fShaderCode = FileManager::ReadEntireTextFile(fragPath);
+			std::string fShaderCode = AssetManager::ReadEntireTextFile(fragPath);
 			const char* c_fShaderCode = fShaderCode.c_str();
 			glShaderSource(fragment, 1, &c_fShaderCode, NULL);
 			glCompileShader(fragment);

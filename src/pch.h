@@ -12,9 +12,6 @@
 #include <functional>
 #include <array>
 
-//std c
-#include <direct.h>
-
 //dependencies
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -23,4 +20,5 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#define STARTING_BROWSER_DIRECTORY "C:\\"
 #define PI 3.14159f
