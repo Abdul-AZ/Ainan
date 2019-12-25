@@ -7,6 +7,7 @@ namespace Ainan {
 		m_EnvironmentFolderPath(environmentFolderPath),
 		m_EnvironmentName(environmentName)
 	{
+		std::memset(m_DeltaTimeHistory.data(), 0, m_DeltaTimeHistory.size() * sizeof(float));
 		m_PlayButtonTexture = Renderer::CreateTexture();
 		m_PauseButtonTexture = Renderer::CreateTexture();
 		m_ResumeButtonTexture = Renderer::CreateTexture();
@@ -35,21 +36,32 @@ namespace Ainan {
 		Window::SetTitle("Ainan");
 	}
 
-	void Environment::Update()
+	void Environment::StartFrame()
+	{
+		timeStart = clock();
+	}
+
+	void Environment::EndFrame()
 	{
 		timeEnd = clock();
-		float deltaTime = (timeEnd - timeStart) / 1000.0f;
-		timeStart = timeEnd;
+		m_DeltaTime = (timeEnd - timeStart) / 1000.0f;
+	}
 
-		m_Camera.Update(deltaTime, m_ViewportWindow.RenderViewport);
-		m_ExportCamera.Update(deltaTime);
-		m_AppStatusWindow.Update(deltaTime);
+	void Environment::Update()
+	{
+		//if time passed is less than a frame time, we use the time of a single frame
+		//because we are not going to start the next frame until the time of a single frame finishes
+		float realDeltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
+
+		m_Camera.Update(realDeltaTime, m_ViewportWindow.RenderViewport);
+		m_ExportCamera.Update(realDeltaTime);
+		m_AppStatusWindow.Update(realDeltaTime);
 
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
 		for (int i = 0; i < InspectorObjects.size(); i++) {
 
 			if(m_Status == Status_PlayMode || m_Status == Status_ExportMode)
-				InspectorObjects[i]->Update(deltaTime);
+				InspectorObjects[i]->Update(realDeltaTime);
 
 			if (InspectorObjects[i]->ToBeDeleted) 
 			{
@@ -65,8 +77,18 @@ namespace Ainan {
 		if (Window::WindowSizeChangedSinceLastFrame)
 			m_RenderSurface.SetSize(Window::FramebufferSize);
 
+		//this stuff is used for the profiler2
 		if (m_Status == Status_PlayMode || m_Status == Status_ExportMode)
-			m_TimeSincePlayModeStarted += deltaTime;
+		{
+			m_TimeSincePlayModeStarted += m_DeltaTime;
+
+			//save delta time for the profiler
+
+			//move everything back
+			std::memmove(m_DeltaTimeHistory.data(), m_DeltaTimeHistory.data() + 1, (m_DeltaTimeHistory.size() - 1) * sizeof(float));
+			//register the new time
+			m_DeltaTimeHistory[m_DeltaTimeHistory.size() - 1] = m_DeltaTime;
+		}
 
 		//this code will be changed and refactored, that is why it is strcutured badly
 		if (m_Status == Status_ExportMode) {
@@ -198,8 +220,6 @@ namespace Ainan {
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
 		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
 		ImGui::PopStyleColor();
-
-
 		
 		AssetManager::DisplayGUI();
 		DisplayEnvironmentControlsGUI();
@@ -231,6 +251,11 @@ namespace Ainan {
 
 		auto flags = ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysUseWindowPadding;
 		ImGui::Begin("Object Inspector", &m_ObjectInspectorWindowOpen, flags);
+
+		if (ImGui::Button("Add Object"))
+			m_AddObjectWindowOpen = true;
+
+		ImGui::Spacing();
 
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() - 30);
 		if (ImGui::ListBoxHeader("##Inspector", -1, 30)) {
@@ -332,11 +357,6 @@ namespace Ainan {
 			ImGui::ListBoxFooter();
 		}
 
-		ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 90.0f);
-
-		if (ImGui::Button("Add Object"))
-			m_AddObjectWindowOpen = true;
-
 		ImGui::End();
 
 		if (!m_AddObjectWindowOpen)
@@ -382,7 +402,7 @@ namespace Ainan {
 
 		if (ImGui::Button("Add Object"))
 		{
-			AddInspectorObject(m_AddObjectWindowObjectType, m_AddObjectWindowObjectName);
+			AddEnvironmentObject(m_AddObjectWindowObjectType, m_AddObjectWindowObjectName);
 
 			//close the window after adding the object
 			m_AddObjectWindowOpen = false;
@@ -448,6 +468,21 @@ namespace Ainan {
 				ImGui::Text("Draw Calls: ");
 				ImGui::SameLine();
 				ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(Renderer::NumberOfDrawCallsLastScene).c_str());
+				ImGui::SameLine();
+
+
+				ImGui::Text("        FPS: ");
+				ImGui::SameLine();
+				ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(static_cast<int>( 1.0f / m_DeltaTime)).c_str());
+
+				if (ImGui::IsItemHovered()) {
+					ImGui::BeginTooltip();
+					ImGui::SetTooltip("NOTE: Frame rates do not exceed 60,\nthis is theoretical FPS given the time per frame");
+					ImGui::EndTooltip();
+				}
+
+				ImGui::PlotLines("Frame Time(s)", m_DeltaTimeHistory.data(), m_DeltaTimeHistory.size(),
+								 0, 0, 0.0f, 0.025f, ImVec2(0, 75));
 			}
 			break;
 
@@ -633,7 +668,9 @@ namespace Ainan {
 	void Environment::PlayMode()
 	{
 		m_Status = Status_PlayMode;
+		//reset profiler
 		m_TimeSincePlayModeStarted = 0.0f;
+		std::memset(m_DeltaTimeHistory.data(), 0, m_DeltaTimeHistory.size() * sizeof(float));
 	}
 
 	void Environment::ExportMode()
@@ -734,7 +771,7 @@ namespace Ainan {
 
 	}
 
-	void Environment::AddInspectorObject(EnvironmentObjectType type, const std::string& name)
+	void Environment::AddEnvironmentObject(EnvironmentObjectType type, const std::string& name)
 	{
 		//interface for the object to be added
 		pEnvironmentObject obj;

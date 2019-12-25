@@ -21,10 +21,13 @@ int main(int argc, const char* argv[]) {
 
 	while (Window::ShouldClose == false)
 	{
-		Window::HandleWindowEvents();
-
 		if (env) 
 		{
+			env->StartFrame();
+
+			Window::HandleWindowEvents();
+			Renderer::ClearScreen();
+
 			env->Update();
 			env->HandleInput();
 			env->Render();
@@ -35,12 +38,20 @@ int main(int argc, const char* argv[]) {
 				delete env;
 				env = nullptr;
 			}
+
+			env->EndFrame();
+			Window::Present();
 		}
 		else
+		{
+			Window::HandleWindowEvents();
+			Renderer::ClearScreen();
+
 			startMenu.Update(env);
 
-		Window::Present();
-		Renderer::ClearScreen();
+			Window::Present();
+
+		}
 	}
 
 	if(env)

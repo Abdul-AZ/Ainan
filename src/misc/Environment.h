@@ -53,6 +53,10 @@ namespace Ainan {
 		Environment(const std::string& environmentFolderPath, const std::string& environmentName);
 		~Environment();
 
+
+		void StartFrame();
+		void EndFrame();
+
 		void Update();
 		void Render();
 		void RenderGUI();
@@ -73,7 +77,7 @@ namespace Ainan {
 		void Resume();
 		void RegisterEnvironmentInputKeys();
 
-		void AddInspectorObject(EnvironmentObjectType type, const std::string& name);
+		void AddEnvironmentObject(EnvironmentObjectType type, const std::string& name);
 		void Duplicate(EnvironmentObjectInterface& obj);
 		void FocusCameraOnObject(EnvironmentObjectInterface& object);
 		void UpdateTitle();
@@ -113,6 +117,9 @@ namespace Ainan {
 		bool m_MousePressedLastFrame = false;
 
 		float m_TimeSincePlayModeStarted = 0.0f;
+		float m_DeltaTime = 0.0f;
+
+		std::array<float, 120> m_DeltaTimeHistory;
 
 		Background m_Background;
 		ViewportWindow m_ViewportWindow;

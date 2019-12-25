@@ -64,13 +64,13 @@ namespace Ainan {
 		CenterWindow();
 
 		glfwMakeContextCurrent(Ptr);
-		glfwSwapInterval(1);
 
 		glfwSetWindowSizeCallback(Ptr, window_size_callback);
 		glfwSetFramebufferSizeCallback(Ptr, framebuffer_size_callback);
 		glfwSetWindowPosCallback(Ptr, pos_callback);
 
 		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		glfwSwapInterval(1);
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
