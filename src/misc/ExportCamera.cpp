@@ -219,43 +219,6 @@ namespace Ainan {
 		});
 	}
 
-	void ExportCamera::Update(float deltaTime)
-	{
-		if(m_ExportMode == SingleFrame || (m_ExportMode == MultipleFramesAsSeperateImages && StartedMultiFrameExport))
-			m_TimeSinceLastCapture += deltaTime;
-
-		if (m_TimeSinceLastCapture > m_TimeBetweenCaptures && RemainingFramesToBeCaptured > 0)
-		{
-			NeedToExport = true;
-			m_TimeSinceLastCapture = 0.0f;
-		}
-
-		if (m_ExportMode == MultipleFramesAsSeperateImages && RemainingFramesToBeCaptured <= 0)
-			NeedToExport = false;
-
-		ExportedEverything = RemainingFramesToBeCaptured <= 0;
-		if (ExportedEverything)
-			StartedMultiFrameExport = false;
-	}
-
-	void ExportCamera::StartExporting()
-	{
-		NeedToExport = true;
-
-		if (m_ExportMode == MultipleFramesAsSeperateImages)
-			StartedMultiFrameExport = true;
-	}
-
-	void ExportCamera::BeginExportScene() 
-	{
-		if (m_ExportMode == SingleFrame) {
-			AlreadyExportedFrame = false;
-		}
-		else if (m_ExportMode == MultipleFramesAsSeperateImages) {
-			RemainingFramesToBeCaptured = m_CaptureFrameCount;
-		}
-	}
-
 	void ExportCamera::ExportFrame(Background& background, std::vector<pEnvironmentObject>& objects, float blurRadius)
 	{
 		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
@@ -292,23 +255,8 @@ namespace Ainan {
 
 		std::string saveTarget = ImageSavePath;
 
-		//add a default name if none is chosen
-		if (saveTarget.back() == '\\')
-			saveTarget.append("default name");
-
-		//append a number at the end for each image if we are exporting multiple ones
-		if (m_ExportMode == MultipleFramesAsSeperateImages)
-		{
-			saveTarget.append(std::to_string(m_CaptureFrameCount - RemainingFramesToBeCaptured));
-		}
+		saveTarget.append("default name");
 
 		image.SaveToFile(saveTarget, SaveImageFormat);
-
-		NeedToExport = false;
-		if (m_ExportMode == SingleFrame) {
-			AlreadyExportedFrame = true;
-		}
-
-		RemainingFramesToBeCaptured--;
 	}
 }

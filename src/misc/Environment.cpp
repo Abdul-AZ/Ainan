@@ -80,7 +80,7 @@ namespace Ainan {
 		//this stuff is used for the profiler2
 		if (m_Status == Status_PlayMode || m_Status == Status_ExportMode)
 		{
-			m_TimeSincePlayModeStarted += m_DeltaTime;
+			m_TimeSincePlayModeStarted += realDeltaTime;
 
 			//save delta time for the profiler
 
@@ -90,24 +90,8 @@ namespace Ainan {
 			m_DeltaTimeHistory[m_DeltaTimeHistory.size() - 1] = m_DeltaTime;
 		}
 
-		//this code will be changed and refactored, that is why it is strcutured badly
-		if (m_Status == Status_ExportMode) {
-			if (m_TimeSincePlayModeStarted > m_ExportCamera.ImageCaptureTime && m_ExportCamera.NeedToExport == false && m_ExportCamera.AlreadyExportedFrame == false)
-				m_ExportCamera.StartExporting();
-			else if (m_TimeSincePlayModeStarted > m_ExportCamera.ImageCaptureTime && m_ExportCamera.NeedToExport == false && m_ExportCamera.ExportedEverything == false)
-				m_ExportCamera.StartExporting();
-
-			if (m_ExportCamera.m_ExportMode == ExportCamera::SingleFrame && m_ExportCamera.AlreadyExportedFrame)
-			{
-				Stop();
-				m_HideGUI = false;
-				m_ExportCamera.AlreadyExportedFrame = false;
-			}
-			else if (m_ExportCamera.m_ExportMode == ExportCamera::MultipleFramesAsSeperateImages && m_ExportCamera.ExportedEverything == true) {
-				Stop();
-				m_HideGUI = false;
-			}
-		}
+		if (m_Status == Status_ExportMode && m_ExportFramesTimes.size() == 0)
+			Stop();
 	}
 
 	void Environment::Render()
@@ -197,9 +181,15 @@ namespace Ainan {
 
 		Renderer::EndScene();
 
-		if (m_ExportCamera.NeedToExport) 
-			m_ExportCamera.ExportFrame(m_Background, InspectorObjects,m_Settings.BlurEnabled ? m_Settings.BlurRadius : -1.0f );
-
+		//if (m_ExportCamera.NeedToExport) 
+		if (m_ExportFramesTimes.size() > 0)
+		{
+			if (m_ExportFramesTimes[0] < m_TimeSincePlayModeStarted) 
+			{
+				m_ExportCamera.ExportFrame(m_Background, InspectorObjects, m_Settings.BlurEnabled ? m_Settings.BlurRadius : -1.0f);
+				m_ExportFramesTimes.erase(m_ExportFramesTimes.begin());
+			}
+		}
 		m_RenderSurface.SurfaceFrameBuffer->Unbind();
 	}
 
@@ -560,20 +550,16 @@ namespace Ainan {
 		ImGui::SetCursorPosX((float)width / 2 - 20);
 
 		if (m_Status == Status_PlayMode || m_Status == Status_PauseMode) {
-			if (ImGui::ImageButton((void*)(uintptr_t)m_StopButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
+			if (ImGui::ImageButton((void*)(uintptr_t)m_StopButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 				Stop();
-			}
 		}
-
-		else {
-			if (ImGui::ImageButton((void*)(uintptr_t)m_PlayButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1)) {
+		else 
+		{
+			if (ImGui::ImageButton((void*)(uintptr_t)m_PlayButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
 				PlayMode();
-			}
-			if (ImGui::Button("Export")) {
-				m_HideGUI = true;
+			
+			if (ImGui::Button("Export")) 
 				ExportMode();
-				m_ExportCamera.ExportedEverything = false;
-			}
 		}
 
 		ImGui::SameLine();
@@ -677,6 +663,21 @@ namespace Ainan {
 	{
 		m_Status = Status_ExportMode;
 		m_TimeSincePlayModeStarted = 0.0f;
+
+		if (m_ExportCamera.m_ExportMode == ExportCamera::ExportMode::SingleFrame)
+		{
+			m_ExportFramesTimes = { m_ExportCamera.ImageCaptureTime };
+		}
+		else if (m_ExportCamera.m_ExportMode == ExportCamera::ExportMode::MultipleFramesAsSeperateImages)
+		{
+			m_ExportFramesTimes.clear();
+			m_ExportFramesTimes.reserve(m_ExportCamera.m_CaptureFrameCount);
+			for (size_t i = 0; i < m_ExportCamera.m_CaptureFrameCount; i++)
+			{
+				m_ExportFramesTimes.push_back(m_ExportCamera.ImageCaptureTime + i * m_ExportCamera.m_TimeBetweenCaptures);
+			}
+		}
+
 		m_ExportCamera.BeginExportScene();
 	}
 

@@ -24,7 +24,8 @@ namespace Ainan {
 		void BeginExportScene();
 
 	public:
-		enum ExportMode {
+		enum ExportMode 
+		{
 			SingleFrame,
 			MultipleFramesAsSeperateImages
 		};
@@ -59,7 +60,7 @@ namespace Ainan {
 	private:
 		void SetSize();
 
-	private:
+	public:
 		bool m_DrawExportCamera = false;
 		glm::vec2 m_Edges[4];
 		Line m_Outline;

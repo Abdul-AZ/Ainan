@@ -94,6 +94,7 @@ namespace Ainan {
 		Grid m_Grid;
 		Gizmo m_Gizmo;
 		std::vector<std::unique_ptr<EnvironmentObjectInterface>> InspectorObjects;
+		std::vector<float> m_ExportFramesTimes;
 
 		bool m_HideGUI = false;
 		bool m_ObjectInspectorWindowOpen = true;
