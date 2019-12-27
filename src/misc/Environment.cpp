@@ -54,7 +54,6 @@ namespace Ainan {
 		float realDeltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
 
 		m_Camera.Update(realDeltaTime, m_ViewportWindow.RenderViewport);
-		m_ExportCamera.Update(realDeltaTime);
 		m_AppStatusWindow.Update(realDeltaTime);
 
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
@@ -90,7 +89,7 @@ namespace Ainan {
 			m_DeltaTimeHistory[m_DeltaTimeHistory.size() - 1] = m_DeltaTime;
 		}
 
-		if (m_Status == Status_ExportMode && m_ExportFramesTimes.size() == 0)
+		if (m_Status == Status_ExportMode && m_ExportedFrame)
 			Stop();
 	}
 
@@ -181,15 +180,12 @@ namespace Ainan {
 
 		Renderer::EndScene();
 
-		//if (m_ExportCamera.NeedToExport) 
-		if (m_ExportFramesTimes.size() > 0)
+		if (m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted) 
 		{
-			if (m_ExportFramesTimes[0] < m_TimeSincePlayModeStarted) 
-			{
-				m_ExportCamera.ExportFrame(m_Background, InspectorObjects, m_Settings.BlurEnabled ? m_Settings.BlurRadius : -1.0f);
-				m_ExportFramesTimes.erase(m_ExportFramesTimes.begin());
-			}
+			m_ExportCamera.ExportFrame(m_Background, InspectorObjects, m_Settings.BlurEnabled ? m_Settings.BlurRadius : -1.0f);
+			m_ExportedFrame = true;
 		}
+
 		m_RenderSurface.SurfaceFrameBuffer->Unbind();
 	}
 
@@ -663,22 +659,7 @@ namespace Ainan {
 	{
 		m_Status = Status_ExportMode;
 		m_TimeSincePlayModeStarted = 0.0f;
-
-		if (m_ExportCamera.m_ExportMode == ExportCamera::ExportMode::SingleFrame)
-		{
-			m_ExportFramesTimes = { m_ExportCamera.ImageCaptureTime };
-		}
-		else if (m_ExportCamera.m_ExportMode == ExportCamera::ExportMode::MultipleFramesAsSeperateImages)
-		{
-			m_ExportFramesTimes.clear();
-			m_ExportFramesTimes.reserve(m_ExportCamera.m_CaptureFrameCount);
-			for (size_t i = 0; i < m_ExportCamera.m_CaptureFrameCount; i++)
-			{
-				m_ExportFramesTimes.push_back(m_ExportCamera.ImageCaptureTime + i * m_ExportCamera.m_TimeBetweenCaptures);
-			}
-		}
-
-		m_ExportCamera.BeginExportScene();
+		m_ExportedFrame = false;
 	}
 
 	void Environment::Stop()

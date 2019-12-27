@@ -17,18 +17,10 @@ namespace Ainan {
 		ExportCamera();
 		void DrawOutline();
 		void DisplayGUI();
-		void Update(float deltaTime);
-		void StartExporting();
 		//TODO change blur radius argument to it's own struct called PosProcessingSettings or something like that
 		void ExportFrame(Background& background, std::vector<pEnvironmentObject>& objects, float blurRadius);
-		void BeginExportScene();
 
 	public:
-		enum ExportMode 
-		{
-			SingleFrame,
-			MultipleFramesAsSeperateImages
-		};
 
 		bool SettingsWindowOpen = true;
 
@@ -40,35 +32,22 @@ namespace Ainan {
 
 		std::string   ImageSavePath;
 		ImageFormat   SaveImageFormat = ImageFormat::png;
-
-		ExportMode m_ExportMode = SingleFrame;
+		Image* m_ExportTargetImage = nullptr;
+		std::shared_ptr<Texture> m_ExportTargetTexture = nullptr;
 
 		//this means after x seconds we will capture the frame using this export camera
 		//timing is handled in the environment class not here
-		bool EnableCaptureImageAfterXSeconds = false;
 		float ImageCaptureTime = 5.0f;
-		bool NeedToExport = false;
-
-		//only used in multiple frame capture
-		bool ExportedEverything = false;
-		bool StartedMultiFrameExport = false;
-
-		//only used in single frame capture
-		bool AlreadyExportedFrame = false;
 
 		int RemainingFramesToBeCaptured = 0;
 	private:
 		void SetSize();
 
-	public:
+	private:
 		bool m_DrawExportCamera = false;
 		glm::vec2 m_Edges[4];
 		Line m_Outline;
 		SaveItemBrowser m_ImageLocationBrowser;
-
-		//These are only used when exporting multiple frames
-		int m_CaptureFrameCount = 3;
-		float m_TimeBetweenCaptures = 0.5f;
-		float m_TimeSinceLastCapture = 0.0f;
+		bool m_FinalizeExportWindowOpen = false;
 	};
 }
