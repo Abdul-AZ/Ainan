@@ -180,7 +180,7 @@ namespace Ainan {
 
 		Renderer::EndScene();
 
-		if (m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted) 
+		if (m_Status == Status_ExportMode && m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted) 
 		{
 			m_ExportCamera.ExportFrame(m_Background, InspectorObjects, m_Settings.BlurEnabled ? m_Settings.BlurRadius : -1.0f);
 			m_ExportedFrame = true;

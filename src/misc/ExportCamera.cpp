@@ -6,11 +6,11 @@ namespace Ainan {
 
 	//TODO use environment directory instead of default
 	ExportCamera::ExportCamera() :
-		m_ImageLocationBrowser(AssetManager::GetAbsolutePath(), "Save Image")
+		m_ImageLocationBrowser(STARTING_BROWSER_DIRECTORY, "Save Image")
 	{
 		memset(m_Edges, 0, sizeof(m_Edges));
 
-		ImageSavePath = AssetManager::GetAbsolutePath();
+		ImageSavePath = STARTING_BROWSER_DIRECTORY;
 		SetSize();
 	}
 
@@ -79,34 +79,6 @@ namespace Ainan {
 
 			if (ImGui::TreeNode("Image Saving:"))
 			{
-				ImGui::Text("Image Format");
-				ImGui::SameLine();
-				if (ImGui::BeginCombo("##Image Format", Image::GetFormatString(SaveImageFormat).c_str()))
-				{
-					bool is_png = SaveImageFormat == ImageFormat::png ? true : false;
-					if (ImGui::Selectable(Image::GetFormatString(ImageFormat::png).c_str(), &is_png)) {
-
-						ImGui::SetItemDefaultFocus();
-						SaveImageFormat = ImageFormat::png;
-					}
-
-					bool is_jpeg = SaveImageFormat == ImageFormat::jpeg ? true : false;
-					if (ImGui::Selectable(Image::GetFormatString(ImageFormat::jpeg).c_str(), &is_jpeg)) {
-
-						ImGui::SetItemDefaultFocus();
-						SaveImageFormat = ImageFormat::jpeg;
-					}
-
-					bool is_bmp = SaveImageFormat == ImageFormat::bmp ? true : false;
-					if (ImGui::Selectable(Image::GetFormatString(ImageFormat::bmp).c_str(), &is_bmp)) {
-
-						ImGui::SetItemDefaultFocus();
-						SaveImageFormat = ImageFormat::bmp;
-					}
-
-					ImGui::EndCombo();
-				}
-
 				ImGui::Text("Image Resolution");
 				ImGui::Text("Width");
 				ImGui::SameLine();
@@ -116,9 +88,6 @@ namespace Ainan {
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(85);
 				ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.0f, 1.0f), std::to_string(static_cast<int>(m_ExportCameraSize.y * GlobalScaleFactor)).c_str());
-
-				if (ImGui::Button("Save Location"))
-					m_ImageLocationBrowser.OpenWindow();
 
 				ImGui::TreePop();
 			}
@@ -157,21 +126,68 @@ namespace Ainan {
 		if (m_FinalizeExportWindowOpen) 
 		{
 			ImGui::Begin("Finalize Export", &m_FinalizeExportWindowOpen);
+			ImGui::Columns(2);
 
-			if (m_ExportTargetTexture)
+			ImGui::Text("Image Format");
+			ImGui::SameLine();
+			if (ImGui::BeginCombo("##Image Format", Image::GetFormatString(SaveImageFormat).c_str()))
 			{
-				int scale = 250;
-				ImVec2 size = ImVec2(scale * m_ExportTargetImage->m_Width / m_ExportTargetImage->m_Height, scale);
-				ImGui::Image((void*)(uintptr_t)m_ExportTargetTexture->GetRendererID(), size);
+				bool is_png = SaveImageFormat == ImageFormat::png ? true : false;
+				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::png).c_str(), &is_png)) {
+
+					ImGui::SetItemDefaultFocus();
+					SaveImageFormat = ImageFormat::png;
+				}
+
+				bool is_jpeg = SaveImageFormat == ImageFormat::jpeg ? true : false;
+				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::jpeg).c_str(), &is_jpeg)) {
+
+					ImGui::SetItemDefaultFocus();
+					SaveImageFormat = ImageFormat::jpeg;
+				}
+
+				bool is_bmp = SaveImageFormat == ImageFormat::bmp ? true : false;
+				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::bmp).c_str(), &is_bmp)) {
+
+					ImGui::SetItemDefaultFocus();
+					SaveImageFormat = ImageFormat::bmp;
+				}
+
+				ImGui::EndCombo();
 			}
+
+			if (ImGui::Button("Save Location"))
+				m_ImageLocationBrowser.OpenWindow();
+
+
+			ImGui::Text("Selected Save Path: ");
+			ImGui::SameLine();
+			std::string saveTargetWithFormat = ImageSavePath;
+			if (saveTargetWithFormat.back() == '\\')
+				saveTargetWithFormat.append("default name");
+			saveTargetWithFormat.append("." + Image::GetFormatString(SaveImageFormat));
+
+			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, saveTargetWithFormat.data());
 
 			if (ImGui::Button("Save"))
 			{
-				//TODO add choosing where to save
 				std::string saveTarget = ImageSavePath;
-				saveTarget.append("default name");
+				if(ImageSavePath.back() == '\\')
+					saveTarget.append("default name");
+
 				m_ExportTargetImage->SaveToFile(saveTarget, SaveImageFormat);
 				m_FinalizeExportWindowOpen = false;
+			}
+
+			ImGui::NextColumn();
+
+			if (m_ExportTargetTexture)
+			{
+				ImGui::Text("Preview");
+
+				int scale = 250;
+				ImVec2 size = ImVec2(scale * m_ExportTargetImage->m_Width / m_ExportTargetImage->m_Height, scale);
+				ImGui::Image((void*)(uintptr_t)m_ExportTargetTexture->GetRendererID(), size);
 			}
 
 			ImGui::End();
