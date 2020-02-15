@@ -76,7 +76,7 @@ namespace Ainan {
 		if (Window::WindowSizeChangedSinceLastFrame)
 			m_RenderSurface.SetSize(Window::FramebufferSize);
 
-		//this stuff is used for the profiler2
+		//this stuff is used for the profiler
 		if (m_Status == Status_PlayMode || m_Status == Status_ExportMode)
 		{
 			m_TimeSincePlayModeStarted += realDeltaTime;
@@ -447,6 +447,8 @@ namespace Ainan {
 			ImGui::PopStyleColor();
 		}
 
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
+
 		switch (m_ActiveProfiler)
 		{
 		case Profiler::RenderingProfiler:
@@ -534,8 +536,8 @@ namespace Ainan {
 		//return if window is not open
 		if (!m_EnvironmentControlsWindowOpen)
 			return;
-
-		ImGui::Begin("Controls", &m_EnvironmentControlsWindowOpen);
+		
+		ImGui::Begin("Controls", &m_EnvironmentControlsWindowOpen, ImGuiWindowFlags_NoScrollbar);
 		if (m_Status == Status_ExportMode)
 		{
 			ImGui::End();
@@ -705,39 +707,48 @@ namespace Ainan {
 			}
 		});
 
-		//so we dont have to repeat those 2 lines
-#define DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW  std::string posStr = "(" + std::to_string(m_Camera.Position.x) + ", " + std::to_string(m_Camera.Position.y) + ")";\
-													  m_AppStatusWindow.SetText(("Moving Camera to Coordinates :" + posStr).c_str(), 0.1f)
+		//shortcut cut to use in all the mapped buttons
+		//it displays the camera position in the status window(the blue coloured stripe at the bottom)
+		auto displayCameraPosFunc = [this]()
+		{
+			std::stringstream messageString;
+
+			messageString << std::fixed << std::setprecision(2);
+			messageString << "Moving Camera to Coordinates :";
+			messageString << "(" << -m_Camera.Position.x / GlobalScaleFactor;
+			messageString << ", " << -m_Camera.Position.y / GlobalScaleFactor << ")";
+
+			m_AppStatusWindow.SetText(messageString.str());
+		};
 
 		//map WASD keys to move the camera in the environment
-
-		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera Up", [this]() {
-			//actually move the camera
+		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera Up", [this, displayCameraPosFunc]() 
+			{
+			//move the camera's position
 			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -10.0f));
-			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW; },
+			displayCameraPosFunc();
+			},
 			//set mode as repeat because we want the camera to move smoothly
 			GLFW_REPEAT);
 		//the rest are the same with only a diffrent move direction, that is why they arent commented
 
-		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this]() {
+		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this, displayCameraPosFunc]() {
 			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, 10.0f));
-			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW;
+			displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
 
-		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this]() {
+		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this, displayCameraPosFunc]() {
 			m_Camera.SetPosition(m_Camera.Position + glm::vec2(-10.0f, 0.0f));
-			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW;
+			displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
 
-		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this]() {
+		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this, displayCameraPosFunc]() {
 			m_Camera.SetPosition(m_Camera.Position + glm::vec2(10.0f, 0.0f));
-			DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW;
+			displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
-
-#undef DISPLAY_CAMERA_POSITION_IN_APP_STATUS_WINDOW
 
 		//delete keyboard shortcut
 		InputManager::RegisterKey(GLFW_KEY_DELETE, "Delete Object", [this]() {
@@ -833,6 +844,16 @@ namespace Ainan {
 		{
 			//make a new radial light
 			InspectorObjects.push_back(std::make_unique<SpotLight>(*static_cast<SpotLight*>(&obj)));
+
+			//add a -copy to the name of the new light to indicate that it was copied
+			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";
+		}
+
+		//if this object is a Sprite
+		else if (obj.Type == EnvironmentObjectType::SpriteType)
+		{
+			//make a new radial light
+			InspectorObjects.push_back(std::make_unique<Sprite>(*static_cast<Sprite*>(&obj)));
 
 			//add a -copy to the name of the new light to indicate that it was copied
 			InspectorObjects[InspectorObjects.size() - 1]->m_Name += "-copy";

@@ -38,7 +38,7 @@ namespace Ainan {
 
 	}
 
-	void Sprite::Update(const float& deltaTime)
+	void Sprite::Update(const float deltaTime)
 	{
 	}
 

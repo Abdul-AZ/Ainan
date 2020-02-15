@@ -56,7 +56,7 @@ namespace Ainan {
 		}
 	}
 
-	void ParticleSystem::Update(const float& deltaTime)
+	void ParticleSystem::Update(const float deltaTime)
 	{
 		SpawnAllParticlesOnQue(deltaTime);
 

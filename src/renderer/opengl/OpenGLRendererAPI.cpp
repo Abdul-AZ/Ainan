@@ -17,6 +17,9 @@ namespace Ainan {
 #ifdef DEBUG
 			glDebugMessageCallback(&opengl_debug_message_callback, nullptr);
 #endif // DEBUG
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
 		void OpenGLRendererAPI::DrawInstanced(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount, const unsigned int& objectCount)

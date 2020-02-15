@@ -17,7 +17,7 @@ namespace Ainan {
 	public:
 		ParticleSystem();
 
-		void Update(const float& deltaTime) override;
+		void Update(const float deltaTime) override;
 		void Draw() override;
 		void SpawnAllParticlesOnQue(const float& deltaTime);
 		void SpawnParticle(const Particle& particle);

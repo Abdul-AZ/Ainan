@@ -34,7 +34,8 @@ namespace Ainan {
 
 	class Environment
 	{
-		enum EnvironmentStatus {
+		enum EnvironmentStatus 
+		{
 			Status_EditorMode,
 			Status_PlayMode,
 			Status_PauseMode,
