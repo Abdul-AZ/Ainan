@@ -77,6 +77,12 @@ namespace Ainan {
 		static glm::mat4 m_CurrentViewProjection;
 		static RendererAPI* m_CurrentActiveAPI;
 		static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary;
+
+		//refrences to created objects
+		//mostly used for profiling
+		static std::vector<std::weak_ptr<Texture>> m_ReservedTextures;
+		static std::vector<std::weak_ptr<VertexBuffer>> m_ReservedVertexBuffers;
+		static std::vector<std::weak_ptr<IndexBuffer>> m_ReservedIndexBuffers;
 	};
 
 }

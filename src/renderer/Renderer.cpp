@@ -10,6 +10,10 @@ namespace Ainan {
 	unsigned int Renderer::NumberOfDrawCallsLastScene = 0;
 	std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> Renderer::ShaderLibrary;
 
+	std::vector<std::weak_ptr<Texture>> Renderer::m_ReservedTextures;
+	std::vector<std::weak_ptr<VertexBuffer>> Renderer::m_ReservedVertexBuffers;
+	std::vector<std::weak_ptr<IndexBuffer>> Renderer::m_ReservedIndexBuffers;
+
 	static unsigned int s_CurrentNumberOfDrawCalls = 0;
 
 	struct ShaderLoadInfo
@@ -55,6 +59,26 @@ namespace Ainan {
 		m_CurrentSceneCamera = &camera;
 		m_CurrentViewProjection = camera.ProjectionMatrix * camera.ViewMatrix;
 		s_CurrentNumberOfDrawCalls = 0;
+
+		//update diagnostics stuff
+		for (size_t i = 0; i < m_ReservedTextures.size(); i++)
+			if (m_ReservedTextures[i].expired())
+			{
+				m_ReservedTextures.erase(m_ReservedTextures.begin() + i);
+				i = 0;
+			}
+		for (size_t i = 0; i < m_ReservedVertexBuffers.size(); i++)
+			if (m_ReservedVertexBuffers[i].expired())
+			{
+				m_ReservedVertexBuffers.erase(m_ReservedVertexBuffers.begin() + i);
+				i = 0;
+			}
+		for (size_t i = 0; i < m_ReservedIndexBuffers.size(); i++)
+			if (m_ReservedIndexBuffers[i].expired())
+			{
+				m_ReservedIndexBuffers.erase(m_ReservedIndexBuffers.begin() + i);
+				i = 0;
+			}
 	}
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
@@ -164,28 +188,40 @@ namespace Ainan {
 
 	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, unsigned int size)
 	{
+		std::shared_ptr<VertexBuffer> buffer;
+
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_shared<OpenGL::OpenGLVertexBuffer>(data, size);
+			buffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(data, size);
+			break;
 
 		default:
 			assert(false);
-			return nullptr;
 		}
+
+		m_ReservedVertexBuffers.push_back(buffer);
+
+		return buffer;
 	}
 
 	std::shared_ptr<IndexBuffer> Renderer::CreateIndexBuffer(unsigned int* data, const int& count)
 	{
+		std::shared_ptr<IndexBuffer> buffer;
+
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_shared<OpenGL::OpenGLIndexBuffer>(data, count);
+			buffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(data, count);
+			break;
 
 		default:
 			assert(false);
-			return nullptr;
 		}
+
+		m_ReservedIndexBuffers.push_back(buffer);
+
+		return buffer;
 	}
 
 	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgram(const std::string& vertPath, const std::string& fragPath)
@@ -229,14 +265,20 @@ namespace Ainan {
 
 	std::shared_ptr<Texture> Renderer::CreateTexture()
 	{
+		std::shared_ptr<Texture> texture;
+
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_shared<OpenGL::OpenGLTexture>();
+			texture = std::make_shared<OpenGL::OpenGLTexture>();
+			break;
 
 		default:
 			assert(false);
-			return nullptr;
 		}
+
+		m_ReservedTextures.push_back(texture);
+
+		return texture;
 	}
 }

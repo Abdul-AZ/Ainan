@@ -471,6 +471,20 @@ namespace Ainan {
 
 				ImGui::PlotLines("Frame Time(s)", m_DeltaTimeHistory.data(), m_DeltaTimeHistory.size(),
 								 0, 0, 0.0f, 0.025f, ImVec2(0, 75));
+
+				ImGui::Text("Textures: ");
+				ImGui::SameLine();
+				ImGui::Text(std::to_string(Renderer::m_ReservedTextures.size()).c_str());
+
+				ImGui::SameLine();
+				ImGui::Text("   VBO(s): ");
+				ImGui::SameLine();
+				ImGui::Text(std::to_string(Renderer::m_ReservedVertexBuffers.size()).c_str());
+
+				ImGui::SameLine();
+				ImGui::Text("   EBO(s): ");
+				ImGui::SameLine();
+				ImGui::Text(std::to_string(Renderer::m_ReservedIndexBuffers.size()).c_str());
 			}
 			break;
 
