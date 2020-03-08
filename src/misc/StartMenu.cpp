@@ -79,11 +79,11 @@ namespace Ainan {
 
 		ImGui::End();
 
-		m_LoadEnvironmentBrowser.DisplayGUI([&currentEnv, this](const std::string& path)
+		m_LoadEnvironmentBrowser.DisplayGUI([&currentEnv, this](const std::filesystem::path path)
 			{
 				//check if file is selected
-				if (path.find(".env") != std::string::npos) {
-					m_EnvironmentLoadError = CheckEnvironmentFile(path);
+				if (path.extension().u8string() == ".env") {
+					m_EnvironmentLoadError = CheckEnvironmentFile(path.u8string());
 
 					//if there are no errors load environment
 					if (m_EnvironmentLoadError == "") {
@@ -91,7 +91,7 @@ namespace Ainan {
 						m_LoadEnvironmentBrowser.OnCloseWindow = nullptr;
 
 						Window::Maximize();
-						currentEnv = LoadEnvironment(path);
+						currentEnv = LoadEnvironment(path.u8string());
 					}
 				}
 			});

@@ -9,7 +9,7 @@ namespace Ainan {
 		CircleOutline();
 
 		void Draw();
-		glm::vec2 GetPointByAngle(const float& angle_in_radians);
+		glm::vec2 GetPointByAngle(float angle_in_radians);
 
 	public:
 		float Radius = 0.25f;

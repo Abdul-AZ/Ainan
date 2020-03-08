@@ -11,14 +11,14 @@ namespace Ainan {
 
 		void OpenWindow();
 		void CloseWindow();
-		void DisplayGUI(const std::function<void(const std::string&)>& func = nullptr);
+		void DisplayGUI(const std::function<void(const std::filesystem::path)>& func = nullptr);
 
 		std::vector<std::string> Filter;
-		std::string m_CurrentselectedFilePath;
+		std::filesystem::path m_CurrentselectedFilePath;
 		std::function<void()> OnCloseWindow = nullptr;
 
 	private:
-		std::string m_CurrentFolder;
+		std::filesystem::path m_CurrentFolderPath;
 		std::string m_WindowName;
 		std::string m_InputFolder;
 		bool m_WindowOpen = false;

@@ -66,7 +66,7 @@ namespace Ainan {
 		shader->Unbind();
 	}
 
-	glm::vec2 CircleOutline::GetPointByAngle(const float & angle_in_radians)
+	glm::vec2 CircleOutline::GetPointByAngle(float angle_in_radians)
 	{
 		float x = Position.x  * GlobalScaleFactor + Radius * cos(angle_in_radians) * GlobalScaleFactor;
 		float y = Position.y  * GlobalScaleFactor + Radius * sin(angle_in_radians) * GlobalScaleFactor;

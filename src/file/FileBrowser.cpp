@@ -7,7 +7,7 @@ namespace Ainan {
 	namespace fs = std::filesystem;
 
 	FileBrowser::FileBrowser(const std::string& startingFolder, const std::string& windowName) :
-		m_CurrentFolder(startingFolder),
+		m_CurrentFolderPath(startingFolder),
 		m_WindowName(windowName),
 		m_InputFolder(startingFolder)
 	{}
@@ -23,7 +23,7 @@ namespace Ainan {
 		m_WindowOpen = false;
 	}
 
-	void FileBrowser::DisplayGUI(const std::function<void(const std::string&)>& func)
+	void FileBrowser::DisplayGUI(const std::function<void(const std::filesystem::path)>& func)
 	{
 		if (!m_WindowOpen)
 			return;
@@ -34,42 +34,49 @@ namespace Ainan {
 
 		ImGui::Text("Current Directory :");
 		ImGui::SameLine();
-		auto flags = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;
-		if (ImGui::InputText("##empty", &m_InputFolder, flags)) {
+		if (ImGui::InputText("##empty", &m_InputFolder, ImGuiInputTextFlags_EnterReturnsTrue)) 
 			if (fs::exists(m_InputFolder))
-				m_CurrentFolder = m_InputFolder;
-		}
+				m_CurrentFolderPath = m_InputFolder;
 
 		ImGui::Text("Current Chosen File :");
 		ImGui::SameLine();
-		ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), m_CurrentselectedFilePath.c_str());
+		ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), m_CurrentselectedFilePath.u8string().c_str());
 		ImGui::PushItemWidth(-1);
 		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetWindowSize().y - 100))) {
 
 			//check if we can go back
-			if (std::count(m_CurrentFolder.begin(), m_CurrentFolder.end(), '\\') > 0) {
+			if (m_CurrentFolderPath.parent_path() != m_CurrentFolderPath) {
 				//back button
 				if (ImGui::Button("..")) {
-					auto lastBackslashLoc = m_CurrentFolder.find_last_of('\\');
-					if (std::count(m_CurrentFolder.begin(), m_CurrentFolder.end(), '\\') == 1)
-						m_CurrentFolder.erase(lastBackslashLoc + 1, m_CurrentFolder.size() - lastBackslashLoc + 1);
-					else
-						m_CurrentFolder.erase(lastBackslashLoc, m_CurrentFolder.size() - lastBackslashLoc);
-					m_InputFolder = m_CurrentFolder;
+					m_CurrentFolderPath = m_CurrentFolderPath.parent_path();
+					m_InputFolder = m_CurrentFolderPath.u8string();
 				}
 			}
-			for (const auto& entry : fs::directory_iterator(m_CurrentFolder)) {
-				if (entry.status().type() == fs::file_type::directory && entry.path().filename() != "System Volume Information" && entry.path().filename() != "$RECYCLE.BIN") {
+			for (const auto& entry : fs::directory_iterator(m_CurrentFolderPath)) {
+				if (entry.status().type() == fs::file_type::directory) {
+					//make a button for every directory
 					if (ImGui::Button(entry.path().filename().u8string().c_str())) {
-						m_CurrentFolder += "\\" + entry.path().filename().u8string();
-						m_InputFolder = m_CurrentFolder;
+						//if button is pressed, enter that directory:
+						
+						//if we are in root (eg "C:\", "D:\") we can just append the relative path of the folder
+						if (m_CurrentFolderPath.parent_path() == m_CurrentFolderPath)
+							m_CurrentFolderPath += entry.path().relative_path();
+						//if we are not in root we have to add a backslash before the new folder's name
+						else {
+							m_CurrentFolderPath += "\\";
+							m_CurrentFolderPath += entry.path().filename();
+						}
+
+						//update the input folder text
+						m_InputFolder = m_CurrentFolderPath.u8string();
 					}
 				}
 			}
 
-			for (const auto& entry : fs::directory_iterator(m_CurrentFolder)) {
+			for (const auto& entry : fs::directory_iterator(m_CurrentFolderPath)) {
 				if (entry.status().type() != fs::file_type::directory) {
 
+					//remove unwanted files if they are filtered 
 					bool inFilter = false;
 					for (std::string& str : Filter) {
 						if (entry.path().extension() == str) {
@@ -80,9 +87,9 @@ namespace Ainan {
 					if (!inFilter)
 						continue;
 
-					bool is_selected = (m_CurrentselectedFilePath == entry.path().u8string());
+					bool is_selected = (m_CurrentselectedFilePath == entry.path());
 					if (ImGui::Selectable(entry.path().filename().u8string().c_str(), &is_selected))
-						m_CurrentselectedFilePath = entry.path().u8string();
+						m_CurrentselectedFilePath = entry.path();
 
 					if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
 					{
