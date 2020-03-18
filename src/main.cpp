@@ -37,9 +37,11 @@ int main()
 				delete env;
 				env = nullptr;
 			}
-
-			env->EndFrame();
-			Window::Present();
+			else 
+			{
+				env->EndFrame();
+				Window::Present();
+			}
 		}
 		else
 		{
