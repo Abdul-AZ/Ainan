@@ -1,7 +1,10 @@
 project "glfw"
-  kind ("StaticLib")
-
   basedir("../")
+  kind ("StaticLib")
+  objdir("%{wks.location}/build/obj/%{prj.name}_%{cfg.shortname}/")
+  targetdir("%{wks.location}/build/bin/%{prj.name}_%{cfg.shortname}/")
+  compileas "C"
+
   files {
     "../submodules/glfw/src/init.c",
     "../submodules/glfw/src/input.c",

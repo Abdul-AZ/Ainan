@@ -1,6 +1,8 @@
 project "Core"
   basedir("../")
-  kind ("ConsoleApp")
+  kind("ConsoleApp")
+  objdir("%{wks.location}/build/obj/%{prj.name}_%{cfg.shortname}/")
+  targetdir("%{wks.location}/build/bin/%{prj.name}_%{cfg.shortname}/")
   cppdialect "C++17"
   compileas "C++"
 

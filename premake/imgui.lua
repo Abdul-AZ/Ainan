@@ -1,7 +1,10 @@
 project "imgui"
-  kind ("StaticLib")
   basedir("../")
+  kind ("StaticLib")
+  objdir("%{wks.location}/build/obj/%{prj.name}_%{cfg.shortname}/")
+  targetdir("%{wks.location}/build/bin/%{prj.name}_%{cfg.shortname}/")
   cppdialect "C++17"
+  compileas "C++"
 
   files { 
     "../submodules/imgui/*.h", "../submodules/imgui/*.cpp",
