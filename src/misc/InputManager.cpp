@@ -9,6 +9,25 @@ namespace Ainan {
 	std::vector<RegisteredKey> InputManager::m_Keys;
 	std::vector<RegisteredKey> InputManager::m_MouseKeys;
 	std::unordered_map<int, int> InputManager::m_KeyStates;
+	std::vector<std::function<void(int)>> InputManager::m_ScrollFunctions;
+
+	static void scroll_callback(GLFWwindow* window, double x, double y) 
+	{
+		for (auto& fun : InputManager::m_ScrollFunctions)
+		{
+			fun(y);
+		}
+	}
+
+	void InputManager::Init()
+	{
+		glfwSetScrollCallback(Window::Ptr, scroll_callback);
+	}
+
+	void InputManager::Terminate()
+	{
+		glfwSetScrollCallback(Window::Ptr, nullptr);
+	}
 
 	void InputManager::RegisterKey(int glfwKeyCode, std::string description, std::function<void()> func, int eventTrigger)
 	{

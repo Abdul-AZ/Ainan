@@ -21,13 +21,21 @@ namespace Ainan {
 		RegisterEnvironmentInputKeys();
 
 		AssetManager::Init(environmentFolderPath);
+		InputManager::Init();
 
 		UpdateTitle();
+
+		InputManager::m_ScrollFunctions.push_back([this](int scroll) {
+				GlobalZoomFactor -= scroll * 25;
+
+				GlobalZoomFactor = std::clamp(GlobalZoomFactor, GlobalZoomFactorMin, GlobalZoomFactorMax);
+			});
 	}
 
 	Environment::~Environment()
 	{
 		InputManager::ClearKeys();
+		InputManager::Terminate();
 		AssetManager::Terminate();
 		InspectorObjects.clear();
 		Window::Restore();
@@ -739,7 +747,7 @@ namespace Ainan {
 		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera Up", [this, displayCameraPosFunc]() 
 			{
 			//move the camera's position
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -10.0f));
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -GlobalZoomFactor / 100.0f));
 			displayCameraPosFunc();
 			},
 			//set mode as repeat because we want the camera to move smoothly
@@ -747,19 +755,19 @@ namespace Ainan {
 		//the rest are the same with only a diffrent move direction, that is why they arent commented
 
 		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this, displayCameraPosFunc]() {
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, 10.0f));
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, GlobalZoomFactor / 100.0f));
 			displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
 
 		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this, displayCameraPosFunc]() {
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(-10.0f, 0.0f));
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(-GlobalZoomFactor / 100.0f, 0.0f));
 			displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
 
 		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this, displayCameraPosFunc]() {
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(10.0f, 0.0f));
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(GlobalZoomFactor / 100.0f, 0.0f));
 			displayCameraPosFunc();
 			},
 			GLFW_REPEAT);

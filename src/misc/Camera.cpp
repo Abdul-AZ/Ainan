@@ -21,7 +21,7 @@ namespace Ainan {
 	void Camera::Update(float deltaTime, const Rectangle& viewport)
 	{
 		float aspectRatio = (float)viewport.Width / viewport.Height;
-		ProjectionMatrix = glm::ortho(0.0f, GlobalScaleFactor * aspectRatio, 0.0f, GlobalScaleFactor);
+		ProjectionMatrix = glm::ortho(-GlobalZoomFactor * aspectRatio / 2.0f, GlobalZoomFactor * aspectRatio / 2.0f, -GlobalZoomFactor / 2.0f, GlobalZoomFactor / 2.0f);
 	}
 
 	void Camera::SetPosition(const glm::vec2& newPos)
