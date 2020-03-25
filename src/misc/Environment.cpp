@@ -26,9 +26,19 @@ namespace Ainan {
 		UpdateTitle();
 
 		InputManager::m_ScrollFunctions.push_back([this](int scroll) {
+				//change zoom factor
 				m_Camera.ZoomFactor -= scroll * 25;
-
+				//clamp zoom factor
 				m_Camera.ZoomFactor = std::clamp(m_Camera.ZoomFactor, c_CameraZoomFactorMin, c_CameraZoomFactorMax);
+
+				//display the new zoom factor in the bottom left of the screen
+				std::stringstream stream;
+				stream << std::setprecision(0);
+				stream << "Zoom ";
+				stream << (int)(c_CameraZoomFactorDefault * 100.0f / m_Camera.ZoomFactor);
+				stream << "%%";
+
+				m_AppStatusWindow.SetText(stream.str());
 			});
 	}
 
@@ -728,6 +738,19 @@ namespace Ainan {
 				}
 			}
 		});
+
+		InputManager::RegisterMouseKey(GLFW_MOUSE_BUTTON_MIDDLE, "Change Camera Zoom to Default", [this]() 
+			{
+				m_Camera.ZoomFactor = c_CameraZoomFactorDefault; 
+				//display the new zoom factor in the bottom left of the screen
+				std::stringstream stream;
+				stream << std::setprecision(0);
+				stream << "Zoom ";
+				stream << (int)(c_CameraZoomFactorDefault * 100.0f / m_Camera.ZoomFactor);
+				stream << "%%";
+
+				m_AppStatusWindow.SetText(stream.str());
+			});
 
 		//shortcut cut to use in all the mapped buttons
 		//it displays the camera position in the status window(the blue coloured stripe at the bottom)
