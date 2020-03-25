@@ -9,11 +9,7 @@
 
 namespace Ainan {
 
-	const float GlobalScaleFactor = 1000.0f;
-
-	extern float GlobalZoomFactor;
-	const float GlobalZoomFactorMin = 100.0f;
-	const float GlobalZoomFactorMax = 2000.0f;
+	const float c_GlobalScaleFactor = 1000.0f;
 
 	class Window
 	{

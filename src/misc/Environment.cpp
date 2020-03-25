@@ -26,9 +26,9 @@ namespace Ainan {
 		UpdateTitle();
 
 		InputManager::m_ScrollFunctions.push_back([this](int scroll) {
-				GlobalZoomFactor -= scroll * 25;
+				m_Camera.ZoomFactor -= scroll * 25;
 
-				GlobalZoomFactor = std::clamp(GlobalZoomFactor, GlobalZoomFactorMin, GlobalZoomFactorMax);
+				m_Camera.ZoomFactor = std::clamp(m_Camera.ZoomFactor, c_CameraZoomFactorMin, c_CameraZoomFactorMax);
 			});
 	}
 
@@ -737,8 +737,8 @@ namespace Ainan {
 
 			messageString << std::fixed << std::setprecision(2);
 			messageString << "Moving Camera to Coordinates :";
-			messageString << "(" << -m_Camera.Position.x / GlobalScaleFactor;
-			messageString << ", " << -m_Camera.Position.y / GlobalScaleFactor << ")";
+			messageString << "(" << -m_Camera.Position.x / c_GlobalScaleFactor;
+			messageString << ", " << -m_Camera.Position.y / c_GlobalScaleFactor << ")";
 
 			m_AppStatusWindow.SetText(messageString.str());
 		};
@@ -747,7 +747,7 @@ namespace Ainan {
 		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera Up", [this, displayCameraPosFunc]() 
 			{
 			//move the camera's position
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -GlobalZoomFactor / 100.0f));
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -m_Camera.ZoomFactor / 100.0f));
 			displayCameraPosFunc();
 			},
 			//set mode as repeat because we want the camera to move smoothly
@@ -755,19 +755,19 @@ namespace Ainan {
 		//the rest are the same with only a diffrent move direction, that is why they arent commented
 
 		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this, displayCameraPosFunc]() {
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, GlobalZoomFactor / 100.0f));
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, m_Camera.ZoomFactor / 100.0f));
 			displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
 
 		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this, displayCameraPosFunc]() {
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(-GlobalZoomFactor / 100.0f, 0.0f));
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(-m_Camera.ZoomFactor / 100.0f, 0.0f));
 			displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
 
 		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this, displayCameraPosFunc]() {
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(GlobalZoomFactor / 100.0f, 0.0f));
+			m_Camera.SetPosition(m_Camera.Position + glm::vec2(m_Camera.ZoomFactor / 100.0f, 0.0f));
 			displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -893,7 +893,7 @@ namespace Ainan {
 			{
 			case SpawnMode::SpawnOnPoint:
 
-				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_SpawnPosition.x * -GlobalScaleFactor, ps.Customizer.m_SpawnPosition.y * -GlobalScaleFactor, 0.0f)
+				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_SpawnPosition.x * -c_GlobalScaleFactor, ps.Customizer.m_SpawnPosition.y * -c_GlobalScaleFactor, 0.0f)
 					+ glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
 				break;
 
@@ -909,13 +909,13 @@ namespace Ainan {
 
 			case SpawnMode::SpawnOnLine:
 
-				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_LinePosition.x * -GlobalScaleFactor, ps.Customizer.m_LinePosition.y * -GlobalScaleFactor, 0.0f)
+				m_Camera.SetPosition(glm::vec3(ps.Customizer.m_LinePosition.x * -c_GlobalScaleFactor, ps.Customizer.m_LinePosition.y * -c_GlobalScaleFactor, 0.0f)
 								   + glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
 				break;
 			}
 		}
 		else {
-			m_Camera.SetPosition(glm::vec3(object.GetPositionRef().x, object.GetPositionRef().y, 0.0f) * -GlobalScaleFactor
+			m_Camera.SetPosition(glm::vec3(object.GetPositionRef().x, object.GetPositionRef().y, 0.0f) * -c_GlobalScaleFactor
 							   + glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
 		}
 	}

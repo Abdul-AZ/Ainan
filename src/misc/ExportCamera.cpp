@@ -40,7 +40,7 @@ namespace Ainan {
 
 		RealCamera.Update(0.0f, Renderer::GetCurrentViewport());
 		glm::vec2 reversedPos = glm::vec2(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y);
-		RealCamera.SetPosition(reversedPos * GlobalScaleFactor);
+		RealCamera.SetPosition(reversedPos * c_GlobalScaleFactor);
 	}
 
 	void ExportCamera::DisplayGUI()
@@ -83,11 +83,11 @@ namespace Ainan {
 				ImGui::Text("Width");
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(85);
-				ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.0f, 1.0f), std::to_string(static_cast<int>(m_ExportCameraSize.x * GlobalScaleFactor)).c_str());
+				ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.0f, 1.0f), std::to_string(static_cast<int>(m_ExportCameraSize.x * c_GlobalScaleFactor)).c_str());
 				ImGui::Text("Height");
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(85);
-				ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.0f, 1.0f), std::to_string(static_cast<int>(m_ExportCameraSize.y * GlobalScaleFactor)).c_str());
+				ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.0f, 1.0f), std::to_string(static_cast<int>(m_ExportCameraSize.y * c_GlobalScaleFactor)).c_str());
 
 				ImGui::TreePop();
 			}
@@ -201,7 +201,7 @@ namespace Ainan {
 		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
 		Renderer::BeginScene(RealCamera);
 
-		m_RenderSurface.SetSize(m_ExportCameraSize * GlobalScaleFactor);
+		m_RenderSurface.SetSize(m_ExportCameraSize * c_GlobalScaleFactor);
 		m_RenderSurface.SurfaceFrameBuffer->Bind();
 
 		Renderer::SetViewport({ 0, 0, (int)Window::FramebufferSize.x, (int)Window::FramebufferSize.y });

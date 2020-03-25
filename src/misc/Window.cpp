@@ -13,7 +13,6 @@ namespace Ainan {
 	glm::vec2 Window::Size = { 0,0 };
 	glm::vec2 Window::Position = { 0,0 };
 	GLFWwindow* Window::Ptr = nullptr;
-	float GlobalZoomFactor = 1000.0f;
 
 	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	{

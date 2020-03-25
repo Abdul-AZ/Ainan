@@ -192,7 +192,7 @@ namespace Ainan {
 		switch (Mode)
 		{
 		case SpawnMode::SpawnOnPoint: {
-			glm::vec2 spawnPosition = { m_SpawnPosition.x * GlobalScaleFactor, m_SpawnPosition.y * GlobalScaleFactor };
+			glm::vec2 spawnPosition = { m_SpawnPosition.x * c_GlobalScaleFactor, m_SpawnPosition.y * c_GlobalScaleFactor };
 			m_Particle.m_Position = spawnPosition;
 			break;
 		}
@@ -215,7 +215,7 @@ namespace Ainan {
 			float r = m_CircleOutline.Radius * sqrt(dest(mt));
 			float theta = dest(mt) * 2 * PI; //in radians
 			m_Particle.m_Position = glm::vec2(m_CircleOutline.Position.x + r * cos(theta), m_CircleOutline.Position.y + r * sin(theta));
-			m_Particle.m_Position *= GlobalScaleFactor;
+			m_Particle.m_Position *= c_GlobalScaleFactor;
 			break;
 		}
 		}

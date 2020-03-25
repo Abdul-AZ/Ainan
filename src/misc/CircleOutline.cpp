@@ -50,8 +50,8 @@ namespace Ainan {
 	void CircleOutline::Draw()
 	{
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(Position.x * GlobalScaleFactor, Position.y * GlobalScaleFactor, 0.0f));
-		model = glm::scale(model, glm::vec3(Radius * GlobalScaleFactor, Radius * GlobalScaleFactor, Radius * GlobalScaleFactor));
+		model = glm::translate(model, glm::vec3(Position.x * c_GlobalScaleFactor, Position.y * c_GlobalScaleFactor, 0.0f));
+		model = glm::scale(model, glm::vec3(Radius * c_GlobalScaleFactor, Radius * c_GlobalScaleFactor, Radius * c_GlobalScaleFactor));
 
 		auto& shader = Renderer::ShaderLibrary["CircleOutlineShader"];
 
@@ -68,8 +68,8 @@ namespace Ainan {
 
 	glm::vec2 CircleOutline::GetPointByAngle(float angle_in_radians)
 	{
-		float x = Position.x  * GlobalScaleFactor + Radius * cos(angle_in_radians) * GlobalScaleFactor;
-		float y = Position.y  * GlobalScaleFactor + Radius * sin(angle_in_radians) * GlobalScaleFactor;
+		float x = Position.x  * c_GlobalScaleFactor + Radius * cos(angle_in_radians) * c_GlobalScaleFactor;
+		float y = Position.y  * c_GlobalScaleFactor + Radius * sin(angle_in_radians) * c_GlobalScaleFactor;
 
 		return glm::vec2(x, y);
 	}

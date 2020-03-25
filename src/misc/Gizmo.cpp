@@ -90,7 +90,7 @@ namespace Ainan {
 		float NDC_xpos = (float)xpos * 2 / viewport.Width - 1.0f;
 		float NDC_ypos = (float)ypos * 2 / viewport.Height - 1.0f;
 
-		glm::vec2 objectPositionWS = objectPosition * GlobalScaleFactor;
+		glm::vec2 objectPositionWS = objectPosition * c_GlobalScaleFactor;
 		glm::vec2 realMousePositionNDC = glm::vec2(NDC_xpos, NDC_ypos);
 
 		glm::mat4 invView = glm::inverse(Renderer::m_CurrentSceneCamera->ViewMatrix);
@@ -127,9 +127,9 @@ namespace Ainan {
 		}
 
 		if (m_ArrowPressedMap[&objectPosition] == Horizontal)
-			objectPosition.x = (result.x - m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition]) / GlobalScaleFactor;
+			objectPosition.x = (result.x - m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition]) / c_GlobalScaleFactor;
 		else if(m_ArrowPressedMap[&objectPosition] == Vertical)
-			objectPosition.y = (result.y - m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition]) / GlobalScaleFactor;
+			objectPosition.y = (result.y - m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition]) / c_GlobalScaleFactor;
 
 		if (!mouseButtonDown) {
 			m_ArrowPressedMap[&objectPosition] = None;
@@ -165,8 +165,8 @@ namespace Ainan {
 
 		shader->SetUniformVec4("u_Color", color);
 		shader->SetUniformMat4("u_Model", model);
-		glm::vec2 mousePosWS = Renderer::m_CurrentSceneCamera->Position + realMousePositionNDC * GlobalScaleFactor;
-		glm::vec2 objectPosWS = objectPositionWS * GlobalScaleFactor;
+		glm::vec2 mousePosWS = Renderer::m_CurrentSceneCamera->Position + realMousePositionNDC * c_GlobalScaleFactor;
+		glm::vec2 objectPosWS = objectPositionWS * c_GlobalScaleFactor;
 
 		Renderer::Draw(*VAO, *shader, Primitive::Triangles, *EBO);
 	}
@@ -177,14 +177,14 @@ namespace Ainan {
 		//check if inside arrow rectangle, that is the shape (v0, v1, v2, v6) in the arrow in the start of this file
 		if (arrow == Horizontal)
 		{
-			if(point.x > arrowCentre.x&& point.x < arrowCentre.x + GIZMO_LINE_LENGTH_TILL_WINGS * GlobalScaleFactor / 10.0f &&
-				   point.y > arrowCentre.y && point.y < arrowCentre.y + GIZMO_LINE_WIDTH * GlobalScaleFactor / 10.0f)
+			if(point.x > arrowCentre.x&& point.x < arrowCentre.x + GIZMO_LINE_LENGTH_TILL_WINGS * c_GlobalScaleFactor / 10.0f &&
+				   point.y > arrowCentre.y && point.y < arrowCentre.y + GIZMO_LINE_WIDTH * c_GlobalScaleFactor / 10.0f)
 				return true;
 		}
 		else if (arrow == Vertical)
 		{
-			if(point.x > arrowCentre.x - GIZMO_LINE_WIDTH * GlobalScaleFactor / 10.0f && point.x < arrowCentre.x &&
-				   point.y > arrowCentre.y && point.y < arrowCentre.y + GIZMO_LINE_LENGTH_TILL_WINGS * GlobalScaleFactor / 10.0f)
+			if(point.x > arrowCentre.x - GIZMO_LINE_WIDTH * c_GlobalScaleFactor / 10.0f && point.x < arrowCentre.x &&
+				   point.y > arrowCentre.y && point.y < arrowCentre.y + GIZMO_LINE_LENGTH_TILL_WINGS * c_GlobalScaleFactor / 10.0f)
 				return true;
 		}
 		//check if inside arrow triangle, that is the shape (v3, v4, v5) in the arrow in the start of this file
@@ -195,14 +195,14 @@ namespace Ainan {
 		if (arrow == Horizontal)
 		{
 			//A,B,C represent the edges of the triangle
-			glm::vec2 A = arrowCentre / GlobalScaleFactor + v3;
-			glm::vec2 B = arrowCentre / GlobalScaleFactor + v4;
-			glm::vec2 C = arrowCentre / GlobalScaleFactor + v5;
+			glm::vec2 A = arrowCentre / c_GlobalScaleFactor + v3;
+			glm::vec2 B = arrowCentre / c_GlobalScaleFactor + v4;
+			glm::vec2 C = arrowCentre / c_GlobalScaleFactor + v5;
 
 
 			glm::vec2 vector0 = C - A;
 			glm::vec2 vector1 = B - A;
-			glm::vec2 vector2 = point / GlobalScaleFactor - A;
+			glm::vec2 vector2 = point / c_GlobalScaleFactor - A;
 
 			// Compute dot products
 			float dot00 = glm::dot(vector0, vector0);
@@ -241,14 +241,14 @@ namespace Ainan {
 			}
 
 			//A,B,C represent the edges of the triangle
-			glm::vec2 A = arrowCentre / GlobalScaleFactor + v3;
-			glm::vec2 B = arrowCentre / GlobalScaleFactor + v4;
-			glm::vec2 C = arrowCentre / GlobalScaleFactor + v5;
+			glm::vec2 A = arrowCentre / c_GlobalScaleFactor + v3;
+			glm::vec2 B = arrowCentre / c_GlobalScaleFactor + v4;
+			glm::vec2 C = arrowCentre / c_GlobalScaleFactor + v5;
 
 
 			glm::vec2 vector0 = C - A;
 			glm::vec2 vector1 = B - A;
-			glm::vec2 vector2 = point / GlobalScaleFactor - A;
+			glm::vec2 vector2 = point / c_GlobalScaleFactor - A;
 
 			// Compute dot products
 			float dot00 = glm::dot(vector0, vector0);

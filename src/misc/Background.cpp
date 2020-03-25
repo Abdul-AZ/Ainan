@@ -25,7 +25,7 @@ namespace Ainan {
 
 	void Background::SubmitLight(const RadialLight& light)
 	{
-		m_RadialLightPositionBuffer[m_RadialLightSubmissionCount] = light.Position * GlobalScaleFactor;
+		m_RadialLightPositionBuffer[m_RadialLightSubmissionCount] = light.Position * c_GlobalScaleFactor;
 		m_RadialLightColorBuffer[m_RadialLightSubmissionCount] = light.Color;
 		m_RadialLightIntensityBuffer[m_RadialLightSubmissionCount] = light.Intensity;
 
@@ -34,7 +34,7 @@ namespace Ainan {
 
 	void Background::SubmitLight(const SpotLight& light)
 	{
-		m_SpotLightPositionBuffer[m_SpotLightSubmissionCount] = light.Position * GlobalScaleFactor;
+		m_SpotLightPositionBuffer[m_SpotLightSubmissionCount] = light.Position * c_GlobalScaleFactor;
 		m_SpotLightColorBuffer[m_SpotLightSubmissionCount] = light.Color;
 		m_SpotLightAngleBuffer[m_SpotLightSubmissionCount] = light.Angle * PI / 180.0f;            //convert to radians
 		m_SpotLightInnerCutoffBuffer[m_SpotLightSubmissionCount] = light.InnerCutoff * PI / 180.0f;//convert to radians
