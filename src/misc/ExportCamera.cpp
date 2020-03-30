@@ -6,7 +6,8 @@ namespace Ainan {
 
 	//TODO use environment directory instead of default
 	ExportCamera::ExportCamera() :
-		m_ImageLocationBrowser(STARTING_BROWSER_DIRECTORY, "Save Image")
+		m_ImageLocationBrowser(STARTING_BROWSER_DIRECTORY, "Save Image"), 
+		RealCamera(CameraMode::CentreIsBottomLeft)
 	{
 		memset(m_Edges, 0, sizeof(m_Edges));
 

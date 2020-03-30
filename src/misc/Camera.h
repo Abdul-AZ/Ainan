@@ -8,8 +8,8 @@ namespace Ainan {
 
 	enum class CameraMode
 	{
-		Orthographic,
-		Perspective //NOTE use this when we add 3D stuff
+		CentreIsMidPoint,
+		CentreIsBottomLeft
 	};
 
 	const float c_CameraZoomFactorDefault = 1000.0f;
@@ -19,7 +19,7 @@ namespace Ainan {
 	class Camera
 	{
 	public:
-		Camera(CameraMode mode = CameraMode::Orthographic);
+		Camera(CameraMode mode = CameraMode::CentreIsMidPoint);
 
 		//this only sets the camera size to the screen size
 		void Update(float deltaTime, const Rectangle& viewport);
