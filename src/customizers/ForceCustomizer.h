@@ -19,7 +19,7 @@ namespace Ainan {
 				return DF_Value;
 			else //it is a relative force
 			{
-				glm::vec2 dir = glm::normalize(RF_Target * GlobalScaleFactor - particlePos);
+				glm::vec2 dir = glm::normalize(RF_Target * c_GlobalScaleFactor - particlePos);
 				
 				if (isnan(dir.x) || isnan(dir.y))
 					return glm::vec2(0.0f);

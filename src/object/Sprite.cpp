@@ -45,9 +45,9 @@ namespace Ainan {
 	void Sprite::Draw()
 	{
 		glm::mat4 u_Model(1.0f);
-		u_Model = glm::translate(u_Model, glm::vec3(Position.x, Position.y, 0.0f) * GlobalScaleFactor);
+		u_Model = glm::translate(u_Model, glm::vec3(Position.x, Position.y, 0.0f) * c_GlobalScaleFactor);
 		u_Model = glm::rotate(u_Model, glm::radians(Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-		u_Model = glm::scale(u_Model, glm::vec3(Scale.x, Scale.y, 1.0f) * GlobalScaleFactor);
+		u_Model = glm::scale(u_Model, glm::vec3(Scale.x, Scale.y, 1.0f) * c_GlobalScaleFactor);
 
 		auto& shader = Renderer::ShaderLibrary["SpriteShader"];
 

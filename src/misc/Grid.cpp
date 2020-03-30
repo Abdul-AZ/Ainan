@@ -29,25 +29,25 @@ namespace Ainan {
 			//bottom line vertices
 			for (size_t i = 0; i < VERTICES_PER_AXIS; i++)
 			{
-				vertices.push_back(glm::vec2(-GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * GlobalScaleFactor, -GlobalScaleFactor) * GRID_SCALE);
+				vertices.push_back(glm::vec2(-c_GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * c_GlobalScaleFactor, -c_GlobalScaleFactor) * GRID_SCALE);
 			}
 
 			//top line vertices
 			for (size_t i = 0; i <= VERTICES_PER_AXIS; i++)
 			{
-				vertices.push_back(glm::vec2(-GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * GlobalScaleFactor, GlobalScaleFactor) * GRID_SCALE);
+				vertices.push_back(glm::vec2(-c_GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * c_GlobalScaleFactor, c_GlobalScaleFactor) * GRID_SCALE);
 			}
 
 			//left line vertices
 			for (size_t i = 0; i < VERTICES_PER_AXIS; i++)
 			{
-				vertices.push_back(glm::vec2(-GlobalScaleFactor, -GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * GlobalScaleFactor) * GRID_SCALE);
+				vertices.push_back(glm::vec2(-c_GlobalScaleFactor, -c_GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * c_GlobalScaleFactor) * GRID_SCALE);
 			}
 
 			//right line vertices
 			for (size_t i = 0; i <= VERTICES_PER_AXIS; i++)
 			{
-				vertices.push_back(glm::vec2(GlobalScaleFactor, -GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * GlobalScaleFactor) * GRID_SCALE);
+				vertices.push_back(glm::vec2(c_GlobalScaleFactor, -c_GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * c_GlobalScaleFactor) * GRID_SCALE);
 			}
 
 			//vertical line indecies

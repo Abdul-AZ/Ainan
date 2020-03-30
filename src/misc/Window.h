@@ -9,7 +9,7 @@
 
 namespace Ainan {
 
-	const float GlobalScaleFactor = 1000.0f;
+	const float c_GlobalScaleFactor = 1000.0f;
 
 	class Window
 	{

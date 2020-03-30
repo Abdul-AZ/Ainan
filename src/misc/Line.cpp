@@ -33,7 +33,7 @@ namespace Ainan {
 
 		//transform to world space
 		for (auto& vertex : m_Vertices)
-			vertex *= GlobalScaleFactor;
+			vertex *= c_GlobalScaleFactor;
 	}
 
 	void Line::Draw()
