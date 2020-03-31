@@ -19,7 +19,8 @@ namespace Ainan {
 		//TODO make this customizable or something, for now it's a default value of 1000
 		m_ParticleCount = 1000;
 
-		m_ParticleDrawTransformationBuffer.resize(m_ParticleCount);
+		m_ParticleDrawTranslationBuffer.resize(m_ParticleCount);
+		m_ParticleDrawScaleBuffer.resize(m_ParticleCount);
 		m_ParticleDrawColorBuffer.resize(m_ParticleCount);
 		m_Particles.resize(m_ParticleCount);
 
@@ -152,8 +153,6 @@ namespace Ainan {
 				//create a new model matrix for each particle
 				glm::mat4 model = glm::mat4(1.0f);
 
-				//move particle to it's position
-				model = glm::translate(model, glm::vec3(m_Particles[i].m_Position.x, m_Particles[i].m_Position.y, 0.0f));
 				//use the t value to get the scale of the particle using it's not using a Custom Curve
 				float scale;
 				if (m_Particles[i].m_ScaleInterpolator.Type == Custom)
@@ -161,11 +160,9 @@ namespace Ainan {
 				else
 					scale = m_Particles[i].m_ScaleInterpolator.Interpolate(t);
 
-				//scale the particle by that value
-				model = glm::scale(model, glm::vec3(scale, scale, scale));
-
 				//put the drawing properties of the particles in the draw buffers that would be drawn this frame
-				m_ParticleDrawTransformationBuffer[m_ParticleDrawCount] = model;
+				m_ParticleDrawTranslationBuffer[m_ParticleDrawCount] = m_Particles[i].m_Position;
+				m_ParticleDrawScaleBuffer[m_ParticleDrawCount] = scale;
 				m_ParticleDrawColorBuffer[m_ParticleDrawCount] = m_Particles[i].m_ColorInterpolator.Interpolate(t);
 
 				//up the amount of particles to be drawn this frame
@@ -179,7 +176,9 @@ namespace Ainan {
 		//draw 40 particles
 		for (int i = 0; i < drawCount; i++)
 		{
-			Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformMat4s("u_ModelArr", &m_ParticleDrawTransformationBuffer[i * 40], 40);
+			Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformVec2s("u_TranslationArr", &m_ParticleDrawTranslationBuffer[i * 40], 40);
+			Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniform1fs("u_ScaleArr", &m_ParticleDrawScaleBuffer[i * 40], 40);
+
 			Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformVec4s("u_ColorArr", &m_ParticleDrawColorBuffer[i * 40], 40);
 			Renderer::DrawInstanced(*VAO, *Renderer::ShaderLibrary["ParticleSystemShader"], Primitive::TriangleFan, 26, 40);
 		}
@@ -192,8 +191,8 @@ namespace Ainan {
 			return;
 
 		//draw them
-		Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformMat4s("u_ModelArr", &m_ParticleDrawTransformationBuffer[drawCount * 40], remaining);
-		Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformVec4s("u_ColorArr", &m_ParticleDrawColorBuffer[drawCount * 40], remaining);
+		Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformVec2s("u_TranslationArr", &m_ParticleDrawTranslationBuffer[drawCount * 40], 40);
+		Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniform1fs("u_ScaleArr", &m_ParticleDrawScaleBuffer[drawCount * 40], 40);
 		Renderer::DrawInstanced(*VAO, *Renderer::ShaderLibrary["ParticleSystemShader"], Primitive::TriangleFan, 26, remaining);
 	}
 
@@ -255,7 +254,8 @@ namespace Ainan {
 	{
 
 		//these are calculated every frame, so there is no need to copy them. a resize should be enough
-		m_ParticleDrawTransformationBuffer.resize(Psystem.m_ParticleDrawTransformationBuffer.size());
+		m_ParticleDrawTranslationBuffer.resize(Psystem.m_ParticleDrawTranslationBuffer.size());
+		m_ParticleDrawScaleBuffer.resize(Psystem.m_ParticleDrawScaleBuffer.size());
 		m_ParticleDrawColorBuffer.resize(Psystem.m_ParticleDrawColorBuffer.size());
 
 		//copy other variables

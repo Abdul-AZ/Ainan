@@ -37,7 +37,8 @@ namespace Ainan {
 
 	private:
 		//these are the buffers for all the particles that will be drawn this frame
-		std::vector<glm::mat4> m_ParticleDrawTransformationBuffer;
+		std::vector<glm::vec2> m_ParticleDrawTranslationBuffer;
+		std::vector<float> m_ParticleDrawScaleBuffer;
 		std::vector<glm::vec4> m_ParticleDrawColorBuffer;
 		size_t m_ParticleDrawCount = 0;
 
