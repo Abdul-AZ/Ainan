@@ -14,6 +14,10 @@ namespace Ainan {
 	std::vector<std::weak_ptr<VertexBuffer>> Renderer::m_ReservedVertexBuffers;
 	std::vector<std::weak_ptr<IndexBuffer>> Renderer::m_ReservedIndexBuffers;
 
+	std::vector<std::shared_ptr<VertexBuffer>> Renderer::m_QuadBatchVertexBuffers = {};
+	std::vector<std::shared_ptr<VertexArray>> Renderer::m_QuadBatchVertexArrays;
+	std::shared_ptr<IndexBuffer> Renderer::m_QuadBatchIndexBuffer = nullptr;
+
 	static unsigned int s_CurrentNumberOfDrawCalls = 0;
 
 	struct ShaderLoadInfo
@@ -34,7 +38,8 @@ namespace Ainan {
 		{ "LineShader"          , "shaders/Line.vert"          , "shaders/FlatColor.frag"      },
 		{ "BlurShader"          , "shaders/Image.vert"         , "shaders/Blur.frag"           },
 		{ "GizmoShader"         , "shaders/Gizmo.vert"         , "shaders/FlatColor.frag"      },
-		{ "ImageShader"         , "shaders/Image.vert"         , "shaders/Image.frag"          }
+		{ "ImageShader"         , "shaders/Image.vert"         , "shaders/Image.frag"          },
+		{ "QuadBatchShader"     , "shaders/QuadBatch.vert"     , "shaders/QuadBatch.frag"      }
 	};
 
 	void Renderer::Init()
@@ -47,11 +52,36 @@ namespace Ainan {
 		{
 			ShaderLibrary[shaderInfo.Name] = Renderer::CreateShaderProgram(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
 		}
+
+		//setup batch renderer
+		m_QuadBatchVertexArrays.push_back(CreateVertexArray());
+		m_QuadBatchVertexArrays[0]->Bind();
+		m_QuadBatchVertexBuffers.push_back(CreateVertexBuffer(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex)));
+		m_QuadBatchVertexBuffers[0]->Bind();
+		unsigned int* indicies = new unsigned int[c_MaxQuadsPerBatch * 6];
+		for (size_t i = 0; i < c_MaxQuadsPerBatch * 6; i+=6)
+		{
+			indicies[i + 0] = 0;
+			indicies[i + 1] = 1;
+			indicies[i + 2] = 2;
+
+			indicies[i + 3] = 0;
+			indicies[i + 4] = 2;
+			indicies[i + 5] = 3;
+		}
+		m_QuadBatchIndexBuffer = CreateIndexBuffer(indicies, c_MaxQuadsPerBatch * 6);
+		m_QuadBatchVertexArrays[0]->Unbind();
+		delete[] indicies;
 	}
 
 	void Renderer::Terminate()
 	{
 		ShaderLibrary.erase(ShaderLibrary.begin(), ShaderLibrary.end());
+
+		//batch renderer data
+		m_QuadBatchVertexBuffers.erase(m_QuadBatchVertexBuffers.begin(), m_QuadBatchVertexBuffers.end());
+		m_QuadBatchVertexArrays.erase(m_QuadBatchVertexArrays.begin(), m_QuadBatchVertexArrays.end());
+		m_QuadBatchIndexBuffer.reset();
 	}
 
 	void Renderer::BeginScene(Camera& camera)

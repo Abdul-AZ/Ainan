@@ -21,6 +21,18 @@
 
 namespace Ainan {
 
+	//used internally for batch rendering
+	struct QuadVertex 
+	{
+		glm::vec2 Position;
+		glm::vec4 Color;
+		float Texture;
+		glm::vec2 TextureCoordinates;
+	};
+
+	const int c_MaxQuadsPerBatch = 10000;
+	const int c_MaxQuadVerticesPerBatch = c_MaxQuadsPerBatch * 4;
+
 	//this class is completely api agnostic, meaning NO gl calls, NO direct3D calls etc
 	class Renderer 
 	{
@@ -77,6 +89,11 @@ namespace Ainan {
 		static glm::mat4 m_CurrentViewProjection;
 		static RendererAPI* m_CurrentActiveAPI;
 		static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary;
+		
+		//batch renderer data
+		static std::vector<std::shared_ptr<VertexBuffer>> m_QuadBatchVertexBuffers;
+		static std::vector<std::shared_ptr<VertexArray>> m_QuadBatchVertexArrays;
+		static std::shared_ptr<IndexBuffer> m_QuadBatchIndexBuffer;
 
 		//refrences to created objects
 		//mostly used for profiling
