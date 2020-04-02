@@ -32,6 +32,7 @@ namespace Ainan {
 
 	const int c_MaxQuadsPerBatch = 10000;
 	const int c_MaxQuadVerticesPerBatch = c_MaxQuadsPerBatch * 4;
+	const int c_MaxQuadTexturesPerBatch = 16;
 
 	//this class is completely api agnostic, meaning NO gl calls, NO direct3D calls etc
 	class Renderer 
@@ -47,7 +48,9 @@ namespace Ainan {
 		static void BeginScene(Camera& camera);
 		static void EndScene();
 
-		//these will be changed to SubmitRenderCommand() or something like that
+		//position is in world coordinates
+		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture = nullptr);
+		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, std::shared_ptr<Texture> texture = nullptr);
 
 		//these overloads DO NOT use an index buffer
 		static void Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode,
@@ -58,6 +61,8 @@ namespace Ainan {
 		//these overloads DO use an index buffer
 		static void Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive,
 						 const IndexBuffer& indexBuffer);
+		static void Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive,
+						 const IndexBuffer& indexBuffer, int vertexCount);
 
 		static void ClearScreen();
 
@@ -69,7 +74,7 @@ namespace Ainan {
 
 		static std::shared_ptr<VertexArray> CreateVertexArray();
 
-		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size);
+		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size, bool dynamic = false);
 
 		//data should ALWAYS an UNSIGNED INT array
 		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(unsigned int* data, const int& count);
@@ -91,15 +96,24 @@ namespace Ainan {
 		static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary;
 		
 		//batch renderer data
-		static std::vector<std::shared_ptr<VertexBuffer>> m_QuadBatchVertexBuffers;
-		static std::vector<std::shared_ptr<VertexArray>> m_QuadBatchVertexArrays;
+		static std::shared_ptr<VertexBuffer> m_QuadBatchVertexBuffer;
+		static std::shared_ptr<VertexArray> m_QuadBatchVertexArray;
 		static std::shared_ptr<IndexBuffer> m_QuadBatchIndexBuffer;
+		static QuadVertex* m_QuadBatchVertexBufferDataOrigin;
+		static QuadVertex* m_QuadBatchVertexBufferDataPtr;
+		//first one is reserved for blank white texture, so we have c_MaxQuadTexturesPerBatch - 1 textures in total
+		static std::array<std::shared_ptr<Texture>, c_MaxQuadTexturesPerBatch> m_QuadBatchTextures;
+		static int m_QuadBatchTextureSlotsUsed;
 
 		//refrences to created objects
 		//mostly used for profiling
 		static std::vector<std::weak_ptr<Texture>> m_ReservedTextures;
 		static std::vector<std::weak_ptr<VertexBuffer>> m_ReservedVertexBuffers;
 		static std::vector<std::weak_ptr<IndexBuffer>> m_ReservedIndexBuffers;
+
+
+	private:
+		static void DrawQuadBatch();
 	};
 
 }

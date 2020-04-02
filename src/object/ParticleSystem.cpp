@@ -170,30 +170,13 @@ namespace Ainan {
 			}
 		}
 
-		//how many times we need to drae (currently we draw 40 particles at a time)
-		int drawCount = (int)m_ParticleDrawCount / 40;
+		if(Customizer.m_TextureCustomizer.UseDefaultTexture)
+			Renderer::DrawQuadv(m_ParticleDrawTranslationBuffer.data(), m_ParticleDrawColorBuffer.data(),
+				m_ParticleDrawScaleBuffer.data(), m_ParticleDrawCount, DefaultTexture);
+		else
+			Renderer::DrawQuadv(m_ParticleDrawTranslationBuffer.data(), m_ParticleDrawColorBuffer.data(),
+				m_ParticleDrawScaleBuffer.data(), m_ParticleDrawCount, Customizer.m_TextureCustomizer.ParticleTexture);
 
-		//draw 40 particles
-		for (int i = 0; i < drawCount; i++)
-		{
-			Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformVec2s("u_TranslationArr", &m_ParticleDrawTranslationBuffer[i * 40], 40);
-			Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniform1fs("u_ScaleArr", &m_ParticleDrawScaleBuffer[i * 40], 40);
-
-			Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformVec4s("u_ColorArr", &m_ParticleDrawColorBuffer[i * 40], 40);
-			Renderer::DrawInstanced(*VAO, *Renderer::ShaderLibrary["ParticleSystemShader"], Primitive::TriangleFan, 26, 40);
-		}
-
-		//get the remaining particles (because we draw 40 at a time and not every number is divisble by 40)
-		int remaining = m_ParticleDrawCount % 40;
-
-		//return early if non are remaining
-		if (remaining == 0)
-			return;
-
-		//draw them
-		Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniformVec2s("u_TranslationArr", &m_ParticleDrawTranslationBuffer[drawCount * 40], 40);
-		Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniform1fs("u_ScaleArr", &m_ParticleDrawScaleBuffer[drawCount * 40], 40);
-		Renderer::DrawInstanced(*VAO, *Renderer::ShaderLibrary["ParticleSystemShader"], Primitive::TriangleFan, 26, remaining);
 	}
 
 	void ParticleSystem::SpawnParticle(const Particle& particle)

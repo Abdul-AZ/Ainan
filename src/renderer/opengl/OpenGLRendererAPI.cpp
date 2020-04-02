@@ -32,6 +32,11 @@ namespace Ainan {
 			glDrawElements(GetOpenGLPrimitive(primitive), indexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
 		}
 
+		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
+		{
+			glDrawElements(GetOpenGLPrimitive(primitive), vertexCount, GL_UNSIGNED_INT, nullptr);
+		}
+
 		void OpenGLRendererAPI::ClearScreen()
 		{
 			glClear(GL_COLOR_BUFFER_BIT);

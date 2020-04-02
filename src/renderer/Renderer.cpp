@@ -10,15 +10,20 @@ namespace Ainan {
 	unsigned int Renderer::NumberOfDrawCallsLastScene = 0;
 	std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> Renderer::ShaderLibrary;
 
+	//profiler data
 	std::vector<std::weak_ptr<Texture>> Renderer::m_ReservedTextures;
 	std::vector<std::weak_ptr<VertexBuffer>> Renderer::m_ReservedVertexBuffers;
 	std::vector<std::weak_ptr<IndexBuffer>> Renderer::m_ReservedIndexBuffers;
-
-	std::vector<std::shared_ptr<VertexBuffer>> Renderer::m_QuadBatchVertexBuffers = {};
-	std::vector<std::shared_ptr<VertexArray>> Renderer::m_QuadBatchVertexArrays;
-	std::shared_ptr<IndexBuffer> Renderer::m_QuadBatchIndexBuffer = nullptr;
-
 	static unsigned int s_CurrentNumberOfDrawCalls = 0;
+
+	//batch renderer data
+	std::shared_ptr<VertexBuffer> Renderer::m_QuadBatchVertexBuffer = nullptr;
+	std::shared_ptr<VertexArray> Renderer::m_QuadBatchVertexArray = nullptr;
+	std::shared_ptr<IndexBuffer> Renderer::m_QuadBatchIndexBuffer = nullptr;
+	QuadVertex* Renderer::m_QuadBatchVertexBufferDataOrigin = nullptr;
+	QuadVertex* Renderer::m_QuadBatchVertexBufferDataPtr = nullptr;
+	std::array<std::shared_ptr<Texture>, c_MaxQuadTexturesPerBatch> Renderer::m_QuadBatchTextures;
+	int Renderer::m_QuadBatchTextureSlotsUsed = 1;
 
 	struct ShaderLoadInfo
 	{
@@ -54,24 +59,54 @@ namespace Ainan {
 		}
 
 		//setup batch renderer
-		m_QuadBatchVertexArrays.push_back(CreateVertexArray());
-		m_QuadBatchVertexArrays[0]->Bind();
-		m_QuadBatchVertexBuffers.push_back(CreateVertexBuffer(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex)));
-		m_QuadBatchVertexBuffers[0]->Bind();
+		m_QuadBatchVertexArray = CreateVertexArray();
+		m_QuadBatchVertexArray->Bind();
+
+		m_QuadBatchVertexBuffer = CreateVertexBuffer(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), true);
+		m_QuadBatchVertexBuffer->Bind();
+		m_QuadBatchVertexBuffer->SetLayout(
+			{
+				ShaderVariableType::Vec2,  //Position
+				ShaderVariableType::Vec4,  //Color;
+				ShaderVariableType::Float, //Texture;
+				ShaderVariableType::Vec2   //Texture Coordinates;
+			}
+		);
+
 		unsigned int* indicies = new unsigned int[c_MaxQuadsPerBatch * 6];
+		int u = 0;
 		for (size_t i = 0; i < c_MaxQuadsPerBatch * 6; i+=6)
 		{
-			indicies[i + 0] = 0;
-			indicies[i + 1] = 1;
-			indicies[i + 2] = 2;
+			indicies[i + 0] = 0 + u;
+			indicies[i + 1] = 1 + u;
+			indicies[i + 2] = 2 + u;
 
-			indicies[i + 3] = 0;
-			indicies[i + 4] = 2;
-			indicies[i + 5] = 3;
+			indicies[i + 3] = 0 + u;
+			indicies[i + 4] = 2 + u;
+			indicies[i + 5] = 3 + u;
+			u += 4;
 		}
 		m_QuadBatchIndexBuffer = CreateIndexBuffer(indicies, c_MaxQuadsPerBatch * 6);
-		m_QuadBatchVertexArrays[0]->Unbind();
+		m_QuadBatchVertexArray->Unbind();
 		delete[] indicies;
+
+		m_QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
+		m_QuadBatchVertexBufferDataPtr = m_QuadBatchVertexBufferDataOrigin;
+
+		m_QuadBatchTextures[0] = CreateTexture();
+		m_QuadBatchTextures[0]->SetDefaultTextureSettings();
+		Image img;
+		img.m_Width = 1;
+		img.m_Height = 1;
+		img.m_Comp = 4;
+		img.m_Data = new unsigned char[4];
+		memset(img.m_Data, (unsigned char)255, 4);
+		m_QuadBatchTextures[0]->SetImage(img);
+
+		for (size_t i = 0; i < c_MaxQuadTexturesPerBatch; i++) {
+			std::string name = "u_Textures[" + std::to_string(i) + "]";
+			ShaderLibrary["QuadBatchShader"]->SetUniform1i(name.c_str(), i);
+		}
 	}
 
 	void Renderer::Terminate()
@@ -79,9 +114,11 @@ namespace Ainan {
 		ShaderLibrary.erase(ShaderLibrary.begin(), ShaderLibrary.end());
 
 		//batch renderer data
-		m_QuadBatchVertexBuffers.erase(m_QuadBatchVertexBuffers.begin(), m_QuadBatchVertexBuffers.end());
-		m_QuadBatchVertexArrays.erase(m_QuadBatchVertexArrays.begin(), m_QuadBatchVertexArrays.end());
+		m_QuadBatchVertexBuffer.reset();
+		m_QuadBatchVertexArray.reset();
 		m_QuadBatchIndexBuffer.reset();
+		delete[] m_QuadBatchVertexBufferDataOrigin;
+		m_QuadBatchTextures[0].reset();
 	}
 
 	void Renderer::BeginScene(Camera& camera)
@@ -143,8 +180,127 @@ namespace Ainan {
 
 	void Renderer::EndScene()
 	{
+		DrawQuadBatch();
+
 		m_CurrentSceneCamera = nullptr;
 		NumberOfDrawCallsLastScene = s_CurrentNumberOfDrawCalls;
+	}
+
+	void Ainan::Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture)
+	{
+		if (m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin > c_MaxQuadVerticesPerBatch - 4 ||
+			m_QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
+			DrawQuadBatch();
+
+		float textureSlot;
+		if (texture == nullptr)
+			textureSlot = 0.0f;
+		else
+		{
+			bool foundTexture = false;
+			//check if texture is already used
+			for (size_t i = 0; i < m_QuadBatchTextureSlotsUsed; i++)
+			{
+				if (m_QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
+				{
+					foundTexture = true;
+					textureSlot = i;
+					break;
+				}
+			}
+			
+			if (!foundTexture)
+			{
+				m_QuadBatchTextures[m_QuadBatchTextureSlotsUsed] = texture;
+				textureSlot = m_QuadBatchTextureSlotsUsed;
+				m_QuadBatchTextureSlotsUsed++;
+			}
+		}
+
+		m_QuadBatchVertexBufferDataPtr->Position = position;
+		m_QuadBatchVertexBufferDataPtr->Color = color;
+		m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
+		m_QuadBatchVertexBufferDataPtr++;
+
+		m_QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(0.0f, 1.0f) * scale;
+		m_QuadBatchVertexBufferDataPtr->Color = color;
+		m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
+		m_QuadBatchVertexBufferDataPtr++;
+
+		m_QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 1.0f) * scale;
+		m_QuadBatchVertexBufferDataPtr->Color = color;
+		m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
+		m_QuadBatchVertexBufferDataPtr++;
+
+		m_QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 0.0f) * scale;
+		m_QuadBatchVertexBufferDataPtr->Color = color;
+		m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
+		m_QuadBatchVertexBufferDataPtr++;
+	}
+
+	void Renderer::DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, std::shared_ptr<Texture> texture)
+	{
+		assert(count < c_MaxQuadsPerBatch);
+
+		if (m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin > count ||
+			m_QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
+			DrawQuadBatch();
+
+		float textureSlot;
+		if (texture == nullptr)
+			textureSlot = 0.0f;
+		else
+		{
+			bool foundTexture = false;
+			//check if texture is already used
+			for (size_t i = 0; i < m_QuadBatchTextureSlotsUsed; i++)
+			{
+				if (m_QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
+				{
+					foundTexture = true;
+					textureSlot = i;
+					break;
+				}
+			}
+
+			if (!foundTexture)
+			{
+				m_QuadBatchTextures[m_QuadBatchTextureSlotsUsed] = texture;
+				textureSlot = m_QuadBatchTextureSlotsUsed;
+				m_QuadBatchTextureSlotsUsed++;
+			}
+		}
+
+		for (size_t i = 0; i < count; i++)
+		{
+			m_QuadBatchVertexBufferDataPtr->Position = position[i];
+			m_QuadBatchVertexBufferDataPtr->Color = color[i];
+			m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
+			m_QuadBatchVertexBufferDataPtr++;
+
+			m_QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(0.0f, 1.0f) * scale[i];
+			m_QuadBatchVertexBufferDataPtr->Color = color[i];
+			m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
+			m_QuadBatchVertexBufferDataPtr++;
+
+			m_QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 1.0f) * scale[i];
+			m_QuadBatchVertexBufferDataPtr->Color = color[i];
+			m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
+			m_QuadBatchVertexBufferDataPtr++;
+
+			m_QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 0.0f) * scale[i];
+			m_QuadBatchVertexBufferDataPtr->Color = color[i];
+			m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
+			m_QuadBatchVertexBufferDataPtr++;
+		}
 	}
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
@@ -155,6 +311,21 @@ namespace Ainan {
 		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
 
 		m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer);
+
+		vertexArray.Unbind();
+		shader.Unbind();
+
+		s_CurrentNumberOfDrawCalls++;
+	}
+
+	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
+	{
+		vertexArray.Bind();
+		shader.Bind();
+
+		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
+
+		m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer, vertexCount);
 
 		vertexArray.Unbind();
 		shader.Unbind();
@@ -216,14 +387,14 @@ namespace Ainan {
 		}
 	}
 
-	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, unsigned int size)
+	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, unsigned int size, bool dynamic)
 	{
 		std::shared_ptr<VertexBuffer> buffer;
 
 		switch (m_CurrentActiveAPI->GetType())
 		{
 		case RendererType::OpenGL:
-			buffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(data, size);
+			buffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(data, size, dynamic);
 			break;
 
 		default:
@@ -310,5 +481,24 @@ namespace Ainan {
 		m_ReservedTextures.push_back(texture);
 
 		return texture;
+	}
+
+	void Ainan::Renderer::DrawQuadBatch()
+	{
+		for (size_t i = 0; i < m_QuadBatchTextureSlotsUsed; i++)
+			m_QuadBatchTextures[i]->Bind(i);
+
+		int numVertices = (m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin);
+
+		m_QuadBatchVertexBuffer->UpdateData(0,
+			numVertices * sizeof(QuadVertex),
+			m_QuadBatchVertexBufferDataOrigin);
+
+		Renderer::Draw(*m_QuadBatchVertexArray,
+			*ShaderLibrary["QuadBatchShader"], Primitive::Triangles, *m_QuadBatchIndexBuffer, (numVertices * 3) / 2);
+
+		//reset data so we can accept the next batch
+		m_QuadBatchVertexBufferDataPtr = m_QuadBatchVertexBufferDataOrigin;
+		m_QuadBatchTextureSlotsUsed = 1;
 	}
 }
