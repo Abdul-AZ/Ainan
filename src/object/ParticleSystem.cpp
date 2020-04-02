@@ -2,10 +2,6 @@
 #include "ParticleSystem.h"
 
 namespace Ainan {
-	static bool InitilizedCircleVertices = false;
-	static std::shared_ptr<VertexArray> VAO = nullptr;
-	static std::shared_ptr<VertexBuffer> VBO = nullptr;
-
 	static std::shared_ptr<Texture> DefaultTexture;
 
 	ParticleSystem::ParticleSystem()
@@ -16,44 +12,19 @@ namespace Ainan {
 
 		m_Noise.Init();
 
-		//TODO make this customizable or something, for now it's a default value of 1000
-		m_ParticleCount = 1000;
+		//maximum of 2000 particles allowed for now
+		m_ParticleCount = 2000;
 
 		m_ParticleDrawTranslationBuffer.resize(m_ParticleCount);
 		m_ParticleDrawScaleBuffer.resize(m_ParticleCount);
 		m_ParticleDrawColorBuffer.resize(m_ParticleCount);
 		m_Particles.resize(m_ParticleCount);
 
-
-		//initilize the vertices only the first time a particle system is created
-		if (!InitilizedCircleVertices) {
-
-			VAO = Renderer::CreateVertexArray();
-			VAO->Bind();
-
-			//						 Position				  Texture Coordinates
-			glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0),
-									 glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 1.0),
-									 glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
-
-									 glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
-									 glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
-									 glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0) };
-
-
-			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices));
-
-			//				 Position					Texture Coordinates
-			VBO->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
-
-			VBO->Unbind();
-			VAO->Unbind();
-
+		//initilize the default shader
+		if (DefaultTexture == nullptr) {
 			DefaultTexture = Renderer::CreateTexture();
 			DefaultTexture->SetImage(Image::LoadFromFile("res/Circle.png"));
 			DefaultTexture->Bind();
-
-			InitilizedCircleVertices = true;
 		}
 	}
 
@@ -117,26 +88,6 @@ namespace Ainan {
 
 	void ParticleSystem::Draw()
 	{
-		//bind vertex array and shader
-		VAO->Bind();
-		Renderer::ShaderLibrary["ParticleSystemShader"]->Bind();
-
-		//set texture uniform (Sampler2D) to 0
-		Renderer::ShaderLibrary["ParticleSystemShader"]->SetUniform1i("u_Texture", 0);
-
-		//if we are using the default texture
-		if (Customizer.m_TextureCustomizer.UseDefaultTexture) {
-			//bind the default texture to slot 0
-			DefaultTexture->Bind(0);
-			DefaultTexture->SetDefaultTextureSettings();
-		}
-		else
-			//if we are using a custom texture, bind it to slot 0
-			if (Customizer.m_TextureCustomizer.ParticleTexture) {
-				Customizer.m_TextureCustomizer.ParticleTexture->Bind(0);
-				Customizer.m_TextureCustomizer.ParticleTexture->SetDefaultTextureSettings();
-			}
-
 		//reset the amount of particles to be drawn every frame
 		m_ParticleDrawCount = 0;
 
@@ -149,9 +100,6 @@ namespace Ainan {
 				//1 meaning it's lifetime is over and it is going to die (get deactivated and not rendered).
 				//0 meaning it's just been spawned (activated).
 				float t = (m_Particles[i].m_LifeTime - m_Particles[i].m_RemainingLifeTime) / m_Particles[i].m_LifeTime;
-
-				//create a new model matrix for each particle
-				glm::mat4 model = glm::mat4(1.0f);
 
 				//use the t value to get the scale of the particle using it's not using a Custom Curve
 				float scale;

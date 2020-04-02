@@ -36,7 +36,6 @@ namespace Ainan {
 	std::vector<ShaderLoadInfo> CompileOnInit =
 	{
 		//name                  //vertex shader                //fragment shader
-		{ "ParticleSystemShader", "shaders/ParticleSystem.vert", "shaders/ParticleSystem.frag" },
 		{ "BackgroundShader"    , "shaders/Background.vert"    , "shaders/Background.frag"     },
 		{ "SpriteShader"        , "shaders/Sprite.vert"        , "shaders/Sprite.frag"         },
 		{ "CircleOutlineShader" , "shaders/CircleOutline.vert" , "shaders/FlatColor.frag"      },
@@ -180,7 +179,8 @@ namespace Ainan {
 
 	void Renderer::EndScene()
 	{
-		DrawQuadBatch();
+		if(m_QuadBatchVertexBufferDataPtr != m_QuadBatchVertexBufferDataOrigin)
+			DrawQuadBatch();
 
 		m_CurrentSceneCamera = nullptr;
 		NumberOfDrawCallsLastScene = s_CurrentNumberOfDrawCalls;
@@ -246,7 +246,7 @@ namespace Ainan {
 	{
 		assert(count < c_MaxQuadsPerBatch);
 
-		if (m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin > count ||
+		if ((m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > count * 4 ||
 			m_QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
 			DrawQuadBatch();
 
