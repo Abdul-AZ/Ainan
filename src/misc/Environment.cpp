@@ -176,6 +176,7 @@ namespace Ainan {
 			m_ExportCamera.DrawOutline();
 			m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
 			m_RenderSurface.SurfaceFrameBuffer->Unbind();
+			Renderer::EndScene();
 			return;
 		}
 

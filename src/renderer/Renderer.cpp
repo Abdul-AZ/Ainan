@@ -37,7 +37,6 @@ namespace Ainan {
 	{
 		//name                  //vertex shader                //fragment shader
 		{ "BackgroundShader"    , "shaders/Background.vert"    , "shaders/Background.frag"     },
-		{ "SpriteShader"        , "shaders/Sprite.vert"        , "shaders/Sprite.frag"         },
 		{ "CircleOutlineShader" , "shaders/CircleOutline.vert" , "shaders/FlatColor.frag"      },
 		{ "LineShader"          , "shaders/Line.vert"          , "shaders/FlatColor.frag"      },
 		{ "BlurShader"          , "shaders/Image.vert"         , "shaders/Blur.frag"           },
@@ -188,7 +187,7 @@ namespace Ainan {
 
 	void Ainan::Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture)
 	{
-		if (m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin > c_MaxQuadVerticesPerBatch - 4 ||
+		if ((m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
 			m_QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
 			DrawQuadBatch();
 
@@ -236,6 +235,71 @@ namespace Ainan {
 		m_QuadBatchVertexBufferDataPtr++;
 
 		m_QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 0.0f) * scale;
+		m_QuadBatchVertexBufferDataPtr->Color = color;
+		m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
+		m_QuadBatchVertexBufferDataPtr++;
+	}
+
+	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, std::shared_ptr<Texture> texture)
+	{
+		if ((m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
+			m_QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
+			DrawQuadBatch();
+
+		float textureSlot;
+		if (texture == nullptr)
+			textureSlot = 0.0f;
+		else
+		{
+			bool foundTexture = false;
+			//check if texture is already used
+			for (size_t i = 0; i < m_QuadBatchTextureSlotsUsed; i++)
+			{
+				if (m_QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
+				{
+					foundTexture = true;
+					textureSlot = i;
+					break;
+				}
+			}
+
+			if (!foundTexture)
+			{
+				m_QuadBatchTextures[m_QuadBatchTextureSlotsUsed] = texture;
+				textureSlot = m_QuadBatchTextureSlotsUsed;
+				m_QuadBatchTextureSlotsUsed++;
+			}
+		}
+
+		float distance = 0.5f * scale;
+		float sine = std::sin(rotationInRadians);
+		float cosine = std::cos(rotationInRadians);
+
+		glm::vec2 relPosV0 = glm::vec2((-distance) * cosine - (-distance) * sine, (-distance) * sine + (-distance) * cosine);
+		glm::vec2 relPosV1 = glm::vec2((-distance) * cosine - (+distance) * sine, (-distance) * sine + (+distance) * cosine);
+		glm::vec2 relPosV2 = glm::vec2((+distance) * cosine - (+distance) * sine, (+distance) * sine + (+distance) * cosine);
+		glm::vec2 relPosV3 = glm::vec2((+distance) * cosine - (-distance) * sine, (+distance) * sine + (-distance) * cosine);
+
+		m_QuadBatchVertexBufferDataPtr->Position = position + relPosV0;
+		m_QuadBatchVertexBufferDataPtr->Color = color;
+		m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
+		m_QuadBatchVertexBufferDataPtr++;
+
+		m_QuadBatchVertexBufferDataPtr->Position = position + relPosV1;
+		m_QuadBatchVertexBufferDataPtr->Color = color;
+		m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
+		m_QuadBatchVertexBufferDataPtr++;
+
+		m_QuadBatchVertexBufferDataPtr->Position = position + relPosV2;
+		m_QuadBatchVertexBufferDataPtr->Color = color;
+		m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
+		m_QuadBatchVertexBufferDataPtr++;
+
+		m_QuadBatchVertexBufferDataPtr->Position = position + relPosV3;
 		m_QuadBatchVertexBufferDataPtr->Color = color;
 		m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 		m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };

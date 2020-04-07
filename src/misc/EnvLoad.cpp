@@ -222,7 +222,7 @@ namespace Ainan {
 		//populate with data
 		sprite->m_Name = data[id + "Name"].get<std::string>();
 		sprite->Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
-		sprite->Scale = JSON_ARRAY_TO_VEC2(data[id + "Scale"].get<std::vector<float>>());
+		sprite->Scale = data[id + "Scale"].get<float>();
 		sprite->Rotation = data[id + "Rotation"].get<float>();
 		sprite->Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
 		sprite->m_TexturePath = data[id + "TexturePath"].get<std::string>();
