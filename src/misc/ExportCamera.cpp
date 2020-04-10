@@ -202,6 +202,10 @@ namespace Ainan {
 		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
 		SceneDescription desc;
 		desc.SceneCamera = RealCamera;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		desc.Blur = blurRadius != -1.0f;
+		desc.BlurRadius = blurRadius;
 		Renderer::BeginScene(desc);
 
 		m_RenderSurface.SetSize(m_ExportCameraSize * c_GlobalScaleFactor);
@@ -225,9 +229,6 @@ namespace Ainan {
 
 		for (pEnvironmentObject& obj : objects)
 			obj->Draw();
-
-		//if (blurRadius > 0.0f)
-			//GaussianBlur(m_RenderSurface, blurRadius);
 
 		Renderer::EndScene();
 
