@@ -200,7 +200,13 @@ namespace Ainan {
 	void ExportCamera::ExportFrame(Background& background, std::vector<pEnvironmentObject>& objects, float blurRadius)
 	{
 		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
-		Renderer::BeginScene(RealCamera);
+		SceneDescription desc;
+		desc.SceneCamera = RealCamera;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		desc.Blur = blurRadius != -1.0f;
+		desc.BlurRadius = blurRadius;
+		Renderer::BeginScene(desc);
 
 		m_RenderSurface.SetSize(m_ExportCameraSize * c_GlobalScaleFactor);
 		m_RenderSurface.SurfaceFrameBuffer->Bind();
@@ -223,9 +229,6 @@ namespace Ainan {
 
 		for (pEnvironmentObject& obj : objects)
 			obj->Draw();
-
-		if (blurRadius > 0.0f)
-			GaussianBlur(m_RenderSurface, blurRadius);
 
 		Renderer::EndScene();
 

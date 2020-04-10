@@ -20,14 +20,12 @@ namespace Ainan {
 
 	public:
 		glm::vec2 Position = glm::vec2(0.0f, 0.0f);
-		glm::vec2 Scale = glm::vec2(0.1f, 0.1f);
+		float Scale = 1.0f;
 		float Rotation = 0.0f; //in degrees
 		glm::vec4 Tint = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		std::string m_TexturePath;
 	private:
-		std::shared_ptr<VertexBuffer> m_VertexBuffer;
-		std::shared_ptr<VertexArray> m_VertexArray;
 		std::shared_ptr<Texture> m_Texture;
 	};
 }

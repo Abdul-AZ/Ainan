@@ -18,7 +18,6 @@
 #include "ImGuiWrapper.h"
 
 #include "misc/RenderSurface.h"
-#include "misc/GaussianBlur.h"
 #include "misc/CircleOutline.h"
 #include "misc/Background.h"
 #include "misc/Grid.h"

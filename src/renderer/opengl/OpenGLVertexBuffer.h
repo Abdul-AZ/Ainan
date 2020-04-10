@@ -7,7 +7,7 @@ namespace Ainan
 		{
 		public:
 			//size is in bytes
-			OpenGLVertexBuffer(void* data, unsigned int size);
+			OpenGLVertexBuffer(void* data, unsigned int size, bool dynamic);
 			~OpenGLVertexBuffer();
 
 			// Inherited via VertexBuffer

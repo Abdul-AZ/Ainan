@@ -21,9 +21,12 @@ namespace Ainan {
 
 		private:
 			unsigned int m_RendererID;
+			glm::vec2 m_Size = { 0.0f, 0.0f };
+
+			virtual void SetActiveTexture(const Texture& texture) override;
 
 			// Inherited via FrameBuffer
-			virtual void SetActiveTexture(const Texture& texture) override;
+			virtual glm::vec2 GetSize() const override { return m_Size; }
 		};
 	}
 }

@@ -16,6 +16,7 @@ namespace Ainan {
 			case ShaderVariableType::UnsignedInt:
 				return GL_UNSIGNED_INT;
 
+			case ShaderVariableType::Float:
 			case ShaderVariableType::Vec2:
 			case ShaderVariableType::Vec3:
 			case ShaderVariableType::Vec4:
@@ -28,11 +29,14 @@ namespace Ainan {
 			}
 		}
 
-		OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, unsigned int size)
+		OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, unsigned int size, bool dynamic)
 		{
 			glGenBuffers(1, &m_RendererID);
 			Bind();
-			glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
+			if(dynamic)
+				glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
+			else
+				glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 		}
 
 		OpenGLVertexBuffer::~OpenGLVertexBuffer()

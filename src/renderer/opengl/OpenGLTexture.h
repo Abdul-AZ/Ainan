@@ -20,9 +20,13 @@ namespace Ainan {
 			virtual unsigned int GetRendererID() const override { return m_RendererID; }
 		private:
 			unsigned int m_RendererID;
+			glm::vec2 m_Size = { 0.0f, 0.0f };
 
 			// Inherited via Texture
 			virtual void SetDefaultTextureSettings() override;
+
+			// Inherited via Texture
+			virtual glm::vec2 GetSize() const override { return m_Size; }
 		};
 	}
 }

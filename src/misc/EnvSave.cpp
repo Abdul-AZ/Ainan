@@ -190,7 +190,7 @@ namespace Ainan {
 		j[id + "Type"] = EnvironmentObjectTypeToString(SpriteType);
 		j[id + "Name"] = sprite.m_Name;
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(sprite.Position);
-		j[id + "Scale"] = VEC2_TO_JSON_ARRAY(sprite.Scale);
+		j[id + "Scale"] = sprite.Scale;
 		j[id + "Rotation"] = sprite.Rotation;
 		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.Tint);
 		j[id + "TexturePath"] = sprite.m_TexturePath;

@@ -10,24 +10,6 @@ namespace Ainan {
 		m_Name = "Sprite";
 		EditorOpen = false;
 
-		m_VertexArray = Renderer::CreateVertexArray();
-		m_VertexArray->Bind();
-
-		glm::vec2 vertices[] = {
-								//Positions				//Texture Coordinates
-								glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0),
-								glm::vec2(-1.0f,  1.0f), glm::vec2(0.0, 1.0),
-								glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
-
-								glm::vec2( 1.0f,  1.0f), glm::vec2(1.0, 1.0),
-								glm::vec2( 1.0f, -1.0f), glm::vec2(1.0, 0.0),
-								glm::vec2(-1.0f, -1.0f), glm::vec2(0.0, 0.0)
-		};
-		
-		m_VertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(vertices));
-		m_VertexBuffer->Bind();
-		m_VertexBuffer->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
-
 		m_Texture = Renderer::CreateTexture();
 
 		Image img = Image::LoadFromFile("res/CheckerBoard.png");
@@ -35,7 +17,6 @@ namespace Ainan {
 		Image::GrayScaleToRGB(img);
 
 		m_Texture->SetImage(img);
-
 	}
 
 	void Sprite::Update(const float deltaTime)
@@ -44,21 +25,7 @@ namespace Ainan {
 
 	void Sprite::Draw()
 	{
-		glm::mat4 u_Model(1.0f);
-		u_Model = glm::translate(u_Model, glm::vec3(Position.x, Position.y, 0.0f) * c_GlobalScaleFactor);
-		u_Model = glm::rotate(u_Model, glm::radians(Rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-		u_Model = glm::scale(u_Model, glm::vec3(Scale.x, Scale.y, 1.0f) * c_GlobalScaleFactor);
-
-		auto& shader = Renderer::ShaderLibrary["SpriteShader"];
-
-		shader->SetUniformMat4("u_Model", u_Model);
-		shader->SetUniform1i("u_SpriteTexture", 0);
-		shader->SetUniformVec4("u_Tint", Tint);
-		m_Texture->Bind(0);
-
-		Renderer::Draw(*m_VertexArray, *shader, Primitive::Triangles, 6);
-
-		m_Texture->Unbind();
+		Renderer::DrawQuad(Position * c_GlobalScaleFactor, Tint, Scale * c_GlobalScaleFactor, -Rotation * PI / 180.0f, m_Texture);
 	}
 
 	void Sprite::DisplayGUI()
@@ -110,7 +77,7 @@ namespace Ainan {
 
 		ImGui::Text("Scale: ");
 		ImGui::SameLine();
-		ImGui::DragFloat2("##Scale: ", &Scale.x, 0.01f);
+		ImGui::DragFloat("##Scale: ", &Scale, 0.01f);
 
 		ImGui::Text("Rotate: ");
 		ImGui::SameLine();

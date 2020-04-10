@@ -30,6 +30,7 @@ namespace Ainan {
 				assert(false);
 
 			glGenerateMipmap(GL_TEXTURE_2D);
+			m_Size = { image.m_Width, image.m_Height };
 		}
 
 		void OpenGLTexture::Bind(const int& slot) const
@@ -65,6 +66,8 @@ namespace Ainan {
 			}
 			else
 				assert(false);
+
+			m_Size = size;
 		}
 	}
 }

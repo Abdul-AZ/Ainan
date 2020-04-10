@@ -25,7 +25,6 @@ int main()
 			env->StartFrame();
 
 			Window::HandleWindowEvents();
-			Renderer::ClearScreen();
 
 			env->Update();
 			env->HandleInput();
@@ -46,7 +45,6 @@ int main()
 		else
 		{
 			Window::HandleWindowEvents();
-			Renderer::ClearScreen();
 
 			startMenu.Update(env);
 

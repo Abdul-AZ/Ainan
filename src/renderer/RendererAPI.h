@@ -28,6 +28,8 @@ namespace Ainan {
 								   const unsigned int& vertexCount, const unsigned int& objectCount) = 0;
 		virtual void Draw(ShaderProgram& shader, const Primitive& mode,
 						  const IndexBuffer& indexBuffer) = 0;
+		virtual void Draw(ShaderProgram& shader, const Primitive& mode,
+						  const IndexBuffer& indexBuffer, int vertexCount) = 0;
 
 		virtual void ClearScreen() = 0;
 
