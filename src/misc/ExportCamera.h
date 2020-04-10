@@ -7,7 +7,6 @@
 
 #include "object/ParticleSystem.h"
 #include "Background.h"
-#include "GaussianBlur.h"
 #include "EnvironmentObjectInterface.h"
 
 namespace Ainan {

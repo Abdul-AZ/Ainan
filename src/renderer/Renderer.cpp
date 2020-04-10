@@ -26,6 +26,12 @@ namespace Ainan {
 	std::array<std::shared_ptr<Texture>, c_MaxQuadTexturesPerBatch> Renderer::m_QuadBatchTextures;
 	int Renderer::m_QuadBatchTextureSlotsUsed = 1;
 
+	//postprocessing data
+	std::shared_ptr<Texture>      Renderer::m_BlurTexture = nullptr;
+	std::shared_ptr<FrameBuffer>  Renderer::m_BlurFrameBuffer = nullptr;
+	std::shared_ptr<VertexArray>  Renderer::m_BlurVertexArray = nullptr;
+	std::shared_ptr<VertexBuffer> Renderer::m_BlurVertexBuffer = nullptr;
+
 	struct ShaderLoadInfo
 	{
 		std::string Name;
@@ -106,6 +112,27 @@ namespace Ainan {
 			std::string name = "u_Textures[" + std::to_string(i) + "]";
 			ShaderLibrary["QuadBatchShader"]->SetUniform1i(name.c_str(), i);
 		}
+
+		//setup postprocessing
+		m_BlurTexture = CreateTexture();
+		m_BlurFrameBuffer = CreateFrameBuffer();
+		m_BlurVertexArray = CreateVertexArray();
+		m_BlurVertexArray->Bind();
+
+		float quadVertices[] = {
+			// positions   // texCoords
+			-1.0f,  1.0f,  0.0f, 1.0f,
+			-1.0f, -1.0f,  0.0f, 0.0f,
+			 1.0f, -1.0f,  1.0f, 0.0f,
+
+			-1.0f,  1.0f,  0.0f, 1.0f,
+			 1.0f, -1.0f,  1.0f, 0.0f,
+			 1.0f,  1.0f,  1.0f, 1.0f
+		};
+
+		m_BlurVertexBuffer = CreateVertexBuffer(quadVertices, sizeof(quadVertices));
+		m_BlurVertexBuffer->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
+		m_BlurVertexArray->Unbind();
 	}
 
 	void Renderer::Terminate()
@@ -130,7 +157,6 @@ namespace Ainan {
 
 		m_CurrentSceneDescription.SceneDrawTarget->Bind();
 		ClearScreen();
-		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
 
 
 		//update diagnostics stuff
@@ -156,7 +182,6 @@ namespace Ainan {
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
 	{
-		m_CurrentSceneDescription.SceneDrawTarget->Bind();
 		vertexArray.Bind();
 		shader.Bind();
 		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
@@ -165,7 +190,6 @@ namespace Ainan {
 
 		vertexArray.Unbind();
 		shader.Unbind();
-		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
 	}
@@ -174,6 +198,11 @@ namespace Ainan {
 	{
 		if(m_QuadBatchVertexBufferDataPtr != m_QuadBatchVertexBufferDataOrigin)
 			FlushQuadBatch();
+
+		if (m_CurrentSceneDescription.Blur)
+			Blur(m_CurrentSceneDescription.SceneDrawTarget, m_CurrentSceneDescription.SceneDrawTargetTexture, m_CurrentSceneDescription.BlurRadius);
+
+		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
 
 		memset(&m_CurrentSceneDescription, 0, sizeof(SceneDescription));
 		NumberOfDrawCallsLastScene = s_CurrentNumberOfDrawCalls;
@@ -363,7 +392,6 @@ namespace Ainan {
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
 	{
-		m_CurrentSceneDescription.SceneDrawTarget->Bind();
 		vertexArray.Bind();
 		shader.Bind();
 
@@ -373,14 +401,12 @@ namespace Ainan {
 
 		vertexArray.Unbind();
 		shader.Unbind();
-		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
 	}
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
 	{
-		m_CurrentSceneDescription.SceneDrawTarget->Bind();
 		vertexArray.Bind();
 		shader.Bind();
 
@@ -392,12 +418,60 @@ namespace Ainan {
 		shader.Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
-		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
 	}
 
 	void Renderer::ClearScreen()
 	{
 		m_CurrentActiveAPI->ClearScreen();
+	}
+
+	void Renderer::Blur(std::shared_ptr<FrameBuffer>& target, std::shared_ptr<Texture>& targetTexture,  float radius)
+	{
+		Rectangle lastViewport = Renderer::GetCurrentViewport();
+
+		Rectangle viewport;
+		viewport.X = 0;
+		viewport.Y = 0;
+		viewport.Width = (int)target->GetSize().x;
+		viewport.Height = (int)target->GetSize().y;
+
+		Renderer::SetViewport(viewport);
+		auto& shader = Renderer::ShaderLibrary["BlurShader"];
+
+		shader->SetUniformVec2("u_Resolution", target->GetSize());
+		shader->SetUniform1f("u_Radius", radius);
+		shader->SetUniform1i("u_BlurTarget", 0);
+
+		//Horizontal blur
+
+		//tempSurface.SetSize(surface.GetSize());
+		m_BlurTexture->SetImage(target->GetSize());
+		m_BlurTexture->SetDefaultTextureSettings();
+		m_BlurFrameBuffer->Bind();
+		m_BlurFrameBuffer->SetActiveTexture(*m_BlurTexture);
+
+		//tempSurface.SurfaceFrameBuffer->Bind();
+		m_BlurFrameBuffer->Bind();
+
+		//this specifies that we are doing horizontal blur
+		shader->SetUniformVec2("u_BlurDirection", glm::vec2(1.0f, 0.0f));
+
+		//do the horizontal blur to the surface we revieved and put the result in tempSurface
+		targetTexture->Bind();
+		Draw(*m_BlurVertexArray, *shader, Primitive::Triangles, 6);
+
+		//this specifies that we are doing vertical blur
+		shader->SetUniformVec2("u_BlurDirection", glm::vec2(0.0f, 1.0f));
+
+		//clear the buffer we recieved
+		target->Bind();
+		Renderer::ClearScreen();
+
+		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
+		m_BlurTexture->Bind();
+		Draw(*m_BlurVertexArray, *shader, Primitive::Triangles, 6);
+
+		Renderer::SetViewport(lastViewport);
 	}
 
 	void Renderer::SetViewport(const Rectangle& viewport)
@@ -556,15 +630,11 @@ namespace Ainan {
 			numVertices * sizeof(QuadVertex),
 			m_QuadBatchVertexBufferDataOrigin);
 
-		m_CurrentSceneDescription.SceneDrawTarget->Bind();
-
 		Renderer::Draw(*m_QuadBatchVertexArray,
 			*ShaderLibrary["QuadBatchShader"],
 			Primitive::Triangles,
 			*m_QuadBatchIndexBuffer,
 			(numVertices * 3) / 2);
-
-		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
 
 		//reset data so we can accept the next batch
 		m_QuadBatchVertexBufferDataPtr = m_QuadBatchVertexBufferDataOrigin;

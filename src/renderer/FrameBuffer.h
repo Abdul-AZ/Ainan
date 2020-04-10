@@ -13,6 +13,7 @@ namespace Ainan {
 		virtual void Blit(FrameBuffer* otherBuffer, const glm::vec2& sourceSize, const glm::vec2& targetSize) = 0;
 
 		virtual void SetActiveTexture(const Texture& texture) = 0;
+		virtual glm::vec2 GetSize() const = 0;
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;

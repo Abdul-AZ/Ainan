@@ -24,22 +24,6 @@ namespace Ainan {
 		InputManager::Init();
 
 		UpdateTitle();
-
-		InputManager::m_ScrollFunctions.push_back([this](int scroll) {
-				//change zoom factor
-				m_Camera.ZoomFactor -= scroll * 25;
-				//clamp zoom factor
-				m_Camera.ZoomFactor = std::clamp(m_Camera.ZoomFactor, c_CameraZoomFactorMin, c_CameraZoomFactorMax);
-
-				//display the new zoom factor in the bottom left of the screen
-				std::stringstream stream;
-				stream << std::setprecision(0);
-				stream << "Zoom ";
-				stream << (int)(c_CameraZoomFactorDefault * 100.0f / m_Camera.ZoomFactor);
-				stream << "%%";
-
-				m_AppStatusWindow.SetText(stream.str());
-			});
 	}
 
 	Environment::~Environment()
@@ -116,9 +100,11 @@ namespace Ainan {
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		desc.Blur = m_Settings.BlurEnabled;
+		desc.BlurRadius = m_Settings.BlurRadius;
 
 		Renderer::BeginScene(desc);
-		Renderer::ClearScreen();
 
 		for (pEnvironmentObject& obj : InspectorObjects)
 		{
@@ -139,9 +125,6 @@ namespace Ainan {
 			if (obj->Type == SpriteType)
 				obj->Draw();
 		}
-
-		if(m_Settings.ShowGrid && m_Status != Status_PlayMode)
-			m_Grid.Draw();
 
 		if(m_Status == Status_EditorMode)
 			for (pEnvironmentObject& obj : InspectorObjects)
@@ -176,9 +159,11 @@ namespace Ainan {
 		}
 
 		if (m_Status == Status_EditorMode) {
-			m_ExportCamera.DrawOutline();
 			Renderer::EndScene();
 			m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
+			if (m_Settings.ShowGrid)
+				m_Grid.Draw();
+			m_ExportCamera.DrawOutline();
 			return;
 		}
 
@@ -191,13 +176,10 @@ namespace Ainan {
 			obj->Draw();
 		}
 
-		if (m_Settings.BlurEnabled)
-			GaussianBlur(m_RenderSurface, m_Settings.BlurRadius);
-
-		//draw this after post processing because we do not want the line blured
-		m_ExportCamera.DrawOutline();
-
 		Renderer::EndScene();
+
+		//draw this after the scene is drawn so that post processing effects do not apply to it
+		m_ExportCamera.DrawOutline();
 
 		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
 
@@ -810,6 +792,22 @@ namespace Ainan {
 			}
 		});
 
+		//zoom in and out with mouse scroll wheel
+		InputManager::m_ScrollFunctions.push_back([this](int scroll) {
+			//change zoom factor
+			m_Camera.ZoomFactor -= scroll * 30;
+			//clamp zoom factor
+			m_Camera.ZoomFactor = std::clamp(m_Camera.ZoomFactor, c_CameraZoomFactorMin, c_CameraZoomFactorMax);
+
+			//display the new zoom factor in the bottom left of the screen
+			std::stringstream stream;
+			stream << std::setprecision(0);
+			stream << "Zoom ";
+			stream << (int)(c_CameraZoomFactorDefault * 100.0f / m_Camera.ZoomFactor);
+			stream << "%%";
+
+			m_AppStatusWindow.SetText(stream.str());
+			});
 	}
 
 	void Environment::AddEnvironmentObject(EnvironmentObjectType type, const std::string& name)

@@ -34,6 +34,7 @@ namespace Ainan {
 	{
 		Camera SceneCamera = {};								//Required
 		std::shared_ptr<FrameBuffer> SceneDrawTarget = nullptr; //Required
+		std::shared_ptr<Texture> SceneDrawTargetTexture = nullptr; //Required if there is postprocessing effects
 		bool Blur = false;										//Required
 		float BlurRadius = 0.0f;								//Required if Blur == true
 	};
@@ -73,6 +74,8 @@ namespace Ainan {
 
 		static void ClearScreen();
 
+		static void Blur(std::shared_ptr<FrameBuffer>& target, std::shared_ptr<Texture>& targetShader, float radius);
+
 		static void SetViewport(const Rectangle& viewport);
 		static Rectangle GetCurrentViewport();
 
@@ -96,7 +99,6 @@ namespace Ainan {
 
 		static std::shared_ptr<Texture> CreateTexture();
 
-		//static Camera* m_CurrentSceneCamera;
 		static SceneDescription m_CurrentSceneDescription;
 		static unsigned int NumberOfDrawCallsLastScene;
 		static glm::mat4 m_CurrentViewProjection;
@@ -112,6 +114,12 @@ namespace Ainan {
 		//first one is reserved for blank white texture, so we have c_MaxQuadTexturesPerBatch - 1 textures in total
 		static std::array<std::shared_ptr<Texture>, c_MaxQuadTexturesPerBatch> m_QuadBatchTextures;
 		static int m_QuadBatchTextureSlotsUsed;
+
+		//Postprocessing data
+		static std::shared_ptr<Texture> m_BlurTexture;
+		static std::shared_ptr<FrameBuffer> m_BlurFrameBuffer;
+		static std::shared_ptr<VertexArray> m_BlurVertexArray;
+		static std::shared_ptr<VertexBuffer> m_BlurVertexBuffer;
 
 		//refrences to created objects
 		//mostly used for profiling

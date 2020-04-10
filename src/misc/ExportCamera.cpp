@@ -226,8 +226,8 @@ namespace Ainan {
 		for (pEnvironmentObject& obj : objects)
 			obj->Draw();
 
-		if (blurRadius > 0.0f)
-			GaussianBlur(m_RenderSurface, blurRadius);
+		//if (blurRadius > 0.0f)
+			//GaussianBlur(m_RenderSurface, blurRadius);
 
 		Renderer::EndScene();
 
