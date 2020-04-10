@@ -113,8 +113,11 @@ namespace Ainan {
 
 	void Environment::Render()
 	{
-		Renderer::BeginScene(m_Camera);
-		m_RenderSurface.SurfaceFrameBuffer->Bind();
+		SceneDescription desc;
+		desc.SceneCamera = m_Camera;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
+
+		Renderer::BeginScene(desc);
 		Renderer::ClearScreen();
 
 		for (pEnvironmentObject& obj : InspectorObjects)
@@ -174,9 +177,8 @@ namespace Ainan {
 
 		if (m_Status == Status_EditorMode) {
 			m_ExportCamera.DrawOutline();
-			m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
-			m_RenderSurface.SurfaceFrameBuffer->Unbind();
 			Renderer::EndScene();
+			m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
 			return;
 		}
 
@@ -195,9 +197,9 @@ namespace Ainan {
 		//draw this after post processing because we do not want the line blured
 		m_ExportCamera.DrawOutline();
 
-		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
-
 		Renderer::EndScene();
+
+		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
 
 		if (m_Status == Status_ExportMode && m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted) 
 		{

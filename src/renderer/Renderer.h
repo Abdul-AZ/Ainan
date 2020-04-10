@@ -30,6 +30,14 @@ namespace Ainan {
 		glm::vec2 TextureCoordinates;
 	};
 
+	struct SceneDescription
+	{
+		Camera SceneCamera = {};								//Required
+		std::shared_ptr<FrameBuffer> SceneDrawTarget = nullptr; //Required
+		bool Blur = false;										//Required
+		float BlurRadius = 0.0f;								//Required if Blur == true
+	};
+
 	const int c_MaxQuadsPerBatch = 10000;
 	const int c_MaxQuadVerticesPerBatch = c_MaxQuadsPerBatch * 4;
 	const int c_MaxQuadTexturesPerBatch = 16;
@@ -45,7 +53,7 @@ namespace Ainan {
 		static void Terminate();
 
 		//This will be changed to only render in end scene by putting draw commands to a command buffer 
-		static void BeginScene(Camera& camera);
+		static void BeginScene(const SceneDescription& desc);
 		static void EndScene();
 
 		//position is in world coordinates
@@ -56,8 +64,6 @@ namespace Ainan {
 		//these overloads DO NOT use an index buffer
 		static void Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode,
 						 const unsigned int& vertexCount);
-		static void DrawInstanced(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode,
-								  const unsigned int& vertexCount, const unsigned int& objectCount);
 
 		//these overloads DO use an index buffer
 		static void Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive,
@@ -90,7 +96,8 @@ namespace Ainan {
 
 		static std::shared_ptr<Texture> CreateTexture();
 
-		static Camera* m_CurrentSceneCamera;
+		//static Camera* m_CurrentSceneCamera;
+		static SceneDescription m_CurrentSceneDescription;
 		static unsigned int NumberOfDrawCallsLastScene;
 		static glm::mat4 m_CurrentViewProjection;
 		static RendererAPI* m_CurrentActiveAPI;
@@ -114,7 +121,7 @@ namespace Ainan {
 
 
 	private:
-		static void DrawQuadBatch();
+		static void FlushQuadBatch();
 	};
 
 }

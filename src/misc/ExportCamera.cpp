@@ -200,7 +200,9 @@ namespace Ainan {
 	void ExportCamera::ExportFrame(Background& background, std::vector<pEnvironmentObject>& objects, float blurRadius)
 	{
 		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
-		Renderer::BeginScene(RealCamera);
+		SceneDescription desc;
+		desc.SceneCamera = RealCamera;
+		Renderer::BeginScene(desc);
 
 		m_RenderSurface.SetSize(m_ExportCameraSize * c_GlobalScaleFactor);
 		m_RenderSurface.SurfaceFrameBuffer->Bind();

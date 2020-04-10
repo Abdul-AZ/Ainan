@@ -5,7 +5,8 @@
 namespace Ainan {
 
 	RendererAPI* Renderer::m_CurrentActiveAPI = nullptr;
-	Camera* Renderer::m_CurrentSceneCamera = nullptr;
+	//Camera* Renderer::m_CurrentSceneCamera = nullptr;
+	SceneDescription Renderer::m_CurrentSceneDescription = {};
 	glm::mat4 Renderer::m_CurrentViewProjection = glm::mat4(1.0f);
 	unsigned int Renderer::NumberOfDrawCallsLastScene = 0;
 	std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> Renderer::ShaderLibrary;
@@ -119,11 +120,18 @@ namespace Ainan {
 		m_QuadBatchTextures[0].reset();
 	}
 
-	void Renderer::BeginScene(Camera& camera)
+	void Renderer::BeginScene(const SceneDescription& desc)
 	{
-		m_CurrentSceneCamera = &camera;
-		m_CurrentViewProjection = camera.ProjectionMatrix * camera.ViewMatrix;
+		assert(desc.SceneDrawTarget);
+
+		m_CurrentSceneDescription = desc;
+		m_CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
 		s_CurrentNumberOfDrawCalls = 0;
+
+		m_CurrentSceneDescription.SceneDrawTarget->Bind();
+		ClearScreen();
+		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
+
 
 		//update diagnostics stuff
 		for (size_t i = 0; i < m_ReservedTextures.size(); i++)
@@ -148,30 +156,16 @@ namespace Ainan {
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
 	{
+		m_CurrentSceneDescription.SceneDrawTarget->Bind();
 		vertexArray.Bind();
 		shader.Bind();
-
 		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
 
 		m_CurrentActiveAPI->Draw(shader, mode, vertexCount);
 
 		vertexArray.Unbind();
 		shader.Unbind();
-
-		s_CurrentNumberOfDrawCalls++;
-	}
-
-	void Renderer::DrawInstanced(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount, const unsigned int& objectCount)
-	{
-		vertexArray.Bind();
-		shader.Bind();
-
-		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
-
-		m_CurrentActiveAPI->DrawInstanced(shader, mode, vertexCount, objectCount);
-
-		vertexArray.Unbind();
-		shader.Unbind();
+		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
 	}
@@ -179,9 +173,9 @@ namespace Ainan {
 	void Renderer::EndScene()
 	{
 		if(m_QuadBatchVertexBufferDataPtr != m_QuadBatchVertexBufferDataOrigin)
-			DrawQuadBatch();
+			FlushQuadBatch();
 
-		m_CurrentSceneCamera = nullptr;
+		memset(&m_CurrentSceneDescription, 0, sizeof(SceneDescription));
 		NumberOfDrawCallsLastScene = s_CurrentNumberOfDrawCalls;
 	}
 
@@ -189,7 +183,7 @@ namespace Ainan {
 	{
 		if ((m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
 			m_QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
-			DrawQuadBatch();
+			FlushQuadBatch();
 
 		float textureSlot;
 		if (texture == nullptr)
@@ -245,7 +239,7 @@ namespace Ainan {
 	{
 		if ((m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
 			m_QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
-			DrawQuadBatch();
+			FlushQuadBatch();
 
 		float textureSlot;
 		if (texture == nullptr)
@@ -312,7 +306,7 @@ namespace Ainan {
 
 		if ((m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > count * 4 ||
 			m_QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
-			DrawQuadBatch();
+			FlushQuadBatch();
 
 		float textureSlot;
 		if (texture == nullptr)
@@ -369,6 +363,7 @@ namespace Ainan {
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
 	{
+		m_CurrentSceneDescription.SceneDrawTarget->Bind();
 		vertexArray.Bind();
 		shader.Bind();
 
@@ -378,12 +373,14 @@ namespace Ainan {
 
 		vertexArray.Unbind();
 		shader.Unbind();
+		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
 	}
 
 	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
 	{
+		m_CurrentSceneDescription.SceneDrawTarget->Bind();
 		vertexArray.Bind();
 		shader.Bind();
 
@@ -395,6 +392,7 @@ namespace Ainan {
 		shader.Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
+		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
 	}
 
 	void Renderer::ClearScreen()
@@ -547,7 +545,7 @@ namespace Ainan {
 		return texture;
 	}
 
-	void Ainan::Renderer::DrawQuadBatch()
+	void Ainan::Renderer::FlushQuadBatch()
 	{
 		for (size_t i = 0; i < m_QuadBatchTextureSlotsUsed; i++)
 			m_QuadBatchTextures[i]->Bind(i);
@@ -558,8 +556,15 @@ namespace Ainan {
 			numVertices * sizeof(QuadVertex),
 			m_QuadBatchVertexBufferDataOrigin);
 
+		m_CurrentSceneDescription.SceneDrawTarget->Bind();
+
 		Renderer::Draw(*m_QuadBatchVertexArray,
-			*ShaderLibrary["QuadBatchShader"], Primitive::Triangles, *m_QuadBatchIndexBuffer, (numVertices * 3) / 2);
+			*ShaderLibrary["QuadBatchShader"],
+			Primitive::Triangles,
+			*m_QuadBatchIndexBuffer,
+			(numVertices * 3) / 2);
+
+		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
 
 		//reset data so we can accept the next batch
 		m_QuadBatchVertexBufferDataPtr = m_QuadBatchVertexBufferDataOrigin;
