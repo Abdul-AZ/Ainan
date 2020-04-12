@@ -111,7 +111,6 @@ namespace Ainan {
 
 		std::shared_ptr<Texture> m_PlayButtonTexture;
 		std::shared_ptr<Texture> m_PauseButtonTexture;
-		std::shared_ptr<Texture> m_ResumeButtonTexture;
 		std::shared_ptr<Texture> m_StopButtonTexture;
 
 		bool m_MousePressedLastFrame = false;

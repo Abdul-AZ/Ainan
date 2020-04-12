@@ -10,13 +10,11 @@ namespace Ainan {
 		std::memset(m_DeltaTimeHistory.data(), 0, m_DeltaTimeHistory.size() * sizeof(float));
 		m_PlayButtonTexture = Renderer::CreateTexture();
 		m_PauseButtonTexture = Renderer::CreateTexture();
-		m_ResumeButtonTexture = Renderer::CreateTexture();
 		m_StopButtonTexture = Renderer::CreateTexture();
 
-		m_PlayButtonTexture->SetImage(Image::LoadFromFile("res/PlayButton.png", 3));
-		m_PauseButtonTexture->SetImage(Image::LoadFromFile("res/PauseButton.png", 3));
-		m_ResumeButtonTexture->SetImage(Image::LoadFromFile("res/ResumeButton.png", 3));
-		m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 3));
+		m_PlayButtonTexture->SetImage(Image::LoadFromFile("res/PlayButton.png", 4));
+		m_PauseButtonTexture->SetImage(Image::LoadFromFile("res/PauseButton.png", 4));
+		m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 4));
 
 		RegisterEnvironmentInputKeys();
 
@@ -207,9 +205,11 @@ namespace Ainan {
 		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
 
 		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
+		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode , 0);
 		ImGui::PopStyleColor();
-		
+
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
+
 		AssetManager::DisplayGUI();
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
@@ -224,6 +224,7 @@ namespace Ainan {
 
 		InputManager::DisplayGUI();
 		m_ViewportWindow.DisplayGUI();
+		ImGui::PopStyleColor();
 
 		ImGuiWrapper::Render();
 	}
@@ -553,7 +554,7 @@ namespace Ainan {
 		//return if window is not open
 		if (!m_EnvironmentControlsWindowOpen)
 			return;
-		
+
 		ImGui::Begin("Controls", &m_EnvironmentControlsWindowOpen, ImGuiWindowFlags_NoScrollbar);
 		if (m_Status == Status_ExportMode)
 		{
@@ -561,31 +562,127 @@ namespace Ainan {
 			return;
 		}
 
-		int width = (int)ImGui::GetWindowSize().x;
-		ImGui::SetCursorPosX((float)width / 2 - 20);
+		//because ImGui doesnt accept different colors for different image button states, we have to use data from last frame
+		static bool s_playButtonHovered = false;
+		static bool s_stopButtonHovered = false;
+		static bool s_pauseButtonHovered = false;
 
-		if (m_Status == Status_PlayMode || m_Status == Status_PauseMode) {
-			if (ImGui::ImageButton((void*)(uintptr_t)m_StopButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
-				Stop();
-		}
-		else 
-		{
-			if (ImGui::ImageButton((void*)(uintptr_t)m_PlayButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
-				PlayMode();
-			
-			if (ImGui::Button("Export")) 
-				ExportMode();
-		}
+		//we keep track of how many frames have passed since the button is hovered so that we can display a tool tip if 
+		//it is hovered for too long
+		static int s_playButtonHoverFrameCount = 0;
+		static int s_stopButtonHoverFrameCount = 0;
+		static int s_pauseButtonHoverFrameCount = 0;
 
-		ImGui::SameLine();
-		if (m_Status == Status_PlayMode) {
-			if (ImGui::ImageButton((void*)(uintptr_t)m_PauseButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
-				Pause();
-		}
-		else if (m_Status == Status_PauseMode) {
-			if (ImGui::ImageButton((void*)(uintptr_t)m_ResumeButtonTexture->GetRendererID(), ImVec2(30, 20), ImVec2(0, 0), ImVec2(1, 1), 1))
+		ImVec4& bgColor = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
+		ImVec4& buttonColor = ImGui::GetStyle().Colors[ImGuiCol_Button];
+		ImVec4& buttonHoveredColor = ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered];
+
+		const ImVec2 c_buttonSize = { 50, 50 };
+
+		//code for displaying each of the control buttons in lambdas so that we can reuse it
+		auto displayPlayButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
+			ImVec4 playButtonoTint = s_playButtonHovered ? buttonHoveredColor : buttonColor;
+			if (ImGui::ImageButton((void*)(uintptr_t)m_PlayButtonTexture->GetRendererID(),
+				c_buttonSize,
+				ImVec2(0, 0),
+				ImVec2(1, 1),
+				0,
+				bgColor,
+				playButtonoTint))
+			{
 				Resume();
+			}
+
+			s_playButtonHovered = ImGui::IsItemHovered();
+			if (s_playButtonHovered)
+			{
+				s_playButtonHoverFrameCount++;
+				if (s_playButtonHoverFrameCount > 30)
+					ImGui::SetTooltip("Play");
+			}
+			else
+				s_playButtonHoverFrameCount = 0;
+		};
+
+		auto displayStopButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
+			ImVec4 stopButtonoTint = s_stopButtonHovered ? buttonHoveredColor : buttonColor;
+			if (ImGui::ImageButton((void*)(uintptr_t)m_StopButtonTexture->GetRendererID(),
+				ImVec2(50, 50),
+				ImVec2(0, 0),
+				ImVec2(1, 1),
+				0,
+				bgColor,
+				stopButtonoTint))
+			{
+				Stop();
+			}
+
+			s_stopButtonHovered = ImGui::IsItemHovered();
+			if (s_stopButtonHovered)
+			{
+				s_stopButtonHoverFrameCount++;
+				if (s_stopButtonHoverFrameCount > 30)
+					ImGui::SetTooltip("Stop");
+			}
+			else
+				s_stopButtonHoverFrameCount = 0;
+		};
+
+		auto displayPauseButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
+			ImVec4 pauseButtonoTint = s_pauseButtonHovered ? buttonHoveredColor : buttonColor;
+			if (ImGui::ImageButton((void*)(uintptr_t)m_PauseButtonTexture->GetRendererID(),
+				ImVec2(50, 50),
+				ImVec2(0, 0),
+				ImVec2(1, 1),
+				0,
+				bgColor,
+				pauseButtonoTint))
+			{
+				Pause();
+			}
+
+			s_pauseButtonHovered = ImGui::IsItemHovered();
+			static int hoverFrameCount;
+			if (s_pauseButtonHovered)
+			{
+				s_pauseButtonHoverFrameCount++;
+				if (s_pauseButtonHoverFrameCount > 30)
+					ImGui::SetTooltip("Pause");
+			}
+			else
+				s_pauseButtonHoverFrameCount = 0;
+		};
+
+		int windowcentre = ImGui::GetWindowSize().x / 2.0f;
+
+		//display the buttons depending on the state of the environment
+		switch (m_Status)
+		{
+		case Status_EditorMode:
+			ImGui::SetCursorPosX(windowcentre - c_buttonSize.x / 2.0f);
+			displayPlayButton();
+			break;
+
+		case Status_PlayMode:
+			ImGui::SetCursorPosX(windowcentre - c_buttonSize.x);
+			displayStopButton();
+			ImGui::SameLine();
+			displayPauseButton();
+			break;
+
+		case Status_PauseMode:
+			ImGui::SetCursorPosX(windowcentre - c_buttonSize.x);
+			displayStopButton();
+			ImGui::SameLine();
+			displayPlayButton();
+			break;
+
+		default:
+			break;
 		}
+
+		if (ImGui::Button("Export"))
+			ExportMode();
 
 		ImGui::End();
 	}

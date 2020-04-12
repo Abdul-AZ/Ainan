@@ -9,7 +9,9 @@ namespace Ainan {
 		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 10.0f);
-		ImGui::Begin("Viewport",nullptr ,ImGuiWindowFlags_NoBackground);
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, { 0.0f,0.0f,0.0f,0.0f });
+		ImGui::Begin("Viewport", nullptr , ImGuiWindowFlags_NoBackground);
+		ImGui::PopStyleColor();
 		ImGui::PopStyleVar();
 
 		RenderViewport.X = ImGui::GetWindowPos().x;
