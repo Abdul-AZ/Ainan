@@ -821,19 +821,6 @@ namespace Ainan {
 			}
 		});
 
-		InputManager::RegisterMouseKey(GLFW_MOUSE_BUTTON_MIDDLE, "Change Camera Zoom to Default", [this]() 
-			{
-				m_Camera.ZoomFactor = c_CameraZoomFactorDefault; 
-				//display the new zoom factor in the bottom left of the screen
-				std::stringstream stream;
-				stream << std::setprecision(0);
-				stream << "Zoom ";
-				stream << (int)(c_CameraZoomFactorDefault * 100.0f / m_Camera.ZoomFactor);
-				stream << "%%";
-
-				m_AppStatusWindow.SetText(stream.str());
-			});
-
 		//shortcut cut to use in all the mapped buttons
 		//it displays the camera position in the status window(the blue coloured stripe at the bottom)
 		auto displayCameraPosFunc = [this]()
@@ -851,51 +838,89 @@ namespace Ainan {
 		//map WASD keys to move the camera in the environment
 		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera Up", [this, displayCameraPosFunc]() 
 			{
-			//move the camera's position
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -m_Camera.ZoomFactor / 100.0f));
-			displayCameraPosFunc();
+				//we don't want to zoom if the focus is not set on the viewport
+				if (m_ViewportWindow.IsFocused == false)
+					return;
+
+				//move the camera's position
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -m_Camera.ZoomFactor / 100.0f));
+
+				//display text in the bottom right of the screen stating the new position of the camera
+				displayCameraPosFunc();
 			},
 			//set mode as repeat because we want the camera to move smoothly
 			GLFW_REPEAT);
+
 		//the rest are the same with only a diffrent move direction, that is why they arent commented
-
-		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this, displayCameraPosFunc]() {
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, m_Camera.ZoomFactor / 100.0f));
-			displayCameraPosFunc();
-			},
-			GLFW_REPEAT);
-
-		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this, displayCameraPosFunc]() {
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(-m_Camera.ZoomFactor / 100.0f, 0.0f));
-			displayCameraPosFunc();
-			},
-			GLFW_REPEAT);
-
-		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this, displayCameraPosFunc]() {
-			m_Camera.SetPosition(m_Camera.Position + glm::vec2(m_Camera.ZoomFactor / 100.0f, 0.0f));
-			displayCameraPosFunc();
-			},
-			GLFW_REPEAT);
-
-		//delete keyboard shortcut
-		InputManager::RegisterKey(GLFW_KEY_DELETE, "Delete Object", [this]() {
-
-			for (int i = 0; i < InspectorObjects.size(); i++)
+		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this, displayCameraPosFunc]() 
 			{
-				if (InspectorObjects[i]->Selected) {
-					InspectorObjects[i]->ToBeDeleted = true;
-					break;
+				if (m_ViewportWindow.IsFocused == false)
+					return;
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, m_Camera.ZoomFactor / 100.0f));
+				displayCameraPosFunc();
+			},
+			GLFW_REPEAT);
+
+		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this, displayCameraPosFunc]() 
+			{
+				if (m_ViewportWindow.IsFocused == false)
+					return;
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(-m_Camera.ZoomFactor / 100.0f, 0.0f));
+				displayCameraPosFunc();
+			},
+			GLFW_REPEAT);
+
+		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this, displayCameraPosFunc]() 
+			{
+				if (m_ViewportWindow.IsFocused == false)
+					return;
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(m_Camera.ZoomFactor / 100.0f, 0.0f));
+				displayCameraPosFunc();
+			},
+			GLFW_REPEAT);
+
+		//delete object keyboard shortcut
+		InputManager::RegisterKey(GLFW_KEY_DELETE, "Delete Object", [this]() 
+			{
+				for (int i = 0; i < InspectorObjects.size(); i++)
+				{
+					if (InspectorObjects[i]->Selected) {
+						InspectorObjects[i]->ToBeDeleted = true;
+						break;
+					}
 				}
-			}
 		});
 
 		//zoom in and out with mouse scroll wheel
-		InputManager::m_ScrollFunctions.push_back([this](int scroll) {
-			//change zoom factor
-			m_Camera.ZoomFactor -= scroll * 30;
-			//clamp zoom factor
-			m_Camera.ZoomFactor = std::clamp(m_Camera.ZoomFactor, c_CameraZoomFactorMin, c_CameraZoomFactorMax);
+		InputManager::m_ScrollFunctions.push_back([this](int scroll) 
+			{
+				//we don't want to zoom if the focus is not set on the viewport
+				if (m_ViewportWindow.IsFocused == false)
+					return;
 
+				//change zoom factor
+				m_Camera.ZoomFactor -= scroll * 30;
+				//clamp zoom factor
+				m_Camera.ZoomFactor = std::clamp(m_Camera.ZoomFactor, c_CameraZoomFactorMin, c_CameraZoomFactorMax);
+
+				//display the new zoom factor in the bottom left of the screen
+				std::stringstream stream;
+				stream << std::setprecision(0);
+				stream << "Zoom ";
+				stream << (int)(c_CameraZoomFactorDefault * 100.0f / m_Camera.ZoomFactor);
+				stream << "%%";
+
+				m_AppStatusWindow.SetText(stream.str());
+			});
+
+
+		InputManager::RegisterMouseKey(GLFW_MOUSE_BUTTON_MIDDLE, "Change Camera Zoom to Default", [this]()
+			{
+			//we don't want to zoom if the focus is not set on the viewport
+			if (m_ViewportWindow.IsFocused == false)
+				return;
+
+			m_Camera.ZoomFactor = c_CameraZoomFactorDefault;
 			//display the new zoom factor in the bottom left of the screen
 			std::stringstream stream;
 			stream << std::setprecision(0);

@@ -12,5 +12,6 @@ namespace Ainan {
 
 	public:
 		Rectangle RenderViewport = {0};
+		bool IsFocused = false;
 	};
 }

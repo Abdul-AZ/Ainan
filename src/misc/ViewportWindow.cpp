@@ -24,6 +24,7 @@ namespace Ainan {
 		RenderViewport.X -= Window::Position.x;
 		RenderViewport.Y += Window::Position.y; //negative because y axis is inverted in screen coordinates
 
+		IsFocused = ImGui::IsWindowFocused();
 		ImGui::End();
 	}
 
