@@ -1,6 +1,9 @@
+#pragma once
+
 #include <pch.h>
 
 #include "Environment.h"
+#include "environment/EnvironmentData.h"
 #include "json/json.hpp"
 
 using json = nlohmann::json;
@@ -25,20 +28,22 @@ namespace Ainan {
 		}
 	}
 
-	static void ParticleSystemFromJson(Environment* env, json& data, std::string id);
-	static void RadialLightFromJson(Environment* env,json& data, std::string id);
-	static void SettingsFromJson(Environment* env, json& data);
+	static void ParticleSystemFromJson(EnvironmentData* env, json& data, std::string id);
+	static void RadialLightFromJson(EnvironmentData* env, json& data, std::string id);
+	static void SpotLightFromJson(EnvironmentData* env, json& data, std::string id);
+	static void SpriteFromJson(EnvironmentData* env,json& data, std::string id);
+	static void SettingsFromJson(EnvironmentData* env, json& data);
 	static void BackgroundFromJson(Background& background, json& data);
 
-	Environment* LoadEnvironment(const std::string& path)
+	EnvironmentData* LoadEnvironment(const std::string& path)
 	{
 		json data = json::parse(AssetManager::ReadEntireTextFile(path));
 
 		size_t lastBackslash = path.find_last_of("\\");
 		std::string environmentFolder = path.substr(0, lastBackslash) + "\\";
 
-		Environment* env = new Environment(environmentFolder, data["EnvironmentName"].get<std::string>());
-		env->InspectorObjects.clear();
+		//Environment* env = new Environment(environmentFolder, data["EnvironmentName"].get<std::string>());
+		EnvironmentData* env = new EnvironmentData;
 
 		SettingsFromJson(env, data);
 		BackgroundFromJson(env->m_Background, data);
@@ -75,12 +80,12 @@ namespace Ainan {
 				break;
 			}
 		}
-		env->UpdateTitle();
+		//env->UpdateTitle(); //TODO
 
 		return env;
 	}
 
-	void SettingsFromJson(Environment* env, json& data)
+	void SettingsFromJson(EnvironmentData* env, json& data)
 	{
 		env->m_Settings.BlurEnabled = data["BlurEnabled"].get<bool>();
 		env->m_Settings.BlurRadius = data["BlurRadius"].get<float>();
@@ -96,7 +101,7 @@ namespace Ainan {
 		background.Quadratic = data["BackgroundQuadratic"].get<float>();
 	}
 
-	void ParticleSystemFromJson(Environment* env, json& data, std::string id)
+	void ParticleSystemFromJson(EnvironmentData* env, json& data, std::string id)
 	{
 		//create particle system
 		std::unique_ptr<ParticleSystem> ps = std::make_unique<ParticleSystem>();
@@ -177,10 +182,10 @@ namespace Ainan {
 		
 		//add particle system to environment
 		pEnvironmentObject startingPSi((EnvironmentObjectInterface*)(ps.release()));
-		env->InspectorObjects.push_back(std::move(startingPSi));
+		env->Objects.push_back(std::move(startingPSi));
 	}
 
-	void RadialLightFromJson(Environment* env, json& data, std::string id)
+	void RadialLightFromJson(EnvironmentData* env, json& data, std::string id)
 	{
 		//create radial light
 		std::unique_ptr<RadialLight> light = std::make_unique<RadialLight>();
@@ -193,10 +198,10 @@ namespace Ainan {
 
 		//add radial light to environment
 		pEnvironmentObject startingPSi((EnvironmentObjectInterface*)(light.release()));
-		env->InspectorObjects.push_back(std::move(startingPSi));
+		env->Objects.push_back(std::move(startingPSi));
 	}
 
-	void SpotLightFromJson(Environment* env, json& data, std::string id)
+	void SpotLightFromJson(EnvironmentData* env, json& data, std::string id)
 	{
 		//create radial light
 		std::unique_ptr<SpotLight> light = std::make_unique<SpotLight>();
@@ -211,10 +216,10 @@ namespace Ainan {
 
 		//add radial light to environment
 		pEnvironmentObject obj((EnvironmentObjectInterface*)(light.release()));
-		env->InspectorObjects.push_back(std::move(obj));
+		env->Objects.push_back(std::move(obj));
 	}
 
-	void SpriteFromJson(Environment* env, json& data, std::string id)
+	void SpriteFromJson(EnvironmentData* env, json& data, std::string id)
 	{
 		//create sprite
 		std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
@@ -230,7 +235,7 @@ namespace Ainan {
 			sprite->LoadTextureFromFile(AssetManager::GetAbsolutePath() + sprite->m_TexturePath);
 
 		pEnvironmentObject obj((EnvironmentObjectInterface*)(sprite.release()));
-		env->InspectorObjects.push_back(std::move(obj));
+		env->Objects.push_back(std::move(obj));
 	}
 }
 

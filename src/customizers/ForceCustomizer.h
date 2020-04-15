@@ -79,7 +79,7 @@ namespace Ainan {
 		std::string m_CurrentSelectedForceName = "";
 
 		//exposing to render a gizmo on force target position if it is used
-		friend class Environment;
+		friend class Editor;
 		EXPOSE_CUSTOMIZER_TO_JSON
 	};
 }

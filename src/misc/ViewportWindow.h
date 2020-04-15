@@ -11,7 +11,7 @@ namespace Ainan {
 		void DisplayGUI();
 
 	public:
-		Rectangle RenderViewport = {0};
+		Rectangle RenderViewport = {0, 0, 0, 0};
 		bool IsFocused = false;
 	};
 }

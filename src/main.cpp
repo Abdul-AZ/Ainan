@@ -5,6 +5,8 @@
 #include "misc/StartMenu.h"
 #include "renderer/Renderer.h"
 
+#include "editor/Editor.h"
+
 int main() 
 {
 	using namespace Ainan;
@@ -15,47 +17,59 @@ int main()
 	ImGuiWrapper::Init();
 	SetEditorStyle(EditorStyle::Dark_Gray);
 
-	Environment* env = nullptr;
-	StartMenu startMenu;
+	//Environment* env = nullptr;
+	//StartMenu startMenu;
+
+	Editor* editor = new Editor;
 
 	while (Window::ShouldClose == false)
 	{
-		if (env) 
-		{
-			env->StartFrame();
+		Renderer::ClearScreen();
+		editor->StartFrame();
+		Window::HandleWindowEvents();
+		editor->Update();
+		editor->Draw();
+		editor->EndFrame();
+		Window::Present();
 
-			Window::HandleWindowEvents();
-
-			env->Update();
-			env->HandleInput();
-			env->Render();
-			env->RenderGUI();
-		
-			if (env->ShouldDelete) 
-			{
-				delete env;
-				env = nullptr;
-			}
-			else 
-			{
-				env->EndFrame();
-				Window::Present();
-			}
-		}
-		else
-		{
-			Window::HandleWindowEvents();
-
-			startMenu.Update(env);
-
-			Window::Present();
-
-		}
+		//if (env) 
+		//{
+		//	env->StartFrame();
+		//
+		//	Window::HandleWindowEvents();
+		//
+		//	env->Update();
+		//	env->HandleInput();
+		//	env->Render();
+		//	env->RenderGUI();
+		//
+		//	if (env->ShouldDelete) 
+		//	{
+		//		delete env;
+		//		env = nullptr;
+		//	}
+		//	else 
+		//	{
+		//		env->EndFrame();
+		//		Window::Present();
+		//	}
+		//}
+		//else
+		//{
+		//	Window::HandleWindowEvents();
+		//
+		//	startMenu.Update(env);
+		//
+		//	Window::Present();
+		//
+		//}
 	}
 
-	if(env)
-		delete env;
+	delete editor;
 
+	//if(env)
+	//	delete env;
+	//
 	Renderer::Terminate();
 	ImGuiWrapper::Terminate();
 	Window::Terminate();

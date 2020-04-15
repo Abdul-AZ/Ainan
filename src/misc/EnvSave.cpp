@@ -1,7 +1,10 @@
 #include <pch.h>
 
-#include "Environment.h"
+#include "environment/EnvironmentData.h"
+#include "misc/EnvironmentObjectInterface.h"
 #include "json/json.hpp"
+#include "object/Sprite.h"
+#include "object/ParticleSystem.h"
 
 using json = nlohmann::json;
 
@@ -19,35 +22,35 @@ namespace Ainan {
 	static void toJson(json& j, const Background& background);
 	static void toJson(json& j, const Sprite& sprite, size_t objectOrder);
 
-	bool SaveEnvironment(const Environment& env, std::string path)
+	bool SaveEnvironment(const EnvironmentData& env, std::string path)
 	{
 		json data;
 
-		data["EnvironmentName"] = env.m_EnvironmentName;
+		data["EnvironmentName"] = env.Name;
 
 		//serialize inspector objects count int
-		data["objectCount"] = env.InspectorObjects.size();
+		data["objectCount"] = env.Objects.size();
 		
 		//serialize inspector objects
-		for (size_t i = 0; i < env.InspectorObjects.size(); i++)
+		for (size_t i = 0; i < env.Objects.size(); i++)
 		{
 			//save object depending on what type it is
-			switch (env.InspectorObjects[i]->Type)
+			switch (env.Objects[i]->Type)
 			{
 			case ParticleSystemType:
-				toJson(data, *(ParticleSystem*)env.InspectorObjects[i].get(), i);
+				toJson(data, *(ParticleSystem*)env.Objects[i].get(), i);
 				break;
 
 			case RadialLightType:
-				toJson(data, *(RadialLight*)env.InspectorObjects[i].get(), i);
+				toJson(data, *(RadialLight*)env.Objects[i].get(), i);
 				break;
 
 			case SpotLightType:
-				toJson(data, *(SpotLight*)env.InspectorObjects[i].get(), i);
+				toJson(data, *(SpotLight*)env.Objects[i].get(), i);
 				break;
 
 			case SpriteType:
-				toJson(data, *(Sprite*)env.InspectorObjects[i].get(), i);
+				toJson(data, *(Sprite*)env.Objects[i].get(), i);
 				break;
 
 			default: //this means we have a type that we haven't implemented how to save it

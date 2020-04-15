@@ -1,4 +1,7 @@
 #include <pch.h>
+
+#if 0
+
 #include "Environment.h"
 
 namespace Ainan {
@@ -1078,3 +1081,5 @@ namespace Ainan {
 		}
 	}
 }
+
+#endif

@@ -6,7 +6,10 @@
 #define START_MENU_BUTTON_HEIGHT 75
 
 namespace Ainan {
-	
+	bool SaveEnvironment(const EnvironmentData& env, std::string path);
+	std::string CheckEnvironmentFile(const std::string& path);
+	EnvironmentData* LoadEnvironment(const std::string& path);
+
 	StartMenu::StartMenu() :
 	m_LoadEnvironmentBrowser(STARTING_BROWSER_DIRECTORY, "Load Environment")
 	{
@@ -17,7 +20,7 @@ namespace Ainan {
 		};
 	}
 
-	void StartMenu::Update(Environment*& currentEnv)
+	void StartMenu::Draw(EnvironmentData*& currentEnv)
 	{
 		assert(!currentEnv);
 
@@ -36,7 +39,7 @@ namespace Ainan {
 		}
 	}
 
-	inline void StartMenu::DisplayMainGUI(Environment*& currentEnv)
+	inline void StartMenu::DisplayMainGUI(EnvironmentData*& currentEnv)
 	{
 		if (m_LoadEnvironmentBrowser.OnCloseWindow == nullptr)
 			m_LoadEnvironmentBrowser.OnCloseWindow = []() {
@@ -83,6 +86,7 @@ namespace Ainan {
 			{
 				//check if file is selected
 				if (path.extension().u8string() == ".env") {
+					//TODO
 					m_EnvironmentLoadError = CheckEnvironmentFile(path.u8string());
 
 					//if there are no errors load environment
@@ -99,7 +103,7 @@ namespace Ainan {
 		ImGuiWrapper::Render();
 	}
 
-	inline void StartMenu::DisplayCreateEnvironmentGUI(Environment*& currentEnv)
+	inline void StartMenu::DisplayCreateEnvironmentGUI(EnvironmentData*& currentEnv)
 	{
 		ImGuiWrapper::NewFrame();
 
@@ -217,10 +221,13 @@ namespace Ainan {
 					dirPath = m_EnvironmentCreateFolderPath;
 				}
 
-				currentEnv = new Environment(dirPath, m_EnvironmentCreateName);
+				currentEnv = new EnvironmentData;
+				currentEnv->FolderPath = dirPath;
+				currentEnv->Name = m_EnvironmentCreateName;
 
 				//add starting object
-				currentEnv->AddEnvironmentObject(ParticleSystemType, "Particle System");
+				//TODO
+				//currentEnv->AddEnvironmentObject(ParticleSystemType, "Particle System");
 
 				if (m_IncludeStarterAssets)
 					std::filesystem::copy("res\\StarterAssets", dirPath + "\\StarterAssets");

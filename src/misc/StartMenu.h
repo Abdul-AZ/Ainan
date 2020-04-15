@@ -1,5 +1,9 @@
+#pragma once
+
+#include "environment/EnvironmentData.h"
 #include "Environment.h"
 #include "file/FolderBrowser.h"
+#include "file/FileBrowser.h"
 
 #define WINDOW_SIZE_FACTOR_ON_LAUNCH 500
 
@@ -15,11 +19,11 @@ namespace Ainan {
 	public:
 		StartMenu();
 
-		void Update(Environment*& currentEnv);
+		void Draw(EnvironmentData*& currentEnv);
 
 	private: //helper functions to display gui in each state
-		inline void DisplayMainGUI(Environment*& currentEnv);
-		inline void DisplayCreateEnvironmentGUI(Environment*& currentEnv);
+		inline void DisplayMainGUI(EnvironmentData*& currentEnv);
+		inline void DisplayCreateEnvironmentGUI(EnvironmentData*& currentEnv);
 
 	private:
 		std::string m_EnvironmentCreateFolderPath;
