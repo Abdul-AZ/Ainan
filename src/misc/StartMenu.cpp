@@ -6,9 +6,9 @@
 #define START_MENU_BUTTON_HEIGHT 75
 
 namespace Ainan {
-	bool SaveEnvironment(const EnvironmentData& env, std::string path);
+	bool SaveEnvironment(const Environment& env, std::string path);
 	std::string CheckEnvironmentFile(const std::string& path);
-	EnvironmentData* LoadEnvironment(const std::string& path);
+	Environment* LoadEnvironment(const std::string& path);
 
 	StartMenu::StartMenu() :
 	m_LoadEnvironmentBrowser(STARTING_BROWSER_DIRECTORY, "Load Environment")
@@ -20,7 +20,7 @@ namespace Ainan {
 		};
 	}
 
-	void StartMenu::Draw(EnvironmentData*& currentEnv)
+	void StartMenu::Draw(Environment*& currentEnv)
 	{
 		assert(!currentEnv);
 
@@ -39,7 +39,7 @@ namespace Ainan {
 		}
 	}
 
-	inline void StartMenu::DisplayMainGUI(EnvironmentData*& currentEnv)
+	inline void StartMenu::DisplayMainGUI(Environment*& currentEnv)
 	{
 		if (m_LoadEnvironmentBrowser.OnCloseWindow == nullptr)
 			m_LoadEnvironmentBrowser.OnCloseWindow = []() {
@@ -103,7 +103,7 @@ namespace Ainan {
 		ImGuiWrapper::Render();
 	}
 
-	inline void StartMenu::DisplayCreateEnvironmentGUI(EnvironmentData*& currentEnv)
+	inline void StartMenu::DisplayCreateEnvironmentGUI(Environment*& currentEnv)
 	{
 		ImGuiWrapper::NewFrame();
 
@@ -221,7 +221,7 @@ namespace Ainan {
 					dirPath = m_EnvironmentCreateFolderPath;
 				}
 
-				currentEnv = new EnvironmentData;
+				currentEnv = new Environment;
 				currentEnv->FolderPath = dirPath;
 				currentEnv->Name = m_EnvironmentCreateName;
 

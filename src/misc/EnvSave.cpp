@@ -1,6 +1,6 @@
 #include <pch.h>
 
-#include "environment/EnvironmentData.h"
+#include "environment/Environment.h"
 #include "misc/EnvironmentObjectInterface.h"
 #include "json/json.hpp"
 #include "object/Sprite.h"
@@ -22,7 +22,7 @@ namespace Ainan {
 	static void toJson(json& j, const Background& background);
 	static void toJson(json& j, const Sprite& sprite, size_t objectOrder);
 
-	bool SaveEnvironment(const EnvironmentData& env, std::string path)
+	bool SaveEnvironment(const Environment& env, std::string path)
 	{
 		json data;
 

@@ -2,9 +2,9 @@
 
 #include <pch.h>
 
-#include "Environment.h"
-#include "environment/EnvironmentData.h"
+#include "environment/Environment.h"
 #include "json/json.hpp"
+#include "object/Sprite.h"
 
 using json = nlohmann::json;
 
@@ -28,14 +28,14 @@ namespace Ainan {
 		}
 	}
 
-	static void ParticleSystemFromJson(EnvironmentData* env, json& data, std::string id);
-	static void RadialLightFromJson(EnvironmentData* env, json& data, std::string id);
-	static void SpotLightFromJson(EnvironmentData* env, json& data, std::string id);
-	static void SpriteFromJson(EnvironmentData* env,json& data, std::string id);
-	static void SettingsFromJson(EnvironmentData* env, json& data);
+	static void ParticleSystemFromJson(Environment* env, json& data, std::string id);
+	static void RadialLightFromJson(Environment* env, json& data, std::string id);
+	static void SpotLightFromJson(Environment* env, json& data, std::string id);
+	static void SpriteFromJson(Environment* env,json& data, std::string id);
+	static void SettingsFromJson(Environment* env, json& data);
 	static void BackgroundFromJson(Background& background, json& data);
 
-	EnvironmentData* LoadEnvironment(const std::string& path)
+	Environment* LoadEnvironment(const std::string& path)
 	{
 		json data = json::parse(AssetManager::ReadEntireTextFile(path));
 
@@ -43,7 +43,7 @@ namespace Ainan {
 		std::string environmentFolder = path.substr(0, lastBackslash) + "\\";
 
 		//Environment* env = new Environment(environmentFolder, data["EnvironmentName"].get<std::string>());
-		EnvironmentData* env = new EnvironmentData;
+		Environment* env = new Environment;
 		env->FolderPath = environmentFolder;
 
 		SettingsFromJson(env, data);
@@ -86,7 +86,7 @@ namespace Ainan {
 		return env;
 	}
 
-	void SettingsFromJson(EnvironmentData* env, json& data)
+	void SettingsFromJson(Environment* env, json& data)
 	{
 		env->m_Settings.BlurEnabled = data["BlurEnabled"].get<bool>();
 		env->m_Settings.BlurRadius = data["BlurRadius"].get<float>();
@@ -102,7 +102,7 @@ namespace Ainan {
 		background.Quadratic = data["BackgroundQuadratic"].get<float>();
 	}
 
-	void ParticleSystemFromJson(EnvironmentData* env, json& data, std::string id)
+	void ParticleSystemFromJson(Environment* env, json& data, std::string id)
 	{
 		//create particle system
 		std::unique_ptr<ParticleSystem> ps = std::make_unique<ParticleSystem>();
@@ -186,7 +186,7 @@ namespace Ainan {
 		env->Objects.push_back(std::move(startingPSi));
 	}
 
-	void RadialLightFromJson(EnvironmentData* env, json& data, std::string id)
+	void RadialLightFromJson(Environment* env, json& data, std::string id)
 	{
 		//create radial light
 		std::unique_ptr<RadialLight> light = std::make_unique<RadialLight>();
@@ -202,7 +202,7 @@ namespace Ainan {
 		env->Objects.push_back(std::move(startingPSi));
 	}
 
-	void SpotLightFromJson(EnvironmentData* env, json& data, std::string id)
+	void SpotLightFromJson(Environment* env, json& data, std::string id)
 	{
 		//create radial light
 		std::unique_ptr<SpotLight> light = std::make_unique<SpotLight>();
@@ -220,7 +220,7 @@ namespace Ainan {
 		env->Objects.push_back(std::move(obj));
 	}
 
-	void SpriteFromJson(EnvironmentData* env, json& data, std::string id)
+	void SpriteFromJson(Environment* env, json& data, std::string id)
 	{
 		//create sprite
 		std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();

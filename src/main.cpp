@@ -1,7 +1,6 @@
 #include <pch.h>
 
 #include "misc/Window.h"
-#include "misc/Environment.h"
 #include "misc/StartMenu.h"
 #include "renderer/Renderer.h"
 

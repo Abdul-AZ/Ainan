@@ -1,7 +1,6 @@
 #pragma once
 
-#include "environment/EnvironmentData.h"
-#include "Environment.h"
+#include "environment/Environment.h"
 #include "file/FolderBrowser.h"
 #include "file/FileBrowser.h"
 
@@ -19,11 +18,11 @@ namespace Ainan {
 	public:
 		StartMenu();
 
-		void Draw(EnvironmentData*& currentEnv);
+		void Draw(Environment*& currentEnv);
 
 	private: //helper functions to display gui in each state
-		inline void DisplayMainGUI(EnvironmentData*& currentEnv);
-		inline void DisplayCreateEnvironmentGUI(EnvironmentData*& currentEnv);
+		inline void DisplayMainGUI(Environment*& currentEnv);
+		inline void DisplayCreateEnvironmentGUI(Environment*& currentEnv);
 
 	private:
 		std::string m_EnvironmentCreateFolderPath;

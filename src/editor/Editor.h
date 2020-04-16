@@ -1,12 +1,19 @@
 #pragma once
 
-#include "environment/EnvironmentData.h"
+#include "environment/Environment.h"
+#include "misc/ViewportWindow.h"
+#include "misc/AppStatusWindow.h"
 #include "misc/StartMenu.h"
+#include "misc/Grid.h"
+#include "misc/InputManager.h"
+#include "misc/EditorStyles.h"
+#include "object/ParticleSystem.h"
+#include "object/Sprite.h"
 
 namespace Ainan {
-	bool SaveEnvironment(const EnvironmentData& env, std::string path);
+	bool SaveEnvironment(const Environment& env, std::string path);
 	std::string CheckEnvironmentFile(const std::string& path);
-	EnvironmentData* LoadEnvironment(const std::string& path);
+	Environment* LoadEnvironment(const std::string& path);
 
 	class Editor
 	{
@@ -38,7 +45,7 @@ namespace Ainan {
 		bool ShouldDelete = false;
 
 	private:
-		EnvironmentData* m_Env = nullptr;
+		Environment* m_Env = nullptr;
 		StartMenu m_StartMenu;
 		Camera m_Camera;
 		ViewportWindow m_ViewportWindow;

@@ -8,7 +8,7 @@
 
 namespace Ainan
 {
-	struct EnvironmentData
+	struct Environment
 	{
 		std::string Name;
 		std::vector<std::unique_ptr<EnvironmentObjectInterface>> Objects;
