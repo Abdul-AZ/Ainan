@@ -6,17 +6,13 @@ namespace Ainan
 {
 	Editor::Editor()
 	{
-		//m_EnvironmentFolderPath(environmentFolderPath),
-		//	m_EnvironmentName(environmentName)
-		//{
-			//std::memset(m_DeltaTimeHistory.data(), 0, m_DeltaTimeHistory.size() * sizeof(float));
-			m_PlayButtonTexture = Renderer::CreateTexture();
-			m_PauseButtonTexture = Renderer::CreateTexture();
-			m_StopButtonTexture = Renderer::CreateTexture();
+		m_PlayButtonTexture = Renderer::CreateTexture();
+		m_PauseButtonTexture = Renderer::CreateTexture();
+		m_StopButtonTexture = Renderer::CreateTexture();
 
-			m_PlayButtonTexture->SetImage(Image::LoadFromFile("res/PlayButton.png", 4));
-			m_PauseButtonTexture->SetImage(Image::LoadFromFile("res/PauseButton.png", 4));
-			m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 4));
+		m_PlayButtonTexture->SetImage(Image::LoadFromFile("res/PlayButton.png", 4));
+		m_PauseButtonTexture->SetImage(Image::LoadFromFile("res/PauseButton.png", 4));
+		m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 4));
 	}
 
 	Editor::~Editor()
@@ -101,8 +97,8 @@ namespace Ainan
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
 		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
-		desc.Blur = m_Env->m_Settings.BlurEnabled;
-		desc.BlurRadius = m_Env->m_Settings.BlurRadius;
+		desc.Blur = m_Env->BlurEnabled;
+		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
 		
 		for (pEnvironmentObject& obj : m_Env->Objects)
@@ -160,7 +156,7 @@ namespace Ainan
 		if (m_Status == Status_EditorMode) {
 			Renderer::EndScene();
 			m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
-			if (m_Env->m_Settings.ShowGrid)
+			if (m_ShowGrid)
 				m_Grid.Draw();
 			m_ExportCamera.DrawOutline();
 		}
@@ -185,7 +181,7 @@ namespace Ainan
 			
 			if (m_Status == Status_ExportMode && m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted)
 			{
-				m_ExportCamera.ExportFrame(m_Env->m_Background, m_Env->Objects, m_Env->m_Settings.BlurEnabled ? m_Env->m_Settings.BlurRadius : -1.0f);
+				m_ExportCamera.ExportFrame(m_Env->m_Background, m_Env->Objects, m_Env->BlurEnabled ? m_Env->BlurRadius : -1.0f);
 				m_ExportedFrame = true;
 			}
 			
@@ -213,7 +209,69 @@ namespace Ainan
 		DisplayObjectInspecterGUI();
 		DisplayProfilerGUI();
 		m_AppStatusWindow.DisplayGUI(viewportDockID);
-		m_Env->m_Settings.DisplayGUI();
+
+		//Settings window
+		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
+
+		if (ImGui::TreeNode("Blend Settings:"))
+		{
+			ImGui::Text("Mode");
+			ImGui::SameLine();
+			if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
+			{
+				{
+					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
+					if (ImGui::Selectable("Additive", &is_Active)) {
+
+						ImGui::SetItemDefaultFocus();
+						m_Env->BlendMode = RenderingBlendMode::Additive;
+					}
+				}
+
+				{
+					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
+					if (ImGui::Selectable("Screen", &is_Active)) {
+
+						ImGui::SetItemDefaultFocus();
+						m_Env->BlendMode = RenderingBlendMode::Screen;
+					}
+				}
+				glEnable(GL_BLEND);
+
+				if (m_Env->BlendMode == RenderingBlendMode::Additive)
+					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
+					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+
+				ImGui::EndCombo();
+
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::Text("Show Grid");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(100.0f);
+		ImGui::Checkbox("##Show Grid", &m_ShowGrid);
+
+		ImGui::Text("Blur");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(100.0f);
+		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
+
+		if (m_Env->BlurEnabled) {
+			if (ImGui::TreeNode("Blur Settings: ")) {
+
+				ImGui::Text("Blur Radius: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
+
+				ImGui::TreePop();
+			}
+		}
+
+		ImGui::End();
+
 		m_ExportCamera.DisplayGUI();
 		m_Env->m_Background.DisplayGUI();
 
@@ -256,7 +314,7 @@ namespace Ainan
 
 				ImGui::MenuItem("Environment Controls", nullptr, &m_EnvironmentControlsWindowOpen);
 				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
-				ImGui::MenuItem("General Settings", nullptr, &m_Env->m_Settings.GeneralSettingsWindowOpen);
+				ImGui::MenuItem("General Settings", nullptr, &m_EnvironmentSettingsWindowOpen);
 				ImGui::MenuItem("Profiler", nullptr, &m_ProfilerWindowOpen);
 				ImGui::MenuItem("Background Settings", nullptr, &m_Env->m_Background.SettingsWindowOpen);
 				ImGui::MenuItem("ExportMode Settings", nullptr, &m_Env->m_ExportCamera.SettingsWindowOpen);

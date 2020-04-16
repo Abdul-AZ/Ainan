@@ -58,6 +58,9 @@ namespace Ainan {
 		bool m_EnvironmentControlsWindowOpen = true;
 		bool m_ObjectInspectorWindowOpen = true;
 		bool m_ProfilerWindowOpen = true;
+		bool m_EnvironmentSettingsWindowOpen = true;
+		bool m_ShowGrid = true;
+
 		EditorStatus m_Status = Status_EditorMode;
 		std::string m_EnvironmentFolderPath;
 		std::shared_ptr<Texture> m_PlayButtonTexture;

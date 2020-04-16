@@ -43,6 +43,12 @@ namespace Ainan {
 	const int c_MaxQuadVerticesPerBatch = c_MaxQuadsPerBatch * 4;
 	const int c_MaxQuadTexturesPerBatch = 16;
 
+	enum class RenderingBlendMode 
+	{
+		Additive,
+		Screen
+	};
+
 	//this class is completely api agnostic, meaning NO gl calls, NO direct3D calls etc
 	class Renderer 
 	{

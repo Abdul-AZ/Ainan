@@ -88,9 +88,8 @@ namespace Ainan {
 
 	void SettingsFromJson(Environment* env, json& data)
 	{
-		env->m_Settings.BlurEnabled = data["BlurEnabled"].get<bool>();
-		env->m_Settings.BlurRadius = data["BlurRadius"].get<float>();
-		env->m_Settings.ShowGrid = data["ShowGrid"].get<bool>();
+		env->BlurEnabled = data["BlurEnabled"].get<bool>();
+		env->BlurRadius = data["BlurRadius"].get<float>();
 	}
 
 	void BackgroundFromJson(Background& background, json& data)

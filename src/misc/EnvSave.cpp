@@ -18,7 +18,6 @@ namespace Ainan {
 	static void toJson(json& j, const ParticleSystem& ps, size_t objectOrder);
 	static void toJson(json& j, const RadialLight& light, size_t objectOrder);
 	static void toJson(json& j, const SpotLight& light, size_t objectOrder);
-	static void toJson(json& j, const GeneralSettingsGUI& settings);
 	static void toJson(json& j, const Background& background);
 	static void toJson(json& j, const Sprite& sprite, size_t objectOrder);
 
@@ -59,7 +58,9 @@ namespace Ainan {
 			}
 		}
 
-		toJson(data, env.m_Settings);
+		data["BlurEnabled"] = env.BlurEnabled;
+		data["BlurRadius"] = env.BlurRadius;
+
 		toJson(data, env.m_Background);
 
 		std::string jsonString = data.dump(4);
@@ -74,13 +75,6 @@ namespace Ainan {
 			assert(false, "Error while trying to save environment");
 		
 		return true;
-	}
-
-	void toJson(json& j, const GeneralSettingsGUI& settings)
-	{
-		j["BlurEnabled"] = settings.BlurEnabled;
-		j["BlurRadius"] = settings.BlurRadius;
-		j["ShowGrid"] = settings.ShowGrid;
 	}
 
 	void toJson(json& j, const Background& background)
