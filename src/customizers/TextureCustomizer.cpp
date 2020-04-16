@@ -50,7 +50,7 @@ namespace Ainan {
 							ParticleTexture = Renderer::CreateTexture();
 							ParticleTexture->SetImage(Image::LoadFromFile(tex));
 							UseDefaultTexture = false;
-							std::string absolutePathToEnv = AssetManager::GetAbsolutePath();
+							std::string absolutePathToEnv = AssetManager::s_EnvironmentDirectory.u8string();
 							m_TexturePath = tex.substr(absolutePathToEnv.size(), tex.size() - absolutePathToEnv.size());
 						}
 					}
