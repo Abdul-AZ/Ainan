@@ -264,7 +264,6 @@ namespace Ainan
 					//remove minimizing event on file browser window close
 					m_LoadEnvironmentBrowser.OnCloseWindow = nullptr;
 
-					Window::Maximize();
 					m_Env = LoadEnvironment(path.u8string());
 					m_State = State_EditorMode;
 					OnEnvironmentLoad();
@@ -1020,16 +1019,26 @@ namespace Ainan
 
 	void Editor::OnEnvironmentLoad()
 	{
+		AssetManager::Init(m_Env->FolderPath);
+		InputManager::Init();
+
+		Window::Maximize();
 		Window::WindowSizeChangedSinceLastFrame = true;
 		m_RenderSurface.SetSize(Window::FramebufferSize);
 		RegisterEnvironmentInputKeys();
 
 		std::memset(m_DeltaTimeHistory.data(), 0, m_DeltaTimeHistory.size() * sizeof(float));
 
-		AssetManager::Init(m_Env->FolderPath);
-		InputManager::Init();
-
 		UpdateTitle();
+	}
+
+	void Editor::OnEnvironmentDestroy()
+	{
+		AssetManager::Terminate();
+		InputManager::Terminate();
+		Window::Restore();
+		Window::SetSize({ WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 });
+		Window::CenterWindow();
 	}
 
 	void Editor::DisplayMainMenuBarGUI()
@@ -1041,7 +1050,11 @@ namespace Ainan
 					SaveEnvironment(*m_Env, m_EnvironmentFolderPath + m_Env->Name + ".env");
 
 				if (ImGui::MenuItem("Close Environment"))
-					ShouldDelete = true; //this means environment be closed when the time is right
+				{
+					m_ShouldDeleteEnv = true;
+					OnEnvironmentDestroy();
+					m_State = State_NoEnvLoaded;
+				}
 
 				if (ImGui::MenuItem("Exit"))
 					exit(0);
@@ -1330,7 +1343,6 @@ namespace Ainan
 					ImGui::EndDragDropTarget();
 				}
 
-
 				//show menu when right clicking
 				if (ImGui::BeginPopupContextItem("Object Popup"))
 				{
@@ -1357,7 +1369,8 @@ namespace Ainan
 				}
 
 				//display particle system buttons only if it is selected
-				if (m_Env->Objects[i]->Selected) {
+				if (m_Env->Objects[i]->Selected)
+				{
 					if (ImGui::Button("Edit"))
 						m_Env->Objects[i]->EditorOpen = !m_Env->Objects[i]->EditorOpen;
 
@@ -1389,7 +1402,6 @@ namespace Ainan
 
 			ImGui::ListBoxFooter();
 		}
-
 		ImGui::End();
 
 		if (!m_AddObjectWindowOpen)
@@ -1670,7 +1682,8 @@ namespace Ainan
 			{
 				for (int i = 0; i < m_Env->Objects.size(); i++)
 				{
-					if (m_Env->Objects[i]->Selected) {
+					if (m_Env->Objects[i]->Selected) 
+					{
 						m_Env->Objects[i]->ToBeDeleted = true;
 						break;
 					}
@@ -1881,6 +1894,13 @@ namespace Ainan
 
 	void Editor::StartFrame()
 	{
+		if (m_ShouldDeleteEnv)
+		{
+			delete m_Env;
+			m_Env = nullptr;
+			m_ShouldDeleteEnv = false;
+		}
+
 		m_TimeStart = clock();
 	}
 

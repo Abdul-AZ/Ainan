@@ -47,9 +47,6 @@ namespace Ainan {
 		void StartFrame();
 		void EndFrame();
 
-	public:
-		bool ShouldDelete = false;
-
 	private:
 		Environment* m_Env = nullptr;
 		Camera m_Camera;
@@ -87,6 +84,7 @@ namespace Ainan {
 		FolderBrowser m_FolderBrowser;
 		FileBrowser m_LoadEnvironmentBrowser;
 		bool m_IncludeStarterAssets = false;
+		bool m_ShouldDeleteEnv = false;
 
 	private:
 		//methods based on editor state
@@ -104,6 +102,7 @@ namespace Ainan {
 
 		//general functions for reusing code
 		void OnEnvironmentLoad();
+		void OnEnvironmentDestroy();
 		void DisplayMainMenuBarGUI();
 		void DisplayEnvironmentControlsGUI();
 		void Stop();

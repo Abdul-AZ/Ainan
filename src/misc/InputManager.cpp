@@ -27,6 +27,7 @@ namespace Ainan {
 	void InputManager::Terminate()
 	{
 		glfwSetScrollCallback(Window::Ptr, nullptr);
+		ClearKeys();
 	}
 
 	void InputManager::RegisterKey(int glfwKeyCode, std::string description, std::function<void()> func, int eventTrigger)
@@ -43,6 +44,8 @@ namespace Ainan {
 	void InputManager::ClearKeys()
 	{
 		m_Keys.clear();
+		m_MouseKeys.clear();
+		m_ScrollFunctions.clear();
 	}
 
 	void InputManager::HandleInput()
