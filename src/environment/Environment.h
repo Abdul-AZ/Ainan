@@ -11,6 +11,7 @@ namespace Ainan
 	{
 		//project name
 		std::string Name;
+
 		//all the objects in the environement
 		std::vector<std::unique_ptr<EnvironmentObjectInterface>> Objects;
 

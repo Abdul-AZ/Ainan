@@ -4,8 +4,15 @@
 
 namespace Ainan 
 {
-	Editor::Editor()
+	Editor::Editor():
+		m_LoadEnvironmentBrowser(STARTING_BROWSER_DIRECTORY, "Load Environment")
 	{
+		m_LoadEnvironmentBrowser.Filter.push_back(".env");
+		m_LoadEnvironmentBrowser.OnCloseWindow = []() {
+			Window::SetSize({ WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 });
+			Window::CenterWindow();
+		};
+
 		m_PlayButtonTexture = Renderer::CreateTexture();
 		m_PauseButtonTexture = Renderer::CreateTexture();
 		m_StopButtonTexture = Renderer::CreateTexture();
@@ -22,25 +29,58 @@ namespace Ainan
 
 	void Editor::Update()
 	{
-		static bool first_time = true;
+		switch (m_State)
+		{
+		case State_EditorMode:
+			Update_EditorMode();
+			break;
 
-		if (m_Env == nullptr)
-			return;
+		case State_PlayMode:
+			Update_PlayMode();
+			break;
 
-		if (first_time) {
-			Window::WindowSizeChangedSinceLastFrame = true;
-			RegisterEnvironmentInputKeys();
+		case State_PauseMode:
+			Update_PauseMode();
+			break;
 
-			std::memset(m_DeltaTimeHistory.data(), 0, m_DeltaTimeHistory.size() * sizeof(float));
-
-			AssetManager::Init(m_Env->FolderPath);
-			InputManager::Init();
-
-			UpdateTitle();
-
-			first_time = false;
+		case State_ExportMode:
+			Update_ExportMode();
+			break;
 		}
+	}
 
+	void Editor::Draw()
+	{
+		switch (m_State)
+		{
+		case State_NoEnvLoaded:
+			Draw_NoEnvLoaded();
+			break;
+		
+		case State_CreateEnv:
+			Draw_CreateEnv();
+			break;
+
+		case State_EditorMode:
+			Draw_EditorMode();
+			break;
+
+		case State_PlayMode:
+			Draw_PlayMode();
+			break;
+
+		case State_PauseMode:
+			Draw_PauseMode();
+			break;
+
+		case State_ExportMode:
+			Draw_ExportMode();
+			break;
+		}
+	}
+
+	void Editor::Update_EditorMode()
+	{
 		//if time passed is less than a frame time, we use the time of a single frame
 		//because we are not going to start the next frame until the time of a single frame finishes
 		float realDeltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
@@ -49,10 +89,38 @@ namespace Ainan
 		m_AppStatusWindow.Update(realDeltaTime);
 
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
-		for (int i = 0; i < m_Env->Objects.size(); i++) {
+		for (int i = 0; i < m_Env->Objects.size(); i++) 
+		{
+			if (m_Env->Objects[i]->ToBeDeleted)
+			{
+				//display status that we are deleting the object (for 2 seconds)
+				m_AppStatusWindow.SetText("Deleted Object : \"" + m_Env->Objects[i]->m_Name + '"' + " of Type : \"" +
+					EnvironmentObjectTypeToString(m_Env->Objects[i]->Type) + '"', 2.0f);
 
-			if (m_Status == Status_PlayMode || m_Status == Status_ExportMode)
-				m_Env->Objects[i]->Update(realDeltaTime);
+				//delete the object
+				m_Env->Objects.erase(m_Env->Objects.begin() + i);
+			}
+		}
+
+		if (Window::WindowSizeChangedSinceLastFrame)
+			m_RenderSurface.SetSize(Window::FramebufferSize);
+
+		InputManager::HandleInput();
+	}
+
+	void Editor::Update_PlayMode()
+	{
+		//if time passed is less than a frame time, we use the time of a single frame
+		//because we are not going to start the next frame until the time of a single frame finishes
+		float realDeltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
+
+		m_Camera.Update(realDeltaTime, m_ViewportWindow.RenderViewport);
+		m_AppStatusWindow.Update(realDeltaTime);
+
+		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
+		for (int i = 0; i < m_Env->Objects.size(); i++) 
+		{
+			m_Env->Objects[i]->Update(realDeltaTime);
 
 			if (m_Env->Objects[i]->ToBeDeleted)
 			{
@@ -69,30 +137,286 @@ namespace Ainan
 			m_RenderSurface.SetSize(Window::FramebufferSize);
 
 		//this stuff is used for the profiler
-		if (m_Status == Status_PlayMode || m_Status == Status_ExportMode)
-		{
-			m_TimeSincePlayModeStarted += realDeltaTime;
+		m_TimeSincePlayModeStarted += realDeltaTime;
 
-			//save delta time for the profiler
+		//save delta time for the profiler
 
-			//move everything back
-			std::memmove(m_DeltaTimeHistory.data(), m_DeltaTimeHistory.data() + 1, (m_DeltaTimeHistory.size() - 1) * sizeof(float));
-			//register the new time
-			m_DeltaTimeHistory[m_DeltaTimeHistory.size() - 1] = m_DeltaTime;
-		}
+		//move everything back
+		std::memmove(m_DeltaTimeHistory.data(), m_DeltaTimeHistory.data() + 1, (m_DeltaTimeHistory.size() - 1) * sizeof(float));
+		//register the new time
+		m_DeltaTimeHistory[m_DeltaTimeHistory.size() - 1] = m_DeltaTime;
 
-		if (m_Status == Status_ExportMode && m_ExportedFrame)
+		if (m_State == State_ExportMode && m_ExportedFrame)
 			Stop();
 		InputManager::HandleInput();
 	}
 
-	void Editor::Draw()
+	void Editor::Update_PauseMode()
 	{
-		//TODO
-		if (m_Env == nullptr) {
-			m_StartMenu.Draw(m_Env);
-			return;
+		//if time passed is less than a frame time, we use the time of a single frame
+		//because we are not going to start the next frame until the time of a single frame finishes
+		float realDeltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
+
+		m_Camera.Update(realDeltaTime, m_ViewportWindow.RenderViewport);
+		m_AppStatusWindow.Update(realDeltaTime);
+
+		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
+		for (int i = 0; i < m_Env->Objects.size(); i++) 
+		{
+			if (m_Env->Objects[i]->ToBeDeleted)
+			{
+				//display status that we are deleting the object (for 2 seconds)
+				m_AppStatusWindow.SetText("Deleted Object : \"" + m_Env->Objects[i]->m_Name + '"' + " of Type : \"" +
+					EnvironmentObjectTypeToString(m_Env->Objects[i]->Type) + '"', 2.0f);
+
+				//delete the object
+				m_Env->Objects.erase(m_Env->Objects.begin() + i);
+			}
 		}
+
+		if (Window::WindowSizeChangedSinceLastFrame)
+			m_RenderSurface.SetSize(Window::FramebufferSize);
+
+		InputManager::HandleInput();
+	}
+
+	void Editor::Update_ExportMode()
+	{
+		//if time passed is less than a frame time, we use the time of a single frame
+		//because we are not going to start the next frame until the time of a single frame finishes
+		float realDeltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
+
+		m_Camera.Update(realDeltaTime, m_ViewportWindow.RenderViewport);
+		m_AppStatusWindow.Update(realDeltaTime);
+
+		//update all objects
+		for (auto& obj : m_Env->Objects) 
+			obj->Update(realDeltaTime);
+
+		if (Window::WindowSizeChangedSinceLastFrame)
+			m_RenderSurface.SetSize(Window::FramebufferSize);
+
+		//this stuff is used for the profiler
+		m_TimeSincePlayModeStarted += realDeltaTime;
+
+		//save delta time for the profiler
+
+		//move everything back
+		std::memmove(m_DeltaTimeHistory.data(), m_DeltaTimeHistory.data() + 1, (m_DeltaTimeHistory.size() - 1) * sizeof(float));
+		//register the new time
+		m_DeltaTimeHistory[m_DeltaTimeHistory.size() - 1] = m_DeltaTime;
+
+		if (m_ExportedFrame)
+			Stop();
+
+		InputManager::HandleInput();
+	}
+
+	void Editor::Draw_NoEnvLoaded()
+	{
+		if (m_LoadEnvironmentBrowser.OnCloseWindow == nullptr)
+			m_LoadEnvironmentBrowser.OnCloseWindow = []() {
+			Window::SetSize({ WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 });
+			Window::CenterWindow();
+		};
+
+		ImGuiWrapper::NewFrame();
+
+		ImGui::SetNextWindowPos({ 0,0 });
+		ImGui::SetNextWindowSize({ (float)Window::FramebufferSize.x , Window::FramebufferSize.y });
+
+		ImGui::SetNextWindowDockID(ImGui::DockSpaceOverViewport(), ImGuiCond_::ImGuiCond_Always);
+		ImGui::Begin("Start Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
+
+		ImGui::SetWindowSize(ImVec2(Window::Size.x, Window::FramebufferSize.y));
+
+		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
+
+		if (ImGui::Button("Create New Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		{
+			m_State = State_CreateEnv;
+			Window::SetSize({ WINDOW_SIZE_ON_CREATE_ENVIRONMENT_X, WINDOW_SIZE_ON_CREATE_ENVIRONMENT_Y });
+			Window::CenterWindow();
+		}
+
+		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
+
+		if (ImGui::Button("Load Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		{
+			m_LoadEnvironmentBrowser.OpenWindow();
+		}
+
+		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
+
+		if (ImGui::Button("Exit App", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		{
+			Window::SetShouldClose();
+		}
+
+		ImGui::End();
+
+		m_LoadEnvironmentBrowser.DisplayGUI([this](const std::filesystem::path path)
+			{
+				//check if file is selected
+				if (path.extension().u8string() == ".env") {
+					assert(CheckEnvironmentFile(path.u8string()) == "");
+
+					//remove minimizing event on file browser window close
+					m_LoadEnvironmentBrowser.OnCloseWindow = nullptr;
+
+					Window::Maximize();
+					m_Env = LoadEnvironment(path.u8string());
+					m_State = State_EditorMode;
+					OnEnvironmentLoad();
+				}
+			});
+
+		ImGuiWrapper::Render();
+	}
+
+	void Editor::Draw_CreateEnv()
+	{
+		ImGuiWrapper::NewFrame();
+
+		ImGui::SetNextWindowDockID(ImGui::DockSpaceOverViewport(), ImGuiCond_::ImGuiCond_Always);
+		ImGui::Begin("Create Environment", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
+
+		ImGui::Text("Environment Folder");
+		ImGui::SameLine();
+		ImGui::InputText("##Environment Folder", &m_EnvironmentCreateFolderPath);
+		ImGui::SameLine();
+		if (ImGui::Button("Browser"))
+		{
+			m_FolderBrowser.WindowOpen = true;
+		}
+
+		bool fileExists = false, fileIsDirectory = false, fileIsEmpty = false;
+		ImGui::Text("Create Directory For Environment: ");
+		ImGui::SameLine();
+		ImGui::Checkbox("##Create Directory For Environment: ", &m_CreateEvironmentDirectory);
+		bool canCreateDirectory = !std::filesystem::exists(m_EnvironmentCreateFolderPath + m_EnvironmentCreateName + "\\");
+
+		fileExists = std::filesystem::exists(m_EnvironmentCreateFolderPath);
+
+		if (fileExists)
+		{
+			fileIsDirectory = std::filesystem::is_directory(m_EnvironmentCreateFolderPath);
+			if (fileIsDirectory)
+				fileIsEmpty = std::filesystem::is_empty(m_EnvironmentCreateFolderPath);
+		}
+
+		bool unsupportedEnvironmentName =
+			m_EnvironmentCreateName.find(" ") != std::string::npos
+			|| m_EnvironmentCreateName.find(".") != std::string::npos
+			|| m_EnvironmentCreateName.find("\\") != std::string::npos
+			|| m_EnvironmentCreateName.find("/") != std::string::npos
+			|| m_EnvironmentCreateName.find("\'") != std::string::npos
+			|| m_EnvironmentCreateName.find("\"") != std::string::npos
+			|| m_EnvironmentCreateName == "";
+
+		ImGui::Text("Environment Name");
+		ImGui::SameLine();
+		ImGui::InputTextWithHint("##Environment Name", "MyEnvironment", &m_EnvironmentCreateName);
+
+		bool canSaveEnvironment = false;
+
+		if (fileExists     //the directory we create our environment in or the directory that we create the folder that holds our environment exists
+			&& fileIsDirectory //make sure it is a directory
+			&& (fileIsEmpty || m_CreateEvironmentDirectory)  //make sure the directory is not empty if aren't making a seperate directory for the environment
+			&& (!m_CreateEvironmentDirectory || (m_CreateEvironmentDirectory && canCreateDirectory)) //if we are making a directory make sure there is no one like it
+			&& !unsupportedEnvironmentName) //environment name is not valid
+		{
+			canSaveEnvironment = true;
+		}
+		else
+		{
+			ImVec4 redColor = { 0.8f, 0.0f, 0.0f, 1.0f };
+
+			//display why the path is not valid
+			if (!fileExists)
+				ImGui::TextColored(redColor, "Directoy does not exists");
+			else if (!fileIsDirectory)
+				ImGui::TextColored({ 1.0f, 0.0f, 0.0f, 1.0f }, "File is not a Directory");
+			else if (!fileIsEmpty && !m_CreateEvironmentDirectory)
+				ImGui::TextColored(redColor, "Directory is not empty");
+			else if (unsupportedEnvironmentName)
+				ImGui::TextColored(redColor, "Name is not valid");
+			else if (m_CreateEvironmentDirectory && !canCreateDirectory)
+				ImGui::TextColored(redColor, "Directory already exists");
+			else
+				assert(false); //we should never get to here
+
+			canSaveEnvironment = false;
+		}
+
+		ImGui::Text("Include Starter Assets");
+		ImGui::SameLine();
+		ImGui::Checkbox("##Include Starter Assets", &m_IncludeStarterAssets);
+
+		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - (START_MENU_BUTTON_HEIGHT + 10));
+
+		if (ImGui::Button("Cancel", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		{
+			m_State = State_NoEnvLoaded;
+			Window::SetSize({ WINDOW_SIZE_ON_LAUNCH_X, WINDOW_SIZE_ON_LAUNCH_Y });
+			Window::CenterWindow();
+		}
+
+		//change create button color to green to show that the path given is valid
+		if (canSaveEnvironment)
+			ImGui::PushStyleColor(ImGuiCol_Button, { 0.0f, 0.8f, 0.0f, 1.0f });
+		//change create button color to red to show that the path given is not valid
+		else
+			ImGui::PushStyleColor(ImGuiCol_Button, { 0.8f, 0.0f, 0.0f, 1.0f });
+
+		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - (START_MENU_BUTTON_HEIGHT + 10));
+		ImGui::SetCursorPosX(ImGui::GetWindowSize().x - (START_MENU_BUTTON_WIDTH + 10));
+
+		if (ImGui::Button("Create", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		{
+			if (canSaveEnvironment) {
+				Window::Maximize();
+
+				//make sure the folder path has a backslash at the end
+				if (m_EnvironmentCreateFolderPath[m_EnvironmentCreateFolderPath.size() - 1] != '\\')
+					m_EnvironmentCreateFolderPath = m_EnvironmentCreateFolderPath + "\\";
+
+				std::string dirPath = "";
+				if (m_CreateEvironmentDirectory)
+				{
+					dirPath = m_EnvironmentCreateFolderPath + m_EnvironmentCreateName + "\\";
+					std::filesystem::create_directory(dirPath);
+				}
+				else
+				{
+					dirPath = m_EnvironmentCreateFolderPath;
+				}
+
+				m_Env = new Environment;
+				m_Env->FolderPath = dirPath;
+				m_Env->Name = m_EnvironmentCreateName;
+
+				if (m_IncludeStarterAssets)
+					std::filesystem::copy("res\\StarterAssets", dirPath + "\\StarterAssets");
+
+				m_State = State_EditorMode;
+				OnEnvironmentLoad();
+			}
+		}
+
+		ImGui::PopStyleColor();
+
+		ImGui::End();
+
+		m_FolderBrowser.DisplayGUI([this](const std::string& dir) {
+			m_EnvironmentCreateFolderPath = dir;
+			});
+
+		ImGuiWrapper::Render();
+	}
+
+	void Editor::Draw_EditorMode()
+	{
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
@@ -100,7 +424,7 @@ namespace Ainan
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
-		
+
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
 			if (obj->Type == RadialLightType) {
@@ -112,82 +436,50 @@ namespace Ainan
 				m_Env->m_Background.SubmitLight(*light);
 			}
 		}
-		
+
 		m_Env->m_Background.Draw();
-		
+
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
 			if (obj->Type == SpriteType)
 				obj->Draw();
 		}
-		
-		if (m_Status == Status_EditorMode)
-			for (pEnvironmentObject& obj : m_Env->Objects)
-				if (obj->Selected) {
-					//draw object position gizmo
-					m_Gizmo.Draw(obj->GetPositionRef(), m_ViewportWindow.RenderViewport);
-		
-					//if particle system needs to edit a force target (a world point), use a gimzo for it
-					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
-					{
-						auto ps = static_cast<ParticleSystem*>(obj.get());
-						if (ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "")
-							if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce)
-								m_Gizmo.Draw(ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target, m_ViewportWindow.RenderViewport);
-					}
+
+		for (pEnvironmentObject& obj : m_Env->Objects)
+			if (obj->Selected) {
+				//draw object position gizmo
+				m_Gizmo.Draw(obj->GetPositionRef(), m_ViewportWindow.RenderViewport);
+
+				//if particle system needs to edit a force target (a world point), use a gimzo for it
+				if (obj->Type == EnvironmentObjectType::ParticleSystemType)
+				{
+					auto ps = static_cast<ParticleSystem*>(obj.get());
+					if (ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "")
+						if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce)
+							m_Gizmo.Draw(ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target, m_ViewportWindow.RenderViewport);
 				}
-		
+			}
+
 		//Render world space gui here because we need camera information for that
-		if (m_Status == Status_EditorMode) {
-			for (pEnvironmentObject& obj : m_Env->Objects)
-			{
-				if (obj->Selected)
-					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
-					{
-						ParticleSystem* ps = (ParticleSystem*)obj.get();
-						if (ps->Customizer.Mode == SpawnMode::SpawnOnLine)
-							ps->Customizer.m_Line.Draw();
-						else if (ps->Customizer.Mode == SpawnMode::SpawnOnCircle || ps->Customizer.Mode == SpawnMode::SpawnInsideCircle && ps->Selected)
-							ps->Customizer.m_CircleOutline.Draw();
-					}
-			}
-		}
-		
-		if (m_Status == Status_EditorMode) {
-			Renderer::EndScene();
-			m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
-			if (m_ShowGrid)
-				m_Grid.Draw();
-			m_ExportCamera.DrawOutline();
-		}
-		else
+		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
-
-			//stuff to only render in play mode and export mode
-			for (pEnvironmentObject& obj : m_Env->Objects)
-			{
-				//because we already drawed all the sprites
-				if (obj->Type == SpriteType)
-					continue;
-				obj->Draw();
-			}
-
-			Renderer::EndScene();
-			
-			//draw this after the scene is drawn so that post processing effects do not apply to it
-			m_ExportCamera.DrawOutline();
-			
-			m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
-			
-			if (m_Status == Status_ExportMode && m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted)
-			{
-				m_ExportCamera.ExportFrame(m_Env->m_Background, m_Env->Objects, m_Env->BlurEnabled ? m_Env->BlurRadius : -1.0f);
-				m_ExportedFrame = true;
-			}
-			
-			m_RenderSurface.SurfaceFrameBuffer->Unbind();
+			if (obj->Selected)
+				if (obj->Type == EnvironmentObjectType::ParticleSystemType)
+				{
+					ParticleSystem* ps = (ParticleSystem*)obj.get();
+					if (ps->Customizer.Mode == SpawnMode::SpawnOnLine)
+						ps->Customizer.m_Line.Draw();
+					else if (ps->Customizer.Mode == SpawnMode::SpawnOnCircle || ps->Customizer.Mode == SpawnMode::SpawnInsideCircle && ps->Selected)
+						ps->Customizer.m_CircleOutline.Draw();
+				}
 		}
-		//
+
+		Renderer::EndScene();
+		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
+		if (m_ShowGrid)
+			m_Grid.Draw();
+		m_ExportCamera.DrawOutline();
+
 		//GUI
 		ImGuiWrapper::NewFrame();
 
@@ -285,6 +577,461 @@ namespace Ainan
 		ImGuiWrapper::Render();
 	}
 
+	void Editor::Draw_PlayMode()
+	{
+		SceneDescription desc;
+		desc.SceneCamera = m_Camera;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		desc.Blur = m_Env->BlurEnabled;
+		desc.BlurRadius = m_Env->BlurRadius;
+		Renderer::BeginScene(desc);
+
+		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			if (obj->Type == RadialLightType) {
+				RadialLight* light = static_cast<RadialLight*>(obj.get());
+				m_Env->m_Background.SubmitLight(*light);
+			}
+			else if (obj->Type == SpotLightType) {
+				SpotLight* light = static_cast<SpotLight*>(obj.get());
+				m_Env->m_Background.SubmitLight(*light);
+			}
+		}
+
+		m_Env->m_Background.Draw();
+
+		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			if (obj->Type == SpriteType)
+				obj->Draw();
+		}
+
+		//stuff to only render in play mode and export mode
+		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			//because we already drawed all the sprites
+			if (obj->Type == SpriteType)
+				continue;
+			obj->Draw();
+		}
+
+		Renderer::EndScene();
+
+		//draw this after the scene is drawn so that post processing effects do not apply to it
+		m_ExportCamera.DrawOutline();
+
+		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
+
+		m_RenderSurface.SurfaceFrameBuffer->Unbind();
+
+		//GUI
+		ImGuiWrapper::NewFrame();
+
+		DisplayMainMenuBarGUI();
+
+		float menuBarHeight = ImGui::GetFrameHeightWithSpacing();
+		ImGuiViewport viewport;
+		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y - menuBarHeight);
+		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
+
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
+		ImGui::PopStyleColor();
+
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
+
+		AssetManager::DisplayGUI();
+		DisplayEnvironmentControlsGUI();
+		DisplayObjectInspecterGUI();
+		DisplayProfilerGUI();
+		m_AppStatusWindow.DisplayGUI(viewportDockID);
+
+		//Settings window
+		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
+
+		if (ImGui::TreeNode("Blend Settings:"))
+		{
+			ImGui::Text("Mode");
+			ImGui::SameLine();
+			if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
+			{
+				{
+					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
+					if (ImGui::Selectable("Additive", &is_Active)) {
+
+						ImGui::SetItemDefaultFocus();
+						m_Env->BlendMode = RenderingBlendMode::Additive;
+					}
+				}
+
+				{
+					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
+					if (ImGui::Selectable("Screen", &is_Active)) {
+
+						ImGui::SetItemDefaultFocus();
+						m_Env->BlendMode = RenderingBlendMode::Screen;
+					}
+				}
+				glEnable(GL_BLEND);
+
+				if (m_Env->BlendMode == RenderingBlendMode::Additive)
+					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
+					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+
+				ImGui::EndCombo();
+
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::Text("Show Grid");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(100.0f);
+		ImGui::Checkbox("##Show Grid", &m_ShowGrid);
+
+		ImGui::Text("Blur");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(100.0f);
+		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
+
+		if (m_Env->BlurEnabled) {
+			if (ImGui::TreeNode("Blur Settings: ")) {
+
+				ImGui::Text("Blur Radius: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
+
+				ImGui::TreePop();
+			}
+		}
+
+		ImGui::End();
+
+		m_ExportCamera.DisplayGUI();
+		m_Env->m_Background.DisplayGUI();
+
+		for (pEnvironmentObject& obj : m_Env->Objects)
+			obj->DisplayGUI();
+
+		InputManager::DisplayGUI();
+		m_ViewportWindow.DisplayGUI();
+		ImGui::PopStyleColor();
+
+		ImGuiWrapper::Render();
+	}
+
+	void Editor::Draw_PauseMode()
+	{
+		SceneDescription desc;
+		desc.SceneCamera = m_Camera;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		desc.Blur = m_Env->BlurEnabled;
+		desc.BlurRadius = m_Env->BlurRadius;
+		Renderer::BeginScene(desc);
+
+		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			if (obj->Type == RadialLightType) {
+				RadialLight* light = static_cast<RadialLight*>(obj.get());
+				m_Env->m_Background.SubmitLight(*light);
+			}
+			else if (obj->Type == SpotLightType) {
+				SpotLight* light = static_cast<SpotLight*>(obj.get());
+				m_Env->m_Background.SubmitLight(*light);
+			}
+		}
+
+		m_Env->m_Background.Draw();
+
+		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			if (obj->Type == SpriteType)
+				obj->Draw();
+		}
+
+		//stuff to only render in play mode and export mode
+		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			//because we already drawed all the sprites
+			if (obj->Type == SpriteType)
+				continue;
+			obj->Draw();
+		}
+
+		Renderer::EndScene();
+
+		//draw this after the scene is drawn so that post processing effects do not apply to it
+		m_ExportCamera.DrawOutline();
+
+		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
+
+		m_RenderSurface.SurfaceFrameBuffer->Unbind();
+
+		//GUI
+		ImGuiWrapper::NewFrame();
+
+		DisplayMainMenuBarGUI();
+
+		float menuBarHeight = ImGui::GetFrameHeightWithSpacing();
+		ImGuiViewport viewport;
+		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y - menuBarHeight);
+		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
+
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
+		ImGui::PopStyleColor();
+
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
+
+		AssetManager::DisplayGUI();
+		DisplayEnvironmentControlsGUI();
+		DisplayObjectInspecterGUI();
+		DisplayProfilerGUI();
+		m_AppStatusWindow.DisplayGUI(viewportDockID);
+
+		//Settings window
+		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
+
+		if (ImGui::TreeNode("Blend Settings:"))
+		{
+			ImGui::Text("Mode");
+			ImGui::SameLine();
+			if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
+			{
+				{
+					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
+					if (ImGui::Selectable("Additive", &is_Active)) {
+
+						ImGui::SetItemDefaultFocus();
+						m_Env->BlendMode = RenderingBlendMode::Additive;
+					}
+				}
+
+				{
+					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
+					if (ImGui::Selectable("Screen", &is_Active)) {
+
+						ImGui::SetItemDefaultFocus();
+						m_Env->BlendMode = RenderingBlendMode::Screen;
+					}
+				}
+				glEnable(GL_BLEND);
+
+				if (m_Env->BlendMode == RenderingBlendMode::Additive)
+					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
+					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+
+				ImGui::EndCombo();
+
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::Text("Show Grid");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(100.0f);
+		ImGui::Checkbox("##Show Grid", &m_ShowGrid);
+
+		ImGui::Text("Blur");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(100.0f);
+		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
+
+		if (m_Env->BlurEnabled) {
+			if (ImGui::TreeNode("Blur Settings: ")) {
+
+				ImGui::Text("Blur Radius: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
+
+				ImGui::TreePop();
+			}
+		}
+
+		ImGui::End();
+
+		m_ExportCamera.DisplayGUI();
+		m_Env->m_Background.DisplayGUI();
+
+		for (pEnvironmentObject& obj : m_Env->Objects)
+			obj->DisplayGUI();
+
+		InputManager::DisplayGUI();
+		m_ViewportWindow.DisplayGUI();
+		ImGui::PopStyleColor();
+
+		ImGuiWrapper::Render();
+	}
+
+	void Editor::Draw_ExportMode()
+	{
+		SceneDescription desc;
+		desc.SceneCamera = m_Camera;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		desc.Blur = m_Env->BlurEnabled;
+		desc.BlurRadius = m_Env->BlurRadius;
+		Renderer::BeginScene(desc);
+
+		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			if (obj->Type == RadialLightType) {
+				RadialLight* light = static_cast<RadialLight*>(obj.get());
+				m_Env->m_Background.SubmitLight(*light);
+			}
+			else if (obj->Type == SpotLightType) {
+				SpotLight* light = static_cast<SpotLight*>(obj.get());
+				m_Env->m_Background.SubmitLight(*light);
+			}
+		}
+
+		m_Env->m_Background.Draw();
+
+		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			if (obj->Type == SpriteType)
+				obj->Draw();
+		}
+
+		//stuff to only render in play mode and export mode
+		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			//because we already drawed all the sprites
+			if (obj->Type == SpriteType)
+				continue;
+			obj->Draw();
+		}
+
+		Renderer::EndScene();
+
+		//draw this after the scene is drawn so that post processing effects do not apply to it
+		m_ExportCamera.DrawOutline();
+
+		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
+
+		if (m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted)
+		{
+			m_ExportCamera.ExportFrame(m_Env->m_Background, m_Env->Objects, m_Env->BlurEnabled ? m_Env->BlurRadius : -1.0f);
+			m_ExportedFrame = true;
+		}
+
+		m_RenderSurface.SurfaceFrameBuffer->Unbind();
+
+		//GUI
+		ImGuiWrapper::NewFrame();
+
+		DisplayMainMenuBarGUI();
+
+		float menuBarHeight = ImGui::GetFrameHeightWithSpacing();
+		ImGuiViewport viewport;
+		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y - menuBarHeight);
+		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
+
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
+		ImGui::PopStyleColor();
+
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
+
+		AssetManager::DisplayGUI();
+		DisplayEnvironmentControlsGUI();
+		DisplayObjectInspecterGUI();
+		DisplayProfilerGUI();
+		m_AppStatusWindow.DisplayGUI(viewportDockID);
+
+		//Settings window
+		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
+
+		if (ImGui::TreeNode("Blend Settings:"))
+		{
+			ImGui::Text("Mode");
+			ImGui::SameLine();
+			if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
+			{
+				{
+					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
+					if (ImGui::Selectable("Additive", &is_Active)) {
+
+						ImGui::SetItemDefaultFocus();
+						m_Env->BlendMode = RenderingBlendMode::Additive;
+					}
+				}
+
+				{
+					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
+					if (ImGui::Selectable("Screen", &is_Active)) {
+
+						ImGui::SetItemDefaultFocus();
+						m_Env->BlendMode = RenderingBlendMode::Screen;
+					}
+				}
+				glEnable(GL_BLEND);
+
+				if (m_Env->BlendMode == RenderingBlendMode::Additive)
+					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
+					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+
+				ImGui::EndCombo();
+
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::Text("Show Grid");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(100.0f);
+		ImGui::Checkbox("##Show Grid", &m_ShowGrid);
+
+		ImGui::Text("Blur");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(100.0f);
+		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
+
+		if (m_Env->BlurEnabled) {
+			if (ImGui::TreeNode("Blur Settings: ")) {
+
+				ImGui::Text("Blur Radius: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
+
+				ImGui::TreePop();
+			}
+		}
+
+		ImGui::End();
+
+		m_ExportCamera.DisplayGUI();
+		m_Env->m_Background.DisplayGUI();
+
+		for (pEnvironmentObject& obj : m_Env->Objects)
+			obj->DisplayGUI();
+
+		InputManager::DisplayGUI();
+		m_ViewportWindow.DisplayGUI();
+		ImGui::PopStyleColor();
+
+		ImGuiWrapper::Render();
+	}
+
+	void Editor::OnEnvironmentLoad()
+	{
+		Window::WindowSizeChangedSinceLastFrame = true;
+		m_RenderSurface.SetSize(Window::FramebufferSize);
+		RegisterEnvironmentInputKeys();
+
+		std::memset(m_DeltaTimeHistory.data(), 0, m_DeltaTimeHistory.size() * sizeof(float));
+
+		AssetManager::Init(m_Env->FolderPath);
+		InputManager::Init();
+
+		UpdateTitle();
+	}
+
 	void Editor::DisplayMainMenuBarGUI()
 	{
 		if (ImGui::BeginMainMenuBar()) {
@@ -362,7 +1109,7 @@ namespace Ainan
 			return;
 
 		ImGui::Begin("Controls", &m_EnvironmentControlsWindowOpen, ImGuiWindowFlags_NoScrollbar);
-		if (m_Status == Status_ExportMode)
+		if (m_State == State_ExportMode)
 		{
 			ImGui::End();
 			return;
@@ -462,21 +1209,21 @@ namespace Ainan
 		int windowcentre = ImGui::GetWindowSize().x / 2.0f;
 
 		//display the buttons depending on the state of the environment
-		switch (m_Status)
+		switch (m_State)
 		{
-		case Status_EditorMode:
+		case State_EditorMode:
 			ImGui::SetCursorPosX(windowcentre - c_buttonSize.x / 2.0f);
 			displayPlayButton();
 			break;
 
-		case Status_PlayMode:
+		case State_PlayMode:
 			ImGui::SetCursorPosX(windowcentre - c_buttonSize.x);
 			displayStopButton();
 			ImGui::SameLine();
 			displayPauseButton();
 			break;
 
-		case Status_PauseMode:
+		case State_PauseMode:
 			ImGui::SetCursorPosX(windowcentre - c_buttonSize.x);
 			displayStopButton();
 			ImGui::SameLine();
@@ -495,7 +1242,7 @@ namespace Ainan
 
 	void Editor::Stop()
 	{
-		m_Status = Status_EditorMode;
+		m_State = State_EditorMode;
 
 		for (pEnvironmentObject& obj : m_Env->Objects) {
 			if (obj->Type == EnvironmentObjectType::ParticleSystemType) {
@@ -507,24 +1254,24 @@ namespace Ainan
 
 	void Editor::Pause()
 	{
-		m_Status = Status_PauseMode;
+		m_State = State_PauseMode;
 	}
 
 	void Editor::Resume()
 	{
-		m_Status = Status_PlayMode;
+		m_State = State_PlayMode;
 	}
 
 	void Editor::ExportMode()
 	{
-		m_Status = Status_ExportMode;
+		m_State = State_ExportMode;
 		m_TimeSincePlayModeStarted = 0.0f;
 		m_ExportedFrame = false;
 	}
 
 	void Editor::PlayMode()
 	{
-		m_Status = Status_PlayMode;
+		m_State = State_PlayMode;
 		//reset profiler
 		m_TimeSincePlayModeStarted = 0.0f;
 		std::memset(m_DeltaTimeHistory.data(), 0, m_DeltaTimeHistory.size() * sizeof(float));
@@ -842,9 +1589,9 @@ namespace Ainan
 	void Editor::RegisterEnvironmentInputKeys()
 	{
 		InputManager::RegisterKey(GLFW_KEY_F5, "PlayMode/Resume", [this]() {
-			if (m_Status == Status_EditorMode)
+			if (m_State == State_EditorMode)
 				PlayMode();
-			if (m_Status == Status_PauseMode)
+			if (m_State == State_PauseMode)
 				Resume();
 			});
 

@@ -3,12 +3,16 @@
 #include "environment/Environment.h"
 #include "misc/ViewportWindow.h"
 #include "misc/AppStatusWindow.h"
-#include "misc/StartMenu.h"
+#include "file/FolderBrowser.h"
 #include "misc/Grid.h"
 #include "misc/InputManager.h"
 #include "misc/EditorStyles.h"
 #include "object/ParticleSystem.h"
 #include "object/Sprite.h"
+
+#define WINDOW_SIZE_FACTOR_ON_LAUNCH 500
+#define START_MENU_BUTTON_WIDTH 200
+#define START_MENU_BUTTON_HEIGHT 75
 
 namespace Ainan {
 	bool SaveEnvironment(const Environment& env, std::string path);
@@ -17,12 +21,14 @@ namespace Ainan {
 
 	class Editor
 	{
-		enum EditorStatus
+		enum EditorState
 		{
-			Status_EditorMode,
-			Status_PlayMode,
-			Status_PauseMode,
-			Status_ExportMode
+			State_NoEnvLoaded, //this usuallly means we just started the app or quit from an env
+			State_CreateEnv,   //this means we are on Create Environment menu
+			State_EditorMode,  //this means we are in the normal enviornment editor
+			State_PlayMode,    //this means that the environment is being simulated/run
+			State_PauseMode,   //this means that there is a pause in simulation and can be resumed to where it was stopped
+			State_ExportMode   //this means that the environment is being simulated/run and there is also recording/exporting
 		};
 
 		enum class Profiler
@@ -46,7 +52,6 @@ namespace Ainan {
 
 	private:
 		Environment* m_Env = nullptr;
-		StartMenu m_StartMenu;
 		Camera m_Camera;
 		ViewportWindow m_ViewportWindow;
 		AppStatusWindow m_AppStatusWindow;
@@ -61,7 +66,7 @@ namespace Ainan {
 		bool m_EnvironmentSettingsWindowOpen = true;
 		bool m_ShowGrid = true;
 
-		EditorStatus m_Status = Status_EditorMode;
+		EditorState m_State = State_NoEnvLoaded;
 		std::string m_EnvironmentFolderPath;
 		std::shared_ptr<Texture> m_PlayButtonTexture;
 		std::shared_ptr<Texture> m_PauseButtonTexture;
@@ -76,7 +81,29 @@ namespace Ainan {
 		std::array<float, 120> m_DeltaTimeHistory;
 		Profiler m_ActiveProfiler = Profiler::RenderingProfiler;
 
+		std::string m_EnvironmentCreateFolderPath;
+		std::string m_EnvironmentCreateName;
+		bool m_CreateEvironmentDirectory = false;
+		FolderBrowser m_FolderBrowser;
+		FileBrowser m_LoadEnvironmentBrowser;
+		bool m_IncludeStarterAssets = false;
+
 	private:
+		//methods based on editor state
+		void Update_EditorMode();
+		void Update_PlayMode();
+		void Update_PauseMode();
+		void Update_ExportMode();
+
+		void Draw_NoEnvLoaded();
+		void Draw_CreateEnv();
+		void Draw_EditorMode();
+		void Draw_PlayMode();
+		void Draw_PauseMode();
+		void Draw_ExportMode();
+
+		//general functions for reusing code
+		void OnEnvironmentLoad();
 		void DisplayMainMenuBarGUI();
 		void DisplayEnvironmentControlsGUI();
 		void Stop();
