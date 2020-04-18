@@ -1,15 +1,15 @@
 #pragma once
 
 #include "misc/EnvironmentObjectInterface.h"
-#include "misc/Background.h"
 #include "misc/ParticleCustomizer.h"
-#include "misc/ExportCamera.h"
 
 namespace Ainan
 {
+	//this is a data only structure, functionality is in the Editor class
+	//all data stored in this class is saved and loaded, it is basically the project filetype in Ainan
 	struct Environment
 	{
-		//project name
+		//metadata
 		std::string Name;
 
 		//all the objects in the environement
@@ -20,10 +20,11 @@ namespace Ainan
 		bool BlurEnabled = false;
 		float BlurRadius = 1.0f;
 
-
-		Background m_Background; //TODO
-		ParticleCustomizer Customizer;
-		ExportCamera m_ExportCamera;
-		std::string FolderPath;
+		//background data
+		glm::vec3 BackgroundColor;
+		float BackgroundBaseLight;
+		float BackgroundConstant;
+		float BackgroundLinear;
+		float BackgroundQuadratic;
 	};
 }

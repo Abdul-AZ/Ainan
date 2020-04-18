@@ -266,6 +266,7 @@ namespace Ainan
 
 					m_Env = LoadEnvironment(path.u8string());
 					m_State = State_EditorMode;
+					m_EnvironmentFolderPath = path.parent_path();
 					OnEnvironmentLoad();
 				}
 			});
@@ -392,7 +393,6 @@ namespace Ainan
 				}
 
 				m_Env = new Environment;
-				m_Env->FolderPath = dirPath;
 				m_Env->Name = m_EnvironmentCreateName;
 
 				if (m_IncludeStarterAssets)
@@ -428,15 +428,15 @@ namespace Ainan
 		{
 			if (obj->Type == RadialLightType) {
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				m_Env->m_Background.SubmitLight(*light);
+				m_Background.SubmitLight(*light);
 			}
 			else if (obj->Type == SpotLightType) {
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				m_Env->m_Background.SubmitLight(*light);
+				m_Background.SubmitLight(*light);
 			}
 		}
 
-		m_Env->m_Background.Draw();
+		m_Background.Draw(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
@@ -564,7 +564,7 @@ namespace Ainan
 		ImGui::End();
 
 		m_ExportCamera.DisplayGUI();
-		m_Env->m_Background.DisplayGUI();
+		m_Background.DisplayGUI(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 			obj->DisplayGUI();
@@ -590,15 +590,15 @@ namespace Ainan
 		{
 			if (obj->Type == RadialLightType) {
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				m_Env->m_Background.SubmitLight(*light);
+				m_Background.SubmitLight(*light);
 			}
 			else if (obj->Type == SpotLightType) {
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				m_Env->m_Background.SubmitLight(*light);
+				m_Background.SubmitLight(*light);
 			}
 		}
 
-		m_Env->m_Background.Draw();
+		m_Background.Draw(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
@@ -709,7 +709,7 @@ namespace Ainan
 		ImGui::End();
 
 		m_ExportCamera.DisplayGUI();
-		m_Env->m_Background.DisplayGUI();
+		m_Background.DisplayGUI(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 			obj->DisplayGUI();
@@ -735,15 +735,15 @@ namespace Ainan
 		{
 			if (obj->Type == RadialLightType) {
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				m_Env->m_Background.SubmitLight(*light);
+				m_Background.SubmitLight(*light);
 			}
 			else if (obj->Type == SpotLightType) {
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				m_Env->m_Background.SubmitLight(*light);
+				m_Background.SubmitLight(*light);
 			}
 		}
 
-		m_Env->m_Background.Draw();
+		m_Background.Draw(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
@@ -854,7 +854,7 @@ namespace Ainan
 		ImGui::End();
 
 		m_ExportCamera.DisplayGUI();
-		m_Env->m_Background.DisplayGUI();
+		m_Background.DisplayGUI(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 			obj->DisplayGUI();
@@ -880,15 +880,15 @@ namespace Ainan
 		{
 			if (obj->Type == RadialLightType) {
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				m_Env->m_Background.SubmitLight(*light);
+				m_Background.SubmitLight(*light);
 			}
 			else if (obj->Type == SpotLightType) {
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				m_Env->m_Background.SubmitLight(*light);
+				m_Background.SubmitLight(*light);
 			}
 		}
 
-		m_Env->m_Background.Draw();
+		m_Background.Draw(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
@@ -914,7 +914,7 @@ namespace Ainan
 
 		if (m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted)
 		{
-			m_ExportCamera.ExportFrame(m_Env->m_Background, m_Env->Objects, m_Env->BlurEnabled ? m_Env->BlurRadius : -1.0f);
+			m_ExportCamera.ExportFrame(*m_Env);
 			m_ExportedFrame = true;
 		}
 
@@ -1005,7 +1005,7 @@ namespace Ainan
 		ImGui::End();
 
 		m_ExportCamera.DisplayGUI();
-		m_Env->m_Background.DisplayGUI();
+		m_Background.DisplayGUI(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 			obj->DisplayGUI();
@@ -1019,7 +1019,7 @@ namespace Ainan
 
 	void Editor::OnEnvironmentLoad()
 	{
-		AssetManager::Init(m_Env->FolderPath);
+		AssetManager::Init(m_EnvironmentFolderPath.u8string());
 		InputManager::Init();
 
 		Window::Maximize();
@@ -1047,7 +1047,7 @@ namespace Ainan
 
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Save"))
-					SaveEnvironment(*m_Env, m_EnvironmentFolderPath + m_Env->Name + ".env");
+					SaveEnvironment(*m_Env, m_EnvironmentFolderPath.u8string() + "\\" + m_Env->Name + ".env");
 
 				if (ImGui::MenuItem("Close Environment"))
 				{
@@ -1076,8 +1076,8 @@ namespace Ainan
 				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
 				ImGui::MenuItem("General Settings", nullptr, &m_EnvironmentSettingsWindowOpen);
 				ImGui::MenuItem("Profiler", nullptr, &m_ProfilerWindowOpen);
-				ImGui::MenuItem("Background Settings", nullptr, &m_Env->m_Background.SettingsWindowOpen);
-				ImGui::MenuItem("ExportMode Settings", nullptr, &m_Env->m_ExportCamera.SettingsWindowOpen);
+				ImGui::MenuItem("Background Settings", nullptr, &m_Background.SettingsWindowOpen);
+				ImGui::MenuItem("ExportMode Settings", nullptr, &m_ExportCamera.SettingsWindowOpen);
 
 				ImGui::EndMenu();
 			}

@@ -17,7 +17,7 @@ namespace Ainan {
 		void DrawOutline();
 		void DisplayGUI();
 		//TODO change blur radius argument to it's own struct called PosProcessingSettings or something like that
-		void ExportFrame(Background& background, std::vector<pEnvironmentObject>& objects, float blurRadius);
+		void ExportFrame(Environment& env);
 
 	public:
 
@@ -28,6 +28,7 @@ namespace Ainan {
 
 		Camera RealCamera;
 		RenderSurface m_RenderSurface;
+		Background m_Background;
 
 		std::string   ImageSavePath;
 		ImageFormat   SaveImageFormat = ImageFormat::png;

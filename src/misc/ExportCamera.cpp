@@ -197,15 +197,15 @@ namespace Ainan {
 		ImGui::PopID();
 	}
 
-	void ExportCamera::ExportFrame(Background& background, std::vector<pEnvironmentObject>& objects, float blurRadius)
+	void ExportCamera::ExportFrame(Environment& env)
 	{
 		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
 		SceneDescription desc;
 		desc.SceneCamera = RealCamera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
 		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
-		desc.Blur = blurRadius != -1.0f;
-		desc.BlurRadius = blurRadius;
+		desc.Blur = env.BlurEnabled;
+		desc.BlurRadius = env.BlurRadius;
 		Renderer::BeginScene(desc);
 
 		m_RenderSurface.SetSize(m_ExportCameraSize * c_GlobalScaleFactor);
@@ -213,21 +213,21 @@ namespace Ainan {
 
 		Renderer::SetViewport({ 0, 0, (int)Window::FramebufferSize.x, (int)Window::FramebufferSize.y });
 
-		for (pEnvironmentObject& obj : objects)
+		for (pEnvironmentObject& obj : env.Objects)
 		{
 			if (obj->Type == RadialLightType) {
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				background.SubmitLight(*light);
+				m_Background.SubmitLight(*light);
 			}
 			else if (obj->Type == SpotLightType) {
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				background.SubmitLight(*light);
+				m_Background.SubmitLight(*light);
 			}
 		}
 
-		background.Draw();
+		m_Background.Draw(env);
 
-		for (pEnvironmentObject& obj : objects)
+		for (pEnvironmentObject& obj : env.Objects)
 			obj->Draw();
 
 		Renderer::EndScene();

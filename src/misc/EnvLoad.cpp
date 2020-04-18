@@ -3,6 +3,8 @@
 #include <pch.h>
 
 #include "environment/Environment.h"
+#include "object/ParticleSystem.h"
+#include "misc/Background.h"
 #include "json/json.hpp"
 #include "object/Sprite.h"
 
@@ -33,21 +35,22 @@ namespace Ainan {
 	static void SpotLightFromJson(Environment* env, json& data, std::string id);
 	static void SpriteFromJson(Environment* env,json& data, std::string id);
 	static void SettingsFromJson(Environment* env, json& data);
-	static void BackgroundFromJson(Background& background, json& data);
 
 	Environment* LoadEnvironment(const std::string& path)
 	{
 		json data = json::parse(AssetManager::ReadEntireTextFile(path));
 
-		size_t lastBackslash = path.find_last_of("\\");
-		std::string environmentFolder = path.substr(0, lastBackslash) + "\\";
-
-		//Environment* env = new Environment(environmentFolder, data["EnvironmentName"].get<std::string>());
 		Environment* env = new Environment;
-		env->FolderPath = environmentFolder;
+
+		env->Name = data["EnvironmentName"].get<std::string>();
 
 		SettingsFromJson(env, data);
-		BackgroundFromJson(env->m_Background, data);
+
+		env->BackgroundColor = JSON_ARRAY_TO_VEC3(data["BackgroundColor"].get<std::vector<float>>());
+		env->BackgroundBaseLight = data["BackgroundBaseLight"].get<float>();
+		env->BackgroundConstant = data["BackgroundConstant"].get<float>();
+		env->BackgroundLinear = data["BackgroundLinear"].get<float>();
+		env->BackgroundQuadratic = data["BackgroundQuadratic"].get<float>();
 
 		int objectCount = data["objectCount"].get<int>();
 
@@ -90,15 +93,6 @@ namespace Ainan {
 	{
 		env->BlurEnabled = data["BlurEnabled"].get<bool>();
 		env->BlurRadius = data["BlurRadius"].get<float>();
-	}
-
-	void BackgroundFromJson(Background& background, json& data)
-	{
-		background.BaseColor = JSON_ARRAY_TO_VEC3(data["BackgroundColor"].get<std::vector<float>>());
-		background.BaseLight = data["BackgroundBaseLight"].get<float>();
-		background.Constant = data["BackgroundConstant"].get<float>();
-		background.Linear = data["BackgroundLinear"].get<float>();
-		background.Quadratic = data["BackgroundQuadratic"].get<float>();
 	}
 
 	void ParticleSystemFromJson(Environment* env, json& data, std::string id)

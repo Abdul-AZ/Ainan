@@ -5,6 +5,7 @@
 #include "json/json.hpp"
 #include "object/Sprite.h"
 #include "object/ParticleSystem.h"
+#include "misc/Background.h"
 
 using json = nlohmann::json;
 
@@ -18,7 +19,6 @@ namespace Ainan {
 	static void toJson(json& j, const ParticleSystem& ps, size_t objectOrder);
 	static void toJson(json& j, const RadialLight& light, size_t objectOrder);
 	static void toJson(json& j, const SpotLight& light, size_t objectOrder);
-	static void toJson(json& j, const Background& background);
 	static void toJson(json& j, const Sprite& sprite, size_t objectOrder);
 
 	bool SaveEnvironment(const Environment& env, std::string path)
@@ -61,7 +61,11 @@ namespace Ainan {
 		data["BlurEnabled"] = env.BlurEnabled;
 		data["BlurRadius"] = env.BlurRadius;
 
-		toJson(data, env.m_Background);
+		data["BackgroundColor"] = VEC3_TO_JSON_ARRAY(env.BackgroundColor);
+		data["BackgroundBaseLight"] = env.BackgroundBaseLight;
+		data["BackgroundConstant"] = env.BackgroundConstant;
+		data["BackgroundLinear"] = env.BackgroundLinear;
+		data["BackgroundQuadratic"] = env.BackgroundQuadratic;
 
 		std::string jsonString = data.dump(4);
 
@@ -75,15 +79,6 @@ namespace Ainan {
 			assert(false, "Error while trying to save environment");
 		
 		return true;
-	}
-
-	void toJson(json& j, const Background& background)
-	{
-		j["BackgroundColor"] = VEC3_TO_JSON_ARRAY(background.BaseColor);
-		j["BackgroundBaseLight"] = background.BaseLight;
-		j["BackgroundConstant"] = background.Constant;
-		j["BackgroundLinear"] = background.Linear;
-		j["BackgroundQuadratic"] = background.Quadratic;
 	}
 
 	void toJson(json& j, const ParticleSystem& ps, size_t objectOrder)

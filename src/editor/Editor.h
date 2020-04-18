@@ -1,6 +1,7 @@
 #pragma once
 
 #include "environment/Environment.h"
+#include "misc/Background.h"
 #include "misc/ViewportWindow.h"
 #include "misc/AppStatusWindow.h"
 #include "file/FolderBrowser.h"
@@ -9,6 +10,7 @@
 #include "misc/EditorStyles.h"
 #include "object/ParticleSystem.h"
 #include "object/Sprite.h"
+#include "misc/ExportCamera.h"
 
 #define WINDOW_SIZE_FACTOR_ON_LAUNCH 500
 #define START_MENU_BUTTON_WIDTH 200
@@ -56,6 +58,7 @@ namespace Ainan {
 		RenderSurface m_RenderSurface;
 		Gizmo m_Gizmo;
 		Grid m_Grid;
+		Background m_Background;
 
 		bool m_EnvironmentControlsWindowOpen = true;
 		bool m_ObjectInspectorWindowOpen = true;
@@ -64,7 +67,7 @@ namespace Ainan {
 		bool m_ShowGrid = true;
 
 		EditorState m_State = State_NoEnvLoaded;
-		std::string m_EnvironmentFolderPath;
+		std::filesystem::path m_EnvironmentFolderPath;
 		std::shared_ptr<Texture> m_PlayButtonTexture;
 		std::shared_ptr<Texture> m_PauseButtonTexture;
 		std::shared_ptr<Texture> m_StopButtonTexture;

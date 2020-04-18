@@ -44,7 +44,7 @@ namespace Ainan {
 		m_SpotLightSubmissionCount++;
 	}
 
-	void Background::DisplayGUI()
+	void Background::DisplayGUI(Environment& env)
 	{
 		if (!SettingsWindowOpen)
 			return;
@@ -52,32 +52,32 @@ namespace Ainan {
 		ImGui::Begin("Background", &SettingsWindowOpen);
 		ImGui::Text("Background\nColor");
 		ImGui::SameLine();
-		ImGui::ColorEdit3("##Base Background Color", &BaseColor.r);
+		ImGui::ColorEdit3("##Base Background Color", &env.BackgroundColor.r);
 
 		ImGui::Text("Base Light");
 		ImGui::SameLine();
 		float xPos = ImGui::GetCursorPosX();
-		ImGui::SliderFloat("##Base Light", &BaseLight, 0.0f, 1.0f);
+		ImGui::SliderFloat("##Base Light", &env.BackgroundBaseLight, 0.0f, 1.0f);
 
 		ImGui::Text("Constant");
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(xPos);
-		ImGui::DragFloat("##Constant", &Constant, 0.01f);
+		ImGui::DragFloat("##Constant", &env.BackgroundConstant, 0.01f);
 
 		ImGui::Text("Linear");
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(xPos);
-		ImGui::DragFloat("##Linear", &Linear, 0.0001f);
+		ImGui::DragFloat("##Linear", &env.BackgroundLinear, 0.0001f);
 
 		ImGui::Text("Quadratic");
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(xPos);
-		ImGui::DragFloat("##Quadratic", &Quadratic, 0.00001f);
+		ImGui::DragFloat("##Quadratic", &env.BackgroundQuadratic, 0.00001f);
 
 		ImGui::End();
 	}
 
-	void Background::Draw()
+	void Background::Draw(Environment& env)
 	{
 		VAO->Unbind();
 		auto& shader = Renderer::ShaderLibrary["BackgroundShader"];
@@ -90,11 +90,11 @@ namespace Ainan {
 		for (int i = m_SpotLightSubmissionCount; i < MAX_NUM_SPOT_LIGHTS; i++)
 			m_SpotLightIntensityBuffer[i] = 0.0f;
 		
-		shader->SetUniformVec3("u_BaseColor", BaseColor);
-		shader->SetUniform1f("u_BaseLight", BaseLight);
-		shader->SetUniform1f("u_Constant", Constant);
-		shader->SetUniform1f("u_Linear", Linear);
-		shader->SetUniform1f("u_Quadratic", Quadratic);
+		shader->SetUniformVec3("u_BaseColor", env.BackgroundColor);
+		shader->SetUniform1f("u_BaseLight", env.BackgroundBaseLight);
+		shader->SetUniform1f("u_Constant", env.BackgroundConstant);
+		shader->SetUniform1f("u_Linear", env.BackgroundLinear);
+		shader->SetUniform1f("u_Quadratic", env.BackgroundQuadratic);
 
 		//radial light data
 		shader->SetUniformVec2s("u_RadialLights.Position", m_RadialLightPositionBuffer, MAX_NUM_RADIAL_LIGHTS);
