@@ -1,16 +1,16 @@
 #pragma once
 
+#include "Background.h"
+#include "ViewportWindow.h"
+#include "AppStatusWindow.h"
+#include "Grid.h"
+#include "InputManager.h"
+#include "EditorStyles.h"
 #include "environment/Environment.h"
-#include "misc/Background.h"
-#include "misc/ViewportWindow.h"
-#include "misc/AppStatusWindow.h"
+#include "environment/ParticleSystem.h"
+#include "environment/Sprite.h"
+#include "ExportCamera.h"
 #include "file/FolderBrowser.h"
-#include "misc/Grid.h"
-#include "misc/InputManager.h"
-#include "misc/EditorStyles.h"
-#include "object/ParticleSystem.h"
-#include "object/Sprite.h"
-#include "misc/ExportCamera.h"
 
 #define WINDOW_SIZE_FACTOR_ON_LAUNCH 500
 #define START_MENU_BUTTON_WIDTH 200

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "Window.h"
+#include "editor/Window.h"
 #include "renderer/Rectangle.h"
 
 namespace Ainan {

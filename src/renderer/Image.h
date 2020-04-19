@@ -1,6 +1,6 @@
 #pragma once
 
-#include "misc/RenderSurface.h"
+#include "renderer/RenderSurface.h"
 #include "stb/stb_image_write.h"
 #include "stb/stb_image.h"
 

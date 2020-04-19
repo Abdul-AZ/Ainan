@@ -1,13 +1,12 @@
 #pragma once
 
-#include "renderer/Renderer.h"
 #include "Line.h"
-#include "Camera.h"
-#include "file/SaveItemBrowser.h"
-
-#include "object/ParticleSystem.h"
 #include "Background.h"
-#include "EnvironmentObjectInterface.h"
+#include "editor/Camera.h"
+#include "file/SaveItemBrowser.h"
+#include "renderer/Renderer.h"
+#include "environment/ParticleSystem.h"
+#include "environment/EnvironmentObjectInterface.h"
 
 namespace Ainan {
 
@@ -16,11 +15,9 @@ namespace Ainan {
 		ExportCamera();
 		void DrawOutline();
 		void DisplayGUI();
-		//TODO change blur radius argument to it's own struct called PosProcessingSettings or something like that
 		void ExportFrame(Environment& env);
 
 	public:
-
 		bool SettingsWindowOpen = true;
 
 		glm::vec2 m_ExportCameraPosition = { 0.0f,0.0f };

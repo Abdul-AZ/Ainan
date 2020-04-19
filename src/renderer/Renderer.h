@@ -1,6 +1,6 @@
 #pragma once
 
-#include "misc/Camera.h"
+#include "editor/Camera.h"
 
 #include "RendererAPI.h"
 #include "ShaderProgram.h"

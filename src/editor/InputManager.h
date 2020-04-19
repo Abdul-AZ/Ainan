@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Window.h"
+#include "editor/Window.h"
 #include "GLFWKey.h"
 
 namespace Ainan {

@@ -1,11 +1,11 @@
 #include <pch.h>
 
-#include "environment/Environment.h"
-#include "misc/EnvironmentObjectInterface.h"
+#include "Environment.h"
+#include "EnvironmentObjectInterface.h"
 #include "json/json.hpp"
-#include "object/Sprite.h"
-#include "object/ParticleSystem.h"
-#include "misc/Background.h"
+#include "Sprite.h"
+#include "ParticleSystem.h"
+#include "editor/Background.h"
 
 using json = nlohmann::json;
 

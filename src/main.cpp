@@ -1,6 +1,6 @@
 #include <pch.h>
 
-#include "misc/Window.h"
+#include "editor/Window.h"
 #include "renderer/Renderer.h"
 
 #include "editor/Editor.h"

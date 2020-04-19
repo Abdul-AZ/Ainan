@@ -1,8 +1,7 @@
 #pragma once
 
-
-#include "ImGuiWrapper.h"
-#include "Interpolation.h"
+#include "editor/ImGuiWrapper.h"
+#include "math/Interpolation.h"
 
 namespace Ainan {
 	struct BezierCurve

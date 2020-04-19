@@ -1,8 +1,8 @@
 #pragma once
 
-#include "misc/InterpolationSelector.h"
-#include "misc/CurveEditor.h"
-#include "misc/ExposeToJson.h"
+#include "editor/InterpolationSelector.h"
+#include "editor/CurveEditor.h"
+#include "environment/ExposeToJson.h"
 
 namespace Ainan {
 

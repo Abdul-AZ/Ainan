@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Camera.h"
+#include "editor/Camera.h"
 
 namespace Ainan {
 

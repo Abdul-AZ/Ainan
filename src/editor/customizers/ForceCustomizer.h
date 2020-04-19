@@ -1,7 +1,7 @@
 #pragma once
 
-#include "misc/ExposeToJson.h"
-#include "misc/Window.h"
+#include "environment/ExposeToJson.h"
+#include "editor/Window.h"
 
 namespace Ainan {
 

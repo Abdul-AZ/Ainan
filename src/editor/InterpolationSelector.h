@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Interpolation.h"
+#include "math/Interpolation.h"
 
 namespace Ainan {
 	

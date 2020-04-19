@@ -1,7 +1,7 @@
 #pragma once
 
-#include "misc/EnvironmentObjectInterface.h"
-#include "misc/ParticleCustomizer.h"
+#include "EnvironmentObjectInterface.h"
+#include "renderer/Renderer.h"
 
 namespace Ainan
 {

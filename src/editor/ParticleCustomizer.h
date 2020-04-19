@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Window.h"
-#include "Particle.h"
+#include "Line.h"
+#include "CircleOutline.h"
+#include "editor/Window.h"
+#include "environment/Particle.h"
 #include "customizers/TextureCustomizer.h"
 #include "customizers/VelocityCustomizer.h"
 #include "customizers/ColorCustomizer.h"
@@ -9,8 +11,6 @@
 #include "customizers/LifetimeCustomizer.h"
 #include "customizers/NoiseCustomizer.h"
 #include "customizers/ForceCustomizer.h"
-#include "misc/Line.h"
-#include "misc/CircleOutline.h"
 
 namespace Ainan {
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "renderer/ShaderProgram.h"
-#include "misc/EnvironmentObjectInterface.h"
+#include "environment/EnvironmentObjectInterface.h"
 
 namespace Ainan {
 

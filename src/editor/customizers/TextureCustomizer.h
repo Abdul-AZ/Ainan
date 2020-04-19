@@ -2,7 +2,7 @@
 
 #include "renderer/Renderer.h"
 #include "file/FileBrowser.h"
-#include "misc/ExposeToJson.h"
+#include "environment/ExposeToJson.h"
 #include "file/AssetManager.h"
 
 namespace Ainan {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "renderer/Texture.h"
-#include "misc/Image.h"
+#include "renderer/Image.h"
 
 namespace Ainan {
 	namespace OpenGL {

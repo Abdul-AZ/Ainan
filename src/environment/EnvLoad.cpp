@@ -3,10 +3,10 @@
 #include <pch.h>
 
 #include "environment/Environment.h"
-#include "object/ParticleSystem.h"
-#include "misc/Background.h"
+#include "environment/ParticleSystem.h"
+#include "editor/Background.h"
 #include "json/json.hpp"
-#include "object/Sprite.h"
+#include "Sprite.h"
 
 using json = nlohmann::json;
 

@@ -1,13 +1,13 @@
 #pragma once
 
+#include "EnvironmentObjectInterface.h"
+#include "Particle.h"
+#include "math/PerlinNoise2D.h"
+#include "editor/Window.h"
+#include "editor/Camera.h"
+#include "editor/ParticleCustomizer.h"
+#include "editor/Gizmo.h"
 #include "renderer/ShaderProgram.h"
-#include "misc/Window.h"
-#include "misc/Particle.h"
-#include "misc/Camera.h"
-#include "misc/ParticleCustomizer.h"
-#include "misc/PerlinNoise2D.h"
-#include "misc/EnvironmentObjectInterface.h"
-#include "misc/Gizmo.h"
 #include "renderer/Renderer.h"
 
 namespace Ainan {

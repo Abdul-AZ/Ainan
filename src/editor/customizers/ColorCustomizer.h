@@ -1,7 +1,7 @@
 #pragma once
 
-#include "misc/InterpolationSelector.h"
-#include "misc/ExposeToJson.h"
+#include "editor/InterpolationSelector.h"
+#include "environment/ExposeToJson.h"
 
 namespace Ainan {
 

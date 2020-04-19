@@ -3,8 +3,8 @@
 #include "Camera.h"
 #include "renderer/ShaderProgram.h"
 #include "renderer/Renderer.h"
-#include "object/RadialLight.h"
-#include "object/SpotLight.h"
+#include "environment/RadialLight.h"
+#include "environment/SpotLight.h"
 #include "environment/Environment.h"
 
 //This should be the same as the one in the Background shader (inside the fragment shader)

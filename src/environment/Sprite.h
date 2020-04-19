@@ -1,6 +1,6 @@
 #pragma once
 
-#include "misc/EnvironmentObjectInterface.h"
+#include "EnvironmentObjectInterface.h"
 #include "renderer/Renderer.h"
 #include "file/AssetManager.h"
 

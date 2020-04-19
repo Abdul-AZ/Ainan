@@ -1,7 +1,7 @@
 #pragma once
 
-#include "InterpolationSelector.h"
-#include "CurveEditor.h"
+#include "editor/InterpolationSelector.h"
+#include "editor/CurveEditor.h"
 
 namespace Ainan {
 

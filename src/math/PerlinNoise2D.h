@@ -1,7 +1,7 @@
 #pragma once
 
 #include "glm/glm.hpp"
-#include "InterpolationSelector.h"
+#include "editor/InterpolationSelector.h"
 #include "Interpolation.h"
 
 namespace Ainan {

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "renderer/ShaderProgram.h"
-#include "Camera.h"
-#include "Window.h"
+#include "editor/Camera.h"
+#include "editor/Window.h"
 #include "renderer/Renderer.h"
 
 namespace Ainan {
