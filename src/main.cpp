@@ -1,9 +1,9 @@
 #include <pch.h>
 
-#include "misc/Window.h"
-#include "misc/Environment.h"
-#include "misc/StartMenu.h"
+#include "editor/Window.h"
 #include "renderer/Renderer.h"
+
+#include "editor/Editor.h"
 
 int main() 
 {
@@ -15,46 +15,24 @@ int main()
 	ImGuiWrapper::Init();
 	SetEditorStyle(EditorStyle::Dark_Gray);
 
-	Environment* env = nullptr;
-	StartMenu startMenu;
+	Editor* editor = new Editor;
 
 	while (Window::ShouldClose == false)
 	{
-		if (env) 
-		{
-			env->StartFrame();
+		Renderer::ClearScreen();
 
-			Window::HandleWindowEvents();
+		editor->StartFrame();
 
-			env->Update();
-			env->HandleInput();
-			env->Render();
-			env->RenderGUI();
-		
-			if (env->ShouldDelete) 
-			{
-				delete env;
-				env = nullptr;
-			}
-			else 
-			{
-				env->EndFrame();
-				Window::Present();
-			}
-		}
-		else
-		{
-			Window::HandleWindowEvents();
+		Window::HandleWindowEvents();
+		editor->Update();
+		editor->Draw();
 
-			startMenu.Update(env);
+		editor->EndFrame();
 
-			Window::Present();
-
-		}
+		Window::Present();
 	}
 
-	if(env)
-		delete env;
+	delete editor;
 
 	Renderer::Terminate();
 	ImGuiWrapper::Terminate();
