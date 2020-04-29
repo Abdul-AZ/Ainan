@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EnvironmentObjectInterface.h"
-#include "Particle.h"
+//#include "Particle.h"
 #include "math/PerlinNoise2D.h"
 #include "editor/Window.h"
 #include "editor/Camera.h"
@@ -14,13 +14,15 @@ namespace Ainan {
 
 	class ParticleSystem : public EnvironmentObjectInterface
 	{
+		const size_t c_ParticlePoolSize = 3000;
+
 	public:
 		ParticleSystem();
 
 		void Update(const float deltaTime) override;
 		void Draw() override;
 		void SpawnAllParticlesOnQue(const float& deltaTime);
-		void SpawnParticle(const Particle& particle);
+		void SpawnParticle(const ParticleDescription& particle);
 		void ClearParticles();
 		void DisplayGUI() override;
 
@@ -36,14 +38,27 @@ namespace Ainan {
 		unsigned int ActiveParticleCount = 0;
 
 	private:
-		//these are the buffers for all the particles that will be drawn this frame
+		//data for each particles
+		//NOTE the size of these vectors is c_ParticlePoolSize
+		struct ParticlesData
+		{
+			std::vector<bool> IsActive;
+			std::vector<glm::vec2> Position;
+			std::vector<glm::vec2> Velocity;
+			std::vector<glm::vec2> Acceleration;
+			std::vector<float> StartScale;
+			std::vector<float> EndScale;
+			std::vector<float> LifeTime;
+			std::vector<float> RemainingLifeTime;
+		};
+
+		//buffers for rendering data
 		std::vector<glm::vec2> m_ParticleDrawTranslationBuffer;
 		std::vector<float> m_ParticleDrawScaleBuffer;
 		std::vector<glm::vec4> m_ParticleDrawColorBuffer;
 		size_t m_ParticleDrawCount = 0;
 
-		std::vector<Particle> m_Particles;
-		unsigned int m_ParticleCount;
+		ParticlesData m_Particles;
 		PerlinNoise2D m_Noise;
 	};
 }

@@ -12,7 +12,7 @@ namespace Ainan {
 		ScaleCustomizer();
 		void DisplayGUI();
 
-		InterpolationSelector<float>& GetScaleInterpolator();
+		InterpolationSelector<float> GetScaleInterpolator();
 		CurveEditor m_Curve;
 
 	private:

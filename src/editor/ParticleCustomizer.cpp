@@ -187,26 +187,28 @@ namespace Ainan {
 		ImGui::End();
 	}
 
-	void ParticleCustomizer::Update()
+	ParticleDescription ParticleCustomizer::GetParticleDescription()
 	{
+		ParticleDescription particleDesc = {};
+
 		switch (Mode)
 		{
 		case SpawnMode::SpawnOnPoint: {
 			glm::vec2 spawnPosition = { m_SpawnPosition.x * c_GlobalScaleFactor, m_SpawnPosition.y * c_GlobalScaleFactor };
-			m_Particle.m_Position = spawnPosition;
+			particleDesc.Position = spawnPosition;
 			break;
 		}
 
 		case SpawnMode::SpawnOnLine: {
 			std::uniform_real_distribution<float> dest(0.0f, 1.0f);
-			m_Particle.m_Position = m_Line.GetPointInLine(dest(mt));
+			particleDesc.Position = m_Line.GetPointInLine(dest(mt));
 			break;
 		}
 
 		case SpawnMode::SpawnOnCircle: {
 			//random angle between 0 and 2pi (360 degrees)
 			std::uniform_real_distribution<float> dest(0.0f, 2.0f * 3.14159f);
-			m_Particle.m_Position = m_CircleOutline.GetPointByAngle(dest(mt));
+			particleDesc.Position = m_CircleOutline.GetPointByAngle(dest(mt));
 			break;
 		}
 
@@ -214,27 +216,18 @@ namespace Ainan {
 			std::uniform_real_distribution<float> dest(0.0f, 1.0f);
 			float r = m_CircleOutline.Radius * sqrt(dest(mt));
 			float theta = dest(mt) * 2 * PI; //in radians
-			m_Particle.m_Position = glm::vec2(m_CircleOutline.Position.x + r * cos(theta), m_CircleOutline.Position.y + r * sin(theta));
-			m_Particle.m_Position *= c_GlobalScaleFactor;
+			particleDesc.Position = glm::vec2(m_CircleOutline.Position.x + r * cos(theta), m_CircleOutline.Position.y + r * sin(theta));
+			particleDesc.Position *= c_GlobalScaleFactor;
 			break;
 		}
 		}
 
-		m_Particle.m_Velocity = m_VelocityCustomizer.GetVelocity();
-		m_Particle.m_ColorInterpolator = m_ColorCustomizer.GetColorInterpolator();
-		m_Particle.SetLifeTime(m_LifetimeCustomizer.GetLifetime());
+		particleDesc.Velocity = m_VelocityCustomizer.GetVelocity();
+		particleDesc.LifeTime = m_LifetimeCustomizer.GetLifetime();
 
-		m_Particle.m_ScaleInterpolator = m_ScaleCustomizer.GetScaleInterpolator();
+		particleDesc.StartScale = m_ScaleCustomizer.GetScaleInterpolator().startPoint;
+		particleDesc.EndScale = m_ScaleCustomizer.GetScaleInterpolator().endPoint;
 
-		if (m_ScaleCustomizer.GetScaleInterpolator().Type == Custom)
-		{
-			m_Particle.CustomScaleCurve = m_ScaleCustomizer.m_Curve;
-		}
-	}
-
-	Particle& ParticleCustomizer::GetParticle()
-	{
-		Update();
-		return m_Particle;
+		return particleDesc;
 	}
 }

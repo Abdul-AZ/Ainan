@@ -7,7 +7,7 @@ namespace Ainan {
 
 	ColorCustomizer::ColorCustomizer() :
 		mt(std::random_device{}()),
-		m_Interpolator(InterpolationType::Fixed, glm::vec4(0, 0, 0, 0), glm::vec4(0, 0, 0, 0), InterpolationSelectorFlags::NoCustomMode)
+		m_Interpolator(InterpolationType::Fixed, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), glm::vec4(0, 0, 0, 0), InterpolationSelectorFlags::NoCustomMode)
 	{}
 
 	void ColorCustomizer::DisplayGUI()
@@ -18,7 +18,7 @@ namespace Ainan {
 
 			ImGui::Text("Color: ");
 			ImGui::SameLine();
-			ImGui::ColorEdit4("##Color: ", &m_DefinedColor.r);
+			ImGui::ColorEdit4("##Color: ", &m_Interpolator.startPoint.r);
 
 			ImGui::Spacing();
 			ImGui::Spacing();
@@ -32,7 +32,7 @@ namespace Ainan {
 			{
 				ImGui::Text("End Color: ");
 				ImGui::SameLine();
-				ImGui::ColorEdit4("##End Color: ", &m_EndColor.r);
+				ImGui::ColorEdit4("##End Color: ", &m_Interpolator.endPoint.r);
 			}
 
 			ImGui::TreePop();
@@ -41,9 +41,6 @@ namespace Ainan {
 
 	InterpolationSelector<glm::vec4> ColorCustomizer::GetColorInterpolator()
 	{
-		m_Interpolator.startPoint = m_DefinedColor;
-		m_Interpolator.endPoint = m_EndColor;
-
 		return m_Interpolator;
 	}
 }

@@ -120,8 +120,8 @@ namespace Ainan {
 		ps->Customizer.m_ScaleCustomizer.m_Interpolator.Type = StringToInterpolationType(data[id + "ScaleInterpolationType"].get<std::string>());
 
 		//Color data
-		ps->Customizer.m_ColorCustomizer.m_DefinedColor = JSON_ARRAY_TO_VEC4(data[id + "DefinedColor"].get<std::vector<float>>());
-		ps->Customizer.m_ColorCustomizer.m_EndColor = JSON_ARRAY_TO_VEC4(data[id + "EndColor"].get<std::vector<float>>());
+		ps->Customizer.m_ColorCustomizer.m_Interpolator.startPoint = JSON_ARRAY_TO_VEC4(data[id + "DefinedColor"].get<std::vector<float>>());
+		ps->Customizer.m_ColorCustomizer.m_Interpolator.endPoint = JSON_ARRAY_TO_VEC4(data[id + "EndColor"].get<std::vector<float>>());
 		ps->Customizer.m_ColorCustomizer.m_Interpolator.Type = StringToInterpolationType(data[id + "ColorInterpolationType"].get<std::string>());
 
 		//Lifetime data

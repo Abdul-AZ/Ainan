@@ -12,13 +12,19 @@ namespace Ainan {
 
 		m_Noise.Init();
 
-		//maximum of 2000 particles allowed for now
-		m_ParticleCount = 2000;
+		m_ParticleDrawTranslationBuffer.resize(c_ParticlePoolSize);
+		m_ParticleDrawScaleBuffer.resize(c_ParticlePoolSize);
+		m_ParticleDrawColorBuffer.resize(c_ParticlePoolSize);
 
-		m_ParticleDrawTranslationBuffer.resize(m_ParticleCount);
-		m_ParticleDrawScaleBuffer.resize(m_ParticleCount);
-		m_ParticleDrawColorBuffer.resize(m_ParticleCount);
-		m_Particles.resize(m_ParticleCount);
+		//initilize data for the particles
+		m_Particles.IsActive.resize(c_ParticlePoolSize);
+		m_Particles.Position.resize(c_ParticlePoolSize);
+		m_Particles.Velocity.resize(c_ParticlePoolSize);
+		m_Particles.Acceleration.resize(c_ParticlePoolSize);
+		m_Particles.StartScale.resize(c_ParticlePoolSize);
+		m_Particles.EndScale.resize(c_ParticlePoolSize);
+		m_Particles.LifeTime.resize(c_ParticlePoolSize);
+		m_Particles.RemainingLifeTime.resize(c_ParticlePoolSize);
 
 		//initilize the default shader
 		if (DefaultTexture == nullptr) {
@@ -33,25 +39,33 @@ namespace Ainan {
 		SpawnAllParticlesOnQue(deltaTime);
 
 		ActiveParticleCount = 0;
-		for (Particle& particle : m_Particles) {
+		for (size_t i = 0; i < c_ParticlePoolSize; i++) {
 
-			//add noise if it is enabled
-			if (Customizer.m_NoiseCustomizer.m_NoiseEnabled && particle.isActive) {
-				particle.m_Velocity.x += m_Noise.Noise(particle.m_Position.x, particle.m_Position.y) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
-				particle.m_Velocity.y += m_Noise.Noise(particle.m_Position.x + 30, particle.m_Position.y - 30) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
-			}
-
-			if (particle.isActive) {
+			if (m_Particles.IsActive[i]) 
+			{
+				//add noise if it is enabled
+				if (Customizer.m_NoiseCustomizer.m_NoiseEnabled)
+				{
+					m_Particles.Velocity[i].x += m_Noise.Noise(m_Particles.Position[i].x, m_Particles.Position[i].y) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
+					m_Particles.Velocity[i].y += m_Noise.Noise(m_Particles.Position[i].x + 30, m_Particles.Position[i].y - 30) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
+				}
 
 				//add forces to the particle
 				for (auto& force : Customizer.m_ForceCustomizer.m_Forces)
 				{
 					if (force.second.Enabled) 
-						particle.m_Acceleration += force.second.GetEffect(particle.m_Position) * deltaTime;
+						m_Particles.Acceleration[i] += force.second.GetEffect(m_Particles.Position[i]) * deltaTime;
 				}
 
 				//update particle speed, lifetime etc
-				particle.Update(deltaTime);
+				//particle.Update(deltaTime);
+				m_Particles.Velocity[i] += m_Particles.Acceleration[i];
+				m_Particles.Position[i] += m_Particles.Velocity[i] * deltaTime;
+
+				m_Particles.RemainingLifeTime[i] -= deltaTime;
+				if (m_Particles.RemainingLifeTime[i] < 0.0f)
+					m_Particles.IsActive[i] = false;
+
 
 				//limit particle velocity
 				if (Customizer.m_VelocityCustomizer.CurrentVelocityLimitType != VelocityCustomizer::NoLimit)
@@ -63,20 +77,20 @@ namespace Ainan {
 					//by calculating the velocity in both x and y and limiting the length of the vector
 					if (velocityCustomizer.CurrentVelocityLimitType == VelocityCustomizer::NormalLimit)
 					{
-						float length = glm::length(particle.m_Velocity);
+						float length = glm::length(m_Particles.Velocity[i]);
 						if (length > velocityCustomizer.m_MaxNormalVelocityLimit ||
 							length < velocityCustomizer.m_MinNormalVelocityLimit)
 						{
-							glm::vec2 direction = glm::normalize(particle.m_Velocity);
+							glm::vec2 direction = glm::normalize(m_Particles.Velocity[i]);
 							length = std::clamp(length, velocityCustomizer.m_MinNormalVelocityLimit, velocityCustomizer.m_MaxNormalVelocityLimit);
-							particle.m_Velocity = length * direction;
+							m_Particles.Velocity[i] = length * direction;
 						}
 					}
 					//limit velocity in each axis
 					else if (Customizer.m_VelocityCustomizer.CurrentVelocityLimitType == VelocityCustomizer::PerAxisLimit)
 					{
-						particle.m_Velocity.x = std::clamp(particle.m_Velocity.x, velocityCustomizer.m_MinPerAxisVelocityLimit.x, velocityCustomizer.m_MaxPerAxisVelocityLimit.x);
-						particle.m_Velocity.y = std::clamp(particle.m_Velocity.y, velocityCustomizer.m_MinPerAxisVelocityLimit.y, velocityCustomizer.m_MaxPerAxisVelocityLimit.y);
+						m_Particles.Velocity[i].x = std::clamp(m_Particles.Velocity[i].x, velocityCustomizer.m_MinPerAxisVelocityLimit.x, velocityCustomizer.m_MaxPerAxisVelocityLimit.x);
+						m_Particles.Velocity[i].y = std::clamp(m_Particles.Velocity[i].y, velocityCustomizer.m_MinPerAxisVelocityLimit.y, velocityCustomizer.m_MaxPerAxisVelocityLimit.y);
 					}
 				}
 
@@ -92,26 +106,30 @@ namespace Ainan {
 		m_ParticleDrawCount = 0;
 
 		//go through all the particles
-		for (unsigned int i = 0; i < m_ParticleCount; i++)
+		for (size_t i = 0; i < c_ParticlePoolSize; i++)
 		{
-			if (m_Particles[i].isActive) {
+			if (m_Particles.IsActive[i]) 
+			{
 
 				//get a value from 0 to 1, showing how much the particle lived.
 				//1 meaning it's lifetime is over and it is going to die (get deactivated and not rendered).
 				//0 meaning it's just been spawned (activated).
-				float t = (m_Particles[i].m_LifeTime - m_Particles[i].m_RemainingLifeTime) / m_Particles[i].m_LifeTime;
+				float t = (m_Particles.LifeTime[i] - m_Particles.RemainingLifeTime[i]) / m_Particles.LifeTime[i];
 
 				//use the t value to get the scale of the particle using it's not using a Custom Curve
-				float scale;
-				if (m_Particles[i].m_ScaleInterpolator.Type == Custom)
-					scale = m_Particles[i].CustomScaleCurve.Interpolate(m_Particles[i].m_ScaleInterpolator.startPoint, m_Particles[i].m_ScaleInterpolator.endPoint, t);
+				float scale = 0.0f;
+				auto interpolater = Customizer.m_ScaleCustomizer.GetScaleInterpolator();
+				interpolater.startPoint = m_Particles.StartScale[i];
+				interpolater.endPoint = m_Particles.EndScale[i];
+				if (interpolater.Type == Custom)
+					scale = Customizer.m_ScaleCustomizer.m_Curve.Interpolate(m_Particles.StartScale[i], m_Particles.EndScale[i], t);
 				else
-					scale = m_Particles[i].m_ScaleInterpolator.Interpolate(t);
+					scale = interpolater.Interpolate(t);
 
 				//put the drawing properties of the particles in the draw buffers that would be drawn this frame
-				m_ParticleDrawTranslationBuffer[m_ParticleDrawCount] = m_Particles[i].m_Position;
+				m_ParticleDrawTranslationBuffer[m_ParticleDrawCount] = m_Particles.Position[i];
 				m_ParticleDrawScaleBuffer[m_ParticleDrawCount] = scale;
-				m_ParticleDrawColorBuffer[m_ParticleDrawCount] = m_Particles[i].m_ColorInterpolator.Interpolate(t);
+				m_ParticleDrawColorBuffer[m_ParticleDrawCount] = Customizer.m_ColorCustomizer.m_Interpolator.Interpolate(t);
 
 				//up the amount of particles to be drawn this frame
 				m_ParticleDrawCount++;
@@ -127,23 +145,23 @@ namespace Ainan {
 
 	}
 
-	void ParticleSystem::SpawnParticle(const Particle& particle)
+	void ParticleSystem::SpawnParticle(const ParticleDescription& particle)
 	{
 		//go through all the particles
-		for (unsigned int i = 0; i < m_ParticleCount; i++)
+		for (size_t i = 0; i < c_ParticlePoolSize; i++)
 		{
 			//find a particle that is not active
-			if (!m_Particles[i].isActive)
+			if (!m_Particles.IsActive[i])
 			{
 				//assign particle variables from the passed particle
-				m_Particles[i].m_Position = particle.m_Position;
-				m_Particles[i].m_ColorInterpolator = particle.m_ColorInterpolator;
-				m_Particles[i].m_Velocity = particle.m_Velocity;
-				m_Particles[i].isActive = true;
-				m_Particles[i].m_ScaleInterpolator = particle.m_ScaleInterpolator;
-				m_Particles[i].CustomScaleCurve = particle.CustomScaleCurve;
-				m_Particles[i].SetLifeTime(particle.m_LifeTime);
-				m_Particles[i].m_Acceleration = glm::vec2(0.0f);
+				m_Particles.Position[i] = particle.Position;
+				m_Particles.Velocity[i] = particle.Velocity;
+				m_Particles.IsActive[i] = true;
+				m_Particles.StartScale[i] = particle.StartScale;
+				m_Particles.EndScale[i] = particle.EndScale;
+				m_Particles.LifeTime[i] = particle.LifeTime;
+				m_Particles.RemainingLifeTime[i] = particle.LifeTime;
+				m_Particles.Acceleration[i] = particle.Acceleration;
 
 				//break out of the for loop because we are spawning one particle only
 				break;
@@ -156,8 +174,7 @@ namespace Ainan {
 	void ParticleSystem::ClearParticles()
 	{
 		//deactivate all particles which will make them stop rendering
-		for (Particle& m_particle : m_Particles)
-			m_particle.isActive = false;
+		m_Particles.IsActive.assign(m_Particles.IsActive.size(), false);
 	}
 
 	glm::vec2& ParticleSystem::GetPositionRef()
@@ -183,7 +200,6 @@ namespace Ainan {
 	ParticleSystem::ParticleSystem(const ParticleSystem& Psystem) :
 		Customizer(Psystem.Customizer)
 	{
-
 		//these are calculated every frame, so there is no need to copy them. a resize should be enough
 		m_ParticleDrawTranslationBuffer.resize(Psystem.m_ParticleDrawTranslationBuffer.size());
 		m_ParticleDrawScaleBuffer.resize(Psystem.m_ParticleDrawScaleBuffer.size());
@@ -191,7 +207,6 @@ namespace Ainan {
 
 		//copy other variables
 		m_Particles = Psystem.m_Particles;
-		m_ParticleCount = Psystem.m_ParticleCount;
 		m_Name = Psystem.m_Name;
 		EditorOpen = Psystem.EditorOpen;
 		RenameTextOpen = Psystem.RenameTextOpen;
@@ -230,11 +245,13 @@ namespace Ainan {
 	void ParticleSystem::SpawnAllParticlesOnQue(const float& deltaTime)
 	{
 		TimeTillNextParticleSpawn -= deltaTime;
-		if (TimeTillNextParticleSpawn < 0.0f) {
+		if (TimeTillNextParticleSpawn < 0.0f) 
+		{
 			TimeTillNextParticleSpawn = abs(TimeTillNextParticleSpawn);
 
-			while (TimeTillNextParticleSpawn > 0.0f) {
-				Particle p = Customizer.GetParticle();
+			while (TimeTillNextParticleSpawn > 0.0f) 
+			{
+				ParticleDescription p = Customizer.GetParticleDescription();
 				SpawnParticle(p);
 				TimeTillNextParticleSpawn -= Customizer.GetTimeBetweenParticles();
 			}

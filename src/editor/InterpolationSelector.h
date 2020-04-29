@@ -23,10 +23,10 @@ namespace Ainan {
 	//you should or (||) these together if you want multiple flags
 	enum class InterpolationSelectorFlags : int
 	{
-		None              = 0b0,
-		NoLinearMode      = 0b1,
-		NoCubicMode       = 0b10,
-		NoSmoothstepMode  = 0b100,
+		None              = 0b0000,
+		NoLinearMode      = 0b0001,
+		NoCubicMode       = 0b0010,
+		NoSmoothstepMode  = 0b0100,
 		NoCustomMode      = 0b1000
 	};
 

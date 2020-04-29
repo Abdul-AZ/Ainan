@@ -3,7 +3,6 @@
 #include "Line.h"
 #include "CircleOutline.h"
 #include "editor/Window.h"
-#include "environment/Particle.h"
 #include "customizers/TextureCustomizer.h"
 #include "customizers/VelocityCustomizer.h"
 #include "customizers/ColorCustomizer.h"
@@ -14,11 +13,22 @@
 
 namespace Ainan {
 
-	enum class SpawnMode {
+	enum class SpawnMode 
+	{
 		SpawnOnPoint,
 		SpawnOnLine,
 		SpawnOnCircle,
 		SpawnInsideCircle
+	};
+
+	struct ParticleDescription
+	{
+		glm::vec2 Position;
+		glm::vec2 Velocity;
+		glm::vec2 Acceleration;
+		float StartScale;
+		float EndScale;
+		float LifeTime;
 	};
 
 	std::string GetModeAsText(const SpawnMode& mode);
@@ -33,8 +43,7 @@ namespace Ainan {
 		ParticleCustomizer operator=(const ParticleCustomizer& customizer);
 
 		void DisplayGUI(const std::string& windowName, bool& windowOpen);
-		void Update();
-		Particle& GetParticle();
+		ParticleDescription GetParticleDescription();
 
 		float GetTimeBetweenParticles() { return 1 / m_ParticlesPerSecond; }
 
@@ -54,9 +63,6 @@ namespace Ainan {
 
 		//this is on a scale from 0 to 1
 		glm::vec2 m_SpawnPosition = { 0.5f, 0.5f };
-
-		//the particle that is going to be spawned next
-		Particle m_Particle;
 
 		//spawn particle on line option
 		glm::vec2 m_LinePosition = { 0.5f, 0.5f };

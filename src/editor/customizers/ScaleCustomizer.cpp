@@ -71,7 +71,7 @@ namespace Ainan {
 		}
 	}
 
-	InterpolationSelector<float>& ScaleCustomizer::GetScaleInterpolator()
+	InterpolationSelector<float> ScaleCustomizer::GetScaleInterpolator()
 	{
 		if (m_RandomScale) {
 			std::uniform_real_distribution<float> dist_scale(m_MinScale, m_MaxScale);
