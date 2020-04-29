@@ -4,8 +4,8 @@
 namespace Ainan {
 
 	ScaleCustomizer::ScaleCustomizer() :
-		mt(std::random_device{}()),
-		m_Interpolator(InterpolationType::Fixed, 0.0f, 0.0f)
+		mt(std::random_device{}())
+		//m_Interpolator(InterpolationType::Fixed, 0.0f, 0.0f)
 	{}
 
 	void ScaleCustomizer::DisplayGUI()
@@ -51,9 +51,10 @@ namespace Ainan {
 
 			ImGui::Text("Scale Over Time");
 
-			m_Interpolator.DisplayGUI("Scale Over Time Mode");
+			//m_Interpolator.DisplayGUI("Scale Over Time Mode");
+			DisplayInterpolationTypeSelector(m_InterpolationType, InterpolationSelectorFlags::None, this);
 
-			if (m_Interpolator.Type != InterpolationType::Fixed)
+			if (m_InterpolationType != InterpolationType::Fixed)
 			{
 				ImGui::Text("End Scale: ");
 				ImGui::SameLine();
@@ -64,29 +65,29 @@ namespace Ainan {
 			if (m_EndScale < 0.0f)
 				m_EndScale = 0.0f;
 
-			m_Curve.Type = m_Interpolator.Type;
+			m_Curve.Type = m_InterpolationType;
 			m_Curve.DisplayInCurrentWindow({ 100,75 });
 
 			ImGui::TreePop();
 		}
 	}
 
-	InterpolationSelector<float> ScaleCustomizer::GetScaleInterpolator()
-	{
-		if (m_RandomScale) {
-			std::uniform_real_distribution<float> dist_scale(m_MinScale, m_MaxScale);
-
-			m_Interpolator.startPoint = dist_scale(mt);
-			m_Interpolator.endPoint = m_EndScale;
-
-			return m_Interpolator;
-		}
-		else {
-
-			m_Interpolator.startPoint = m_DefinedScale;
-			m_Interpolator.endPoint = m_EndScale;
-
-			return m_Interpolator;
-		}
-	}
+	//InterpolationSelector<float> ScaleCustomizer::GetScaleInterpolator()
+	//{
+	//	if (m_RandomScale) {
+	//		std::uniform_real_distribution<float> dist_scale(m_MinScale, m_MaxScale);
+	//
+	//		m_Interpolator.startPoint = dist_scale(mt);
+	//		m_Interpolator.endPoint = m_EndScale;
+	//
+	//		return m_Interpolator;
+	//	}
+	//	else {
+	//
+	//		m_Interpolator.startPoint = m_DefinedScale;
+	//		m_Interpolator.endPoint = m_EndScale;
+	//
+	//		return m_Interpolator;
+	//	}
+	//}
 }

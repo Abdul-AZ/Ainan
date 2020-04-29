@@ -117,12 +117,12 @@ namespace Ainan {
 		ps->Customizer.m_ScaleCustomizer.m_MaxScale = data[id + "MaxScale"].get<float>();
 		ps->Customizer.m_ScaleCustomizer.m_DefinedScale = data[id + "DefinedScale"].get<float>();
 		ps->Customizer.m_ScaleCustomizer.m_EndScale = data[id + "EndScale"].get<float>();
-		ps->Customizer.m_ScaleCustomizer.m_Interpolator.Type = StringToInterpolationType(data[id + "ScaleInterpolationType"].get<std::string>());
+		ps->Customizer.m_ScaleCustomizer.m_InterpolationType = StringToInterpolationType(data[id + "ScaleInterpolationType"].get<std::string>());
 
 		//Color data
-		ps->Customizer.m_ColorCustomizer.m_Interpolator.startPoint = JSON_ARRAY_TO_VEC4(data[id + "DefinedColor"].get<std::vector<float>>());
-		ps->Customizer.m_ColorCustomizer.m_Interpolator.endPoint = JSON_ARRAY_TO_VEC4(data[id + "EndColor"].get<std::vector<float>>());
-		ps->Customizer.m_ColorCustomizer.m_Interpolator.Type = StringToInterpolationType(data[id + "ColorInterpolationType"].get<std::string>());
+		ps->Customizer.m_ColorCustomizer.StartColor = JSON_ARRAY_TO_VEC4(data[id + "DefinedColor"].get<std::vector<float>>());
+		ps->Customizer.m_ColorCustomizer.EndColor = JSON_ARRAY_TO_VEC4(data[id + "EndColor"].get<std::vector<float>>());
+		ps->Customizer.m_ColorCustomizer.m_InterpolationType = StringToInterpolationType(data[id + "ColorInterpolationType"].get<std::string>());
 
 		//Lifetime data
 		ps->Customizer.m_LifetimeCustomizer.m_RandomLifetime = data[id + "IsLifetimeRandom"].get<bool>();

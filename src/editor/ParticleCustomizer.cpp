@@ -225,8 +225,16 @@ namespace Ainan {
 		particleDesc.Velocity = m_VelocityCustomizer.GetVelocity();
 		particleDesc.LifeTime = m_LifetimeCustomizer.GetLifetime();
 
-		particleDesc.StartScale = m_ScaleCustomizer.GetScaleInterpolator().startPoint;
-		particleDesc.EndScale = m_ScaleCustomizer.GetScaleInterpolator().endPoint;
+		//particleDesc.StartScale = m_ScaleCustomizer.GetScaleInterpolator().startPoint;
+		if (m_ScaleCustomizer.m_RandomScale)
+		{
+			std::uniform_real_distribution<float> dest(m_ScaleCustomizer.m_MinScale, m_ScaleCustomizer.m_MaxScale);
+			particleDesc.StartScale = dest(mt);
+		}
+		else
+			particleDesc.StartScale = m_ScaleCustomizer.m_DefinedScale;
+
+		particleDesc.EndScale = m_ScaleCustomizer.m_EndScale;
 
 		return particleDesc;
 	}

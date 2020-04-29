@@ -118,18 +118,26 @@ namespace Ainan {
 
 				//use the t value to get the scale of the particle using it's not using a Custom Curve
 				float scale = 0.0f;
-				auto interpolater = Customizer.m_ScaleCustomizer.GetScaleInterpolator();
-				interpolater.startPoint = m_Particles.StartScale[i];
-				interpolater.endPoint = m_Particles.EndScale[i];
-				if (interpolater.Type == Custom)
-					scale = Customizer.m_ScaleCustomizer.m_Curve.Interpolate(m_Particles.StartScale[i], m_Particles.EndScale[i], t);
+				if (Customizer.m_ScaleCustomizer.m_InterpolationType != Custom)
+				{
+					scale = 
+						Interpolation::Interporpolate(Customizer.m_ScaleCustomizer.m_InterpolationType,
+						m_Particles.StartScale[i],
+						m_Particles.EndScale[i],
+						t);
+				}
 				else
-					scale = interpolater.Interpolate(t);
+					scale = Customizer.m_ScaleCustomizer.m_Curve.Interpolate(m_Particles.StartScale[i], m_Particles.EndScale[i], t);
 
 				//put the drawing properties of the particles in the draw buffers that would be drawn this frame
 				m_ParticleDrawTranslationBuffer[m_ParticleDrawCount] = m_Particles.Position[i];
 				m_ParticleDrawScaleBuffer[m_ParticleDrawCount] = scale;
-				m_ParticleDrawColorBuffer[m_ParticleDrawCount] = Customizer.m_ColorCustomizer.m_Interpolator.Interpolate(t);
+
+				m_ParticleDrawColorBuffer[m_ParticleDrawCount] =
+					Interpolation::Interporpolate(Customizer.m_ColorCustomizer.m_InterpolationType,
+						Customizer.m_ColorCustomizer.StartColor,
+						Customizer.m_ColorCustomizer.EndColor,
+						t);
 
 				//up the amount of particles to be drawn this frame
 				m_ParticleDrawCount++;

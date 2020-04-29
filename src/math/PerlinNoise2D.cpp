@@ -26,8 +26,6 @@ namespace Ainan {
 				m_VectorGradient[x][y].y = sqrt(1 - pow(m_VectorGradient[x][y].x, 2));
 			}
 		}
-
-		m_Selector.Type = InterpolationType::Smoothstep;
 	}
 
 	PerlinNoise2D::~PerlinNoise2D()
@@ -60,20 +58,14 @@ namespace Ainan {
 		n0 = DotGridGradient(x0, y0, x, y);
 		n1 = DotGridGradient(x1, y0, x, y);
 
-		m_Selector.startPoint = n0;
-		m_Selector.endPoint = n0;
-		ix0 = m_Selector.Interpolate(sx);
+		ix0 = Interpolation::Smoothstep(n0, n1, sx);
 
 		n0 = DotGridGradient(x0, y1, x, y);
 		n1 = DotGridGradient(x1, y1, x, y);
 
-		m_Selector.startPoint = n0;
-		m_Selector.endPoint = n1;
-		ix1 = m_Selector.Interpolate(sx);
+		ix1 = Interpolation::Smoothstep(n0, n1, sx);
 
-		m_Selector.startPoint = ix0;
-		m_Selector.endPoint = ix1;
-		value = m_Selector.Interpolate(sy);
+		value = Interpolation::Smoothstep(ix0, ix1, sy);
 
 		return value;
 	}

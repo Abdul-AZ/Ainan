@@ -23,7 +23,6 @@ namespace Ainan {
 		float DotGridGradient(int ix, int iy, float x, float y);
 
 	private:
-		InterpolationSelector<float> m_Selector;
 		glm::ivec2 m_GradientSize = { 0,0 };
 		glm::vec2** m_VectorGradient = nullptr; //2D array
 	};

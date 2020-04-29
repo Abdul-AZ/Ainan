@@ -1,7 +1,8 @@
 #pragma once
 
-//NOTE: t goes from 0 to 1 on all algorithms.
-//		if t is 0 start is returned and if t is 1 end is returned.
+//NOTE: t is a floating point number from 0 to 1 on all functions.
+//		the closer it is to 0, the closer the result is from the 'start' argument.
+//		the closer it is to 1, the closer the result is from the 'end' argument.
 
 namespace Ainan {
 
@@ -33,9 +34,39 @@ namespace Ainan {
 
 	namespace Interpolation {
 
+		template<typename type>
+		type Interporpolate(InterpolationType interpolationType, const type& start, const type& end, float t)
+		{
+			switch (interpolationType)
+			{
+			case Ainan::Fixed:
+				return start;
+				break;
+
+			case Ainan::Linear:
+				return Linear(start, end, t);
+				break;
+
+			case Ainan::Cubic:
+				return Cubic(start, end, t);
+				break;
+
+			case Ainan::Smoothstep:
+				return Smoothstep(start, end, t);
+				break;
+
+			case Ainan::Custom:
+			default:
+
+				assert(false);
+				return start;
+				break;
+			}
+		}
+
 		//Basic linear interpolation
 		template<typename type>
-		type Linear(const type& start, const type& end, const float& t)
+		type Linear(const type& start, const type& end, float t)
 		{
 			if (t >= 1.0f)
 				return end;
@@ -48,7 +79,7 @@ namespace Ainan {
 
 		//Cubic interpolation
 		template<typename type>
-		type Cubic(const type& start, const type& end, const float& t)
+		type Cubic(const type& start, const type& end, float t)
 		{
 			if (t >= 1.0f)
 				return end;
@@ -61,7 +92,7 @@ namespace Ainan {
 
 		//Smoothstep interpolation
 		template<typename type>
-		type Smoothstep(const type& start, const type& end, const float& t)
+		type Smoothstep(const type& start, const type& end, float t)
 		{
 			if (t >= 1.0f)
 				return end;
