@@ -2,6 +2,21 @@
 
 #include "Renderer.h"
 
+#include "opengl/OpenGLRendererAPI.h"
+#include "opengl/OpenGLShaderProgram.h"
+#include "opengl/OpenGLVertexArray.h"
+#include "opengl/OpenGLVertexBuffer.h"
+#include "opengl/OpenGLIndexBuffer.h"
+#include "opengl/OpenGLTexture.h"
+#include "opengl/OpenGLFrameBuffer.h"
+
+#ifdef PLATFORM_WINDOWS
+
+#include "d3d11/D3D11RendererAPI.h"
+
+#endif // PLATFORM_WINDOWS
+
+
 namespace Ainan {
 
 	RendererAPI* Renderer::m_CurrentActiveAPI = nullptr;
@@ -56,6 +71,9 @@ namespace Ainan {
 	{
 		//initilize the renderer api
 		m_CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
+
+		//TEMP
+		D3D11::D3D11RendererAPI api;
 
 		//load shaders
 		for (auto& shaderInfo : CompileOnInit)

@@ -31,6 +31,8 @@ project "Core"
 
   filter "system:Windows"
     systemversion ("latest")
+    links { "d3d11.lib" }
+    defines { "PLATFORM_WINDOWS" }
 
   filter "platforms:64bit"
     architecture "x64"

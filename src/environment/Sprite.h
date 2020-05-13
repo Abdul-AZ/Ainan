@@ -3,6 +3,7 @@
 #include "EnvironmentObjectInterface.h"
 #include "renderer/Renderer.h"
 #include "file/AssetManager.h"
+#include "renderer/Image.h"
 
 namespace Ainan {
 

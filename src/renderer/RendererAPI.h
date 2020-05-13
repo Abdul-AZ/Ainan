@@ -7,7 +7,11 @@ namespace Ainan {
 	class Texture;
 	struct Rectangle;
 
-	enum class RendererType {
+	enum class RendererType 
+	{
+#ifdef PLATFORM_WINDOWS
+		D3D11,
+#endif
 		OpenGL
 	};
 

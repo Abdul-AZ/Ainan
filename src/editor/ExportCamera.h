@@ -7,6 +7,8 @@
 #include "renderer/Renderer.h"
 #include "environment/ParticleSystem.h"
 #include "environment/EnvironmentObjectInterface.h"
+#include "renderer/RenderSurface.h"
+#include "renderer/Image.h"
 
 namespace Ainan {
 

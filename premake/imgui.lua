@@ -28,6 +28,7 @@ project "imgui"
 
   filter "system:Windows"
     systemversion ("latest")
+    defines { "PLATFORM_WINDOWS" }
 
   filter "platforms:64bit"
     architecture "x64"

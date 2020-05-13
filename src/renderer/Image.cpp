@@ -2,6 +2,9 @@
 #include "Image.h"
 #include <thread>
 
+//TEMPORARY
+#include "glad/glad.h"
+
 namespace Ainan {
 
 	//this should not be called outside of this file

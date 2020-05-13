@@ -11,14 +11,6 @@
 #include "FrameBuffer.h"
 #include "Rectangle.h"
 
-#include "opengl/OpenGLRendererAPI.h"
-#include "opengl/OpenGLShaderProgram.h"
-#include "opengl/OpenGLVertexArray.h"
-#include "opengl/OpenGLVertexBuffer.h"
-#include "opengl/OpenGLIndexBuffer.h"
-#include "opengl/OpenGLTexture.h"
-#include "opengl/OpenGLFrameBuffer.h"
-
 namespace Ainan {
 
 	//used internally for batch rendering

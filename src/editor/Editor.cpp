@@ -2,6 +2,9 @@
 
 #include "Editor.h"
 
+//TEMPORARY
+#include "glad/glad.h"
+
 namespace Ainan 
 {
 	Editor::Editor():
