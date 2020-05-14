@@ -12,8 +12,11 @@ namespace Ainan {
 			OpenGLFrameBuffer();
 			~OpenGLFrameBuffer();
 
-			// Inherited via FrameBuffer
 			virtual void Blit(FrameBuffer* otherBuffer, const glm::vec2& sourceSize, const glm::vec2& targetSize) override;
+			virtual Image ReadPixels(glm::vec2 bottomLeftPixel = { 0,0 }, glm::vec2 topRightPixel = { 0,0 }) override;
+
+			virtual void SetActiveTexture(const Texture& texture) override;
+			virtual glm::vec2 GetSize() const override { return m_Size; }
 
 			virtual void Bind() const override;
 			virtual void Unbind() const override;
@@ -22,11 +25,6 @@ namespace Ainan {
 		private:
 			unsigned int m_RendererID;
 			glm::vec2 m_Size = { 0.0f, 0.0f };
-
-			virtual void SetActiveTexture(const Texture& texture) override;
-
-			// Inherited via FrameBuffer
-			virtual glm::vec2 GetSize() const override { return m_Size; }
 		};
 	}
 }

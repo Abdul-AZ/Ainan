@@ -2,9 +2,6 @@
 #include "Image.h"
 #include <thread>
 
-//TEMPORARY
-#include "glad/glad.h"
-
 namespace Ainan {
 
 	//this should not be called outside of this file
@@ -76,6 +73,21 @@ namespace Ainan {
 		return Image(image);
 	}
 
+	void Image::FlipHorizontally()
+	{
+		uint32_t byteCount = m_Width * m_Height * m_Comp;
+		uint32_t rowSize = m_Width * m_Comp;
+		unsigned char* buffer = new unsigned char[byteCount];
+		memcpy(buffer, m_Data, byteCount);
+
+		for (size_t y = 0; y < m_Height; y++)
+		{
+			memcpy(&m_Data[y * rowSize], &buffer[rowSize * ( m_Height - y - 1)], rowSize);
+		}
+
+		delete[] buffer;
+	}
+
 	std::string Image::GetFormatString(const ImageFormat & format)
 	{
 		switch (format)
@@ -91,46 +103,6 @@ namespace Ainan {
 		default:
 			return "";
 		}
-	}
-
-	Image Image::FromFrameBuffer(RenderSurface & framebuffer)
-	{
-		Image image;
-		image.m_Width  = (unsigned int)framebuffer.GetSize().x;
-		image.m_Height = (unsigned int)framebuffer.GetSize().y;
-		image.m_Data = new unsigned char[image.m_Width * image.m_Height * 4];
-		image.m_Comp = 4;
-
-		framebuffer.SurfaceFrameBuffer->Bind();
-		glReadPixels(0, 0, image.m_Width, image.m_Height, GL_RGBA, GL_UNSIGNED_BYTE, image.m_Data);
-
-		return image;
-	}
-
-	Image Image::FromFrameBuffer(RenderSurface & renderSurface, const unsigned int & width, const unsigned int & height)
-	{
-		Image image;
-		image.m_Width = width;
-		image.m_Height = height;
-		image.m_Data = new unsigned char[image.m_Width * image.m_Height * 4];
-		image.m_Comp = 4;
-
-		RenderSurface tempRenderSurface;
-		tempRenderSurface.SetSize(glm::vec2(width, height));
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, renderSurface.SurfaceFrameBuffer->GetRendererID());
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, tempRenderSurface.SurfaceFrameBuffer->GetRendererID());
-
-		glBlitFramebuffer(0, 0, (GLuint)renderSurface.GetSize().x, (GLuint)renderSurface.GetSize().y, 0, 0, (GLuint)tempRenderSurface.GetSize().x, (GLuint)tempRenderSurface.GetSize().y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-
-		tempRenderSurface.SurfaceFrameBuffer->Bind();
-		glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, image.m_Data);
-
-		return image;
-	}
-
-	Image Image::FromFrameBuffer(RenderSurface& renderSurface, const glm::ivec2& size)
-	{
-		return FromFrameBuffer(renderSurface, size.x, size.y);
 	}
 
 	void Image::GrayScaleToRGB(Image& image)

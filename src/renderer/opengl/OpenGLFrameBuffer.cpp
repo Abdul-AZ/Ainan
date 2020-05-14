@@ -33,6 +33,26 @@ namespace Ainan {
 			m_Size = texture.GetSize();
 		}
 
+		Image OpenGLFrameBuffer::ReadPixels(glm::vec2 bottomLeftPixel, glm::vec2 topRightPixel)
+		{
+			Image image;
+			image.m_Width = (unsigned int)m_Size.x;
+			image.m_Height = (unsigned int)m_Size.y;
+			image.m_Data = new unsigned char[image.m_Width * image.m_Height * 4];
+			image.m_Comp = 4;
+
+			Bind();
+			glReadPixels(bottomLeftPixel.x,
+				bottomLeftPixel.y,
+				topRightPixel.x == 0 ? m_Size.x : topRightPixel.x,
+				topRightPixel.y == 0 ? m_Size.y : topRightPixel.y,
+				GL_RGBA,
+				GL_UNSIGNED_BYTE,
+				image.m_Data);
+
+			return image;
+		}
+
 		void OpenGLFrameBuffer::Blit(FrameBuffer* otherBuffer, const glm::vec2& sourceSize, const glm::vec2& targetSize)
 		{
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, m_RendererID);

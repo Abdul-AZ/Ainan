@@ -1,6 +1,5 @@
 #pragma once
 
-#include "renderer/RenderSurface.h"
 #include "stb/stb_image_write.h"
 #include "stb/stb_image.h"
 
@@ -26,11 +25,9 @@ namespace Ainan {
 		Image(const Image& image);
 		Image operator=(const Image& image);
 
+		void FlipHorizontally();
+
 		static std::string GetFormatString(const ImageFormat& format);
-		static Image FromFrameBuffer(RenderSurface& framebuffer);
-		static Image FromFrameBuffer(RenderSurface& framebuffer, const unsigned int& width, const unsigned int& height);
-		//for convenience
-		static Image FromFrameBuffer(RenderSurface& framebuffer, const glm::ivec2& size);
 
 		//this is because modern OpenGL does not render GrayscaleImages well(as it treats it as RGB but G = 0 and B = 0)
 		//that is why we change it to RGB so that grayscale colors are rendered correctly and dont look red

@@ -49,6 +49,8 @@ namespace Ainan {
 			virtual Rectangle GetCurrentScissor() override;
 
 			virtual RendererType GetType() const override { return RendererType::OpenGL; }
+
+			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
 		};
 	}
 }

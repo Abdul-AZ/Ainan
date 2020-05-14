@@ -22,6 +22,13 @@ namespace Ainan {
 		Lines
 	};
 
+	enum class RenderingBlendMode
+	{
+		Additive,
+		Screen,
+		NotSpecified //this will use the current mode it is set on
+	};
+
 	//pure virtual class (interface) for each renderer api to inherit from
 	class RendererAPI
 	{
@@ -36,6 +43,8 @@ namespace Ainan {
 						  const IndexBuffer& indexBuffer, int vertexCount) = 0;
 
 		virtual void ClearScreen() = 0;
+
+		virtual void SetBlendMode(RenderingBlendMode blendMode) = 0;
 
 		virtual void SetViewport(const Rectangle& viewport) = 0;
 		virtual Rectangle GetCurrentViewport() = 0;

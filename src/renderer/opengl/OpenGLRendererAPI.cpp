@@ -70,6 +70,21 @@ namespace Ainan {
 			return scissor;
 		}
 
+		void OpenGLRendererAPI::SetBlendMode(RenderingBlendMode blendMode)
+		{
+			glEnable(GL_BLEND);
+
+			switch (blendMode)
+			{
+			case RenderingBlendMode::Additive:
+					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+				break;
+			case RenderingBlendMode::Screen:
+					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+				break;
+			}
+		}
+
 		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount)
 		{
 			glDrawArrays(GetOpenGLPrimitive(primitive), 0, vertexCount);

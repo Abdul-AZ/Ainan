@@ -234,7 +234,8 @@ namespace Ainan {
 
 		delete m_ExportTargetImage;
 
-		m_ExportTargetImage = new Image(Image::FromFrameBuffer(m_RenderSurface, m_RenderSurface.GetSize()));
+		m_ExportTargetImage = new Image(m_RenderSurface.SurfaceFrameBuffer->ReadPixels());
+		m_ExportTargetImage->FlipHorizontally();
 
 		m_ExportTargetTexture = Renderer::CreateTexture();
 		m_ExportTargetTexture->SetDefaultTextureSettings();

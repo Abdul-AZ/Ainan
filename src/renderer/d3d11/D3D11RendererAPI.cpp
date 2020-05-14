@@ -97,6 +97,9 @@ namespace Ainan {
 		{
 			return RendererType::D3D11;
 		}
+		void D3D11RendererAPI::SetBlendMode(RenderingBlendMode blendMode)
+		{
+		}
 	}
 }
 

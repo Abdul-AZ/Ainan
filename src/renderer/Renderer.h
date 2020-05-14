@@ -24,22 +24,16 @@ namespace Ainan {
 
 	struct SceneDescription
 	{
-		Camera SceneCamera = {};								//Required
-		std::shared_ptr<FrameBuffer> SceneDrawTarget = nullptr; //Required
+		Camera SceneCamera = {};								   //Required
+		std::shared_ptr<FrameBuffer> SceneDrawTarget = nullptr;    //Required
 		std::shared_ptr<Texture> SceneDrawTargetTexture = nullptr; //Required if there is postprocessing effects
-		bool Blur = false;										//Required
-		float BlurRadius = 0.0f;								//Required if Blur == true
+		bool Blur = false;										   //Required
+		float BlurRadius = 0.0f;								   //Required if Blur == true
 	};
 
 	const int c_MaxQuadsPerBatch = 10000;
 	const int c_MaxQuadVerticesPerBatch = c_MaxQuadsPerBatch * 4;
 	const int c_MaxQuadTexturesPerBatch = 16;
-
-	enum class RenderingBlendMode 
-	{
-		Additive,
-		Screen
-	};
 
 	//this class is completely api agnostic, meaning NO gl calls, NO direct3D calls etc
 	class Renderer 
@@ -73,6 +67,8 @@ namespace Ainan {
 		static void ClearScreen();
 
 		static void Blur(std::shared_ptr<FrameBuffer>& target, std::shared_ptr<Texture>& targetShader, float radius);
+
+		static void SetBlendMode(RenderingBlendMode blendMode);
 
 		static void SetViewport(const Rectangle& viewport);
 		static Rectangle GetCurrentViewport();
@@ -125,7 +121,7 @@ namespace Ainan {
 		static std::vector<std::weak_ptr<VertexBuffer>> m_ReservedVertexBuffers;
 		static std::vector<std::weak_ptr<IndexBuffer>> m_ReservedIndexBuffers;
 
-
+		static RenderingBlendMode m_CurrentBlendMode;
 	private:
 		static void FlushQuadBatch();
 	};

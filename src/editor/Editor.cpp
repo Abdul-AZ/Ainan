@@ -2,9 +2,6 @@
 
 #include "Editor.h"
 
-//TEMPORARY
-#include "glad/glad.h"
-
 namespace Ainan 
 {
 	Editor::Editor():
@@ -519,6 +516,8 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Additive;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
 
@@ -528,15 +527,10 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Screen;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
-				glEnable(GL_BLEND);
-
-				if (m_Env->BlendMode == RenderingBlendMode::Additive)
-					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
-					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-
 				ImGui::EndCombo();
 
 			}
@@ -664,6 +658,8 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Additive;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
 
@@ -673,17 +669,12 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Screen;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
-				glEnable(GL_BLEND);
-
-				if (m_Env->BlendMode == RenderingBlendMode::Additive)
-					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
-					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 
 				ImGui::EndCombo();
-
 			}
 
 			ImGui::TreePop();
@@ -809,6 +800,8 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Additive;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
 
@@ -818,17 +811,12 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Screen;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
-				glEnable(GL_BLEND);
-
-				if (m_Env->BlendMode == RenderingBlendMode::Additive)
-					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
-					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 
 				ImGui::EndCombo();
-
 			}
 
 			ImGui::TreePop();
@@ -960,6 +948,8 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Additive;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
 
@@ -969,17 +959,12 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Screen;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
-				glEnable(GL_BLEND);
-
-				if (m_Env->BlendMode == RenderingBlendMode::Additive)
-					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
-					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 
 				ImGui::EndCombo();
-
 			}
 
 			ImGui::TreePop();

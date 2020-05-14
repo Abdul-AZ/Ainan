@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Image.h"
+
 namespace Ainan {
 
 	class Texture;
@@ -14,6 +16,9 @@ namespace Ainan {
 
 		virtual void SetActiveTexture(const Texture& texture) = 0;
 		virtual glm::vec2 GetSize() const = 0;
+
+		//will read the entire framebuffer if no arguments are specified
+		virtual Image ReadPixels(glm::vec2 bottomLeftPixel = { 0,0 }, glm::vec2 topRightPixel = { 0,0 }) = 0;
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;

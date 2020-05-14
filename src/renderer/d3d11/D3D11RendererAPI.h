@@ -25,6 +25,7 @@ namespace Ainan {
 			virtual void SetScissor(const Rectangle& scissor) override;
 			virtual Rectangle GetCurrentScissor() override;
 			virtual RendererType GetType() const override;
+			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
 
 		public:
 			ID3D11Device* Device;
