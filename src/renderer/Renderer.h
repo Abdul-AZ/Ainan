@@ -66,6 +66,8 @@ namespace Ainan {
 
 		static void ClearScreen();
 
+		static void Present();
+
 		static void Blur(std::shared_ptr<FrameBuffer>& target, std::shared_ptr<Texture>& targetShader, float radius);
 
 		static void SetBlendMode(RenderingBlendMode blendMode);

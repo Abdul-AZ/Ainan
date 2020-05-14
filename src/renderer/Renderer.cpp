@@ -447,6 +447,11 @@ namespace Ainan {
 		m_CurrentActiveAPI->ClearScreen();
 	}
 
+	void Renderer::Present()
+	{
+		m_CurrentActiveAPI->Present();
+	}
+
 	void Renderer::Blur(std::shared_ptr<FrameBuffer>& target, std::shared_ptr<Texture>& targetTexture,  float radius)
 	{
 		Rectangle lastViewport = Renderer::GetCurrentViewport();

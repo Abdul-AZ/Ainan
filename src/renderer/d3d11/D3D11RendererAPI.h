@@ -30,7 +30,11 @@ namespace Ainan {
 		public:
 			ID3D11Device* Device;
 			ID3D11DeviceContext* DeviceContext;
+			ID3D11RenderTargetView* BackbufferView;
 			IDXGISwapChain* Swapchain;
+
+			// Inherited via RendererAPI
+			virtual void Present() override;
 		};
 
 	}

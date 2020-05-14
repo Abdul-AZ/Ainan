@@ -2,6 +2,8 @@
 #include <glad/glad.h>
 
 #include "OpenGLRendererAPI.h"
+#include "editor/Window.h"
+#include <GLFW/glfw3.h>
 
 namespace Ainan {
 	namespace OpenGL {
@@ -83,6 +85,12 @@ namespace Ainan {
 					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 				break;
 			}
+		}
+
+		void OpenGLRendererAPI::Present()
+		{
+			glfwSwapBuffers(Window::Ptr);
+			Window::WindowSizeChangedSinceLastFrame = false;
 		}
 
 		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount)

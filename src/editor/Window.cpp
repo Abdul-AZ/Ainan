@@ -73,12 +73,6 @@ namespace Ainan {
 		glfwSwapInterval(1);
 	}
 
-	void Window::Present()
-	{
-		glfwSwapBuffers(Ptr);
-		WindowSizeChangedSinceLastFrame = false;
-	}
-
 	void Window::HandleWindowEvents()
 	{
 		glfwPollEvents();

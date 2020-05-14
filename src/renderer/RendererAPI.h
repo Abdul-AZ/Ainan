@@ -44,6 +44,8 @@ namespace Ainan {
 
 		virtual void ClearScreen() = 0;
 
+		virtual void Present() = 0;
+
 		virtual void SetBlendMode(RenderingBlendMode blendMode) = 0;
 
 		virtual void SetViewport(const Rectangle& viewport) = 0;

@@ -15,7 +15,6 @@ namespace Ainan {
 	{
 	public:
 		static void Init();
-		static void Present();
 		static void HandleWindowEvents();
 		static void Terminate();
 		static void CenterWindow();

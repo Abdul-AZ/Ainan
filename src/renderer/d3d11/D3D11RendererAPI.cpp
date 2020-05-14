@@ -8,6 +8,8 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
+#define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
+
 namespace Ainan {
 	namespace D3D11 {
 		D3D11RendererAPI::D3D11RendererAPI()
@@ -33,7 +35,7 @@ namespace Ainan {
 			swapchainDesc.Windowed = 1;
 			swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 			swapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-			D3D11CreateDeviceAndSwapChain(
+			ASSERT_D3D_CALL(D3D11CreateDeviceAndSwapChain(
 				0,
 				D3D_DRIVER_TYPE_HARDWARE,
 				0,
@@ -45,11 +47,26 @@ namespace Ainan {
 				&Swapchain,
 				&Device,
 				0,
-				&DeviceContext);
+				&DeviceContext));
+
+			ID3D11Texture2D* backbuffer;
+			ASSERT_D3D_CALL(Swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backbuffer));
+			ASSERT_D3D_CALL(Device->CreateRenderTargetView(backbuffer, 0, &BackbufferView));
+			backbuffer->Release();
+
+			DeviceContext->OMSetRenderTargets(1, &BackbufferView, 0);
+
+			D3D11_VIEWPORT viewport{};
+			viewport.TopLeftX = 0;
+			viewport.TopLeftY = 0;
+			viewport.Width = Window::FramebufferSize.x;
+			viewport.Height = Window::FramebufferSize.y;
+			DeviceContext->RSSetViewports(1, &viewport);
 		}
 
 		D3D11RendererAPI::~D3D11RendererAPI()
 		{
+			BackbufferView->Release();
 			Swapchain->Release();
 			DeviceContext->Release();
 			Device->Release();
@@ -73,6 +90,8 @@ namespace Ainan {
 
 		void D3D11RendererAPI::ClearScreen()
 		{
+			float clearColor[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+			DeviceContext->ClearRenderTargetView(BackbufferView, clearColor);
 		}
 
 		void D3D11RendererAPI::SetViewport(const Rectangle& viewport)
@@ -97,8 +116,14 @@ namespace Ainan {
 		{
 			return RendererType::D3D11;
 		}
+
 		void D3D11RendererAPI::SetBlendMode(RenderingBlendMode blendMode)
 		{
+		}
+
+		void D3D11RendererAPI::Present()
+		{
+			Swapchain->Present(0, 0);
 		}
 	}
 }
