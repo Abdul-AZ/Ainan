@@ -40,7 +40,7 @@ namespace Ainan {
 	{
 	public:
 		//this will initilize all the shaders and put them in the shader library member
-		static void Init();
+		static void Init(RendererType api);
 
 		//this will destroy all the shaders in the shader library member
 		static void Terminate();

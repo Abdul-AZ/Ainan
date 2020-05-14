@@ -56,12 +56,10 @@ namespace Ainan {
 
 			DeviceContext->OMSetRenderTargets(1, &BackbufferView, 0);
 
-			D3D11_VIEWPORT viewport{};
-			viewport.TopLeftX = 0;
-			viewport.TopLeftY = 0;
+			Rectangle viewport{};
 			viewport.Width = Window::FramebufferSize.x;
 			viewport.Height = Window::FramebufferSize.y;
-			DeviceContext->RSSetViewports(1, &viewport);
+			SetViewport(viewport);
 		}
 
 		D3D11RendererAPI::~D3D11RendererAPI()
@@ -96,6 +94,12 @@ namespace Ainan {
 
 		void D3D11RendererAPI::SetViewport(const Rectangle& viewport)
 		{
+			D3D11_VIEWPORT d3d_viewport{};
+			d3d_viewport.TopLeftX = 0;
+			d3d_viewport.TopLeftY = 0;
+			d3d_viewport.Width = viewport.Width;
+			d3d_viewport.Height = viewport.Height;
+			DeviceContext->RSSetViewports(1, &d3d_viewport);
 		}
 
 		Rectangle D3D11RendererAPI::GetCurrentViewport()

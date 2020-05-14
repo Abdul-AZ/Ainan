@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderer/Rectangle.h"
+#include "renderer/RendererAPI.h"
 
 #define WINDOW_SIZE_ON_LAUNCH_X 500
 #define WINDOW_SIZE_ON_LAUNCH_Y 500 * 9 / 16
@@ -14,7 +15,7 @@ namespace Ainan {
 	class Window
 	{
 	public:
-		static void Init();
+		static void Init(RendererType api);
 		static void HandleWindowEvents();
 		static void Terminate();
 		static void CenterWindow();

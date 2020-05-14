@@ -69,13 +69,22 @@ namespace Ainan {
 		{ "QuadBatchShader"     , "shaders/QuadBatch.vert"     , "shaders/QuadBatch.frag"      }
 	};
 
-	void Renderer::Init()
+	void Renderer::Init(RendererType api)
 	{
 		//initilize the renderer api
-		m_CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
+		switch (api)
+		{
+		case RendererType::D3D11:
+			m_CurrentActiveAPI = new D3D11::D3D11RendererAPI();
+			break;
 
+		case RendererType::OpenGL:
+			m_CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
+			break;
+		}
 		//TEMP
-		D3D11::D3D11RendererAPI api;
+		if (api == RendererType::D3D11)
+			return;
 
 		//load shaders
 		for (auto& shaderInfo : CompileOnInit)
@@ -159,6 +168,10 @@ namespace Ainan {
 
 	void Renderer::Terminate()
 	{
+		//TEMP
+		if (m_CurrentActiveAPI->GetType() == RendererType::D3D11)
+			return;
+
 		ShaderLibrary.erase(ShaderLibrary.begin(), ShaderLibrary.end());
 
 		//batch renderer data

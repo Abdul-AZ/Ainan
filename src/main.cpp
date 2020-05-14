@@ -11,19 +11,27 @@ int main()
 {
 	using namespace Ainan;
 
-	Window::Init();
-
-	//D3D11::D3D11RendererAPI api;
+	//Window::Init(RendererType::D3D11);
+	//Renderer::Init(RendererType::D3D11);
 	//
-	//api.ClearScreen();
-	//api.Present();
-	Renderer::Init();
+	//while (Window::ShouldClose == false)
+	//{
+	//	Window::HandleWindowEvents();
+	//	Renderer::ClearScreen();
+	//	Renderer::Present();
+	//}
+	//Window::Terminate();
+
+	auto api = RendererType::OpenGL;
+	
+	Window::Init(api);
+	Renderer::Init(api);
 	
 	ImGuiWrapper::Init();
 	SetEditorStyle(EditorStyle::Dark_Gray);
 	
 	Editor* editor = new Editor;
-
+	
 	while (Window::ShouldClose == false)
 	{
 		Renderer::ClearScreen();
@@ -38,9 +46,9 @@ int main()
 		
 		Renderer::Present();
 	}
-
+	
 	delete editor;
-
+	
 	Renderer::Terminate();
 	ImGuiWrapper::Terminate();
 	Window::Terminate();
