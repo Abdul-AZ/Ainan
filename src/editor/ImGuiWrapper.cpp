@@ -3,6 +3,16 @@
 #include "ImGuiWrapper.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+//TEMPORARY
+#ifdef PLATFORM_WINDOWS
+#include "imgui_impl_dx11.cpp"
+#include "renderer/d3d11/D3D11RendererAPI.h"
+#include "imgui_impl_glfw.cpp"
+#endif // PLATFORM_WINDOWS
+
+
+
 #ifdef _WIN32
 #undef APIENTRY
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -84,6 +94,23 @@ namespace Ainan {
 
 	void ImGuiWrapper::Init()
 	{
+		//TEMPORARY
+		if (Renderer::m_CurrentActiveAPI->GetType() == RendererType::D3D11)
+		{
+			ImGui::CreateContext();
+
+
+			ImGuiIO& io = ImGui::GetIO(); (void)io;
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;           // Enable viewports
+
+			D3D11::D3D11RendererAPI* api = (D3D11::D3D11RendererAPI*)Renderer::m_CurrentActiveAPI;
+			auto x = ImGui_ImplDX11_Init(api->Device, api->DeviceContext);
+			ImGui_ImplGlfw_Init(Window::Ptr, false, GlfwClientApi_Unknown);
+
+			return;
+		}
+		
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGui::StyleColorsDark();
@@ -97,6 +124,15 @@ namespace Ainan {
 
 	void ImGuiWrapper::Terminate()
 	{
+		//TEMPORARY
+		if (Renderer::m_CurrentActiveAPI->GetType() == RendererType::D3D11)
+		{
+			D3D11::D3D11RendererAPI* api = (D3D11::D3D11RendererAPI*)Renderer::m_CurrentActiveAPI;
+			ImGui_ImplDX11_Shutdown();
+
+			return;
+		}
+
 		ImGui::DestroyPlatformWindows();
 		DestroyDeviceObjects();
 		Glfw_Shutdown();
@@ -105,6 +141,17 @@ namespace Ainan {
 
 	void ImGuiWrapper::NewFrame()
 	{
+		//TEMPORARY
+		if (Renderer::m_CurrentActiveAPI->GetType() == RendererType::D3D11)
+		{
+			D3D11::D3D11RendererAPI* api = (D3D11::D3D11RendererAPI*)Renderer::m_CurrentActiveAPI;
+			ImGui_ImplDX11_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
+			return;
+		}
+
 		if (!FontTexture)
 			CreateDeviceObjects();
 
@@ -136,6 +183,25 @@ namespace Ainan {
 
 	void ImGuiWrapper::Render()
 	{
+		//TEMPORARY
+		if (Renderer::m_CurrentActiveAPI->GetType() == RendererType::D3D11)
+		{
+			D3D11::D3D11RendererAPI* api = (D3D11::D3D11RendererAPI*)Renderer::m_CurrentActiveAPI;
+
+			ImGui::Render();
+			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+			// Update and Render additional Platform Windows
+			ImGuiIO& io = ImGui::GetIO(); (void)io;
+			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+			}
+
+			return;
+		}
+
 		ImGui::Render();
 		Ainan::RenderDrawData(ImGui::GetDrawData());
 		ImGuiIO& io = ImGui::GetIO(); (void)io;

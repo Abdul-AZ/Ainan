@@ -465,6 +465,11 @@ namespace Ainan {
 		m_CurrentActiveAPI->Present();
 	}
 
+	void Renderer::RecreateSwapchain(const glm::vec2& newSwapchainSize)
+	{
+		m_CurrentActiveAPI->RecreateSwapchain(newSwapchainSize);
+	}
+
 	void Renderer::Blur(std::shared_ptr<FrameBuffer>& target, std::shared_ptr<Texture>& targetTexture,  float radius)
 	{
 		Rectangle lastViewport = Renderer::GetCurrentViewport();

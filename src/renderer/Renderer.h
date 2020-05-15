@@ -68,6 +68,8 @@ namespace Ainan {
 
 		static void Present();
 
+		static void RecreateSwapchain(const glm::vec2& newSwapchainSize);
+
 		static void Blur(std::shared_ptr<FrameBuffer>& target, std::shared_ptr<Texture>& targetShader, float radius);
 
 		static void SetBlendMode(RenderingBlendMode blendMode);

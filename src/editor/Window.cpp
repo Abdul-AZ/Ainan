@@ -10,6 +10,7 @@ namespace Ainan {
 	{
 	public:
 		static void SetViewport(const Rectangle& viewport);
+		static void RecreateSwapchain(const glm::vec2& newSwapchainSize);
 	};
 
 	bool Window::ShouldClose = false;
@@ -32,6 +33,7 @@ namespace Ainan {
 		viewport.Y = 0;
 		viewport.Width = width;
 		viewport.Height = height;
+		Renderer::RecreateSwapchain(Window::FramebufferSize);
 		Renderer::SetViewport(viewport);
 	}
 

@@ -7,20 +7,33 @@
 
 #include "renderer/d3d11/D3D11RendererAPI.h"
 
+#define USE_D3D11 0
+
 int main() 
 {
 	using namespace Ainan;
 
-	//Window::Init(RendererType::D3D11);
-	//Renderer::Init(RendererType::D3D11);
-	//
-	//while (Window::ShouldClose == false)
-	//{
-	//	Window::HandleWindowEvents();
-	//	Renderer::ClearScreen();
-	//	Renderer::Present();
-	//}
-	//Window::Terminate();
+#if USE_D3D11
+	Window::Init(RendererType::D3D11);
+	Renderer::Init(RendererType::D3D11);
+	ImGuiWrapper::Init();
+
+	while (Window::ShouldClose == false)
+	{
+		Renderer::ClearScreen();
+		Window::HandleWindowEvents();
+
+		ImGuiWrapper::NewFrame();
+		ImGui::ShowDemoWindow();
+		ImGuiWrapper::Render();
+
+		Renderer::Present();
+	}
+
+	ImGuiWrapper::Terminate();
+	Window::Terminate();
+
+#else
 
 	auto api = RendererType::OpenGL;
 	
@@ -52,4 +65,5 @@ int main()
 	Renderer::Terminate();
 	ImGuiWrapper::Terminate();
 	Window::Terminate();
+#endif
 }

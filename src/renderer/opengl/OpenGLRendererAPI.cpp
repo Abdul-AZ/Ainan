@@ -87,6 +87,11 @@ namespace Ainan {
 			}
 		}
 
+		//we don't do anything because this is handled by OpenGL, it's different for other API's
+		void OpenGLRendererAPI::RecreateSwapchain(const glm::vec2& newSwapchainSize)
+		{
+		}
+
 		void OpenGLRendererAPI::Present()
 		{
 			glfwSwapBuffers(Window::Ptr);

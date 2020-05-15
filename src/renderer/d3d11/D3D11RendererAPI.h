@@ -20,6 +20,8 @@ namespace Ainan {
 			virtual void Draw(ShaderProgram& shader, const Primitive& mode, const IndexBuffer& indexBuffer) override;
 			virtual void Draw(ShaderProgram& shader, const Primitive& mode, const IndexBuffer& indexBuffer, int vertexCount) override;
 			virtual void ClearScreen() override;
+			virtual void Present() override;
+			virtual void RecreateSwapchain(const glm::vec2& newSwapchainSize) override;
 			virtual void SetViewport(const Rectangle& viewport) override;
 			virtual Rectangle GetCurrentViewport() override;
 			virtual void SetScissor(const Rectangle& scissor) override;
@@ -32,9 +34,6 @@ namespace Ainan {
 			ID3D11DeviceContext* DeviceContext;
 			ID3D11RenderTargetView* BackbufferView;
 			IDXGISwapChain* Swapchain;
-
-			// Inherited via RendererAPI
-			virtual void Present() override;
 		};
 
 	}

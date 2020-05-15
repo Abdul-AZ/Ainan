@@ -129,6 +129,19 @@ namespace Ainan {
 		{
 			Swapchain->Present(0, 0);
 		}
+
+		void D3D11RendererAPI::RecreateSwapchain(const glm::vec2& newSwapchainSize)
+		{
+			BackbufferView->Release();
+			HRESULT x = Swapchain->ResizeBuffers(1, newSwapchainSize.x, newSwapchainSize.y, DXGI_FORMAT_UNKNOWN, 0);
+
+			ID3D11Texture2D* backbuffer;
+			ASSERT_D3D_CALL(Swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backbuffer));
+			ASSERT_D3D_CALL(Device->CreateRenderTargetView(backbuffer, 0, &BackbufferView));
+			backbuffer->Release();
+
+			DeviceContext->OMSetRenderTargets(1, &BackbufferView, 0);
+		}
 	}
 }
 

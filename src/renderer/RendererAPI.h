@@ -46,6 +46,8 @@ namespace Ainan {
 
 		virtual void Present() = 0;
 
+		virtual void RecreateSwapchain(const glm::vec2& newSwapchainSize) = 0;
+
 		virtual void SetBlendMode(RenderingBlendMode blendMode) = 0;
 
 		virtual void SetViewport(const Rectangle& viewport) = 0;
