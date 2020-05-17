@@ -6,6 +6,8 @@
 
 #include <d3d11.h>
 
+#include "D3D11RendererContext.h"
+
 namespace Ainan {
 	namespace D3D11 {
 		class D3D11RendererAPI : public RendererAPI
@@ -26,14 +28,11 @@ namespace Ainan {
 			virtual Rectangle GetCurrentViewport() override;
 			virtual void SetScissor(const Rectangle& scissor) override;
 			virtual Rectangle GetCurrentScissor() override;
-			virtual RendererType GetType() const override;
+			virtual RendererContext* GetContext() override { return &Context; };
 			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
 
 		public:
-			ID3D11Device* Device;
-			ID3D11DeviceContext* DeviceContext;
-			ID3D11RenderTargetView* BackbufferView;
-			IDXGISwapChain* Swapchain;
+			D3D11RendererContext Context;
 		};
 
 	}

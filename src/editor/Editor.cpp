@@ -1870,7 +1870,7 @@ namespace Ainan
 
 	void Editor::UpdateTitle()
 	{
-		RendererType currentRendererType = Renderer::m_CurrentActiveAPI->GetType();
+		RendererType currentRendererType = Renderer::m_CurrentActiveAPI->GetContext()->GetType();
 
 		switch (currentRendererType)
 		{

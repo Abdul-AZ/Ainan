@@ -5,6 +5,8 @@
 #include "renderer/IndexBuffer.h"
 #include "renderer/Rectangle.h"
 
+#include "OpenGLRendererContext.h"
+
 #include <glad/glad.h>
 
 namespace Ainan {
@@ -49,9 +51,11 @@ namespace Ainan {
 			virtual void SetScissor(const Rectangle& scissor) override;
 			virtual Rectangle GetCurrentScissor() override;
 
-			virtual RendererType GetType() const override { return RendererType::OpenGL; }
+			virtual RendererContext* GetContext() override { return &Context; };
 
 			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
+
+			OpenGLRendererContext Context;
 		};
 	}
 }

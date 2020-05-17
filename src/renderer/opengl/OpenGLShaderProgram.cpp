@@ -12,14 +12,14 @@ namespace Ainan {
 			unsigned int vertex, fragment;
 
 			vertex = glCreateShader(GL_VERTEX_SHADER);
-			std::string vShaderCode = AssetManager::ReadEntireTextFile(vertPath);
+			std::string vShaderCode = AssetManager::ReadEntireTextFile(vertPath + ".vert");
 			const char* c_vShaderCode = vShaderCode.c_str();
 			glShaderSource(vertex, 1, &c_vShaderCode, NULL);
 			glCompileShader(vertex);
 
 
 			fragment = glCreateShader(GL_FRAGMENT_SHADER);
-			std::string fShaderCode = AssetManager::ReadEntireTextFile(fragPath);
+			std::string fShaderCode = AssetManager::ReadEntireTextFile(fragPath + ".frag");
 			const char* c_fShaderCode = fShaderCode.c_str();
 			glShaderSource(fragment, 1, &c_fShaderCode, NULL);
 			glCompileShader(fragment);

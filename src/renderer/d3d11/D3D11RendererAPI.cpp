@@ -44,17 +44,17 @@ namespace Ainan {
 				0,
 				D3D11_SDK_VERSION,
 				&swapchainDesc,
-				&Swapchain,
-				&Device,
+				&Context.Swapchain,
+				&Context.Device,
 				0,
-				&DeviceContext));
+				&Context.DeviceContext));
 
 			ID3D11Texture2D* backbuffer;
-			ASSERT_D3D_CALL(Swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backbuffer));
-			ASSERT_D3D_CALL(Device->CreateRenderTargetView(backbuffer, 0, &BackbufferView));
+			ASSERT_D3D_CALL(Context.Swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backbuffer));
+			ASSERT_D3D_CALL(Context.Device->CreateRenderTargetView(backbuffer, 0, &Context.BackbufferView));
 			backbuffer->Release();
 
-			DeviceContext->OMSetRenderTargets(1, &BackbufferView, 0);
+			Context.DeviceContext->OMSetRenderTargets(1, &Context.BackbufferView, 0);
 
 			Rectangle viewport{};
 			viewport.Width = Window::FramebufferSize.x;
@@ -64,10 +64,10 @@ namespace Ainan {
 
 		D3D11RendererAPI::~D3D11RendererAPI()
 		{
-			BackbufferView->Release();
-			Swapchain->Release();
-			DeviceContext->Release();
-			Device->Release();
+			Context.BackbufferView->Release();
+			Context.Swapchain->Release();
+			Context.DeviceContext->Release();
+			Context.Device->Release();
 		}
 
 		void D3D11RendererAPI::Draw(ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
@@ -89,7 +89,7 @@ namespace Ainan {
 		void D3D11RendererAPI::ClearScreen()
 		{
 			float clearColor[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-			DeviceContext->ClearRenderTargetView(BackbufferView, clearColor);
+			Context.DeviceContext->ClearRenderTargetView(Context.BackbufferView, clearColor);
 		}
 
 		void D3D11RendererAPI::SetViewport(const Rectangle& viewport)
@@ -99,7 +99,7 @@ namespace Ainan {
 			d3d_viewport.TopLeftY = 0;
 			d3d_viewport.Width = viewport.Width;
 			d3d_viewport.Height = viewport.Height;
-			DeviceContext->RSSetViewports(1, &d3d_viewport);
+			Context.DeviceContext->RSSetViewports(1, &d3d_viewport);
 		}
 
 		Rectangle D3D11RendererAPI::GetCurrentViewport()
@@ -116,31 +116,26 @@ namespace Ainan {
 			return Rectangle();
 		}
 
-		RendererType D3D11RendererAPI::GetType() const
-		{
-			return RendererType::D3D11;
-		}
-
 		void D3D11RendererAPI::SetBlendMode(RenderingBlendMode blendMode)
 		{
 		}
 
 		void D3D11RendererAPI::Present()
 		{
-			Swapchain->Present(0, 0);
+			Context.Swapchain->Present(0, 0);
 		}
 
 		void D3D11RendererAPI::RecreateSwapchain(const glm::vec2& newSwapchainSize)
 		{
-			BackbufferView->Release();
-			HRESULT x = Swapchain->ResizeBuffers(1, newSwapchainSize.x, newSwapchainSize.y, DXGI_FORMAT_UNKNOWN, 0);
+			Context.BackbufferView->Release();
+			Context.Swapchain->ResizeBuffers(1, newSwapchainSize.x, newSwapchainSize.y, DXGI_FORMAT_UNKNOWN, 0);
 
 			ID3D11Texture2D* backbuffer;
-			ASSERT_D3D_CALL(Swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backbuffer));
-			ASSERT_D3D_CALL(Device->CreateRenderTargetView(backbuffer, 0, &BackbufferView));
+			ASSERT_D3D_CALL(Context.Swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backbuffer));
+			ASSERT_D3D_CALL(Context.Device->CreateRenderTargetView(backbuffer, 0, &Context.BackbufferView));
 			backbuffer->Release();
 
-			DeviceContext->OMSetRenderTargets(1, &BackbufferView, 0);
+			Context.DeviceContext->OMSetRenderTargets(1, &Context.BackbufferView, 0);
 		}
 	}
 }

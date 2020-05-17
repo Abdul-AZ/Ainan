@@ -1,19 +1,13 @@
 #pragma once
 
+#include "RendererContext.h"
+
 namespace Ainan {
 
 	class ShaderProgram;
 	class IndexBuffer;
 	class Texture;
 	struct Rectangle;
-
-	enum class RendererType 
-	{
-#ifdef PLATFORM_WINDOWS
-		D3D11,
-#endif
-		OpenGL
-	};
 
 	enum class Primitive
 	{
@@ -33,6 +27,7 @@ namespace Ainan {
 	class RendererAPI
 	{
 	public:
+		virtual ~RendererAPI() {};
 		virtual void Draw(ShaderProgram& shader, const Primitive& mode,
 						  const unsigned int& vertexCount) = 0;
 		virtual void DrawInstanced(ShaderProgram& shader, const Primitive& mode,
@@ -56,6 +51,6 @@ namespace Ainan {
 		virtual void SetScissor(const Rectangle& scissor) = 0;
 		virtual Rectangle GetCurrentScissor() = 0;
 
-		virtual RendererType GetType() const = 0;
+		virtual RendererContext* GetContext() = 0;
 	};
 }

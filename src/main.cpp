@@ -7,7 +7,7 @@
 
 #include "renderer/d3d11/D3D11RendererAPI.h"
 
-#define USE_D3D11 0
+#define USE_D3D11 1
 
 int main() 
 {
@@ -18,19 +18,24 @@ int main()
 	Renderer::Init(RendererType::D3D11);
 	ImGuiWrapper::Init();
 
-	while (Window::ShouldClose == false)
 	{
-		Renderer::ClearScreen();
-		Window::HandleWindowEvents();
+		auto exampleShader = Renderer::CreateShaderProgram("shaders/Line", "shaders/FlatColor");
 
-		ImGuiWrapper::NewFrame();
-		ImGui::ShowDemoWindow();
-		ImGuiWrapper::Render();
+		while (Window::ShouldClose == false)
+		{
+			Renderer::ClearScreen();
+			Window::HandleWindowEvents();
 
-		Renderer::Present();
+			ImGuiWrapper::NewFrame();
+			ImGui::ShowDemoWindow();
+			ImGuiWrapper::Render();
+
+			Renderer::Present();
+		}
 	}
 
 	ImGuiWrapper::Terminate();
+	Renderer::Terminate();
 	Window::Terminate();
 
 #else
@@ -62,8 +67,8 @@ int main()
 	
 	delete editor;
 	
-	Renderer::Terminate();
 	ImGuiWrapper::Terminate();
+	Renderer::Terminate();
 	Window::Terminate();
 #endif
 }

@@ -13,6 +13,7 @@
 #ifdef PLATFORM_WINDOWS
 
 #include "d3d11/D3D11RendererAPI.h"
+#include "d3d11/D3D11ShaderProgram.h"
 
 #endif // PLATFORM_WINDOWS
 
@@ -60,13 +61,13 @@ namespace Ainan {
 	std::vector<ShaderLoadInfo> CompileOnInit =
 	{
 		//name                  //vertex shader                //fragment shader
-		{ "BackgroundShader"    , "shaders/Background.vert"    , "shaders/Background.frag"     },
-		{ "CircleOutlineShader" , "shaders/CircleOutline.vert" , "shaders/FlatColor.frag"      },
-		{ "LineShader"          , "shaders/Line.vert"          , "shaders/FlatColor.frag"      },
-		{ "BlurShader"          , "shaders/Image.vert"         , "shaders/Blur.frag"           },
-		{ "GizmoShader"         , "shaders/Gizmo.vert"         , "shaders/FlatColor.frag"      },
-		{ "ImageShader"         , "shaders/Image.vert"         , "shaders/Image.frag"          },
-		{ "QuadBatchShader"     , "shaders/QuadBatch.vert"     , "shaders/QuadBatch.frag"      }
+		{ "BackgroundShader"    , "shaders/Background"    , "shaders/Background"     },
+		{ "CircleOutlineShader" , "shaders/CircleOutline" , "shaders/FlatColor"      },
+		{ "LineShader"          , "shaders/Line"          , "shaders/FlatColor"      },
+		{ "BlurShader"          , "shaders/Image"         , "shaders/Blur"           },
+		{ "GizmoShader"         , "shaders/Gizmo"         , "shaders/FlatColor"      },
+		{ "ImageShader"         , "shaders/Image"         , "shaders/Image"          },
+		{ "QuadBatchShader"     , "shaders/QuadBatch"     , "shaders/QuadBatch"      }
 	};
 
 	void Renderer::Init(RendererType api)
@@ -168,11 +169,15 @@ namespace Ainan {
 
 	void Renderer::Terminate()
 	{
-		//TEMP
-		if (m_CurrentActiveAPI->GetType() == RendererType::D3D11)
-			return;
-
 		ShaderLibrary.erase(ShaderLibrary.begin(), ShaderLibrary.end());
+
+		auto type = m_CurrentActiveAPI->GetContext()->GetType();
+
+		delete m_CurrentActiveAPI;
+
+		//TEMP
+		if (type == RendererType::D3D11)
+			return;
 
 		//batch renderer data
 		m_QuadBatchVertexBuffer.reset();
@@ -531,7 +536,7 @@ namespace Ainan {
 
 	Rectangle Renderer::GetCurrentViewport()
 	{
-		switch (m_CurrentActiveAPI->GetType())
+		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			return m_CurrentActiveAPI->GetCurrentViewport();
@@ -549,7 +554,7 @@ namespace Ainan {
 
 	Rectangle Renderer::GetCurrentScissor()
 	{
-		switch (m_CurrentActiveAPI->GetType())
+		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			return m_CurrentActiveAPI->GetCurrentScissor();
@@ -562,7 +567,7 @@ namespace Ainan {
 
 	std::shared_ptr<VertexArray> Renderer::CreateVertexArray()
 	{
-		switch (m_CurrentActiveAPI->GetType())
+		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			return std::make_shared<OpenGL::OpenGLVertexArray>();
@@ -577,7 +582,7 @@ namespace Ainan {
 	{
 		std::shared_ptr<VertexBuffer> buffer;
 
-		switch (m_CurrentActiveAPI->GetType())
+		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			buffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(data, size, dynamic);
@@ -596,7 +601,7 @@ namespace Ainan {
 	{
 		std::shared_ptr<IndexBuffer> buffer;
 
-		switch (m_CurrentActiveAPI->GetType())
+		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			buffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(data, count);
@@ -613,10 +618,13 @@ namespace Ainan {
 
 	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgram(const std::string& vertPath, const std::string& fragPath)
 	{
-		switch (m_CurrentActiveAPI->GetType())
+		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			return std::make_shared<OpenGL::OpenGLShaderProgram>(vertPath, fragPath);
+
+		case RendererType::D3D11:
+			return std::make_shared<D3D11::D3D11ShaderProgram>(vertPath, fragPath, m_CurrentActiveAPI->GetContext());
 
 		default:
 			assert(false);
@@ -626,7 +634,7 @@ namespace Ainan {
 
 	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgramRaw(const std::string& vertSrc, const std::string& fragSrc)
 	{
-		switch (m_CurrentActiveAPI->GetType())
+		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			return OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
@@ -639,7 +647,7 @@ namespace Ainan {
 
 	std::shared_ptr<FrameBuffer> Renderer::CreateFrameBuffer()
 	{
-		switch (m_CurrentActiveAPI->GetType())
+		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			return std::make_shared<OpenGL::OpenGLFrameBuffer>();
@@ -654,7 +662,7 @@ namespace Ainan {
 	{
 		std::shared_ptr<Texture> texture;
 
-		switch (m_CurrentActiveAPI->GetType())
+		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			texture = std::make_shared<OpenGL::OpenGLTexture>();

@@ -95,7 +95,7 @@ namespace Ainan {
 	void ImGuiWrapper::Init()
 	{
 		//TEMPORARY
-		if (Renderer::m_CurrentActiveAPI->GetType() == RendererType::D3D11)
+		if (Renderer::m_CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
 		{
 			ImGui::CreateContext();
 
@@ -104,8 +104,8 @@ namespace Ainan {
 			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;           // Enable viewports
 
-			D3D11::D3D11RendererAPI* api = (D3D11::D3D11RendererAPI*)Renderer::m_CurrentActiveAPI;
-			auto x = ImGui_ImplDX11_Init(api->Device, api->DeviceContext);
+			auto context = (D3D11::D3D11RendererContext*)Renderer::m_CurrentActiveAPI->GetContext();
+			auto x = ImGui_ImplDX11_Init(context->Device, context->DeviceContext);
 			ImGui_ImplGlfw_Init(Window::Ptr, false, GlfwClientApi_Unknown);
 
 			return;
@@ -125,9 +125,8 @@ namespace Ainan {
 	void ImGuiWrapper::Terminate()
 	{
 		//TEMPORARY
-		if (Renderer::m_CurrentActiveAPI->GetType() == RendererType::D3D11)
+		if (Renderer::m_CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
 		{
-			D3D11::D3D11RendererAPI* api = (D3D11::D3D11RendererAPI*)Renderer::m_CurrentActiveAPI;
 			ImGui_ImplDX11_Shutdown();
 
 			return;
@@ -142,9 +141,8 @@ namespace Ainan {
 	void ImGuiWrapper::NewFrame()
 	{
 		//TEMPORARY
-		if (Renderer::m_CurrentActiveAPI->GetType() == RendererType::D3D11)
+		if (Renderer::m_CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
 		{
-			D3D11::D3D11RendererAPI* api = (D3D11::D3D11RendererAPI*)Renderer::m_CurrentActiveAPI;
 			ImGui_ImplDX11_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
@@ -184,10 +182,8 @@ namespace Ainan {
 	void ImGuiWrapper::Render()
 	{
 		//TEMPORARY
-		if (Renderer::m_CurrentActiveAPI->GetType() == RendererType::D3D11)
+		if (Renderer::m_CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
 		{
-			D3D11::D3D11RendererAPI* api = (D3D11::D3D11RendererAPI*)Renderer::m_CurrentActiveAPI;
-
 			ImGui::Render();
 			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
