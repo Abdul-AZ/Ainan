@@ -1,4 +1,5 @@
 #include "renderer/VertexBuffer.h"
+#include "renderer/ShaderProgram.h"
 
 namespace Ainan
 {
@@ -11,7 +12,7 @@ namespace Ainan
 			~OpenGLVertexBuffer();
 
 			// Inherited via VertexBuffer
-			virtual void SetLayout(const VertexLayout& layout) override;
+			virtual void SetLayout(const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram) override;
 			virtual void UpdateData(const int& offset, const int& size, void* data) override;
 			virtual unsigned int GetRendererID() override { return m_RendererID; }
 			virtual void Bind() const override;

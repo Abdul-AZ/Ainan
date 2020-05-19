@@ -7,14 +7,21 @@ namespace Ainan {
 		Int, UnsignedInt, Float, Vec2, Vec3, Vec4, Mat3, Mat4
 	};
 
-	using VertexLayout = std::vector<ShaderVariableType>;
+	struct VertexLayoutPart
+	{
+		std::string Name;
+		ShaderVariableType Type;
+	};
+
+	using VertexLayout = std::vector<VertexLayoutPart>;
+	class ShaderProgram;
 
 	class VertexBuffer
 	{
 	public:
 		virtual ~VertexBuffer() {};
 
-		virtual void SetLayout(const VertexLayout& layout) = 0;
+		virtual void SetLayout(const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram) = 0;
 
 		//NOTE: offset and size are in bytes
 		//offset is the start of the memory location you want to update

@@ -60,7 +60,7 @@ namespace Ainan {
 			glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 		}
 
-		void OpenGLVertexBuffer::SetLayout(const VertexLayout& layout)
+		void OpenGLVertexBuffer::SetLayout(const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram)
 		{
 			Bind();
 
@@ -68,16 +68,16 @@ namespace Ainan {
 			int offset = 0;
 			int stride = 0;
 
-			for (auto& type : layout)
+			for (auto& layoutPart : layout)
 			{
-				stride += GetShaderVariableSize(type);
+				stride += GetShaderVariableSize(layoutPart.Type);
 			}
 
-			for (auto& type : layout)
+			for (auto& layoutPart : layout)
 			{
-				int size = GetShaderVariableSize(type);
-				int componentCount = GetShaderVariableComponentCount(type);
-				GLenum openglType = GetOpenglTypeFromShaderType(type);
+				int size = GetShaderVariableSize(layoutPart.Type);
+				int componentCount = GetShaderVariableComponentCount(layoutPart.Type);
+				GLenum openglType = GetOpenglTypeFromShaderType(layoutPart.Type);
 
 				glVertexAttribPointer(index, componentCount, openglType, false, stride, (void*)(uintptr_t)offset);
 				offset += size;

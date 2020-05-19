@@ -7,7 +7,7 @@
 
 #include "renderer/d3d11/D3D11RendererAPI.h"
 
-#define USE_D3D11 1
+#define USE_D3D11 0
 
 int main() 
 {
@@ -19,7 +19,12 @@ int main()
 	ImGuiWrapper::Init();
 
 	{
+		glm::vec2 vertices[2] = { {-1.0f,-1.0f}, {1.0f,1.0f} };
 		auto exampleShader = Renderer::CreateShaderProgram("shaders/Line", "shaders/FlatColor");
+		auto exampleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(vertices), false);
+		VertexLayout layout(1);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		exampleVertexBuffer->SetLayout(layout, exampleShader);
 
 		while (Window::ShouldClose == false)
 		{

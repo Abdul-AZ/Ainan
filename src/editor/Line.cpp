@@ -10,7 +10,9 @@ namespace Ainan {
 		VAO->Bind();
 
 		VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2);
-		VBO->SetLayout({ ShaderVariableType::Vec2 });
+		VertexLayout layout(1);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		VBO->SetLayout(layout, Renderer::ShaderLibrary["LineShader"]);
 
 		VAO->Unbind();
 	}
@@ -25,7 +27,9 @@ namespace Ainan {
 			VAO->Bind();
 
 			VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * vertices.size());
-			VBO->SetLayout({ ShaderVariableType::Vec2 });
+			VertexLayout layout(1);
+			layout[0] = { "aPos", ShaderVariableType::Vec2 };
+			VBO->SetLayout(layout, Renderer::ShaderLibrary["LineShader"]);
 
 			VAO->Unbind();
 		}

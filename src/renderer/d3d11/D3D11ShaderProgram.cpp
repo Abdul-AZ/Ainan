@@ -14,7 +14,6 @@ namespace Ainan {
 			Context = (D3D11RendererContext*)context;
 
 			//load batch renderer shader
-			uint32_t vertexByteCodeSize = 0;
 			uint8_t* fragmentByteCode = nullptr;
 			uint32_t fragmentByteCodeSize = 0;
 			{
@@ -24,11 +23,11 @@ namespace Ainan {
 					assert(false);
 
 				fseek(file, 0, SEEK_END);
-				vertexByteCodeSize = ftell(file);
+				VertexByteCodeSize = ftell(file);
 				fseek(file, 0, SEEK_SET);
 
-				VertexByteCode = new uint8_t[vertexByteCodeSize];
-				fread(VertexByteCode, vertexByteCodeSize, 1, file);
+				VertexByteCode = new uint8_t[VertexByteCodeSize];
+				fread(VertexByteCode, VertexByteCodeSize, 1, file);
 				fclose(file);
 			}
 			{
@@ -46,7 +45,7 @@ namespace Ainan {
 				fclose(file);
 			}
 
-			ASSERT_D3D_CALL(Context->Device->CreateVertexShader(VertexByteCode, vertexByteCodeSize, 0, &VertexShader));
+			ASSERT_D3D_CALL(Context->Device->CreateVertexShader(VertexByteCode, VertexByteCodeSize, 0, &VertexShader));
 			ASSERT_D3D_CALL(Context->Device->CreatePixelShader(fragmentByteCode, fragmentByteCodeSize, 0, &FragmentShader));
 
 

@@ -59,7 +59,9 @@ namespace Ainan {
 
 		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices));
 		VBO->Bind();
-		VBO->SetLayout({ ShaderVariableType::Vec2 });
+		VertexLayout layout(1);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		VBO->SetLayout(layout, Renderer::ShaderLibrary["GizmoShader"]);
 
 		EBO = Renderer::CreateIndexBuffer((unsigned int*)arrowIndecies, sizeof(arrowIndecies) / sizeof(unsigned int));
 		EBO->Bind();

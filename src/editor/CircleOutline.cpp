@@ -37,7 +37,9 @@ namespace Ainan {
 			vertices[vertexCount - 1] = vertices[0];
 
 			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * vertexCount);
-			VBO->SetLayout({ ShaderVariableType::Vec2 });
+			VertexLayout layout(1);
+			layout[0] = { "aPos", ShaderVariableType::Vec2 };
+			VBO->SetLayout(layout, Renderer::ShaderLibrary["CircleOutlineShader"]);
 
 			EBO = Renderer::CreateIndexBuffer(indecies, vertexCount * 2 - 2);
 

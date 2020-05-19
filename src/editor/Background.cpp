@@ -18,7 +18,9 @@ namespace Ainan {
 								 glm::vec2(-1.0f, 1.0f) };
 
 		VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices));
-		VBO->SetLayout({ ShaderVariableType::Vec2 });
+		VertexLayout layout(1);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		VBO->SetLayout(layout, Renderer::ShaderLibrary["BackgroundShader"]);
 
 		VAO->Unbind();
 	}

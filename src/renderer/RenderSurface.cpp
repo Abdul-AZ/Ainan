@@ -37,7 +37,10 @@ namespace Ainan {
 		};
 
 		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices));
-		m_VertexBuffer->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
+		VertexLayout layout(2);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
+		m_VertexBuffer->SetLayout(layout, Renderer::ShaderLibrary["ImageShader"]);
 
 		SurfaceFrameBuffer->Unbind();
 	}

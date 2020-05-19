@@ -14,6 +14,7 @@
 
 #include "d3d11/D3D11RendererAPI.h"
 #include "d3d11/D3D11ShaderProgram.h"
+#include "d3d11/D3D11VertexBuffer.h"
 
 #endif // PLATFORM_WINDOWS
 
@@ -99,14 +100,15 @@ namespace Ainan {
 
 		m_QuadBatchVertexBuffer = CreateVertexBuffer(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), true);
 		m_QuadBatchVertexBuffer->Bind();
-		m_QuadBatchVertexBuffer->SetLayout(
-			{
-				ShaderVariableType::Vec2,  //Position
-				ShaderVariableType::Vec4,  //Color;
-				ShaderVariableType::Float, //Texture;
-				ShaderVariableType::Vec2   //Texture Coordinates;
-			}
-		);
+		{
+			VertexLayout layout(4);
+			layout[0] = { "aPos", ShaderVariableType::Vec2 };
+			layout[1] = { "aColor", ShaderVariableType::Vec4 };
+			layout[2] = { "aTexture", ShaderVariableType::Float };
+			layout[3] = { "aTexCoords", ShaderVariableType::Vec2 };
+
+			m_QuadBatchVertexBuffer->SetLayout(layout, ShaderLibrary["QuadBatchShader"]);
+		}
 
 		unsigned int* indicies = new unsigned int[c_MaxQuadsPerBatch * 6];
 		int u = 0;
@@ -161,7 +163,12 @@ namespace Ainan {
 		};
 
 		m_BlurVertexBuffer = CreateVertexBuffer(quadVertices, sizeof(quadVertices));
-		m_BlurVertexBuffer->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
+		{
+			VertexLayout layout(2);
+			layout[0] = { "aPos", ShaderVariableType::Vec2 };
+			layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
+			m_BlurVertexBuffer->SetLayout(layout, ShaderLibrary["BlurShader"]);
+		}
 		m_BlurVertexArray->Unbind();
 
 		SetBlendMode(m_CurrentBlendMode);
@@ -587,6 +594,12 @@ namespace Ainan {
 		case RendererType::OpenGL:
 			buffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(data, size, dynamic);
 			break;
+
+#ifdef PLATFORM_WINDOWS
+		case RendererType::D3D11:
+			buffer = std::make_shared<D3D11::D3D11VertexBuffer>(data, size, dynamic, m_CurrentActiveAPI->GetContext());
+			break;
+#endif // PLATFORM_WINDOWS
 
 		default:
 			assert(false);
