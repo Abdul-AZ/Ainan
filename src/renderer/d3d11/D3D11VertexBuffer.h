@@ -11,11 +11,12 @@ namespace Ainan {
 		class D3D11VertexBuffer : public VertexBuffer
 		{
 		public:
-			D3D11VertexBuffer(void* data, unsigned int size, bool dynamic, RendererContext* context);
+			D3D11VertexBuffer(void* data, unsigned int size,
+				const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
+				bool dynamic, RendererContext* context);
 			virtual ~D3D11VertexBuffer();
 
 			// Inherited via VertexBuffer
-			virtual void SetLayout(const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram) override;
 			virtual void UpdateData(const int& offset, const int& size, void* data) override;
 			virtual unsigned int GetRendererID() override;
 			virtual void Bind() const override;

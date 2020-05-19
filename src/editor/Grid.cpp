@@ -67,10 +67,10 @@ namespace Ainan {
 			VAO = Renderer::CreateVertexArray();
 			VAO->Bind();
 
-			VBO = Renderer::CreateVertexBuffer(vertices.data(),(unsigned int)sizeof(glm::vec2) * (unsigned int)vertices.size());
 			VertexLayout layout(1);
 			layout[0] = { "aPos", ShaderVariableType::Vec2 };
-			VBO->SetLayout(layout, Renderer::ShaderLibrary["LineShader"]);
+			VBO = Renderer::CreateVertexBuffer(vertices.data(),(unsigned int)sizeof(glm::vec2) * (unsigned int)vertices.size(),
+				layout, Renderer::ShaderLibrary["LineShader"]);
 
 			EBO = Renderer::CreateIndexBuffer(indecies.data(), (unsigned int)indecies.size());
 

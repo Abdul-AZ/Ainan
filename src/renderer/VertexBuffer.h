@@ -21,7 +21,7 @@ namespace Ainan {
 	public:
 		virtual ~VertexBuffer() {};
 
-		virtual void SetLayout(const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram) = 0;
+		//virtual void SetLayout(const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram) = 0;
 
 		//NOTE: offset and size are in bytes
 		//offset is the start of the memory location you want to update

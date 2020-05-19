@@ -36,11 +36,10 @@ namespace Ainan {
 			 1.0f,  1.0f,  1.0f, 1.0f
 		};
 
-		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices));
 		VertexLayout layout(2);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
 		layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
-		m_VertexBuffer->SetLayout(layout, Renderer::ShaderLibrary["ImageShader"]);
+		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, Renderer::ShaderLibrary["ImageShader"]);
 
 		SurfaceFrameBuffer->Unbind();
 	}

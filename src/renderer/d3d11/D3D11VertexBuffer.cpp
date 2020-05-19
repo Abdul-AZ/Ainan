@@ -38,50 +38,55 @@ namespace Ainan {
 			}
 		}
 
-		D3D11VertexBuffer::D3D11VertexBuffer(void* data, unsigned int size, bool dynamic, RendererContext* context)
+		D3D11VertexBuffer::D3D11VertexBuffer(void* data, unsigned int size,
+			const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
+			bool dynamic, RendererContext* context)
 		{
 			Context = (D3D11RendererContext*)context;
 
-			D3D11_BUFFER_DESC desc{};
-			desc.ByteWidth = size;
-			desc.Usage = dynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
-			desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-			desc.CPUAccessFlags = dynamic ? D3D11_CPU_ACCESS_WRITE : 0;
-			if (data)
+			//create buffer
 			{
-				D3D11_SUBRESOURCE_DATA initialData{};
-				initialData.pSysMem = data;
+				D3D11_BUFFER_DESC desc{};
+				desc.ByteWidth = size;
+				desc.Usage = dynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
+				desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+				desc.CPUAccessFlags = dynamic ? D3D11_CPU_ACCESS_WRITE : 0;
+				if (data)
+				{
+					D3D11_SUBRESOURCE_DATA initialData{};
+					initialData.pSysMem = data;
 
-				ASSERT_D3D_CALL(Context->Device->CreateBuffer(&desc,&initialData, &Buffer));
+					ASSERT_D3D_CALL(Context->Device->CreateBuffer(&desc, &initialData, &Buffer));
+				}
+				else
+				{
+					ASSERT_D3D_CALL(Context->Device->CreateBuffer(&desc, 0, &Buffer));
+				}
 			}
-			else
+
+			//set layout
 			{
-				ASSERT_D3D_CALL(Context->Device->CreateBuffer(&desc, 0, &Buffer));
+				std::vector<D3D11_INPUT_ELEMENT_DESC> desc(layout.size());
+
+				for (size_t i = 0; i < layout.size(); i++)
+				{
+					desc[i].SemanticName = layout[i].Name.c_str();
+					desc[i].SemanticIndex = 0;
+					desc[i].Format = GetD3D11FormatFromShaderType(layout[i].Type);
+					desc[i].InputSlot = i;
+					desc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+					desc[i].InstanceDataStepRate = 0;
+				}
+
+				auto d3dshader = std::static_pointer_cast<D3D11ShaderProgram>(shaderProgram);
+
+				ASSERT_D3D_CALL(Context->Device->CreateInputLayout(desc.data(), desc.size(), d3dshader->VertexByteCode, d3dshader->VertexByteCodeSize, &Layout));
 			}
 		}
 
 		D3D11VertexBuffer::~D3D11VertexBuffer()
 		{
 			Buffer->Release();
-		}
-
-		void D3D11VertexBuffer::SetLayout(const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram)
-		{
-			std::vector<D3D11_INPUT_ELEMENT_DESC> desc(layout.size());
-			
-			for (size_t i = 0; i < layout.size(); i++)
-			{
-				desc[i].SemanticName = layout[i].Name.c_str();
-				desc[i].SemanticIndex = 0;
-				desc[i].Format = GetD3D11FormatFromShaderType(layout[i].Type);
-				desc[i].InputSlot = i;
-				desc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
-				desc[i].InstanceDataStepRate = 0;
-			}
-
-			auto d3dshader = std::static_pointer_cast<D3D11ShaderProgram>(shaderProgram);
-
-			ASSERT_D3D_CALL(Context->Device->CreateInputLayout(desc.data(), desc.size(), d3dshader->VertexByteCode, d3dshader->VertexByteCodeSize, &Layout));
 		}
 
 		void D3D11VertexBuffer::UpdateData(const int& offset, const int& size, void* data)

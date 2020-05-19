@@ -29,41 +29,17 @@ namespace Ainan {
 			}
 		}
 
-		OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, unsigned int size, bool dynamic)
+		OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, unsigned int size, const VertexLayout& layout, bool dynamic)
 		{
+			//create buffer
 			glGenBuffers(1, &m_RendererID);
 			Bind();
 			if(dynamic)
 				glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
 			else
 				glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-		}
 
-		OpenGLVertexBuffer::~OpenGLVertexBuffer()
-		{
-			glDeleteBuffers(1, &m_RendererID);
-		}
-
-		void OpenGLVertexBuffer::Bind() const
-		{
-			glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
-		}
-
-		void OpenGLVertexBuffer::Unbind() const
-		{
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-		}
-
-		void OpenGLVertexBuffer::UpdateData(const int& offset, const int& size, void* data)
-		{
-			Bind();
-			glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
-		}
-
-		void OpenGLVertexBuffer::SetLayout(const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram)
-		{
-			Bind();
-
+			//set layout
 			int index = 0;
 			int offset = 0;
 			int stride = 0;
@@ -85,6 +61,27 @@ namespace Ainan {
 				glEnableVertexAttribArray(index);
 				index++;
 			}
+		}
+
+		OpenGLVertexBuffer::~OpenGLVertexBuffer()
+		{
+			glDeleteBuffers(1, &m_RendererID);
+		}
+
+		void OpenGLVertexBuffer::Bind() const
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+		}
+
+		void OpenGLVertexBuffer::Unbind() const
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+
+		void OpenGLVertexBuffer::UpdateData(const int& offset, const int& size, void* data)
+		{
+			Bind();
+			glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 		}
 	}
 }

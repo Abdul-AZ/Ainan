@@ -21,10 +21,9 @@ int main()
 	{
 		glm::vec2 vertices[2] = { {-1.0f,-1.0f}, {1.0f,1.0f} };
 		auto exampleShader = Renderer::CreateShaderProgram("shaders/Line", "shaders/FlatColor");
-		auto exampleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(vertices), false);
 		VertexLayout layout(1);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
-		exampleVertexBuffer->SetLayout(layout, exampleShader);
+		auto exampleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(vertices), layout, exampleShader, false);
 
 		while (Window::ShouldClose == false)
 		{

@@ -990,7 +990,8 @@ namespace Ainan {
 		AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->GetRendererID(), "Color");
 
 		// Create buffers
-		ImGuiVertexBuffer = Renderer::CreateVertexBuffer(nullptr, 0);
+		VertexLayout layout;
+		ImGuiVertexBuffer = Renderer::CreateVertexBuffer(nullptr, 0, layout, ImGuiShader);
 		ImGuiIndexBuffer = Renderer::CreateIndexBuffer(nullptr, 0);
 
 		Ainan::ImGui_ImplOpenGL3_CreateFontsTexture();

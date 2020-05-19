@@ -97,9 +97,6 @@ namespace Ainan {
 		//setup batch renderer
 		m_QuadBatchVertexArray = CreateVertexArray();
 		m_QuadBatchVertexArray->Bind();
-
-		m_QuadBatchVertexBuffer = CreateVertexBuffer(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), true);
-		m_QuadBatchVertexBuffer->Bind();
 		{
 			VertexLayout layout(4);
 			layout[0] = { "aPos", ShaderVariableType::Vec2 };
@@ -107,7 +104,8 @@ namespace Ainan {
 			layout[2] = { "aTexture", ShaderVariableType::Float };
 			layout[3] = { "aTexCoords", ShaderVariableType::Vec2 };
 
-			m_QuadBatchVertexBuffer->SetLayout(layout, ShaderLibrary["QuadBatchShader"]);
+			m_QuadBatchVertexBuffer = CreateVertexBuffer(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex),
+				layout, ShaderLibrary["QuadBatchShader"], true);
 		}
 
 		unsigned int* indicies = new unsigned int[c_MaxQuadsPerBatch * 6];
@@ -162,12 +160,11 @@ namespace Ainan {
 			 1.0f,  1.0f,  1.0f, 1.0f
 		};
 
-		m_BlurVertexBuffer = CreateVertexBuffer(quadVertices, sizeof(quadVertices));
 		{
 			VertexLayout layout(2);
 			layout[0] = { "aPos", ShaderVariableType::Vec2 };
 			layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
-			m_BlurVertexBuffer->SetLayout(layout, ShaderLibrary["BlurShader"]);
+			m_BlurVertexBuffer = CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, ShaderLibrary["BlurShader"]);
 		}
 		m_BlurVertexArray->Unbind();
 
@@ -585,19 +582,21 @@ namespace Ainan {
 		}
 	}
 
-	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, unsigned int size, bool dynamic)
+	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, unsigned int size,
+		const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
+		bool dynamic)
 	{
 		std::shared_ptr<VertexBuffer> buffer;
 
 		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
-			buffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(data, size, dynamic);
+			buffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(data, size, layout, dynamic);
 			break;
 
 #ifdef PLATFORM_WINDOWS
 		case RendererType::D3D11:
-			buffer = std::make_shared<D3D11::D3D11VertexBuffer>(data, size, dynamic, m_CurrentActiveAPI->GetContext());
+			buffer = std::make_shared<D3D11::D3D11VertexBuffer>(data, size, layout, shaderProgram, dynamic, m_CurrentActiveAPI->GetContext());
 			break;
 #endif // PLATFORM_WINDOWS
 

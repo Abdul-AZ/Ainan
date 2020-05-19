@@ -82,7 +82,9 @@ namespace Ainan {
 
 		static std::shared_ptr<VertexArray> CreateVertexArray();
 
-		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size, bool dynamic = false);
+		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size,
+			const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
+			bool dynamic = false);
 
 		//data should ALWAYS an UNSIGNED INT array
 		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(unsigned int* data, const int& count);

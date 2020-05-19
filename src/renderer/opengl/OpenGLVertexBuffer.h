@@ -8,11 +8,10 @@ namespace Ainan
 		{
 		public:
 			//size is in bytes
-			OpenGLVertexBuffer(void* data, unsigned int size, bool dynamic);
+			OpenGLVertexBuffer(void* data, unsigned int size, const VertexLayout& layout, bool dynamic);
 			~OpenGLVertexBuffer();
 
 			// Inherited via VertexBuffer
-			virtual void SetLayout(const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram) override;
 			virtual void UpdateData(const int& offset, const int& size, void* data) override;
 			virtual unsigned int GetRendererID() override { return m_RendererID; }
 			virtual void Bind() const override;
