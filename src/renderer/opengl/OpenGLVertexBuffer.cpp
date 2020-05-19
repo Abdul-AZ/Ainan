@@ -31,6 +31,9 @@ namespace Ainan {
 
 		OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, unsigned int size, const VertexLayout& layout, bool dynamic)
 		{
+			glGenVertexArrays(1, &m_VertexArray);
+			glBindVertexArray(m_VertexArray);
+
 			//create buffer
 			glGenBuffers(1, &m_RendererID);
 			Bind();
@@ -71,11 +74,13 @@ namespace Ainan {
 		void OpenGLVertexBuffer::Bind() const
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+			glBindVertexArray(m_VertexArray);
 		}
 
 		void OpenGLVertexBuffer::Unbind() const
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
 		}
 
 		void OpenGLVertexBuffer::UpdateData(const int& offset, const int& size, void* data)

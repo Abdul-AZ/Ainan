@@ -27,7 +27,6 @@ namespace Ainan {
 		bool SettingsWindowOpen = true;
 
 	private:
-		std::shared_ptr<VertexArray> VAO;
 		std::shared_ptr<VertexBuffer> VBO;
 
 		//RadialLight data

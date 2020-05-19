@@ -7,15 +7,11 @@ namespace Ainan {
 	static bool CircleOutlineBuffersInitilized = false;
 	static std::shared_ptr<IndexBuffer> EBO = nullptr;
 	static std::shared_ptr<VertexBuffer> VBO = nullptr;
-	static std::shared_ptr<VertexArray> VAO = nullptr;
 
 	static const int vertexCount = 60;
 	CircleOutline::CircleOutline()
 	{
 		if (!CircleOutlineBuffersInitilized){
-
-			VAO = Renderer::CreateVertexArray();
-			VAO->Bind();
 
 			glm::vec2 vertices[vertexCount];
 			unsigned int indecies[vertexCount * 2 - 2];
@@ -42,8 +38,6 @@ namespace Ainan {
 
 			EBO = Renderer::CreateIndexBuffer(indecies, vertexCount * 2 - 2);
 
-			VAO->Unbind();
-
 			CircleOutlineBuffersInitilized = true;
 		}
 	}
@@ -59,11 +53,9 @@ namespace Ainan {
 		shader->Bind();
 		shader->SetUniformMat4("u_Model", model);
 		shader->SetUniformVec4("u_Color", Color);
-		VAO->Bind();
 
-		Renderer::Draw(*VAO, *shader, Primitive::Lines, *EBO);
+		Renderer::Draw(*VBO, *shader, Primitive::Lines, *EBO);
 
-		VAO->Unbind();
 		shader->Unbind();
 	}
 

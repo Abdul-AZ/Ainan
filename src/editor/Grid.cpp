@@ -8,7 +8,6 @@
 namespace Ainan {
 
 	static bool GridBufferInitilized = false;
-	static std::shared_ptr<VertexArray> VAO = nullptr;
 	static std::shared_ptr<VertexBuffer> VBO = nullptr;
 	static std::shared_ptr<IndexBuffer> EBO = nullptr;
 
@@ -64,9 +63,6 @@ namespace Ainan {
 				indecies.push_back((unsigned int)i + VERTICES_PER_AXIS * 3 + 1);
 			}
 
-			VAO = Renderer::CreateVertexArray();
-			VAO->Bind();
-
 			VertexLayout layout(1);
 			layout[0] = { "aPos", ShaderVariableType::Vec2 };
 			VBO = Renderer::CreateVertexBuffer(vertices.data(),(unsigned int)sizeof(glm::vec2) * (unsigned int)vertices.size(),
@@ -74,24 +70,19 @@ namespace Ainan {
 
 			EBO = Renderer::CreateIndexBuffer(indecies.data(), (unsigned int)indecies.size());
 
-			VAO->Unbind();
-
 			GridBufferInitilized = true;
 		}
 	}
 
 	void Grid::Draw()
 	{
-		VAO->Bind();
-
 		auto& shader = Renderer::ShaderLibrary["LineShader"];
 		shader->Bind();
 
 		shader->SetUniformVec4("u_Color", glm::vec4(1.0f, 1.0f, 1.0f, 0.3f));
 
-		Renderer::Draw(*VAO, *shader, Primitive::Lines, *EBO);
+		Renderer::Draw(*VBO, *shader, Primitive::Lines, *EBO);
 
-		VAO->Unbind();
 		shader->Unbind();
 	}
 }

@@ -1103,8 +1103,8 @@ namespace Ainan {
 #ifdef GL_SAMPLER_BINDING
 		glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 #endif
-
-		std::shared_ptr<VertexArray> tempVA = Renderer::CreateVertexArray();
+		VertexLayout layout;
+		std::shared_ptr<VertexBuffer> tempVA = Renderer::CreateVertexBuffer(nullptr,0, layout,ImGuiShader);
 		tempVA->Bind();
 
 		// Bind vertex/index buffers and setup attributes for ImDrawVert

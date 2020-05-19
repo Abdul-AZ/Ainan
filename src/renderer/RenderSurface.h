@@ -23,7 +23,6 @@ namespace Ainan {
 	
 		std::shared_ptr<Texture> m_Texture;
 	private:
-		std::shared_ptr<VertexArray> m_VertexArray;
 		std::shared_ptr<VertexBuffer> m_VertexBuffer;
 		glm::vec2 m_Size;
 	};

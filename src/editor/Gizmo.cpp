@@ -54,17 +54,12 @@ namespace Ainan {
 
 	Gizmo::Gizmo()
 	{
-		VAO = Renderer::CreateVertexArray();
-		VAO->Bind();
-
 		VertexLayout layout(1);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
 		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibrary["GizmoShader"]);
 
 		EBO = Renderer::CreateIndexBuffer((unsigned int*)arrowIndecies, sizeof(arrowIndecies) / sizeof(unsigned int));
 		EBO->Bind();
-
-		VAO->Unbind();
 	}
 
 	void Gizmo::Draw(glm::vec2& objectPosition, const Rectangle& viewport)
@@ -153,7 +148,7 @@ namespace Ainan {
 
 		shader->SetUniformVec4("u_Color", color);
 		shader->SetUniformMat4("u_Model", model);
-		Renderer::Draw(*VAO, *shader, Primitive::Triangles, *EBO);
+		Renderer::Draw(*VBO, *shader, Primitive::Triangles, *EBO);
 
 		model = glm::rotate(model, -PI / 2, glm::vec3(0.0f, 0.0f, -1.0f));
 
@@ -168,7 +163,7 @@ namespace Ainan {
 		glm::vec2 mousePosWS = Renderer::m_CurrentSceneDescription.SceneCamera.Position + realMousePositionNDC * c_GlobalScaleFactor;
 		glm::vec2 objectPosWS = objectPositionWS * c_GlobalScaleFactor;
 
-		Renderer::Draw(*VAO, *shader, Primitive::Triangles, *EBO);
+		Renderer::Draw(*VBO, *shader, Primitive::Triangles, *EBO);
 	}
 
 	bool Gizmo::CheckIfInsideArrow(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point)

@@ -4,7 +4,6 @@
 
 #include "RendererAPI.h"
 #include "ShaderProgram.h"
-#include "VertexArray.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Texture.h"
@@ -55,13 +54,13 @@ namespace Ainan {
 		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, std::shared_ptr<Texture> texture = nullptr);
 
 		//these overloads DO NOT use an index buffer
-		static void Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode,
+		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& mode,
 						 const unsigned int& vertexCount);
 
 		//these overloads DO use an index buffer
-		static void Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive,
+		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive,
 						 const IndexBuffer& indexBuffer);
-		static void Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive,
+		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive,
 						 const IndexBuffer& indexBuffer, int vertexCount);
 
 		static void ClearScreen();
@@ -79,8 +78,6 @@ namespace Ainan {
 
 		static void SetScissor(const Rectangle& scissor);
 		static Rectangle GetCurrentScissor();
-
-		static std::shared_ptr<VertexArray> CreateVertexArray();
 
 		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size,
 			const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
@@ -107,7 +104,6 @@ namespace Ainan {
 		
 		//batch renderer data
 		static std::shared_ptr<VertexBuffer> m_QuadBatchVertexBuffer;
-		static std::shared_ptr<VertexArray> m_QuadBatchVertexArray;
 		static std::shared_ptr<IndexBuffer> m_QuadBatchIndexBuffer;
 		static QuadVertex* m_QuadBatchVertexBufferDataOrigin;
 		static QuadVertex* m_QuadBatchVertexBufferDataPtr;
@@ -118,7 +114,6 @@ namespace Ainan {
 		//Postprocessing data
 		static std::shared_ptr<Texture> m_BlurTexture;
 		static std::shared_ptr<FrameBuffer> m_BlurFrameBuffer;
-		static std::shared_ptr<VertexArray> m_BlurVertexArray;
 		static std::shared_ptr<VertexBuffer> m_BlurVertexBuffer;
 
 		//refrences to created objects

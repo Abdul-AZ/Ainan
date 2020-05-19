@@ -6,9 +6,6 @@ namespace Ainan {
 
 	Background::Background()
 	{
-		VAO = Renderer::CreateVertexArray();
-		VAO->Bind();
-
 		glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f),
 								 glm::vec2(1.0f, -1.0f),
 								 glm::vec2(-1.0f, 1.0f),
@@ -20,8 +17,6 @@ namespace Ainan {
 		VertexLayout layout(1);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
 		VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices), layout, Renderer::ShaderLibrary["BackgroundShader"]);
-
-		VAO->Unbind();
 	}
 
 	void Background::SubmitLight(const RadialLight& light)
@@ -80,7 +75,6 @@ namespace Ainan {
 
 	void Background::Draw(Environment& env)
 	{
-		VAO->Unbind();
 		auto& shader = Renderer::ShaderLibrary["BackgroundShader"];
 		shader->Bind();
 
@@ -114,9 +108,8 @@ namespace Ainan {
 		model = glm::scale(model, glm::vec3(5000.0f));
 		shader->SetUniformMat4("u_Model", model);
 
-		Renderer::Draw(*VAO, *shader, Primitive::Triangles, 6);
+		Renderer::Draw(*VBO, *shader, Primitive::Triangles, 6);
 
-		VAO->Unbind();
 		shader->Unbind();
 
 		m_RadialLightSubmissionCount = 0;

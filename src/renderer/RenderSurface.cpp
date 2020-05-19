@@ -21,9 +21,6 @@ namespace Ainan {
 
 		SurfaceFrameBuffer->SetActiveTexture(*m_Texture);
 
-		m_VertexArray = Renderer::CreateVertexArray();
-		m_VertexArray->Bind();
-
 		// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 		float quadVertices[] = { 
 			// positions   // texCoords
@@ -49,13 +46,13 @@ namespace Ainan {
 		auto& shader = Renderer::ShaderLibrary["ImageShader"];
 		shader->SetUniform1i("u_ScreenTexture", 0);
 		m_Texture->Bind();
-		Renderer::Draw(*m_VertexArray, *shader, Primitive::Triangles, 6);
+		Renderer::Draw(*m_VertexBuffer, *shader, Primitive::Triangles, 6);
 	}
 
 	void RenderSurface::Render(ShaderProgram& shader)
 	{
 		m_Texture->Bind();
-		Renderer::Draw(*m_VertexArray, shader, Primitive::Triangles, 6);
+		Renderer::Draw(*m_VertexBuffer, shader, Primitive::Triangles, 6);
 	}
 
 	void RenderSurface::RenderToScreen(const Rectangle& viewport)

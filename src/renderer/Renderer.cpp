@@ -4,7 +4,6 @@
 
 #include "opengl/OpenGLRendererAPI.h"
 #include "opengl/OpenGLShaderProgram.h"
-#include "opengl/OpenGLVertexArray.h"
 #include "opengl/OpenGLVertexBuffer.h"
 #include "opengl/OpenGLIndexBuffer.h"
 #include "opengl/OpenGLTexture.h"
@@ -36,7 +35,6 @@ namespace Ainan {
 
 	//batch renderer data
 	std::shared_ptr<VertexBuffer> Renderer::m_QuadBatchVertexBuffer = nullptr;
-	std::shared_ptr<VertexArray> Renderer::m_QuadBatchVertexArray = nullptr;
 	std::shared_ptr<IndexBuffer> Renderer::m_QuadBatchIndexBuffer = nullptr;
 	QuadVertex* Renderer::m_QuadBatchVertexBufferDataOrigin = nullptr;
 	QuadVertex* Renderer::m_QuadBatchVertexBufferDataPtr = nullptr;
@@ -46,7 +44,6 @@ namespace Ainan {
 	//postprocessing data
 	std::shared_ptr<Texture>      Renderer::m_BlurTexture = nullptr;
 	std::shared_ptr<FrameBuffer>  Renderer::m_BlurFrameBuffer = nullptr;
-	std::shared_ptr<VertexArray>  Renderer::m_BlurVertexArray = nullptr;
 	std::shared_ptr<VertexBuffer> Renderer::m_BlurVertexBuffer = nullptr;
 
 	RenderingBlendMode Renderer::m_CurrentBlendMode = RenderingBlendMode::Additive;
@@ -95,8 +92,6 @@ namespace Ainan {
 		}
 
 		//setup batch renderer
-		m_QuadBatchVertexArray = CreateVertexArray();
-		m_QuadBatchVertexArray->Bind();
 		{
 			VertexLayout layout(4);
 			layout[0] = { "aPos", ShaderVariableType::Vec2 };
@@ -122,7 +117,6 @@ namespace Ainan {
 			u += 4;
 		}
 		m_QuadBatchIndexBuffer = CreateIndexBuffer(indicies, c_MaxQuadsPerBatch * 6);
-		m_QuadBatchVertexArray->Unbind();
 		delete[] indicies;
 
 		m_QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
@@ -146,8 +140,6 @@ namespace Ainan {
 		//setup postprocessing
 		m_BlurTexture = CreateTexture();
 		m_BlurFrameBuffer = CreateFrameBuffer();
-		m_BlurVertexArray = CreateVertexArray();
-		m_BlurVertexArray->Bind();
 
 		float quadVertices[] = {
 			// positions   // texCoords
@@ -166,7 +158,6 @@ namespace Ainan {
 			layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
 			m_BlurVertexBuffer = CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, ShaderLibrary["BlurShader"]);
 		}
-		m_BlurVertexArray->Unbind();
 
 		SetBlendMode(m_CurrentBlendMode);
 	}
@@ -185,7 +176,6 @@ namespace Ainan {
 
 		//batch renderer data
 		m_QuadBatchVertexBuffer.reset();
-		m_QuadBatchVertexArray.reset();
 		m_QuadBatchIndexBuffer.reset();
 		delete[] m_QuadBatchVertexBufferDataOrigin;
 		m_QuadBatchTextures[0].reset();
@@ -224,15 +214,15 @@ namespace Ainan {
 			}
 	}
 
-	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
+	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
 	{
-		vertexArray.Bind();
+		vertexBuffer.Bind();
 		shader.Bind();
 		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
 
 		m_CurrentActiveAPI->Draw(shader, mode, vertexCount);
 
-		vertexArray.Unbind();
+		vertexBuffer.Unbind();
 		shader.Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
@@ -434,31 +424,32 @@ namespace Ainan {
 		}
 	}
 
-	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
+	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
 	{
-		vertexArray.Bind();
+		vertexBuffer.Bind();
+		indexBuffer.Bind();
 		shader.Bind();
 
 		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
 
 		m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer);
 
-		vertexArray.Unbind();
+		vertexBuffer.Unbind();
 		shader.Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
 	}
 
-	void Renderer::Draw(const VertexArray& vertexArray, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
+	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
 	{
-		vertexArray.Bind();
+		vertexBuffer.Bind();
 		shader.Bind();
 
 		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
 
 		m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer, vertexCount);
 
-		vertexArray.Unbind();
+		vertexBuffer.Unbind();
 		shader.Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
@@ -511,7 +502,7 @@ namespace Ainan {
 
 		//do the horizontal blur to the surface we revieved and put the result in tempSurface
 		targetTexture->Bind();
-		Draw(*m_BlurVertexArray, *shader, Primitive::Triangles, 6);
+		Draw(*m_BlurVertexBuffer, *shader, Primitive::Triangles, 6);
 
 		//this specifies that we are doing vertical blur
 		shader->SetUniformVec2("u_BlurDirection", glm::vec2(0.0f, 1.0f));
@@ -522,7 +513,7 @@ namespace Ainan {
 
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
 		m_BlurTexture->Bind();
-		Draw(*m_BlurVertexArray, *shader, Primitive::Triangles, 6);
+		Draw(*m_BlurVertexBuffer, *shader, Primitive::Triangles, 6);
 
 		Renderer::SetViewport(lastViewport);
 	}
@@ -566,19 +557,6 @@ namespace Ainan {
 		default:
 			assert(false);
 			return Rectangle();
-		}
-	}
-
-	std::shared_ptr<VertexArray> Renderer::CreateVertexArray()
-	{
-		switch (m_CurrentActiveAPI->GetContext()->GetType())
-		{
-		case RendererType::OpenGL:
-			return std::make_shared<OpenGL::OpenGLVertexArray>();
-
-		default:
-			assert(false);
-			return nullptr;
 		}
 	}
 
@@ -700,7 +678,7 @@ namespace Ainan {
 			numVertices * sizeof(QuadVertex),
 			m_QuadBatchVertexBufferDataOrigin);
 
-		Renderer::Draw(*m_QuadBatchVertexArray,
+		Renderer::Draw(*m_QuadBatchVertexBuffer,
 			*ShaderLibrary["QuadBatchShader"],
 			Primitive::Triangles,
 			*m_QuadBatchIndexBuffer,
