@@ -8,7 +8,7 @@ namespace Ainan {
 	public:
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
-		 
+		
 		virtual void SetUniform1i(const char* name, const int& value)                                  = 0;
 		virtual void SetUniform1f(const char* name, const float& value)                                = 0;
 		virtual void SetUniform1fs(const char* name, float * value, const int& count)                  = 0;

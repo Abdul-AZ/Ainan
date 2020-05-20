@@ -8,6 +8,7 @@
 #include "opengl/OpenGLIndexBuffer.h"
 #include "opengl/OpenGLTexture.h"
 #include "opengl/OpenGLFrameBuffer.h"
+#include "opengl/OpenGLUniformBuffer.h"
 
 #ifdef PLATFORM_WINDOWS
 
@@ -27,6 +28,7 @@ namespace Ainan {
 	glm::mat4 Renderer::m_CurrentViewProjection = glm::mat4(1.0f);
 	unsigned int Renderer::NumberOfDrawCallsLastScene = 0;
 	std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> Renderer::ShaderLibrary;
+	std::shared_ptr<UniformBuffer> Renderer::SceneUniformbuffer = nullptr;
 
 	//profiler data
 	std::vector<std::weak_ptr<Texture>> Renderer::m_ReservedTextures;
@@ -161,6 +163,9 @@ namespace Ainan {
 		}
 
 		SetBlendMode(m_CurrentBlendMode);
+
+		SceneUniformbuffer = CreateUniformBuffer(sizeof(glm::mat4), nullptr);
+		SceneUniformbuffer->Bind(0);
 	}
 
 	void Renderer::Terminate()
@@ -193,6 +198,8 @@ namespace Ainan {
 		m_CurrentSceneDescription.SceneDrawTarget->Bind();
 		ClearScreen();
 
+		//update the per-frame uniform buffer
+		SceneUniformbuffer->UpdateData(&m_CurrentViewProjection);
 
 		//update diagnostics stuff
 		for (size_t i = 0; i < m_ReservedTextures.size(); i++)
@@ -219,7 +226,6 @@ namespace Ainan {
 	{
 		vertexBuffer.Bind();
 		shader.Bind();
-		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
 
 		m_CurrentActiveAPI->Draw(shader, mode, vertexCount);
 
@@ -431,8 +437,6 @@ namespace Ainan {
 		indexBuffer.Bind();
 		shader.Bind();
 
-		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
-
 		m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer);
 
 		vertexBuffer.Unbind();
@@ -445,8 +449,6 @@ namespace Ainan {
 	{
 		vertexBuffer.Bind();
 		shader.Bind();
-
-		shader.SetUniformMat4("u_ViewProjection", m_CurrentViewProjection);
 
 		m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer, vertexCount);
 
@@ -670,6 +672,23 @@ namespace Ainan {
 		m_ReservedTextures.push_back(texture);
 
 		return texture;
+	}
+
+	std::shared_ptr<UniformBuffer> Renderer::CreateUniformBuffer(uint32_t size, void* data)
+	{
+		std::shared_ptr<UniformBuffer> buffer;
+
+		switch (m_CurrentActiveAPI->GetContext()->GetType())
+		{
+		case RendererType::OpenGL:
+			buffer = std::make_shared<OpenGL::OpenGLUniformBuffer>(size, data);
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return buffer;
 	}
 
 	void Ainan::Renderer::FlushQuadBatch()

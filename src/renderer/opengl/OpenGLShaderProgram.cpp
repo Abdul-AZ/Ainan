@@ -36,6 +36,10 @@ namespace Ainan {
 			glDeleteShader(fragment);
 
 			Bind();
+
+			//setup the per-frame uniform buffer
+			uint32_t index = glGetUniformBlockIndex(m_RendererID, "FrameData");
+			glUniformBlockBinding(m_RendererID, index, 0);
 		}
 
 		std::shared_ptr<OpenGLShaderProgram> OpenGLShaderProgram::CreateRaw(const std::string& vertSrc, const std::string& fragSrc)

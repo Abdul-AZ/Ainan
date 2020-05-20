@@ -9,6 +9,7 @@
 #include "Texture.h"
 #include "FrameBuffer.h"
 #include "Rectangle.h"
+#include "UniformBuffer.h"
 
 namespace Ainan {
 
@@ -96,11 +97,14 @@ namespace Ainan {
 
 		static std::shared_ptr<Texture> CreateTexture();
 
+		static std::shared_ptr<UniformBuffer> CreateUniformBuffer(uint32_t size, void* data);
+
 		static SceneDescription m_CurrentSceneDescription;
 		static unsigned int NumberOfDrawCallsLastScene;
 		static glm::mat4 m_CurrentViewProjection;
 		static RendererAPI* m_CurrentActiveAPI;
 		static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary;
+		static std::shared_ptr<UniformBuffer> SceneUniformbuffer;
 		
 		//batch renderer data
 		static std::shared_ptr<VertexBuffer> m_QuadBatchVertexBuffer;

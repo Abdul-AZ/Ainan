@@ -1,8 +1,12 @@
 #version 330 core
 layout(location = 0) in vec2 aPos;
 
+layout (std140) uniform FrameData
+{
+	mat4 u_ViewProjection;
+};
+
 uniform mat4 u_Model;
-uniform mat4 u_ViewProjection;
 
 out vec2 FragPos;
 
