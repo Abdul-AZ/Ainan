@@ -43,6 +43,7 @@ namespace Ainan {
 			bool dynamic, RendererContext* context)
 		{
 			Context = (D3D11RendererContext*)context;
+			Stride = 0;
 
 			//create buffer
 			{
@@ -76,6 +77,7 @@ namespace Ainan {
 					desc[i].InputSlot = i;
 					desc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 					desc[i].InstanceDataStepRate = 0;
+					Stride += GetShaderVariableSize(layout[i].Type);
 				}
 
 				auto d3dshader = std::static_pointer_cast<D3D11ShaderProgram>(shaderProgram);
@@ -103,12 +105,14 @@ namespace Ainan {
 		void D3D11VertexBuffer::Bind() const
 		{
 			uint32_t offset = 0;
-			Context->DeviceContext->IASetVertexBuffers(0, 1, &Buffer, &stride, &offset);
+			Context->DeviceContext->IASetVertexBuffers(0, 1, &Buffer, &Stride, &offset);
+			Context->DeviceContext->IASetInputLayout(Layout);
 		}
 
 		void D3D11VertexBuffer::Unbind() const
 		{
 			Context->DeviceContext->IASetVertexBuffers(0, 0, 0, 0, 0);
+			Context->DeviceContext->IASetInputLayout(0);
 		}
 	}
 }

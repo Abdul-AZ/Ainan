@@ -19,11 +19,13 @@ int main()
 	ImGuiWrapper::Init();
 
 	{
-		glm::vec2 vertices[2] = { {-1.0f,-1.0f}, {1.0f,1.0f} };
+		glm::vec2 vertices[3] = { {-1.0f,-1.0f}, {1.0f,-1.0f}, {0.0f, 1.0f} };
+		uint32_t indecies[3] = { 0, 2, 1 };
 		auto exampleShader = Renderer::CreateShaderProgram("shaders/Line", "shaders/FlatColor");
 		VertexLayout layout(1);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
 		auto exampleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(vertices), layout, exampleShader, false);
+		auto exampleIndexBuffer = Renderer::CreateIndexBuffer(indecies, 3);
 
 		while (Window::ShouldClose == false)
 		{
@@ -33,6 +35,8 @@ int main()
 			ImGuiWrapper::NewFrame();
 			ImGui::ShowDemoWindow();
 			ImGuiWrapper::Render();
+
+			Renderer::Draw(*exampleVertexBuffer, *exampleShader, Primitive::Triangles, *exampleIndexBuffer);
 
 			Renderer::Present();
 		}

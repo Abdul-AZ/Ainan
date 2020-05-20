@@ -1,5 +1,8 @@
 #include <pch.h>
+
 #include "D3D11RendererAPI.h"
+
+#include "renderer/IndexBuffer.h"
 
 #ifdef PLATFORM_WINDOWS
 
@@ -7,6 +10,7 @@
 #undef APIENTRY
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
+
 
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 
@@ -62,6 +66,28 @@ namespace Ainan {
 			SetViewport(viewport);
 		}
 
+		constexpr D3D11_PRIMITIVE_TOPOLOGY GetD3DPrimitive(Primitive primitive)
+		{
+			switch (primitive)
+			{
+			case Primitive::Triangles:
+				return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+				break;
+
+			case Primitive::TriangleFan:
+				return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+				break;
+
+			case Primitive::Lines:
+				return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+				break;
+
+			default:
+				assert(false);
+				return D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
+			}
+		}
+
 		D3D11RendererAPI::~D3D11RendererAPI()
 		{
 			Context.BackbufferView->Release();
@@ -80,6 +106,9 @@ namespace Ainan {
 
 		void D3D11RendererAPI::Draw(ShaderProgram& shader, const Primitive& mode, const IndexBuffer& indexBuffer)
 		{
+			Context.DeviceContext->IASetPrimitiveTopology(GetD3DPrimitive(mode));
+
+			Context.DeviceContext->DrawIndexed(indexBuffer.GetCount(), 0, 0);
 		}
 
 		void D3D11RendererAPI::Draw(ShaderProgram& shader, const Primitive& mode, const IndexBuffer& indexBuffer, int vertexCount)

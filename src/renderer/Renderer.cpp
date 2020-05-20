@@ -14,6 +14,7 @@
 #include "d3d11/D3D11RendererAPI.h"
 #include "d3d11/D3D11ShaderProgram.h"
 #include "d3d11/D3D11VertexBuffer.h"
+#include "d3d11/D3D11IndexBuffer.h"
 
 #endif // PLATFORM_WINDOWS
 
@@ -595,6 +596,10 @@ namespace Ainan {
 		{
 		case RendererType::OpenGL:
 			buffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(data, count);
+			break;
+
+		case RendererType::D3D11:
+			buffer = std::make_shared<D3D11::D3D11IndexBuffer>(data, count, m_CurrentActiveAPI->GetContext());
 			break;
 
 		default:

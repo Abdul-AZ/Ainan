@@ -26,7 +26,7 @@ namespace Ainan {
 			D3D11RendererContext* Context;
 			ID3D11Buffer* Buffer;
 			ID3D11InputLayout* Layout;
-			uint32_t stride;
+			uint32_t Stride;
 		};
 	}
 }
