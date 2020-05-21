@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderer/UniformBuffer.h"
+#include "renderer/VertexBuffer.h"//for VertexLayout
 
 namespace Ainan {
 	namespace OpenGL {
@@ -8,16 +9,18 @@ namespace Ainan {
 		class OpenGLUniformBuffer : public UniformBuffer
 		{
 		public:
-			OpenGLUniformBuffer(uint32_t size, void* data);
+			OpenGLUniformBuffer(const std::string& name, const VertexLayout& layout, void* data);
 			virtual ~OpenGLUniformBuffer();
 
 			virtual void UpdateData(void* data) override;
 			virtual void Bind(uint32_t index) override;
 
 		private:
-			uint32_t m_RendererID;
-			uint32_t m_Size;
-			std::string m_Name;
+			uint32_t m_RendererID = 0;
+			uint32_t m_Size = 0;
+			uint8_t* m_BufferMemory = nullptr;
+			VertexLayout m_Layout;
+			std::string m_Name = "";
 		};
 	}
 }

@@ -97,7 +97,8 @@ namespace Ainan {
 
 		static std::shared_ptr<Texture> CreateTexture();
 
-		static std::shared_ptr<UniformBuffer> CreateUniformBuffer(uint32_t size, void* data);
+		static std::shared_ptr<UniformBuffer> CreateUniformBuffer(const std::string& name, uint32_t reg,
+			const VertexLayout& layout, void* data);
 
 		static SceneDescription m_CurrentSceneDescription;
 		static unsigned int NumberOfDrawCallsLastScene;

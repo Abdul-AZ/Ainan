@@ -162,13 +162,27 @@ namespace Ainan {
 			layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
 			m_BlurVertexBuffer = CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, ShaderLibrary["BlurShader"]);
 		}
-		m_BlurUniformBuffer = CreateUniformBuffer(32, nullptr);
-		ShaderLibrary["BlurShader"]->BindUniformBuffer("BlurData", 1);
+		{
+			VertexLayout bufferLayout =
+			{
+				{ "u_Resolution", ShaderVariableType::Vec2 },
+				{ "u_BlurDirection", ShaderVariableType::Vec2 },
+				{ "u_Radius", ShaderVariableType::Float }
+			};
+			m_BlurUniformBuffer = CreateUniformBuffer("BlurData", 1, bufferLayout, nullptr);
+			ShaderLibrary["BlurShader"]->BindUniformBuffer("BlurData", 1);
+		}
 
 		SetBlendMode(m_CurrentBlendMode);
 
-		SceneUniformbuffer = CreateUniformBuffer(sizeof(glm::mat4), nullptr);
-		SceneUniformbuffer->Bind(0);
+		{
+			VertexLayout bufferLayout =
+			{
+				{ "u_ViewProjection", ShaderVariableType::Mat4 }
+			};
+			SceneUniformbuffer = CreateUniformBuffer("FrameData", 0, bufferLayout, nullptr);
+			SceneUniformbuffer->Bind(0);
+		}
 	}
 
 	void Renderer::Terminate()
@@ -492,17 +506,17 @@ namespace Ainan {
 		auto& shader = Renderer::ShaderLibrary["BlurShader"];
 
 		auto resolution = target->GetSize();
-		//setup uniform buffer with the correct memory alignment needed for the shader
-		uint8_t bufferData[36];
+		//make a buffer for all the uniform data
+		uint8_t bufferData[20];
 		glm::vec2 horizonatlDirection = glm::vec2(1.0f, 0.0f);
 		glm::vec2 verticalDirection = glm::vec2(0.0f, 1.0f);
-		memset(bufferData, 0, 32);
+		memset(bufferData, 0, 20);
+
 		memcpy(bufferData, &resolution, sizeof(glm::vec2));
 		memcpy(bufferData + 8, &horizonatlDirection, sizeof(glm::vec2));
 		memcpy(bufferData + 16, &radius, sizeof(float));
 		m_BlurUniformBuffer->UpdateData(bufferData);
 		m_BlurUniformBuffer->Bind(1);
-
 
 		//Horizontal blur
 		m_BlurTexture->SetImage(target->GetSize());
@@ -686,14 +700,14 @@ namespace Ainan {
 		return texture;
 	}
 
-	std::shared_ptr<UniformBuffer> Renderer::CreateUniformBuffer(uint32_t size, void* data)
+	std::shared_ptr<UniformBuffer> Renderer::CreateUniformBuffer(const std::string& name, uint32_t reg, const VertexLayout& layout, void* data)
 	{
 		std::shared_ptr<UniformBuffer> buffer;
 
 		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
-			buffer = std::make_shared<OpenGL::OpenGLUniformBuffer>(size, data);
+			buffer = std::make_shared<OpenGL::OpenGLUniformBuffer>(name, layout, data);
 			break;
 
 		default:
