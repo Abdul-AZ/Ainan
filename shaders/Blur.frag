@@ -4,13 +4,15 @@ out vec4 FragColor;
 in vec2 TexCoords;
 
 uniform sampler2D u_BlurTarget;
-//this should only be {1.0, 0.0} for horizontal or {0.0, 1.0} for vertical
-uniform vec2 u_BlurDirection;
-uniform vec2 u_Resolution;
-uniform float u_Radius;
+
+layout (std140) uniform BlurData
+{
+    vec2 u_Resolution;
+    vec2 u_BlurDirection; //this is {1.0, 0.0} for the horizontal pass and {0.0, 1.0} for vertical pass
+    float u_Radius;
+};
 
 //this is a 9 pass filter
-
 void main() 
 {
     float blurX = u_Radius / u_Resolution.x;

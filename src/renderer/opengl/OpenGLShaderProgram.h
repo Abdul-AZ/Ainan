@@ -34,6 +34,9 @@ namespace Ainan {
 
 			//this is to avoid getting uniform location repeatedly which is not very performant
 			std::unordered_map<std::string, int> m_UniformLocationMap;
+
+			// Inherited via ShaderProgram
+			virtual void BindUniformBuffer(const char* name, uint32_t slot) override;
 		};
 	}
 }

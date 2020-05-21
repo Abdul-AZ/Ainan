@@ -40,6 +40,9 @@ namespace Ainan {
 			//this is needed for creating vertex buffers
 			uint8_t* VertexByteCode = nullptr;
 			uint32_t VertexByteCodeSize = 0;
+
+			// Inherited via ShaderProgram
+			virtual void BindUniformBuffer(const char* name, uint32_t slot) override;
 			//there is no reason to keep the fragment shader code so it is immdediately freed after use
 		};
 	}

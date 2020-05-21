@@ -113,5 +113,8 @@ namespace Ainan {
 		{
 			return 0;
 		}
+		void D3D11ShaderProgram::BindUniformBuffer(const char* name, uint32_t slot)
+		{
+		}
 	}
 }

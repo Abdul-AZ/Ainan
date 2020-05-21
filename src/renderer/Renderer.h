@@ -119,6 +119,7 @@ namespace Ainan {
 		static std::shared_ptr<Texture> m_BlurTexture;
 		static std::shared_ptr<FrameBuffer> m_BlurFrameBuffer;
 		static std::shared_ptr<VertexBuffer> m_BlurVertexBuffer;
+		static std::shared_ptr<UniformBuffer> m_BlurUniformBuffer;
 
 		//refrences to created objects
 		//mostly used for profiling

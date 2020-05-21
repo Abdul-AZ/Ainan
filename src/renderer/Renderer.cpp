@@ -45,9 +45,10 @@ namespace Ainan {
 	int Renderer::m_QuadBatchTextureSlotsUsed = 1;
 
 	//postprocessing data
-	std::shared_ptr<Texture>      Renderer::m_BlurTexture = nullptr;
-	std::shared_ptr<FrameBuffer>  Renderer::m_BlurFrameBuffer = nullptr;
-	std::shared_ptr<VertexBuffer> Renderer::m_BlurVertexBuffer = nullptr;
+	std::shared_ptr<Texture>       Renderer::m_BlurTexture = nullptr;
+	std::shared_ptr<FrameBuffer>   Renderer::m_BlurFrameBuffer = nullptr;
+	std::shared_ptr<VertexBuffer>  Renderer::m_BlurVertexBuffer = nullptr;
+	std::shared_ptr<UniformBuffer> Renderer::m_BlurUniformBuffer = nullptr;
 
 	RenderingBlendMode Renderer::m_CurrentBlendMode = RenderingBlendMode::Additive;
 
@@ -161,6 +162,8 @@ namespace Ainan {
 			layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
 			m_BlurVertexBuffer = CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, ShaderLibrary["BlurShader"]);
 		}
+		m_BlurUniformBuffer = CreateUniformBuffer(32, nullptr);
+		ShaderLibrary["BlurShader"]->BindUniformBuffer("BlurData", 1);
 
 		SetBlendMode(m_CurrentBlendMode);
 
@@ -241,7 +244,9 @@ namespace Ainan {
 			FlushQuadBatch();
 
 		if (m_CurrentSceneDescription.Blur && m_CurrentBlendMode != RenderingBlendMode::Screen)
+		{
 			Blur(m_CurrentSceneDescription.SceneDrawTarget, m_CurrentSceneDescription.SceneDrawTargetTexture, m_CurrentSceneDescription.BlurRadius);
+		}
 
 		m_CurrentSceneDescription.SceneDrawTarget->Unbind();
 
@@ -486,12 +491,20 @@ namespace Ainan {
 		Renderer::SetViewport(viewport);
 		auto& shader = Renderer::ShaderLibrary["BlurShader"];
 
-		shader->SetUniformVec2("u_Resolution", target->GetSize());
-		shader->SetUniform1f("u_Radius", radius);
-		shader->SetUniform1i("u_BlurTarget", 0);
+		auto resolution = target->GetSize();
+		//setup uniform buffer with the correct memory alignment needed for the shader
+		uint8_t bufferData[36];
+		glm::vec2 horizonatlDirection = glm::vec2(1.0f, 0.0f);
+		glm::vec2 verticalDirection = glm::vec2(0.0f, 1.0f);
+		memset(bufferData, 0, 32);
+		memcpy(bufferData, &resolution, sizeof(glm::vec2));
+		memcpy(bufferData + 8, &horizonatlDirection, sizeof(glm::vec2));
+		memcpy(bufferData + 16, &radius, sizeof(float));
+		m_BlurUniformBuffer->UpdateData(bufferData);
+		m_BlurUniformBuffer->Bind(1);
+
 
 		//Horizontal blur
-
 		m_BlurTexture->SetImage(target->GetSize());
 		m_BlurTexture->SetDefaultTextureSettings();
 		m_BlurFrameBuffer->Bind();
@@ -500,15 +513,14 @@ namespace Ainan {
 		m_BlurFrameBuffer->Bind();
 		ClearScreen();
 
-		//this specifies that we are doing horizontal blur
-		shader->SetUniformVec2("u_BlurDirection", glm::vec2(1.0f, 0.0f));
-
 		//do the horizontal blur to the surface we revieved and put the result in tempSurface
 		targetTexture->Bind();
 		Draw(*m_BlurVertexBuffer, *shader, Primitive::Triangles, 6);
 
 		//this specifies that we are doing vertical blur
 		shader->SetUniformVec2("u_BlurDirection", glm::vec2(0.0f, 1.0f));
+		memcpy(bufferData + 8, &verticalDirection, sizeof(glm::vec2));
+		m_BlurUniformBuffer->UpdateData(bufferData);
 
 		//clear the buffer we recieved
 		target->Bind();
