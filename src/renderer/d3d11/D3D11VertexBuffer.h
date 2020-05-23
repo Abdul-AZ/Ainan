@@ -1,3 +1,4 @@
+#pragma once
 #ifdef PLATFORM_WINDOWS
 
 #include "renderer/RendererAPI.h"

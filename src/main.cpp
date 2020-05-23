@@ -7,7 +7,7 @@
 
 #include "renderer/d3d11/D3D11RendererAPI.h"
 
-#define USE_D3D11 0
+#define USE_D3D11 1
 
 int main() 
 {
@@ -26,6 +26,12 @@ int main()
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
 		auto exampleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(vertices), layout, exampleShader, false);
 		auto exampleIndexBuffer = Renderer::CreateIndexBuffer(indecies, 3);
+		glm::mat4 viewProjection(1.0f);
+		auto exampleUniformBuffer = Renderer::CreateUniformBuffer("FrameData", 0, { {"u_ViewProjection", ShaderVariableType::Mat4} }, &viewProjection);
+		exampleUniformBuffer->Bind(0, RenderingStage::VertexShader);
+		viewProjection = glm::scale(viewProjection, glm::vec3(0.1f, 0.1f, 0.1f));
+		viewProjection = glm::rotate(viewProjection, PI, glm::vec3(0.0f, 0.0f, 1.0f));
+		exampleUniformBuffer->UpdateData(&viewProjection);
 
 		while (Window::ShouldClose == false)
 		{

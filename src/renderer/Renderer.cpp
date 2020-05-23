@@ -16,6 +16,7 @@
 #include "d3d11/D3D11ShaderProgram.h"
 #include "d3d11/D3D11VertexBuffer.h"
 #include "d3d11/D3D11IndexBuffer.h"
+#include "d3d11/D3D11UniformBuffer.h"
 
 #endif // PLATFORM_WINDOWS
 
@@ -181,7 +182,7 @@ namespace Ainan {
 				{ "u_ViewProjection", ShaderVariableType::Mat4 }
 			};
 			SceneUniformbuffer = CreateUniformBuffer("FrameData", 0, bufferLayout, nullptr);
-			SceneUniformbuffer->Bind(0);
+			SceneUniformbuffer->Bind(0, RenderingStage::VertexShader);
 		}
 	}
 
@@ -516,7 +517,7 @@ namespace Ainan {
 		memcpy(bufferData + 8, &horizonatlDirection, sizeof(glm::vec2));
 		memcpy(bufferData + 16, &radius, sizeof(float));
 		m_BlurUniformBuffer->UpdateData(bufferData);
-		m_BlurUniformBuffer->Bind(1);
+		m_BlurUniformBuffer->Bind(1, RenderingStage::FragmentShader);
 
 		//Horizontal blur
 		m_BlurTexture->SetImage(target->GetSize());
@@ -708,6 +709,12 @@ namespace Ainan {
 		case RendererType::OpenGL:
 			buffer = std::make_shared<OpenGL::OpenGLUniformBuffer>(name, layout, data);
 			break;
+
+#ifdef PLATFORM_WINDOWS
+		case RendererType::D3D11:
+			buffer = std::make_shared<D3D11::D3D11UniformBuffer>(name, reg, layout, data, m_CurrentActiveAPI->GetContext());
+			break;
+#endif // PLATFORM_WINDOWS
 
 		default:
 			assert(false);

@@ -1,7 +1,10 @@
 
-matrix<float, 2, 2> u_ViewProjection : register(b0);
+cbuffer FrameData : register(b0)
+{
+    matrix<float, 4, 4> u_ViewProjection;
+}
 
 float4 main( float2 vPos : aPos) : SV_Position
 {
-    return float4(vPos, 0,1);    
+    return mul(u_ViewProjection, float4(vPos, 0, 1) );    
 }

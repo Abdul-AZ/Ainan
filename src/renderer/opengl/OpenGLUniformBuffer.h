@@ -13,7 +13,7 @@ namespace Ainan {
 			virtual ~OpenGLUniformBuffer();
 
 			virtual void UpdateData(void* data) override;
-			virtual void Bind(uint32_t index) override;
+			virtual void Bind(uint32_t index, RenderingStage stageBindTarget) override;
 
 		private:
 			uint32_t m_RendererID = 0;

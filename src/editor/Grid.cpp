@@ -72,7 +72,7 @@ namespace Ainan {
 		shader->Bind();
 
 		shader->BindUniformBuffer("ObjectColor", 1);
-		ColorUniformBuffer->Bind(1);
+		ColorUniformBuffer->Bind(1, RenderingStage::FragmentShader);
 		auto color = glm::vec4(1.0f, 1.0f, 1.0f, 0.3f);
 		ColorUniformBuffer->UpdateData(&color);
 

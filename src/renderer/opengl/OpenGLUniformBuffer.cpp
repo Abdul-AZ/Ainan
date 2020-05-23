@@ -116,7 +116,7 @@ namespace Ainan {
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		}
 
-		void OpenGLUniformBuffer::Bind(uint32_t index)
+		void OpenGLUniformBuffer::Bind(uint32_t index, RenderingStage stageBindTarget)
 		{
 			glBindBufferRange(GL_UNIFORM_BUFFER, index, m_RendererID, 0, m_Size);
 		}

@@ -23,6 +23,12 @@ namespace Ainan {
 		NotSpecified //this will use the current mode it is set on
 	};
 
+	enum class RenderingStage
+	{
+		VertexShader,
+		FragmentShader
+	};
+
 	//pure virtual class (interface) for each renderer api to inherit from
 	class RendererAPI
 	{
