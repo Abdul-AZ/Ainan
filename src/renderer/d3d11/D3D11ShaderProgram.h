@@ -18,16 +18,6 @@ namespace Ainan {
 			virtual void Bind() const override;
 			virtual void Unbind() const override;
 			virtual void SetUniform1i(const char* name, const int& value) override;
-			virtual void SetUniform1f(const char* name, const float& value) override;
-			virtual void SetUniform1fs(const char* name, float* value, const int& count) override;
-			virtual void SetUniformVec2(const char* name, const glm::vec2& value) override;
-			virtual void SetUniformVec2s(const char* name, const glm::vec2* const value, const int& count) override;
-			virtual void SetUniformVec3(const char* name, const glm::vec3& value) override;
-			virtual void SetUniformVec3s(const char* name, const glm::vec3* const value, const int& count) override;
-			virtual void SetUniformVec4(const char* name, const glm::vec4& value) override;
-			virtual void SetUniformVec4s(const char* name, const glm::vec4* const value, const int& count) override;
-			virtual void SetUniformMat4(const char* name, const glm::mat4& value) override;
-			virtual void SetUniformMat4s(const char* name, const glm::mat4* const value, const int& count) override;
 			virtual int GetUniformLocation(const char* name) override;
 			virtual int GetRendererID() const override;
 

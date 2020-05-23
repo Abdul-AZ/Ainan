@@ -75,36 +75,6 @@ namespace Ainan {
 		void D3D11ShaderProgram::SetUniform1i(const char* name, const int& value)
 		{
 		}
-		void D3D11ShaderProgram::SetUniform1f(const char* name, const float& value)
-		{
-		}
-		void D3D11ShaderProgram::SetUniform1fs(const char* name, float* value, const int& count)
-		{
-		}
-		void D3D11ShaderProgram::SetUniformVec2(const char* name, const glm::vec2& value)
-		{
-		}
-		void D3D11ShaderProgram::SetUniformVec2s(const char* name, const glm::vec2* const value, const int& count)
-		{
-		}
-		void D3D11ShaderProgram::SetUniformVec3(const char* name, const glm::vec3& value)
-		{
-		}
-		void D3D11ShaderProgram::SetUniformVec3s(const char* name, const glm::vec3* const value, const int& count)
-		{
-		}
-		void D3D11ShaderProgram::SetUniformVec4(const char* name, const glm::vec4& value)
-		{
-		}
-		void D3D11ShaderProgram::SetUniformVec4s(const char* name, const glm::vec4* const value, const int& count)
-		{
-		}
-		void D3D11ShaderProgram::SetUniformMat4(const char* name, const glm::mat4& value)
-		{
-		}
-		void D3D11ShaderProgram::SetUniformMat4s(const char* name, const glm::mat4* const value, const int& count)
-		{
-		}
 		int D3D11ShaderProgram::GetUniformLocation(const char* name)
 		{
 			return 0;

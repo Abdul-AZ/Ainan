@@ -6,7 +6,10 @@ layout (std140) uniform FrameData
 	mat4 u_ViewProjection;
 };
 
-uniform mat4 u_Model;
+layout (std140) uniform ObjectTransform
+{
+    uniform mat4 u_Model;
+};
 
 void main()
 {

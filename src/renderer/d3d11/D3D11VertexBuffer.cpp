@@ -77,7 +77,7 @@ namespace Ainan {
 					desc[i].InputSlot = i;
 					desc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 					desc[i].InstanceDataStepRate = 0;
-					Stride += GetShaderVariableSize(layout[i].Type);
+					Stride += layout[i].GetSize();
 				}
 
 				auto d3dshader = std::static_pointer_cast<D3D11ShaderProgram>(shaderProgram);

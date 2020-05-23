@@ -35,7 +35,6 @@ namespace Ainan {
 
 		auto& shader = Renderer::ShaderLibrary["LineShader"];
 
-		shader->SetUniformVec4("u_Color", Color);
 		shader->Bind();
 
 		Renderer::Draw(*VBO, *shader, Primitive::Lines, m_Vertices.size());

@@ -95,66 +95,6 @@ namespace Ainan {
 			glUniform1i(GetUniformLocation(name), value);
 		}
 
-		void OpenGLShaderProgram::SetUniform1f(const char* name, const float& value)
-		{
-			Bind();
-			glUniform1f(GetUniformLocation(name), value);
-		}
-
-		void OpenGLShaderProgram::SetUniform1fs(const char* name, float* value, const int& count)
-		{
-			Bind();
-			glUniform1fv(GetUniformLocation(name), count, value);
-		}
-
-		void OpenGLShaderProgram::SetUniformVec2(const char* name, const glm::vec2& value)
-		{
-			Bind();
-			glUniform2f(GetUniformLocation(name), value.x, value.y);
-		}
-
-		void OpenGLShaderProgram::SetUniformVec2s(const char* name, const glm::vec2* const value, const int& count)
-		{
-			Bind();
-			glUniform2fv(GetUniformLocation(name), count, (float*)value);
-		}
-
-		void OpenGLShaderProgram::SetUniformVec3(const char* name, const glm::vec3& value)
-		{
-			Bind();
-			glUniform3f(GetUniformLocation(name), value.x, value.y, value.z);
-		}
-
-		void OpenGLShaderProgram::SetUniformVec3s(const char* name, const glm::vec3* const value, const int& count)
-		{
-			Bind();
-			glUniform3fv(GetUniformLocation(name), count, (float*)value);
-		}
-
-		void OpenGLShaderProgram::SetUniformVec4(const char* name, const glm::vec4& value)
-		{
-			Bind();
-			glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w);
-		}
-
-		void OpenGLShaderProgram::SetUniformVec4s(const char* name, const glm::vec4* const value, const int& count)
-		{
-			Bind();
-			glUniform4fv(GetUniformLocation(name), count, (float*)value);
-		}
-
-		void OpenGLShaderProgram::SetUniformMat4(const char* name, const glm::mat4& value)
-		{
-			Bind();
-			glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
-		}
-
-		void OpenGLShaderProgram::SetUniformMat4s(const char* name, const glm::mat4* const value, const int& count)
-		{
-			Bind();
-			glUniformMatrix4fv(GetUniformLocation(name), count, GL_FALSE, (float*)value);
-		}
-
 		int OpenGLShaderProgram::GetUniformLocation(const char* name)
 		{
 			if (m_UniformLocationMap.find(name) != m_UniformLocationMap.end())

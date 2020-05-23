@@ -34,7 +34,9 @@ namespace Ainan {
 			case ShaderVariableType::Mat4:
 				return 16;
 				break;
+
 			default:
+				return 4 * 4;
 				break;
 			}
 		}
@@ -46,14 +48,26 @@ namespace Ainan {
 			//calculate std140 layout size
 			for (auto& layoutPart : m_Layout)
 			{
-				uint32_t size = GetShaderVariableSize(layoutPart.Type);
-				uint32_t baseAlignment = GetBasestd140Alignemnt(layoutPart.Type);
+				uint32_t size = layoutPart.GetSize();
 
-				m_Size += m_Size % baseAlignment == 0 ? 0 : baseAlignment - (m_Size % baseAlignment);
-				m_Size += size;
+				//if its an array
+				if (layoutPart.Count > 1)
+				{
+					for (size_t i = 0; i < layoutPart.Count; i++)
+					{
+						m_Size += m_Size % 16 == 0 ? 0 : 16 - (m_Size % 16);
+						m_Size += size / layoutPart.Count;
+					}
+				}
+				else
+				{
+					uint32_t baseAlignment = GetBasestd140Alignemnt(layoutPart.Type);
+					m_Size += m_Size % baseAlignment == 0 ? 0 : baseAlignment - (m_Size % baseAlignment);
+					m_Size += size;
+				}
 			}
 			m_Size += m_Size % 16 == 0 ? 0 : 16 - (m_Size % 16);
-			m_BufferMemory = new uint8_t[m_Size];
+			m_BufferMemory = new uint8_t[m_Size]();
 
 			glGenBuffers(1, &m_RendererID);
 			glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
@@ -75,13 +89,26 @@ namespace Ainan {
 			uint8_t* unalignedData = (uint8_t*)data;
 			for (auto& layoutPart : m_Layout)
 			{
-				uint32_t size = GetShaderVariableSize(layoutPart.Type);
-				uint32_t baseAlignment = GetBasestd140Alignemnt(layoutPart.Type);
+				uint32_t size = layoutPart.GetSize();
+				if (layoutPart.Count > 1)
+				{
+					for (size_t i = 0; i < layoutPart.Count; i++)
+					{
+						alignedDataIndex += alignedDataIndex % 16 == 0 ? 0 : 16 - (alignedDataIndex % 16);
+						memcpy(&m_BufferMemory[alignedDataIndex], &unalignedData[unalignedDataIndex], size / layoutPart.Count);
+						unalignedDataIndex += size / layoutPart.Count;
+						alignedDataIndex += size / layoutPart.Count;
+					}
+				}
+				else
+				{
+					uint32_t baseAlignment = GetBasestd140Alignemnt(layoutPart.Type);
 
-				alignedDataIndex += m_Size % baseAlignment == 0 ? 0 : baseAlignment - (m_Size % baseAlignment);
-				memcpy(&m_BufferMemory[alignedDataIndex], &unalignedData[unalignedDataIndex], size);
-				alignedDataIndex += size;
-				unalignedDataIndex += size;
+					alignedDataIndex += alignedDataIndex % baseAlignment == 0 ? 0 : baseAlignment - (alignedDataIndex % baseAlignment);
+					memcpy(&m_BufferMemory[alignedDataIndex], &unalignedData[unalignedDataIndex], size);
+					alignedDataIndex += size;
+					unalignedDataIndex += size;
+				}
 			}
 
 			glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);

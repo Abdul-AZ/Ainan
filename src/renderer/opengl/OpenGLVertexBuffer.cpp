@@ -49,12 +49,12 @@ namespace Ainan {
 
 			for (auto& layoutPart : layout)
 			{
-				stride += GetShaderVariableSize(layoutPart.Type);
+				stride += layoutPart.GetSize();
 			}
 
 			for (auto& layoutPart : layout)
 			{
-				int size = GetShaderVariableSize(layoutPart.Type);
+				int size = layoutPart.GetSize();
 				int componentCount = GetShaderVariableComponentCount(layoutPart.Type);
 				GLenum openglType = GetOpenglTypeFromShaderType(layoutPart.Type);
 

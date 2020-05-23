@@ -1099,7 +1099,8 @@ namespace Ainan {
 
 		ImGuiShader->Bind();
 		ImGuiShader->SetUniform1i("Texture", 0);
-		ImGuiShader->SetUniformMat4("ProjMtx", orthoProjection);
+		//ImGuiShader->SetUniformMat4("ProjMtx", orthoProjection);
+		glUniformMatrix4fv(glGetUniformLocation(ImGuiShader->GetRendererID(), "ProjMtx"), 1, GL_FALSE, (GLfloat*)&orthoProjection);
 #ifdef GL_SAMPLER_BINDING
 		glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 #endif

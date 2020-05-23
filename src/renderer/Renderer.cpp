@@ -532,7 +532,6 @@ namespace Ainan {
 		Draw(*m_BlurVertexBuffer, *shader, Primitive::Triangles, 6);
 
 		//this specifies that we are doing vertical blur
-		shader->SetUniformVec2("u_BlurDirection", glm::vec2(0.0f, 1.0f));
 		memcpy(bufferData + 8, &verticalDirection, sizeof(glm::vec2));
 		m_BlurUniformBuffer->UpdateData(bufferData);
 

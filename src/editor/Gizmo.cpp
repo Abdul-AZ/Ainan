@@ -60,6 +60,9 @@ namespace Ainan {
 
 		EBO = Renderer::CreateIndexBuffer((unsigned int*)arrowIndecies, sizeof(arrowIndecies) / sizeof(unsigned int));
 		EBO->Bind();
+
+		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { {"u_Model", ShaderVariableType::Mat4} }, nullptr);
+		ColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 2, { {"u_Color", ShaderVariableType::Vec4} }, nullptr);
 	}
 
 	void Gizmo::Draw(glm::vec2& objectPosition, const Rectangle& viewport)
@@ -146,8 +149,14 @@ namespace Ainan {
 
 		auto& shader = Renderer::ShaderLibrary["GizmoShader"];
 
-		shader->SetUniformVec4("u_Color", color);
-		shader->SetUniformMat4("u_Model", model);
+		shader->BindUniformBuffer("ObjectTransform", 1);
+		TransformUniformBuffer->Bind(1);
+		ColorUniformBuffer->UpdateData(&color);
+
+		shader->BindUniformBuffer("ObjectColor", 2);
+		ColorUniformBuffer->Bind(2);
+		TransformUniformBuffer->UpdateData(&model);
+
 		Renderer::Draw(*VBO, *shader, Primitive::Triangles, *EBO);
 
 		model = glm::rotate(model, -PI / 2, glm::vec3(0.0f, 0.0f, -1.0f));
@@ -158,8 +167,8 @@ namespace Ainan {
 		else
 			color = glm::vec4(0.0f, 0.75f, 0.0f, 1.0f);
 
-		shader->SetUniformVec4("u_Color", color);
-		shader->SetUniformMat4("u_Model", model);
+		ColorUniformBuffer->UpdateData(&color);
+		TransformUniformBuffer->UpdateData(&model);
 		glm::vec2 mousePosWS = Renderer::m_CurrentSceneDescription.SceneCamera.Position + realMousePositionNDC * c_GlobalScaleFactor;
 		glm::vec2 objectPosWS = objectPositionWS * c_GlobalScaleFactor;
 

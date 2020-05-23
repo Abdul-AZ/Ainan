@@ -4,42 +4,36 @@
 
 namespace Ainan {
 
-	static bool CircleOutlineBuffersInitilized = false;
-	static std::shared_ptr<IndexBuffer> EBO = nullptr;
-	static std::shared_ptr<VertexBuffer> VBO = nullptr;
-
 	static const int vertexCount = 60;
 	CircleOutline::CircleOutline()
 	{
-		if (!CircleOutlineBuffersInitilized){
+		glm::vec2 vertices[vertexCount];
+		unsigned int indecies[vertexCount * 2 - 2];
 
-			glm::vec2 vertices[vertexCount];
-			unsigned int indecies[vertexCount * 2 - 2];
+		float degreesBetweenVertices = 360 / vertexCount;
 
-			float degreesBetweenVertices = 360 / vertexCount;
+		for (int i = 0; i < vertexCount; i++)
+		{
+			float angle = i * degreesBetweenVertices;
+			vertices[i].x = (float)cos(angle * (PI / 180.0));
+			vertices[i].y = (float)sin(angle * (PI / 180.0));
 
-			for (int i = 0; i < vertexCount; i++)
-			{
-				float angle = i * degreesBetweenVertices;
-				vertices[i].x = (float)cos(angle * (PI / 180.0));
-				vertices[i].y = (float)sin(angle * (PI / 180.0));
+			if (i == vertexCount - 1)
+				continue;
 
-				if (i == vertexCount - 1)
-					continue;
-
-				indecies[i * 2] = i;
-				indecies[i * 2 + 1] = i + 1;
-			}
-			vertices[vertexCount - 1] = vertices[0];
-
-			VertexLayout layout(1);
-			layout[0] = { "aPos", ShaderVariableType::Vec2 };
-			VBO = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * vertexCount, layout, Renderer::ShaderLibrary["CircleOutlineShader"]);
-
-			EBO = Renderer::CreateIndexBuffer(indecies, vertexCount * 2 - 2);
-
-			CircleOutlineBuffersInitilized = true;
+			indecies[i * 2] = i;
+			indecies[i * 2 + 1] = i + 1;
 		}
+		vertices[vertexCount - 1] = vertices[0];
+
+		VertexLayout layout(1);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		VBO = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * vertexCount, layout, Renderer::ShaderLibrary["CircleOutlineShader"]);
+
+		EBO = Renderer::CreateIndexBuffer(indecies, vertexCount * 2 - 2);
+
+		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { {"u_Model", ShaderVariableType::Mat4} }, nullptr);
+		ColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 2, { {"u_Color", ShaderVariableType::Vec4} }, nullptr);
 	}
 
 	void CircleOutline::Draw()
@@ -51,8 +45,13 @@ namespace Ainan {
 		auto& shader = Renderer::ShaderLibrary["CircleOutlineShader"];
 
 		shader->Bind();
-		shader->SetUniformMat4("u_Model", model);
-		shader->SetUniformVec4("u_Color", Color);
+		shader->BindUniformBuffer("ObjectTransform", 1);
+		TransformUniformBuffer->Bind(1);
+		TransformUniformBuffer->UpdateData(&model);
+
+		shader->BindUniformBuffer("ObjectColor", 2);
+		ColorUniformBuffer->Bind(2);
+		ColorUniformBuffer->UpdateData(&Color);
 
 		Renderer::Draw(*VBO, *shader, Primitive::Lines, *EBO);
 
