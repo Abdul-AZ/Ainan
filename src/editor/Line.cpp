@@ -35,11 +35,7 @@ namespace Ainan {
 
 		auto& shader = Renderer::ShaderLibrary["LineShader"];
 
-		shader->Bind();
-
 		Renderer::Draw(*VBO, *shader, Primitive::Lines, m_Vertices.size());
-
-		shader->Unbind();
 	}
 
 	float Line::GetSlope(size_t startVertex, size_t endVertex)

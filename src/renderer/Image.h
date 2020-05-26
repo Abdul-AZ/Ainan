@@ -5,11 +5,50 @@
 
 namespace Ainan {
 
-	enum class ImageFormat {
+	enum class ImageFormat 
+	{
 		png,
 		jpeg,
 		bmp
 	};
+
+	enum class TextureFormat
+	{
+		RGBA,
+		RGB,
+		RG,
+		R,
+		Unspecified
+	};
+
+	constexpr uint32_t GetBytesPerPixel(TextureFormat format)
+	{
+		switch (format)
+		{
+		case Ainan::TextureFormat::RGBA:
+			return 4;
+			break;
+
+		case Ainan::TextureFormat::RGB:
+			return 3;
+			break;
+
+		case Ainan::TextureFormat::RG:
+			return 2;
+			break;
+
+		case Ainan::TextureFormat::R:
+			return 1;
+			break;
+
+		case Ainan::TextureFormat::Unspecified:
+		default:
+			assert(false);
+			return 0;
+			break;
+		}
+	}
+
 
 	class RenderSurface;
 
@@ -19,7 +58,7 @@ namespace Ainan {
 		Image() {};
 		~Image();
 
-		static Image LoadFromFile(const std::string& pathAndName, int desiredComp = 0);
+		static Image LoadFromFile(const std::string& pathAndName, TextureFormat desiredFormat = TextureFormat::Unspecified);
 		void SaveToFile(const std::string& pathAndName, const ImageFormat& format);
 
 		Image(const Image& image);
@@ -37,8 +76,7 @@ namespace Ainan {
 		//pointer to the image pixel array
 		unsigned char* m_Data = nullptr;
 
-		//3 means RGB and 4 means RGBA
-		int m_Comp = 0;
+		TextureFormat Format;
 
 		int m_Width = 0;
 		int m_Height = 0;

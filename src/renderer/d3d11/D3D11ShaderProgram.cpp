@@ -5,6 +5,7 @@
 
 #include "D3D11RendererContext.h"
 #include "D3D11UniformBuffer.h"
+#include "D3D11Texture.h"
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 
 namespace Ainan {
@@ -60,26 +61,11 @@ namespace Ainan {
 			FragmentShader->Release();
 		}
 
-		void D3D11ShaderProgram::Bind() const
-		{
-			Context->DeviceContext->VSSetShader(VertexShader, 0, 0);
-			Context->DeviceContext->PSSetShader(FragmentShader, 0, 0);
-		}
-
-		void D3D11ShaderProgram::Unbind() const
-		{
-			Context->DeviceContext->VSSetShader(0, 0, 0);
-			Context->DeviceContext->PSSetShader(0, 0, 0);
-		}
-
-		//TODO
-		void D3D11ShaderProgram::SetUniform1i(const char* name, const int& value)
-		{
-		}
 		int D3D11ShaderProgram::GetUniformLocation(const char* name)
 		{
 			return 0;
 		}
+
 		int D3D11ShaderProgram::GetRendererID() const
 		{
 			return 0;
@@ -93,6 +79,13 @@ namespace Ainan {
 				Context->DeviceContext->VSSetConstantBuffers(slot, 1, &d3dBuffer->Buffer);
 			else if (stage == RenderingStage::FragmentShader)
 				Context->DeviceContext->PSSetConstantBuffers(slot, 1, &d3dBuffer->Buffer);
+		}
+
+		void D3D11ShaderProgram::BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage)
+		{
+			auto d3dTexture = std::static_pointer_cast<D3D11Texture>(texture);
+			Context->DeviceContext->PSSetShaderResources(slot, 1, &d3dTexture->D3DResourceView);
+			Context->DeviceContext->PSSetSamplers(slot, 1, &d3dTexture->D3DSampler);
 		}
 	}
 }

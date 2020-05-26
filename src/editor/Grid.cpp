@@ -69,14 +69,11 @@ namespace Ainan {
 	void Grid::Draw()
 	{
 		auto& shader = Renderer::ShaderLibrary["LineShader"];
-		shader->Bind();
 
 		shader->BindUniformBuffer(ColorUniformBuffer, 1, RenderingStage::FragmentShader);
 		auto color = glm::vec4(1.0f, 1.0f, 1.0f, 0.3f);
 		ColorUniformBuffer->UpdateData(&color);
 
 		Renderer::Draw(*VBO, *shader, Primitive::Lines, *EBO);
-
-		shader->Unbind();
 	}
 }

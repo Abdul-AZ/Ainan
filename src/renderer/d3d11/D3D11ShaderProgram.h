@@ -15,9 +15,6 @@ namespace Ainan {
 			D3D11ShaderProgram(const std::string& vertPath, const std::string& fragPath, RendererContext* context);
 			virtual ~D3D11ShaderProgram();
 
-			virtual void Bind() const override;
-			virtual void Unbind() const override;
-			virtual void SetUniform1i(const char* name, const int& value) override;
 			virtual int GetUniformLocation(const char* name) override;
 			virtual int GetRendererID() const override;
 
@@ -33,6 +30,10 @@ namespace Ainan {
 
 			// Inherited via ShaderProgram
 			virtual void BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage) override;
+
+
+			// Inherited via ShaderProgram
+			virtual void BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage) override;
 
 			//there is no reason to keep the fragment shader code so it is immdediately freed after use
 		};

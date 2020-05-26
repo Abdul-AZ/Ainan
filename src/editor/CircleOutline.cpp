@@ -51,8 +51,6 @@ namespace Ainan {
 		ColorUniformBuffer->UpdateData(&Color);
 
 		Renderer::Draw(*VBO, *shader, Primitive::Lines, *EBO);
-
-		shader->Unbind();
 	}
 
 	glm::vec2 CircleOutline::GetPointByAngle(float angle_in_radians)

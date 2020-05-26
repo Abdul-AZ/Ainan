@@ -101,7 +101,7 @@ namespace Ainan {
 
 		Image img = Image::LoadFromFile(path);
 
-		if (img.m_Comp == 1)
+		if (img.Format == TextureFormat::R)
 			Image::GrayScaleToRGB(img);
 
 		m_Texture = Renderer::CreateTexture(img);

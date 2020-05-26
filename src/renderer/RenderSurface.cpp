@@ -10,14 +10,9 @@ namespace Ainan {
 
 		SurfaceFrameBuffer->Bind();
 
-		m_Texture = Renderer::CreateTexture(Window::FramebufferSize);
+		m_Texture = Renderer::CreateTexture(Window::FramebufferSize, TextureFormat::RGB);
 
-		//m_Size = Window::FramebufferSize;
-		//
-		//m_Texture->SetImage(m_Size, 3);
-		//
 		m_Texture->SetDefaultTextureSettings();
-		//m_Texture->Unbind();
 
 		SurfaceFrameBuffer->SetActiveTexture(*m_Texture);
 
@@ -44,14 +39,13 @@ namespace Ainan {
 	void RenderSurface::Render()
 	{
 		auto& shader = Renderer::ShaderLibrary["ImageShader"];
-		shader->SetUniform1i("u_ScreenTexture", 0);
-		m_Texture->Bind();
+		shader->BindTexture(m_Texture, 0, RenderingStage::FragmentShader);
 		Renderer::Draw(*m_VertexBuffer, *shader, Primitive::Triangles, 6);
 	}
 
 	void RenderSurface::Render(ShaderProgram& shader)
 	{
-		m_Texture->Bind();
+		shader.BindTexture(m_Texture, 0, RenderingStage::FragmentShader);
 		Renderer::Draw(*m_VertexBuffer, shader, Primitive::Triangles, 6);
 	}
 
@@ -78,11 +72,9 @@ namespace Ainan {
 		m_Texture.reset();
 	
 		//create a new one with the window size
-		m_Texture = Renderer::CreateTexture(size);
-		//m_Texture->SetImage(size, 3);
+		m_Texture = Renderer::CreateTexture(size, TextureFormat::RGB);
 	
 		m_Texture->SetDefaultTextureSettings();
-		m_Texture->Unbind();
 	
 		SurfaceFrameBuffer->SetActiveTexture(*m_Texture);
 		SurfaceFrameBuffer->Unbind();

@@ -40,8 +40,8 @@ int main()
 		viewProjection = glm::scale(viewProjection, glm::vec3(0.5f, 0.5f, 0.5f));
 		exampleUniformBuffer->UpdateData(&viewProjection);
 		
-		auto exampleTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Circle.png", 4));
-		exampleTexture->Bind(0);
+		auto exampleTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Circle.png", TextureFormat::RGBA));
+		exampleShader->BindTexture(exampleTexture, 0, RenderingStage::FragmentShader);
 
 		while (Window::ShouldClose == false)
 		{

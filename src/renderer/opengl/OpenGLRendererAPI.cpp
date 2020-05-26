@@ -4,6 +4,7 @@
 #include "OpenGLRendererAPI.h"
 #include "editor/Window.h"
 #include <GLFW/glfw3.h>
+#include "OpenGLShaderProgram.h"
 
 namespace Ainan {
 	namespace OpenGL {
@@ -24,19 +25,22 @@ namespace Ainan {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		}
 
-		void OpenGLRendererAPI::DrawInstanced(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount, const unsigned int& objectCount)
-		{
-			glDrawArraysInstanced(GetOpenGLPrimitive(primitive), 0, vertexCount, objectCount);
-		}
-
 		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
 		{
+			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
+
+			glUseProgram(openglShader->m_RendererID);
 			glDrawElements(GetOpenGLPrimitive(primitive), indexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
+			glUseProgram(0);
 		}
 
 		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
 		{
+			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
+
+			glUseProgram(openglShader->m_RendererID);
 			glDrawElements(GetOpenGLPrimitive(primitive), vertexCount, GL_UNSIGNED_INT, nullptr);
+			glUseProgram(0);
 		}
 
 		void OpenGLRendererAPI::ClearScreen()
@@ -100,7 +104,11 @@ namespace Ainan {
 
 		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount)
 		{
+			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
+
+			glUseProgram(openglShader->m_RendererID);
 			glDrawArrays(GetOpenGLPrimitive(primitive), 0, vertexCount);
+			glUseProgram(0);
 		}
 	}
 }

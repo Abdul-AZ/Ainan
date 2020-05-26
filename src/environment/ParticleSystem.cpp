@@ -27,10 +27,9 @@ namespace Ainan {
 		m_Particles.RemainingLifeTime.resize(c_ParticlePoolSize);
 
 		//initilize the default shader
-		if (DefaultTexture == nullptr) {
+		if (DefaultTexture == nullptr) 
+		{
 			DefaultTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Circle.png"));
-			//DefaultTexture->SetImage(Image::LoadFromFile("res/Circle.png"));
-			DefaultTexture->Bind();
 		}
 	}
 

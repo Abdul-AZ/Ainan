@@ -13,9 +13,9 @@ namespace Ainan
 			Window::CenterWindow();
 		};
 
-		m_PlayButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PlayButton.png", 4));
-		m_PauseButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PauseButton.png", 4));
-		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png", 4));
+		m_PlayButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PlayButton.png"));
+		m_PauseButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PauseButton.png"));
+		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png"));
 
 		//m_PlayButtonTexture->SetImage(Image::LoadFromFile("res/PlayButton.png", 4));
 		//m_PauseButtonTexture->SetImage(Image::LoadFromFile("res/PauseButton.png", 4));

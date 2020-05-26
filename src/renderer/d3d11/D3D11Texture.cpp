@@ -117,16 +117,6 @@ namespace Ainan {
 			return glm::vec2();
 		}
 
-		void D3D11Texture::Bind(const int& slot) const
-		{
-			Context->DeviceContext->PSSetShaderResources(slot, 1, &D3DResourceView);
-			Context->DeviceContext->PSSetSamplers(slot, 1, &D3DSampler);
-		}
-
-		void D3D11Texture::Unbind(const int& slot) const
-		{
-		}
-
 		unsigned int D3D11Texture::GetRendererID() const
 		{
 			return 0;

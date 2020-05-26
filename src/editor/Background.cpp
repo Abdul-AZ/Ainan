@@ -111,7 +111,6 @@ namespace Ainan {
 	void Background::Draw(Environment& env)
 	{
 		auto& shader = Renderer::ShaderLibrary["BackgroundShader"];
-		shader->Bind();
 
 		//not used light spots
 		for (int i = m_RadialLightSubmissionCount; i < MAX_NUM_RADIAL_LIGHTS; i++)
@@ -170,8 +169,6 @@ namespace Ainan {
 		LightingUniformBuffer->UpdateData(LightDataPackingBuffer);
 
 		Renderer::Draw(*VBO, *shader, Primitive::Triangles, 6);
-
-		shader->Unbind();
 
 		m_RadialLightSubmissionCount = 0;
 		m_SpotLightSubmissionCount = 0;

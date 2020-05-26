@@ -39,23 +39,40 @@ namespace Ainan {
 			delete[] m_Data;
 	}
 
-	Image Image::LoadFromFile(const std::string& pathAndName, int desiredComp)
+	Image Image::LoadFromFile(const std::string& pathAndName, TextureFormat desiredFormat)
 	{
 		Image image;
 
-		image.m_Data = stbi_load(pathAndName.c_str(), &image.m_Width, &image.m_Height, &image.m_Comp, desiredComp);
+		int comp = 0;
 
-		if (desiredComp != 0)
-			image.m_Comp = desiredComp;
+		if(desiredFormat == TextureFormat::RGBA)
+			image.m_Data = stbi_load(pathAndName.c_str(), &image.m_Width, &image.m_Height, &comp, 4);
+		else if(desiredFormat == TextureFormat::RGB)
+			image.m_Data = stbi_load(pathAndName.c_str(), &image.m_Width, &image.m_Height, &comp, 3);
+		else
+			image.m_Data = stbi_load(pathAndName.c_str(), &image.m_Width, &image.m_Height, &comp, 0);
+
+		if (comp == 4)
+			image.Format = TextureFormat::RGBA;
+		else if (comp == 3)
+			image.Format = TextureFormat::RGB;
+		else if (comp == 2)
+			image.Format = TextureFormat::RG;
+		else if (comp == 1)
+			image.Format = TextureFormat::R;
+		else
+			assert(false);
 
 		return image;
 	}
 
-	void Image::SaveToFile(const std::string& pathAndName, const ImageFormat & format)
+	void Image::SaveToFile(const std::string& pathAndName, const ImageFormat& format)
 	{
-		unsigned char* dataCpy = new unsigned char[m_Width * m_Height * m_Comp * sizeof(unsigned char)];
-		memcpy(dataCpy, m_Data, m_Width * m_Height * m_Comp * sizeof(unsigned char));
-		std::thread thread(t_SaveToFile, pathAndName, m_Width, m_Height, m_Comp, dataCpy, format);
+		uint32_t comp = GetBytesPerPixel(Format);
+
+		unsigned char* dataCpy = new unsigned char[m_Width * m_Height * comp * sizeof(unsigned char)];
+		memcpy(dataCpy, m_Data, m_Width * m_Height * comp * sizeof(unsigned char));
+		std::thread thread(t_SaveToFile, pathAndName, m_Width, m_Height, comp, dataCpy, format);
 		thread.detach();
 	}
 
@@ -63,9 +80,9 @@ namespace Ainan {
 	{
 		m_Width = image.m_Width;
 		m_Height = image.m_Height;
-		m_Comp = image.m_Comp;
-		m_Data = new unsigned char[m_Width * m_Height * m_Comp];
-		memcpy(m_Data, image.m_Data, m_Width * m_Height * m_Comp * sizeof(unsigned char));
+		Format = image.Format;
+		m_Data = new unsigned char[m_Width * m_Height * GetBytesPerPixel(Format)];
+		memcpy(m_Data, image.m_Data, m_Width * m_Height * GetBytesPerPixel(Format) * sizeof(unsigned char));
 	}
 
 	Image Image::operator=(const Image& image)
@@ -75,8 +92,10 @@ namespace Ainan {
 
 	void Image::FlipHorizontally()
 	{
-		uint32_t byteCount = m_Width * m_Height * m_Comp;
-		uint32_t rowSize = m_Width * m_Comp;
+		uint32_t comp = GetBytesPerPixel(Format);
+
+		uint32_t byteCount = m_Width * m_Height * comp;
+		uint32_t rowSize = m_Width * comp;
 		unsigned char* buffer = new unsigned char[byteCount];
 		memcpy(buffer, m_Data, byteCount);
 
@@ -107,7 +126,7 @@ namespace Ainan {
 
 	void Image::GrayScaleToRGB(Image& image)
 	{
-		assert(image.m_Comp == 1);
+		assert(image.Format == TextureFormat::R);
 
 		size_t pixelCount = image.m_Width * image.m_Height;
 
@@ -120,7 +139,7 @@ namespace Ainan {
 			buffer[i * 3 + 2] = image.m_Data[i];
 		}
 
-		image.m_Comp = 3;
+		image.Format = TextureFormat::RGB;
 		free(image.m_Data);
 		image.m_Data = buffer;
 	}

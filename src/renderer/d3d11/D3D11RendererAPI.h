@@ -18,7 +18,6 @@ namespace Ainan {
 
 			// Inherited via RendererAPI
 			virtual void Draw(ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount) override;
-			virtual void DrawInstanced(ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount, const unsigned int& objectCount) override;
 			virtual void Draw(ShaderProgram& shader, const Primitive& mode, const IndexBuffer& indexBuffer) override;
 			virtual void Draw(ShaderProgram& shader, const Primitive& mode, const IndexBuffer& indexBuffer, int vertexCount) override;
 			virtual void ClearScreen() override;

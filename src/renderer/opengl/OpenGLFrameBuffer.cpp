@@ -39,7 +39,7 @@ namespace Ainan {
 			image.m_Width = (unsigned int)m_Size.x;
 			image.m_Height = (unsigned int)m_Size.y;
 			image.m_Data = new unsigned char[image.m_Width * image.m_Height * 4];
-			image.m_Comp = 4;
+			image.Format = TextureFormat::RGBA;
 
 			Bind();
 			glReadPixels(bottomLeftPixel.x,

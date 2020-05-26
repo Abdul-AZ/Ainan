@@ -11,6 +11,8 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
+#include "D3D11ShaderProgram.h"
+
 
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 
@@ -100,13 +102,14 @@ namespace Ainan {
 		{
 		}
 
-		void D3D11RendererAPI::DrawInstanced(ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount, const unsigned int& objectCount)
-		{
-		}
-
 		void D3D11RendererAPI::Draw(ShaderProgram& shader, const Primitive& mode, const IndexBuffer& indexBuffer)
 		{
 			Context.DeviceContext->IASetPrimitiveTopology(GetD3DPrimitive(mode));
+
+			D3D11ShaderProgram* d3dShader = (D3D11ShaderProgram*)&shader;;
+
+			Context.DeviceContext->VSSetShader(d3dShader->VertexShader, 0, 0);
+			Context.DeviceContext->PSSetShader(d3dShader->FragmentShader, 0, 0);
 
 			Context.DeviceContext->DrawIndexed(indexBuffer.GetCount(), 0, 0);
 		}

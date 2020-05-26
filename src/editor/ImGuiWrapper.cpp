@@ -835,7 +835,7 @@ namespace Ainan {
 		glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
 
 		// Parse GLSL version string
-		int glsl_version = 130;
+		int glsl_version = 420;
 		assert(sscanf(GlslVersionString, "#version %d", &glsl_version));
 
 		const GLchar* vertex_shader_glsl_120 = 
@@ -948,7 +948,7 @@ namespace Ainan {
 			R"(
 			in vec2 Frag_UV;
 			in vec4 Frag_Color;
-			uniform sampler2D Texture;
+			layout(binding = 0) uniform sampler2D Texture;
 			layout (location = 0) out vec4 Out_Color;
 
 			void main()
@@ -980,8 +980,8 @@ namespace Ainan {
 			fragment_shader = fragment_shader_glsl_130;
 		}
 
-		std::string vertSrc = (std::string)GlslVersionString + (std::string)vertex_shader;
-		std::string fragSrc = (std::string)GlslVersionString + (std::string)fragment_shader;
+		std::string vertSrc = (std::string)"#version 420 core" + (std::string)vertex_shader;
+		std::string fragSrc = (std::string)"#version 420 core" + (std::string)fragment_shader;
 
 		ImGuiShader = Renderer::CreateShaderProgramRaw(vertSrc, fragSrc);
 
@@ -1097,8 +1097,7 @@ namespace Ainan {
 			{ (R + L) / (L - R),  (T + B) / (B - T),  0.0f,   1.0f },
 		};
 
-		ImGuiShader->Bind();
-		ImGuiShader->SetUniform1i("Texture", 0);
+		glUseProgram(ImGuiShader->GetRendererID());
 		//ImGuiShader->SetUniformMat4("ProjMtx", orthoProjection);
 		glUniformMatrix4fv(glGetUniformLocation(ImGuiShader->GetRendererID(), "ProjMtx"), 1, GL_FALSE, (GLfloat*)&orthoProjection);
 #ifdef GL_SAMPLER_BINDING

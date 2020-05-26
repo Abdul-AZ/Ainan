@@ -1,4 +1,4 @@
-#version 330 core
+#version 420 core
 
 out vec4 FragColor;
 
@@ -7,7 +7,7 @@ in vec2 FragPos;
 #define MAX_NUM_RADIAL_LIGHTS 10
 #define MAX_NUM_SPOT_LIGHTS 10
 
-layout (std140) uniform LightingData
+layout (std140, binding = 2) uniform LightingData
 {
 	vec3 u_BaseColor;
 	float u_BaseLight;

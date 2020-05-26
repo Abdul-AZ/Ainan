@@ -20,11 +20,9 @@ namespace Ainan {
 			virtual void SetImage(const glm::vec2& size, int comp = 4) override;
 			virtual void SetDefaultTextureSettings() override;
 			virtual glm::vec2 GetSize() const override;
-			virtual void Bind(const int& slot = 0) const override;
-			virtual void Unbind(const int& slot = 0) const override;
 			virtual unsigned int GetRendererID() const override;
 
-		private:
+		public:
 			ID3D11Texture2D* D3DTexture;
 			ID3D11ShaderResourceView* D3DResourceView;
 			ID3D11SamplerState* D3DSampler;

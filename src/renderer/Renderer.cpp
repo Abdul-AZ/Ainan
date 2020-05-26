@@ -66,10 +66,10 @@ namespace Ainan {
 	{
 		//name                  //vertex shader                //fragment shader
 		{ "BackgroundShader"    , "shaders/Background"    , "shaders/Background"     },
-		{ "CircleOutlineShader" , "shaders/CircleOutline" , "shaders/FlatColor"      },
+		{ "CircleOutlineShader" , "shaders/CircleOutline" , "shaders/CircleOutline"  },
 		{ "LineShader"          , "shaders/Line"          , "shaders/FlatColor"      },
 		{ "BlurShader"          , "shaders/Image"         , "shaders/Blur"           },
-		{ "GizmoShader"         , "shaders/Gizmo"         , "shaders/FlatColor"      },
+		{ "GizmoShader"         , "shaders/Gizmo"         , "shaders/Gizmo"          },
 		{ "ImageShader"         , "shaders/Image"         , "shaders/Image"          },
 		{ "QuadBatchShader"     , "shaders/QuadBatch"     , "shaders/QuadBatch"      }
 	};
@@ -128,23 +128,18 @@ namespace Ainan {
 		m_QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
 		m_QuadBatchVertexBufferDataPtr = m_QuadBatchVertexBufferDataOrigin;
 
-		m_QuadBatchTextures[0] = CreateTexture(glm::vec2(1,1));
+		m_QuadBatchTextures[0] = CreateTexture(glm::vec2(1,1), TextureFormat::RGBA);
 		m_QuadBatchTextures[0]->SetDefaultTextureSettings();
 		Image img;
 		img.m_Width = 1;
 		img.m_Height = 1;
-		img.m_Comp = 4;
+		img.Format = TextureFormat::RGBA;
 		img.m_Data = new unsigned char[4];
 		memset(img.m_Data, (unsigned char)255, 4);
 		m_QuadBatchTextures[0]->SetImage(img);
 
-		for (size_t i = 0; i < c_MaxQuadTexturesPerBatch; i++) {
-			std::string name = "u_Textures[" + std::to_string(i) + "]";
-			ShaderLibrary["QuadBatchShader"]->SetUniform1i(name.c_str(), i);
-		}
-
 		//setup postprocessing
-		m_BlurTexture = CreateTexture(Window::FramebufferSize);
+		m_BlurTexture = CreateTexture(Window::FramebufferSize, TextureFormat::RGB);
 		m_BlurFrameBuffer = CreateFrameBuffer();
 
 		float quadVertices[] = {
@@ -247,12 +242,10 @@ namespace Ainan {
 	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
 	{
 		vertexBuffer.Bind();
-		shader.Bind();
 
 		m_CurrentActiveAPI->Draw(shader, mode, vertexCount);
 
 		vertexBuffer.Unbind();
-		shader.Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
 	}
@@ -459,12 +452,10 @@ namespace Ainan {
 	{
 		vertexBuffer.Bind();
 		indexBuffer.Bind();
-		shader.Bind();
 
 		m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer);
 
 		vertexBuffer.Unbind();
-		shader.Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
 	}
@@ -472,12 +463,10 @@ namespace Ainan {
 	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
 	{
 		vertexBuffer.Bind();
-		shader.Bind();
 
 		m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer, vertexCount);
 
 		vertexBuffer.Unbind();
-		shader.Unbind();
 
 		s_CurrentNumberOfDrawCalls++;
 	}
@@ -533,7 +522,7 @@ namespace Ainan {
 		ClearScreen();
 
 		//do the horizontal blur to the surface we revieved and put the result in tempSurface
-		targetTexture->Bind();
+		shader->BindTexture(targetTexture, 0, RenderingStage::FragmentShader);
 		Draw(*m_BlurVertexBuffer, *shader, Primitive::Triangles, 6);
 
 		//this specifies that we are doing vertical blur
@@ -545,7 +534,7 @@ namespace Ainan {
 		Renderer::ClearScreen();
 
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
-		m_BlurTexture->Bind();
+		shader->BindTexture(m_BlurTexture, 0, RenderingStage::FragmentShader);
 		Draw(*m_BlurVertexBuffer, *shader, Primitive::Triangles, 6);
 
 		Renderer::SetViewport(lastViewport);
@@ -685,14 +674,14 @@ namespace Ainan {
 		}
 	}
 
-	std::shared_ptr<Texture> Renderer::CreateTexture(const glm::vec2& size, uint8_t* data)
+	std::shared_ptr<Texture> Renderer::CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data)
 	{
 		std::shared_ptr<Texture> texture;
 
 		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
-			texture = std::make_shared<OpenGL::OpenGLTexture>(size, data);
+			texture = std::make_shared<OpenGL::OpenGLTexture>(size, format, data);
 			break;
 
 #ifdef PLATFORM_WINDOWS
@@ -717,7 +706,7 @@ namespace Ainan {
 		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
-			texture = std::make_shared<OpenGL::OpenGLTexture>(glm::vec2(img.m_Width, img.m_Height), img.m_Data);
+			texture = std::make_shared<OpenGL::OpenGLTexture>(glm::vec2(img.m_Width, img.m_Height), img.Format, img.m_Data);
 			break;
 
 #ifdef PLATFORM_WINDOWS
@@ -761,7 +750,7 @@ namespace Ainan {
 	void Ainan::Renderer::FlushQuadBatch()
 	{
 		for (size_t i = 0; i < m_QuadBatchTextureSlotsUsed; i++)
-			m_QuadBatchTextures[i]->Bind(i);
+			ShaderLibrary["QuadBatchShader"]->BindTexture(m_QuadBatchTextures[i], i, RenderingStage::FragmentShader);
 
 		int numVertices = (m_QuadBatchVertexBufferDataPtr - m_QuadBatchVertexBufferDataOrigin);
 

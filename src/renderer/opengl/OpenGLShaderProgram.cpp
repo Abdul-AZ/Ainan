@@ -4,6 +4,7 @@
 #include "OpenGLShaderProgram.h"
 #include "file/AssetManager.h" //for reading shader files
 #include "OpenGLUniformBuffer.h"
+#include "OpenGLTexture.h"
 
 namespace Ainan {
 	namespace OpenGL {
@@ -35,8 +36,6 @@ namespace Ainan {
 			// delete the shaders as they're linked into our program now and no longer necessery
 			glDeleteShader(vertex);
 			glDeleteShader(fragment);
-
-			Bind();
 		}
 
 		std::shared_ptr<OpenGLShaderProgram> OpenGLShaderProgram::CreateRaw(const std::string& vertSrc, const std::string& fragSrc)
@@ -67,30 +66,12 @@ namespace Ainan {
 			glDeleteShader(vertex);
 			glDeleteShader(fragment);
 
-			shader->Bind();
-
 			return shader;
 		}
 
 		OpenGLShaderProgram::~OpenGLShaderProgram()
 		{
 			glDeleteProgram(m_RendererID);
-		}
-
-		void OpenGLShaderProgram::Bind() const
-		{
-			glUseProgram(m_RendererID);
-		}
-
-		void OpenGLShaderProgram::Unbind() const
-		{
-			glUseProgram(0);
-		}
-
-		void OpenGLShaderProgram::SetUniform1i(const char* name, const int& value)
-		{
-			Bind();
-			glUniform1i(GetUniformLocation(name), value);
 		}
 
 		int OpenGLShaderProgram::GetUniformLocation(const char* name)
@@ -107,13 +88,15 @@ namespace Ainan {
 			return m_RendererID;
 		}
 
+		void OpenGLShaderProgram::BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage)
+		{
+			std::shared_ptr<OpenGLTexture> openglTexture = std::static_pointer_cast<OpenGLTexture>(texture);
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_2D, openglTexture->m_RendererID);
+		}
+
 		void OpenGLShaderProgram::BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
 		{
-			//bind buffer slot in shader
-			uint32_t index = glGetUniformBlockIndex(m_RendererID, buffer->GetName().c_str());
-			glUniformBlockBinding(m_RendererID, index, slot);
-
-			//bind buffer
 			std::shared_ptr<OpenGLUniformBuffer> openglBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(buffer);
 			glBindBufferRange(GL_UNIFORM_BUFFER, slot, openglBuffer->m_RendererID, 0, buffer->GetAlignedSize());
 		}
