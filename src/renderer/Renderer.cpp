@@ -17,6 +17,7 @@
 #include "d3d11/D3D11VertexBuffer.h"
 #include "d3d11/D3D11IndexBuffer.h"
 #include "d3d11/D3D11UniformBuffer.h"
+#include "d3d11/D3D11Texture.h"
 
 #endif // PLATFORM_WINDOWS
 
@@ -127,7 +128,7 @@ namespace Ainan {
 		m_QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
 		m_QuadBatchVertexBufferDataPtr = m_QuadBatchVertexBufferDataOrigin;
 
-		m_QuadBatchTextures[0] = CreateTexture();
+		m_QuadBatchTextures[0] = CreateTexture(glm::vec2(1,1));
 		m_QuadBatchTextures[0]->SetDefaultTextureSettings();
 		Image img;
 		img.m_Width = 1;
@@ -143,7 +144,7 @@ namespace Ainan {
 		}
 
 		//setup postprocessing
-		m_BlurTexture = CreateTexture();
+		m_BlurTexture = CreateTexture(Window::FramebufferSize);
 		m_BlurFrameBuffer = CreateFrameBuffer();
 
 		float quadVertices[] = {
@@ -681,15 +682,46 @@ namespace Ainan {
 		}
 	}
 
-	std::shared_ptr<Texture> Renderer::CreateTexture()
+	std::shared_ptr<Texture> Renderer::CreateTexture(const glm::vec2& size, uint8_t* data)
 	{
 		std::shared_ptr<Texture> texture;
 
 		switch (m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
-			texture = std::make_shared<OpenGL::OpenGLTexture>();
+			texture = std::make_shared<OpenGL::OpenGLTexture>(size, data);
 			break;
+
+#ifdef PLATFORM_WINDOWS
+		case RendererType::D3D11:
+			texture = std::make_shared<D3D11::D3D11Texture>(size, data, m_CurrentActiveAPI->GetContext());
+			break;
+#endif // PLATFORM_WINDOWS
+
+		default:
+			assert(false);
+		}
+
+		m_ReservedTextures.push_back(texture);
+
+		return texture;
+	}
+
+	std::shared_ptr<Texture> Renderer::CreateTexture(Image& img)
+	{
+		std::shared_ptr<Texture> texture;
+
+		switch (m_CurrentActiveAPI->GetContext()->GetType())
+		{
+		case RendererType::OpenGL:
+			texture = std::make_shared<OpenGL::OpenGLTexture>(glm::vec2(img.m_Width, img.m_Height), img.m_Data);
+			break;
+
+#ifdef PLATFORM_WINDOWS
+		case RendererType::D3D11:
+			texture = std::make_shared<D3D11::D3D11Texture>(glm::vec2(img.m_Width, img.m_Height), img.m_Data, m_CurrentActiveAPI->GetContext());
+			break;
+#endif // PLATFORM_WINDOWS
 
 		default:
 			assert(false);

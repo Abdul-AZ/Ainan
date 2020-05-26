@@ -28,8 +28,8 @@ namespace Ainan {
 
 		//initilize the default shader
 		if (DefaultTexture == nullptr) {
-			DefaultTexture = Renderer::CreateTexture();
-			DefaultTexture->SetImage(Image::LoadFromFile("res/Circle.png"));
+			DefaultTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Circle.png"));
+			//DefaultTexture->SetImage(Image::LoadFromFile("res/Circle.png"));
 			DefaultTexture->Bind();
 		}
 	}

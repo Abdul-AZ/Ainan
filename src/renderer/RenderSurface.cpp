@@ -10,14 +10,14 @@ namespace Ainan {
 
 		SurfaceFrameBuffer->Bind();
 
-		m_Texture = Renderer::CreateTexture();
+		m_Texture = Renderer::CreateTexture(Window::FramebufferSize);
 
-		m_Size = Window::FramebufferSize;
-		
-		m_Texture->SetImage(m_Size, 3);
-
+		//m_Size = Window::FramebufferSize;
+		//
+		//m_Texture->SetImage(m_Size, 3);
+		//
 		m_Texture->SetDefaultTextureSettings();
-		m_Texture->Unbind();
+		//m_Texture->Unbind();
 
 		SurfaceFrameBuffer->SetActiveTexture(*m_Texture);
 
@@ -78,8 +78,8 @@ namespace Ainan {
 		m_Texture.reset();
 	
 		//create a new one with the window size
-		m_Texture = Renderer::CreateTexture();
-		m_Texture->SetImage(size, 3);
+		m_Texture = Renderer::CreateTexture(size);
+		//m_Texture->SetImage(size, 3);
 	
 		m_Texture->SetDefaultTextureSettings();
 		m_Texture->Unbind();

@@ -6,9 +6,13 @@
 namespace Ainan {
 	namespace OpenGL {
 
-		OpenGLTexture::OpenGLTexture()
+		OpenGLTexture::OpenGLTexture(const glm::vec2& size, uint8_t* data)
 		{
 			glGenTextures(1, &m_RendererID);
+			Bind();
+
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
 		}
 
 		OpenGLTexture::~OpenGLTexture()

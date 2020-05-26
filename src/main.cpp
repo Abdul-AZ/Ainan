@@ -19,28 +19,36 @@ int main()
 	ImGuiWrapper::Init();
 
 	{
-		glm::vec2 vertices[3] = { {-1.0f,-1.0f}, {1.0f,-1.0f}, {0.0f, 1.0f} };
-		uint32_t indecies[3] = { 0, 2, 1 };
+		glm::vec2 vertices[] = 
+		{   {-1.0f,-1.0f}, {0.0f,0.0f},
+			{-1.0f,1.0f}, {0.0f, 1.0f},
+			{1.0f, -1.0f}, {1.0f, 0.0f},
+			{1.0f,1.0f}, {1.0f,1.0f}
+		};
+		uint32_t indecies[] = { 0, 1, 2, 3, 2, 1 };
 		auto exampleShader = Renderer::CreateShaderProgram("shaders/Line", "shaders/FlatColor");
-		VertexLayout layout(1);
+		VertexLayout layout(2);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
 		auto exampleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(vertices), layout, exampleShader, false);
-		auto exampleIndexBuffer = Renderer::CreateIndexBuffer(indecies, 3);
+		auto exampleIndexBuffer = Renderer::CreateIndexBuffer(indecies, 6);
 		glm::mat4 viewProjection(1.0f);
 		auto exampleUniformBuffer = Renderer::CreateUniformBuffer("FrameData", 0, { {"u_ViewProjection", ShaderVariableType::Mat4} }, &viewProjection);
 		exampleUniformBuffer->Bind(0, RenderingStage::VertexShader);
-		viewProjection = glm::scale(viewProjection, glm::vec3(0.1f, 0.1f, 0.1f));
-		viewProjection = glm::rotate(viewProjection, PI, glm::vec3(0.0f, 0.0f, 1.0f));
+		viewProjection = glm::scale(viewProjection, glm::vec3(0.5f, 0.5f, 0.5f));
 		exampleUniformBuffer->UpdateData(&viewProjection);
+		
+		auto exampleTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Circle.png", 4));
+		exampleTexture->Bind(0);
 
 		while (Window::ShouldClose == false)
 		{
 			Renderer::ClearScreen();
 			Window::HandleWindowEvents();
 
-			ImGuiWrapper::NewFrame();
-			ImGui::ShowDemoWindow();
-			ImGuiWrapper::Render();
+			//ImGuiWrapper::NewFrame();
+			//ImGui::ShowDemoWindow();
+			//ImGuiWrapper::Render();
 
 			Renderer::Draw(*exampleVertexBuffer, *exampleShader, Primitive::Triangles, *exampleIndexBuffer);
 

@@ -95,7 +95,8 @@ namespace Ainan {
 
 		static std::shared_ptr<FrameBuffer> CreateFrameBuffer();
 
-		static std::shared_ptr<Texture> CreateTexture();
+		static std::shared_ptr<Texture> CreateTexture(const glm::vec2& size, uint8_t* data = nullptr);
+		static std::shared_ptr<Texture> CreateTexture(Image& img);
 
 		static std::shared_ptr<UniformBuffer> CreateUniformBuffer(const std::string& name, uint32_t reg,
 			const VertexLayout& layout, void* data);

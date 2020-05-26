@@ -13,13 +13,13 @@ namespace Ainan
 			Window::CenterWindow();
 		};
 
-		m_PlayButtonTexture = Renderer::CreateTexture();
-		m_PauseButtonTexture = Renderer::CreateTexture();
-		m_StopButtonTexture = Renderer::CreateTexture();
+		m_PlayButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PlayButton.png", 4));
+		m_PauseButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PauseButton.png", 4));
+		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png", 4));
 
-		m_PlayButtonTexture->SetImage(Image::LoadFromFile("res/PlayButton.png", 4));
-		m_PauseButtonTexture->SetImage(Image::LoadFromFile("res/PauseButton.png", 4));
-		m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 4));
+		//m_PlayButtonTexture->SetImage(Image::LoadFromFile("res/PlayButton.png", 4));
+		//m_PauseButtonTexture->SetImage(Image::LoadFromFile("res/PauseButton.png", 4));
+		//m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 4));
 	}
 
 	Editor::~Editor()

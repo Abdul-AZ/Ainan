@@ -2,6 +2,8 @@
 
 namespace Ainan {
 
+	class Texture;
+
 	//ONLY create this using Renderer::CreateShaderProgram
 	class ShaderProgram
 	{

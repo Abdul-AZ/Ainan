@@ -74,9 +74,10 @@ namespace Ainan {
 					desc[i].SemanticName = layout[i].Name.c_str();
 					desc[i].SemanticIndex = 0;
 					desc[i].Format = GetD3D11FormatFromShaderType(layout[i].Type);
-					desc[i].InputSlot = i;
+					desc[i].InputSlot = 0;
 					desc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 					desc[i].InstanceDataStepRate = 0;
+					desc[i].AlignedByteOffset = Stride;
 					Stride += layout[i].GetSize();
 				}
 

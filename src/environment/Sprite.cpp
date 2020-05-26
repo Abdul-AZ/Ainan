@@ -10,13 +10,13 @@ namespace Ainan {
 		m_Name = "Sprite";
 		EditorOpen = false;
 
-		m_Texture = Renderer::CreateTexture();
 
 		Image img = Image::LoadFromFile("res/CheckerBoard.png");
 
 		Image::GrayScaleToRGB(img);
 
-		m_Texture->SetImage(img);
+		m_Texture = Renderer::CreateTexture(img);
+		//m_Texture->SetImage(img);
 	}
 
 	void Sprite::Update(const float deltaTime)
@@ -98,14 +98,14 @@ namespace Ainan {
 	{
 		m_Texture.reset();
 
-		m_Texture = Renderer::CreateTexture();
 
 		Image img = Image::LoadFromFile(path);
 
 		if (img.m_Comp == 1)
 			Image::GrayScaleToRGB(img);
 
-		m_Texture->SetImage(img);
+		m_Texture = Renderer::CreateTexture(img);
+		//m_Texture->SetImage(img);
 	}
 
 }
