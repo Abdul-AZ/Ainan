@@ -3,6 +3,7 @@
 
 #include "OpenGLShaderProgram.h"
 #include "file/AssetManager.h" //for reading shader files
+#include "OpenGLUniformBuffer.h"
 
 namespace Ainan {
 	namespace OpenGL {
@@ -36,9 +37,6 @@ namespace Ainan {
 			glDeleteShader(fragment);
 
 			Bind();
-
-			//setup the per-frame uniform buffer
-			BindUniformBuffer("FrameData", 0);
 		}
 
 		std::shared_ptr<OpenGLShaderProgram> OpenGLShaderProgram::CreateRaw(const std::string& vertSrc, const std::string& fragSrc)
@@ -109,10 +107,15 @@ namespace Ainan {
 			return m_RendererID;
 		}
 
-		void OpenGLShaderProgram::BindUniformBuffer(const char* name, uint32_t slot)
+		void OpenGLShaderProgram::BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
 		{
-			uint32_t index = glGetUniformBlockIndex(m_RendererID, name);
+			//bind buffer slot in shader
+			uint32_t index = glGetUniformBlockIndex(m_RendererID, buffer->GetName().c_str());
 			glUniformBlockBinding(m_RendererID, index, slot);
+
+			//bind buffer
+			std::shared_ptr<OpenGLUniformBuffer> openglBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(buffer);
+			glBindBufferRange(GL_UNIFORM_BUFFER, slot, openglBuffer->m_RendererID, 0, buffer->GetAlignedSize());
 		}
 	}
 }

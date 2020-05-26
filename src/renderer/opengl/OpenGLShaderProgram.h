@@ -1,4 +1,5 @@
 #include "renderer/ShaderProgram.h"
+#include "renderer/UniformBuffer.h"
 
 namespace Ainan {
 	namespace OpenGL {
@@ -14,6 +15,7 @@ namespace Ainan {
 			void Bind() const override;
 			void Unbind() const override;
 
+			virtual void BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage) override;
 			void SetUniform1i(const char* name, const int& value)                                  override;
 
 			int GetUniformLocation(const char* name) override;
@@ -25,8 +27,6 @@ namespace Ainan {
 			//this is to avoid getting uniform location repeatedly which is not very performant
 			std::unordered_map<std::string, int> m_UniformLocationMap;
 
-			// Inherited via ShaderProgram
-			virtual void BindUniformBuffer(const char* name, uint32_t slot) override;
 		};
 	}
 }

@@ -3,6 +3,8 @@
 
 #include "OpenGLUniformBuffer.h"
 
+#include <numeric>
+
 namespace Ainan {
 	namespace OpenGL {
 
@@ -45,6 +47,12 @@ namespace Ainan {
 			m_Name(name), 
 			m_Layout(layout)
 		{
+			m_PackedSize = std::accumulate(layout.begin(), layout.end(), 0,
+				[](const uint32_t& a, const VertexLayoutPart& b)
+				{
+					return a + b.GetSize();
+				});
+
 			//calculate std140 layout size
 			for (auto& layoutPart : m_Layout)
 			{
@@ -55,23 +63,23 @@ namespace Ainan {
 				{
 					for (size_t i = 0; i < layoutPart.Count; i++)
 					{
-						m_Size += m_Size % 16 == 0 ? 0 : 16 - (m_Size % 16);
-						m_Size += size / layoutPart.Count;
+						m_AlignedSize += m_AlignedSize % 16 == 0 ? 0 : 16 - (m_AlignedSize % 16);
+						m_AlignedSize += size / layoutPart.Count;
 					}
 				}
 				else
 				{
 					uint32_t baseAlignment = GetBasestd140Alignemnt(layoutPart.Type);
-					m_Size += m_Size % baseAlignment == 0 ? 0 : baseAlignment - (m_Size % baseAlignment);
-					m_Size += size;
+					m_AlignedSize += m_AlignedSize % baseAlignment == 0 ? 0 : baseAlignment - (m_AlignedSize % baseAlignment);
+					m_AlignedSize += size;
 				}
 			}
-			m_Size += m_Size % 16 == 0 ? 0 : 16 - (m_Size % 16);
-			m_BufferMemory = new uint8_t[m_Size]();
+			m_AlignedSize += m_AlignedSize % 16 == 0 ? 0 : 16 - (m_AlignedSize % 16);
+			m_BufferMemory = new uint8_t[m_AlignedSize]();
 
 			glGenBuffers(1, &m_RendererID);
 			glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
-			glBufferData(GL_UNIFORM_BUFFER, m_Size, data, GL_DYNAMIC_DRAW);
+			glBufferData(GL_UNIFORM_BUFFER, m_AlignedSize, data, GL_DYNAMIC_DRAW);
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 		}
 
@@ -112,13 +120,8 @@ namespace Ainan {
 			}
 
 			glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
-			glBufferSubData(GL_UNIFORM_BUFFER, 0, m_Size, m_BufferMemory);
+			glBufferSubData(GL_UNIFORM_BUFFER, 0, m_AlignedSize, m_BufferMemory);
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
-		}
-
-		void OpenGLUniformBuffer::Bind(uint32_t index, RenderingStage stageBindTarget)
-		{
-			glBindBufferRange(GL_UNIFORM_BUFFER, index, m_RendererID, 0, m_Size);
 		}
 	}
 }

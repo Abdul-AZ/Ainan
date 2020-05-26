@@ -34,7 +34,9 @@ int main()
 		auto exampleIndexBuffer = Renderer::CreateIndexBuffer(indecies, 6);
 		glm::mat4 viewProjection(1.0f);
 		auto exampleUniformBuffer = Renderer::CreateUniformBuffer("FrameData", 0, { {"u_ViewProjection", ShaderVariableType::Mat4} }, &viewProjection);
-		exampleUniformBuffer->Bind(0, RenderingStage::VertexShader);
+
+		exampleShader->BindUniformBuffer(exampleUniformBuffer, 0, RenderingStage::VertexShader);
+
 		viewProjection = glm::scale(viewProjection, glm::vec3(0.5f, 0.5f, 0.5f));
 		exampleUniformBuffer->UpdateData(&viewProjection);
 		

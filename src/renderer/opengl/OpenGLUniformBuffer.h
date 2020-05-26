@@ -13,11 +13,15 @@ namespace Ainan {
 			virtual ~OpenGLUniformBuffer();
 
 			virtual void UpdateData(void* data) override;
-			virtual void Bind(uint32_t index, RenderingStage stageBindTarget) override;
 
-		private:
+			virtual std::string GetName() const override { return m_Name; };
+			virtual uint32_t GetPackedSize() const override { return m_PackedSize; };
+			virtual uint32_t GetAlignedSize() const override { return m_AlignedSize; };
+
+		public:
 			uint32_t m_RendererID = 0;
-			uint32_t m_Size = 0;
+			uint32_t m_AlignedSize = 0;
+			uint32_t m_PackedSize = 0;
 			uint8_t* m_BufferMemory = nullptr;
 			VertexLayout m_Layout;
 			std::string m_Name = "";

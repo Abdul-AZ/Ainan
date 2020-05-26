@@ -163,13 +163,12 @@ namespace Ainan {
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(5000.0f));
 
-		shader->BindUniformBuffer("ObjectTransform", 1);
-		TransformUniformBuffer->Bind(1, RenderingStage::VertexShader);
+		shader->BindUniformBuffer(TransformUniformBuffer, 1, RenderingStage::VertexShader);
 		TransformUniformBuffer->UpdateData(&model);
 
-		shader->BindUniformBuffer("LightingData", 2);
-		LightingUniformBuffer->Bind(2, RenderingStage::FragmentShader);
+		shader->BindUniformBuffer(LightingUniformBuffer, 2, RenderingStage::FragmentShader);
 		LightingUniformBuffer->UpdateData(LightDataPackingBuffer);
+
 		Renderer::Draw(*VBO, *shader, Primitive::Triangles, 6);
 
 		shader->Unbind();

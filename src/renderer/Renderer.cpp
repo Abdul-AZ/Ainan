@@ -172,7 +172,7 @@ namespace Ainan {
 				{ "u_Radius", ShaderVariableType::Float }
 			};
 			m_BlurUniformBuffer = CreateUniformBuffer("BlurData", 1, bufferLayout, nullptr);
-			ShaderLibrary["BlurShader"]->BindUniformBuffer("BlurData", 1);
+			ShaderLibrary["BlurShader"]->BindUniformBuffer(m_BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 		}
 
 		SetBlendMode(m_CurrentBlendMode);
@@ -183,7 +183,10 @@ namespace Ainan {
 				{ "u_ViewProjection", ShaderVariableType::Mat4 }
 			};
 			SceneUniformbuffer = CreateUniformBuffer("FrameData", 0, bufferLayout, nullptr);
-			SceneUniformbuffer->Bind(0, RenderingStage::VertexShader);
+			for (auto& shaderTuple : ShaderLibrary)
+			{
+				shaderTuple.second->BindUniformBuffer(SceneUniformbuffer, 0, RenderingStage::VertexShader);
+			}
 		}
 	}
 
@@ -506,6 +509,7 @@ namespace Ainan {
 
 		Renderer::SetViewport(viewport);
 		auto& shader = Renderer::ShaderLibrary["BlurShader"];
+		shader->BindUniformBuffer(m_BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 
 		auto resolution = target->GetSize();
 		//make a buffer for all the uniform data
@@ -518,7 +522,6 @@ namespace Ainan {
 		memcpy(bufferData + 8, &horizonatlDirection, sizeof(glm::vec2));
 		memcpy(bufferData + 16, &radius, sizeof(float));
 		m_BlurUniformBuffer->UpdateData(bufferData);
-		m_BlurUniformBuffer->Bind(1, RenderingStage::FragmentShader);
 
 		//Horizontal blur
 		m_BlurTexture->SetImage(target->GetSize());

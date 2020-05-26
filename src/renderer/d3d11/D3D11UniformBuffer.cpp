@@ -73,15 +73,5 @@ namespace Ainan {
 
 			Context->DeviceContext->Unmap(Buffer, 0);
 		}
-
-		void D3D11UniformBuffer::Bind(uint32_t index, RenderingStage stageBindTarget)
-		{
-			if (stageBindTarget == RenderingStage::VertexShader)
-				Context->DeviceContext->VSSetConstantBuffers(index, 1, &Buffer);
-			else if (stageBindTarget == RenderingStage::FragmentShader)
-				Context->DeviceContext->PSSetConstantBuffers(index, 1, &Buffer);
-			else
-				assert(false);
-		}
 	}
 }

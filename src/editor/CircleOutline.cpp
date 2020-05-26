@@ -44,13 +44,10 @@ namespace Ainan {
 
 		auto& shader = Renderer::ShaderLibrary["CircleOutlineShader"];
 
-		shader->Bind();
-		shader->BindUniformBuffer("ObjectTransform", 1);
-		TransformUniformBuffer->Bind(1, RenderingStage::VertexShader);
+		shader->BindUniformBuffer(TransformUniformBuffer, 1, RenderingStage::VertexShader);
 		TransformUniformBuffer->UpdateData(&model);
 
-		shader->BindUniformBuffer("ObjectColor", 2);
-		ColorUniformBuffer->Bind(2, RenderingStage::FragmentShader);
+		shader->BindUniformBuffer(ColorUniformBuffer, 2, RenderingStage::FragmentShader);
 		ColorUniformBuffer->UpdateData(&Color);
 
 		Renderer::Draw(*VBO, *shader, Primitive::Lines, *EBO);

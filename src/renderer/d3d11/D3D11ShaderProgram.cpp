@@ -4,6 +4,7 @@
 #include "D3D11ShaderProgram.h"
 
 #include "D3D11RendererContext.h"
+#include "D3D11UniformBuffer.h"
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 
 namespace Ainan {
@@ -83,8 +84,15 @@ namespace Ainan {
 		{
 			return 0;
 		}
-		void D3D11ShaderProgram::BindUniformBuffer(const char* name, uint32_t slot)
+
+		void D3D11ShaderProgram::BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
 		{
+			std::shared_ptr<D3D11UniformBuffer> d3dBuffer = std::static_pointer_cast<D3D11UniformBuffer>(buffer);
+
+			if (stage == RenderingStage::VertexShader)
+				Context->DeviceContext->VSSetConstantBuffers(slot, 1, &d3dBuffer->Buffer);
+			else if (stage == RenderingStage::FragmentShader)
+				Context->DeviceContext->PSSetConstantBuffers(slot, 1, &d3dBuffer->Buffer);
 		}
 	}
 }

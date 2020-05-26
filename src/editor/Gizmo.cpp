@@ -149,13 +149,11 @@ namespace Ainan {
 
 		auto& shader = Renderer::ShaderLibrary["GizmoShader"];
 
-		shader->BindUniformBuffer("ObjectTransform", 1);
-		TransformUniformBuffer->Bind(1, RenderingStage::VertexShader);
-		ColorUniformBuffer->UpdateData(&color);
-
-		shader->BindUniformBuffer("ObjectColor", 2);
-		ColorUniformBuffer->Bind(2, RenderingStage::FragmentShader);
+		shader->BindUniformBuffer(TransformUniformBuffer, 1, RenderingStage::VertexShader);
 		TransformUniformBuffer->UpdateData(&model);
+
+		shader->BindUniformBuffer(ColorUniformBuffer, 2, RenderingStage::FragmentShader);
+		ColorUniformBuffer->UpdateData(&color);
 
 		Renderer::Draw(*VBO, *shader, Primitive::Triangles, *EBO);
 

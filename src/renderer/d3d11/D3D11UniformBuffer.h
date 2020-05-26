@@ -18,9 +18,13 @@ namespace Ainan {
 			~D3D11UniformBuffer();
 
 			virtual void UpdateData(void* data) override;
-			virtual void Bind(uint32_t index, RenderingStage stageBindTarget) override;
 
-		private:
+			//TODO
+			virtual std::string GetName() const override { return ""; };
+			virtual uint32_t GetPackedSize() const override { return 0; };
+			virtual uint32_t GetAlignedSize() const override { return 0; };
+
+		public:
 			ID3D11Buffer* Buffer = nullptr;
 			uint32_t BufferSize = 0;
 			VertexLayout Layout;
