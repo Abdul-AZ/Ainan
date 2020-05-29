@@ -7,7 +7,7 @@ project "Core"
   compileas "C++"
 
   files { 
-    "../src/**.h", "../src/**.hpp", "../src/**.cpp", "../src/**.c", "../shaders/**.vert", "../shaders/**.frag",
+    "../src/**.h", "../src/**.hpp", "../src/**.cpp", "../src/**.c", "../shaders/**.vert", "../shaders/**.frag"
    }
 
   pchheader "pch.h"
@@ -33,6 +33,19 @@ project "Core"
     systemversion ("latest")
     links { "d3d11.lib" }
     defines { "PLATFORM_WINDOWS" }
+    files { "../shaders/**.hlsl", "../shaders/**.hlsl" }
+
+filter { "files:../shaders/**-v.hlsl" }
+   shadertype "Vertex"
+   shaderentry "main"
+   shadermodel "5.0"
+   shaderobjectfileoutput("%{prj.location}/shaders/%{file.basename}.cso")
+
+filter { "files:../shaders/**-f.hlsl" }
+   shadertype "Pixel"
+   shaderentry "main"
+   shadermodel "5.0"
+   shaderobjectfileoutput("%{prj.location}/shaders/%{file.basename}.cso")
 
   filter "platforms:64bit"
     architecture "x64"

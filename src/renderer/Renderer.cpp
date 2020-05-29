@@ -18,6 +18,7 @@
 #include "d3d11/D3D11IndexBuffer.h"
 #include "d3d11/D3D11UniformBuffer.h"
 #include "d3d11/D3D11Texture.h"
+#include "d3d11/D3D11FrameBuffer.h"
 
 #endif // PLATFORM_WINDOWS
 
@@ -87,9 +88,6 @@ namespace Ainan {
 			m_CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
 			break;
 		}
-		//TEMP
-		if (api == RendererType::D3D11)
-			return;
 
 		//load shaders
 		for (auto& shaderInfo : CompileOnInit)
@@ -558,6 +556,9 @@ namespace Ainan {
 		case RendererType::OpenGL:
 			return m_CurrentActiveAPI->GetCurrentViewport();
 
+		case RendererType::D3D11:
+			return m_CurrentActiveAPI->GetCurrentViewport();
+
 		default:
 			assert(false);
 			return Rectangle();
@@ -667,6 +668,12 @@ namespace Ainan {
 		{
 		case RendererType::OpenGL:
 			return std::make_shared<OpenGL::OpenGLFrameBuffer>();
+
+#ifdef PLATFORM_WINDOWS
+
+		case RendererType::D3D11:
+			return std::make_shared<D3D11::D3D11FrameBuffer>();
+#endif
 
 		default:
 			assert(false);

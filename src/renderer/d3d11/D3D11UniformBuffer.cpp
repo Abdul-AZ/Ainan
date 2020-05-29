@@ -25,6 +25,9 @@ namespace Ainan {
 				}
 			}
 
+			if (BufferSize % 16 != 0)
+				BufferSize += 16 - (BufferSize % 16);
+
 			//create buffer
 			{
 				D3D11_BUFFER_DESC desc{};

@@ -20,7 +20,7 @@ namespace Ainan {
 			uint32_t fragmentByteCodeSize = 0;
 			{
 				FILE* file = nullptr;
-				auto err = fopen_s(&file, (vertPath + ".cso").c_str(), "rb");
+				auto err = fopen_s(&file, (vertPath + "-v.cso").c_str(), "rb");
 				if (err != 0)
 					assert(false);
 
@@ -34,7 +34,7 @@ namespace Ainan {
 			}
 			{
 				FILE* file = nullptr;
-				auto err = fopen_s(&file, (fragPath + ".cso").c_str(), "rb");
+				auto err = fopen_s(&file, (fragPath + "-f.cso").c_str(), "rb");
 				if (err != 0)
 					assert(false);
 

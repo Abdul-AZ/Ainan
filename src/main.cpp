@@ -7,7 +7,7 @@
 
 #include "renderer/d3d11/D3D11RendererAPI.h"
 
-#define USE_D3D11 1
+#define USE_D3D11 0
 
 int main() 
 {
@@ -64,7 +64,7 @@ int main()
 
 #else
 
-	auto api = RendererType::OpenGL;
+	auto api = RendererType::D3D11;
 	
 	Window::Init(api);
 	Renderer::Init(api);
