@@ -31,14 +31,14 @@ namespace Ainan {
 		VertexLayout layout(2);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
 		layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
-		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, Renderer::ShaderLibrary["ImageShader"]);
+		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, Renderer::ShaderLibrary()["ImageShader"]);
 
 		SurfaceFrameBuffer->Unbind();
 	}
 
 	void RenderSurface::Render()
 	{
-		auto& shader = Renderer::ShaderLibrary["ImageShader"];
+		auto& shader = Renderer::ShaderLibrary()["ImageShader"];
 		shader->BindTexture(m_Texture, 0, RenderingStage::FragmentShader);
 		Renderer::Draw(*m_VertexBuffer, *shader, Primitive::Triangles, 6);
 	}

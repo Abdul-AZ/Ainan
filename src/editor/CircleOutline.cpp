@@ -28,7 +28,7 @@ namespace Ainan {
 
 		VertexLayout layout(1);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
-		VBO = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * vertexCount, layout, Renderer::ShaderLibrary["CircleOutlineShader"]);
+		VBO = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * vertexCount, layout, Renderer::ShaderLibrary()["CircleOutlineShader"]);
 
 		EBO = Renderer::CreateIndexBuffer(indecies, vertexCount * 2 - 2);
 
@@ -42,7 +42,7 @@ namespace Ainan {
 		model = glm::translate(model, glm::vec3(Position.x * c_GlobalScaleFactor, Position.y * c_GlobalScaleFactor, 0.0f));
 		model = glm::scale(model, glm::vec3(Radius * c_GlobalScaleFactor, Radius * c_GlobalScaleFactor, Radius * c_GlobalScaleFactor));
 
-		auto& shader = Renderer::ShaderLibrary["CircleOutlineShader"];
+		auto& shader = Renderer::ShaderLibrary()["CircleOutlineShader"];
 
 		shader->BindUniformBuffer(TransformUniformBuffer, 1, RenderingStage::VertexShader);
 		TransformUniformBuffer->UpdateData(&model);

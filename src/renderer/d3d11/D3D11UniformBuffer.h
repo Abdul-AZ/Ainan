@@ -15,7 +15,7 @@ namespace Ainan {
 		{
 		public:
 			D3D11UniformBuffer(const std::string name, uint32_t reg, const VertexLayout& layout, void* data, RendererContext* context);
-			~D3D11UniformBuffer();
+			virtual ~D3D11UniformBuffer();
 
 			virtual void UpdateData(void* data) override;
 

@@ -56,7 +56,7 @@ namespace Ainan {
 	{
 		VertexLayout layout(1);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
-		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibrary["GizmoShader"]);
+		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibrary()["GizmoShader"]);
 
 		EBO = Renderer::CreateIndexBuffer((unsigned int*)arrowIndecies, sizeof(arrowIndecies) / sizeof(unsigned int));
 		EBO->Bind();
@@ -91,8 +91,8 @@ namespace Ainan {
 		glm::vec2 objectPositionWS = objectPosition * c_GlobalScaleFactor;
 		glm::vec2 realMousePositionNDC = glm::vec2(NDC_xpos, NDC_ypos);
 
-		glm::mat4 invView = glm::inverse(Renderer::m_CurrentSceneDescription.SceneCamera.ViewMatrix);
-		glm::mat4 invProj = glm::inverse(Renderer::m_CurrentSceneDescription.SceneCamera.ProjectionMatrix);
+		glm::mat4 invView = glm::inverse(Renderer::Rdata->m_CurrentSceneDescription.SceneCamera.ViewMatrix);
+		glm::mat4 invProj = glm::inverse(Renderer::Rdata->m_CurrentSceneDescription.SceneCamera.ProjectionMatrix);
 
 		glm::vec4 result = invView * invProj * glm::vec4(realMousePositionNDC.x, realMousePositionNDC.y, 0.0f, 1.0f);
 
@@ -147,7 +147,7 @@ namespace Ainan {
 		else
 			color = glm::vec4(0.75f, 0.0f, 0.0f, 1.0f);
 
-		auto& shader = Renderer::ShaderLibrary["GizmoShader"];
+		auto& shader = Renderer::ShaderLibrary()["GizmoShader"];
 
 		shader->BindUniformBuffer(TransformUniformBuffer, 1, RenderingStage::VertexShader);
 		TransformUniformBuffer->UpdateData(&model);
@@ -167,7 +167,7 @@ namespace Ainan {
 
 		ColorUniformBuffer->UpdateData(&color);
 		TransformUniformBuffer->UpdateData(&model);
-		glm::vec2 mousePosWS = Renderer::m_CurrentSceneDescription.SceneCamera.Position + realMousePositionNDC * c_GlobalScaleFactor;
+		glm::vec2 mousePosWS = Renderer::Rdata->m_CurrentSceneDescription.SceneCamera.Position + realMousePositionNDC * c_GlobalScaleFactor;
 		glm::vec2 objectPosWS = objectPositionWS * c_GlobalScaleFactor;
 
 		Renderer::Draw(*VBO, *shader, Primitive::Triangles, *EBO);

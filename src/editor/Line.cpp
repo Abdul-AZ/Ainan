@@ -8,7 +8,7 @@ namespace Ainan {
 	{
 		VertexLayout layout(1);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
-		VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibrary["LineShader"]);
+		VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibrary()["LineShader"]);
 	}
 
 	void Line::SetVertices(const std::vector<glm::vec2> vertices)
@@ -20,7 +20,7 @@ namespace Ainan {
 
 			VertexLayout layout(1);
 			layout[0] = { "aPos", ShaderVariableType::Vec2 };
-			VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * vertices.size(), layout, Renderer::ShaderLibrary["LineShader"]);
+			VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * vertices.size(), layout, Renderer::ShaderLibrary()["LineShader"]);
 		}
 		m_Vertices = vertices;
 
@@ -33,7 +33,7 @@ namespace Ainan {
 	{
 		VBO->UpdateData(0, sizeof(glm::vec2) * m_Vertices.size(), m_Vertices.data());
 
-		auto& shader = Renderer::ShaderLibrary["LineShader"];
+		auto& shader = Renderer::ShaderLibrary()["LineShader"];
 
 		Renderer::Draw(*VBO, *shader, Primitive::Lines, m_Vertices.size());
 	}

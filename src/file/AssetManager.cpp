@@ -26,6 +26,9 @@ namespace Ainan
 
 	void AssetManager::DisplayGUI()
 	{
+		//temp 
+		return;
+
 		ImGui::Begin("Asset Explorer");
 
 		if (ImGui::ListBoxHeader("##Files", ImVec2(ImGui::GetWindowWidth() - 20, 370)))

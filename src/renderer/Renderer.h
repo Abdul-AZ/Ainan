@@ -101,35 +101,44 @@ namespace Ainan {
 		static std::shared_ptr<UniformBuffer> CreateUniformBuffer(const std::string& name, uint32_t reg,
 			const VertexLayout& layout, void* data);
 
-		static SceneDescription m_CurrentSceneDescription;
-		static unsigned int NumberOfDrawCallsLastScene;
-		static glm::mat4 m_CurrentViewProjection;
-		static RendererAPI* m_CurrentActiveAPI;
-		static std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary;
-		static std::shared_ptr<UniformBuffer> SceneUniformbuffer;
-		
-		//batch renderer data
-		static std::shared_ptr<VertexBuffer> m_QuadBatchVertexBuffer;
-		static std::shared_ptr<IndexBuffer> m_QuadBatchIndexBuffer;
-		static QuadVertex* m_QuadBatchVertexBufferDataOrigin;
-		static QuadVertex* m_QuadBatchVertexBufferDataPtr;
-		//first one is reserved for blank white texture, so we have c_MaxQuadTexturesPerBatch - 1 textures in total
-		static std::array<std::shared_ptr<Texture>, c_MaxQuadTexturesPerBatch> m_QuadBatchTextures;
-		static int m_QuadBatchTextureSlotsUsed;
+		struct RendererData
+		{
+			//scene data
+			RendererAPI* m_CurrentActiveAPI = nullptr;
+			SceneDescription m_CurrentSceneDescription = {};
+			std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary;
+			glm::mat4 m_CurrentViewProjection = glm::mat4(1.0f);
+			std::shared_ptr<UniformBuffer> SceneUniformbuffer = nullptr;
+			RenderingBlendMode m_CurrentBlendMode = RenderingBlendMode::Additive;
 
-		//Postprocessing data
-		static std::shared_ptr<Texture> m_BlurTexture;
-		static std::shared_ptr<FrameBuffer> m_BlurFrameBuffer;
-		static std::shared_ptr<VertexBuffer> m_BlurVertexBuffer;
-		static std::shared_ptr<UniformBuffer> m_BlurUniformBuffer;
+			//batch renderer data
+			std::shared_ptr<VertexBuffer> m_QuadBatchVertexBuffer = nullptr;
+			std::shared_ptr<IndexBuffer> m_QuadBatchIndexBuffer = nullptr;
+			QuadVertex* m_QuadBatchVertexBufferDataOrigin = nullptr;
+			QuadVertex* m_QuadBatchVertexBufferDataPtr = nullptr;
+			//first one is reserved for blank white texture, so we have c_MaxQuadTexturesPerBatch - 1 textures in total
+			std::array<std::shared_ptr<Texture>, c_MaxQuadTexturesPerBatch> m_QuadBatchTextures;
+			uint32_t m_QuadBatchTextureSlotsUsed = 0;
 
-		//refrences to created objects
-		//mostly used for profiling
-		static std::vector<std::weak_ptr<Texture>> m_ReservedTextures;
-		static std::vector<std::weak_ptr<VertexBuffer>> m_ReservedVertexBuffers;
-		static std::vector<std::weak_ptr<IndexBuffer>> m_ReservedIndexBuffers;
+			//Postprocessing data
+			std::shared_ptr<Texture> m_BlurTexture = nullptr;
+			std::shared_ptr<FrameBuffer> m_BlurFrameBuffer = nullptr;
+			std::shared_ptr<VertexBuffer> m_BlurVertexBuffer = nullptr;
+			std::shared_ptr<UniformBuffer> m_BlurUniformBuffer = nullptr;
 
-		static RenderingBlendMode m_CurrentBlendMode;
+			//profiling data
+			uint32_t NumberOfDrawCallsLastScene = 0;
+			uint32_t CurrentNumberOfDrawCalls = 0;
+			//refrences to created objects
+			std::vector<std::weak_ptr<Texture>> m_ReservedTextures;
+			std::vector<std::weak_ptr<VertexBuffer>> m_ReservedVertexBuffers;
+			std::vector<std::weak_ptr<IndexBuffer>> m_ReservedIndexBuffers;
+		};
+
+		static RendererData* Rdata;
+
+		static decltype(Rdata->ShaderLibrary)& ShaderLibrary() { return Rdata->ShaderLibrary; }
+
 	private:
 		static void FlushQuadBatch();
 	};

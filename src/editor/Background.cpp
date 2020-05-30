@@ -18,7 +18,7 @@ namespace Ainan {
 
 		VertexLayout layout(1);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
-		VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices), layout, Renderer::ShaderLibrary["BackgroundShader"]);
+		VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices), layout, Renderer::ShaderLibrary()["BackgroundShader"]);
 
 		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { {"u_Model", ShaderVariableType::Mat4} }, nullptr);
 
@@ -110,7 +110,7 @@ namespace Ainan {
 
 	void Background::Draw(Environment& env)
 	{
-		auto& shader = Renderer::ShaderLibrary["BackgroundShader"];
+		auto& shader = Renderer::ShaderLibrary()["BackgroundShader"];
 
 		//not used light spots
 		for (int i = m_RadialLightSubmissionCount; i < MAX_NUM_RADIAL_LIGHTS; i++)

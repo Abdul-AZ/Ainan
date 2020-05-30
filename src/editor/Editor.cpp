@@ -1778,7 +1778,7 @@ namespace Ainan
 		{
 			ImGui::Text("Draw Calls: ");
 			ImGui::SameLine();
-			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(Renderer::NumberOfDrawCallsLastScene).c_str());
+			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(Renderer::Rdata->NumberOfDrawCallsLastScene).c_str());
 			ImGui::SameLine();
 
 
@@ -1797,17 +1797,17 @@ namespace Ainan
 
 			ImGui::Text("Textures: ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::m_ReservedTextures.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->m_ReservedTextures.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   VBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::m_ReservedVertexBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->m_ReservedVertexBuffers.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   EBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::m_ReservedIndexBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->m_ReservedIndexBuffers.size()).c_str());
 		}
 		break;
 
@@ -1870,7 +1870,7 @@ namespace Ainan
 
 	void Editor::UpdateTitle()
 	{
-		RendererType currentRendererType = Renderer::m_CurrentActiveAPI->GetContext()->GetType();
+		RendererType currentRendererType = Renderer::Rdata->m_CurrentActiveAPI->GetContext()->GetType();
 
 		switch (currentRendererType)
 		{

@@ -13,7 +13,7 @@ namespace Ainan {
 		{
 		public:
 			D3D11Texture(const glm::vec2& size, uint8_t* data, RendererContext* context);
-			~D3D11Texture();
+			virtual ~D3D11Texture();
 
 			// Inherited via Texture
 			virtual void SetImage(const Image& image) override;
