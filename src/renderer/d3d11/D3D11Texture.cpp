@@ -58,6 +58,7 @@ namespace Ainan {
 
 		D3D11Texture::~D3D11Texture()
 		{
+			D3DSampler->Release();
 			D3DResourceView->Release();
 			D3DTexture->Release();
 		}

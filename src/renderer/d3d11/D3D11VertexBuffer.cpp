@@ -89,6 +89,7 @@ namespace Ainan {
 
 		D3D11VertexBuffer::~D3D11VertexBuffer()
 		{
+			Layout->Release();
 			Buffer->Release();
 		}
 
