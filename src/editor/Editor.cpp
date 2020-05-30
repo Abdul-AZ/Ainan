@@ -374,29 +374,26 @@ namespace Ainan
 
 		if (ImGui::Button("Create", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
-			if (canSaveEnvironment) {
+			if (canSaveEnvironment) 
+			{
 				Window::Maximize();
 
 				//make sure the folder path has a backslash at the end
 				if (m_EnvironmentCreateFolderPath[m_EnvironmentCreateFolderPath.size() - 1] != '\\')
 					m_EnvironmentCreateFolderPath = m_EnvironmentCreateFolderPath + "\\";
 
-				std::string dirPath = "";
 				if (m_CreateEvironmentDirectory)
 				{
-					dirPath = m_EnvironmentCreateFolderPath + m_EnvironmentCreateName + "\\";
-					std::filesystem::create_directory(dirPath);
-				}
-				else
-				{
-					dirPath = m_EnvironmentCreateFolderPath;
+					m_EnvironmentCreateFolderPath = m_EnvironmentCreateFolderPath + m_EnvironmentCreateName + "\\";
+					std::filesystem::create_directory(m_EnvironmentCreateFolderPath);
 				}
 
 				m_Env = new Environment;
 				m_Env->Name = m_EnvironmentCreateName;
 
 				if (m_IncludeStarterAssets)
-					std::filesystem::copy("res\\StarterAssets", dirPath + "\\StarterAssets");
+					std::filesystem::copy("res\\StarterAssets", m_EnvironmentCreateFolderPath + "\\StarterAssets");
+				m_EnvironmentFolderPath = m_EnvironmentCreateFolderPath;
 
 				m_State = State_EditorMode;
 				OnEnvironmentLoad();
@@ -407,8 +404,8 @@ namespace Ainan
 
 		ImGui::End();
 
-		m_FolderBrowser.DisplayGUI([this](const std::string& dir) {
-			m_EnvironmentCreateFolderPath = dir;
+		m_FolderBrowser.DisplayGUI([this](const std::filesystem::path& dir) {
+			m_EnvironmentCreateFolderPath = dir.u8string();
 			});
 
 		ImGuiWrapper::Render();
