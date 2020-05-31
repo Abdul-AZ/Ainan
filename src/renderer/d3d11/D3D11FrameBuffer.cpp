@@ -5,11 +5,12 @@
 namespace Ainan {
 	namespace D3D11 {
 
-		void D3D11FrameBuffer::Blit(FrameBuffer* otherBuffer, const glm::vec2& sourceSize, const glm::vec2& targetSize)
+		D3D11FrameBuffer::D3D11FrameBuffer(RendererContext* context)
 		{
+			Context = (D3D11RendererContext*)context;
 		}
 
-		void D3D11FrameBuffer::SetActiveTexture(const Texture& texture)
+		void D3D11FrameBuffer::Blit(FrameBuffer* otherBuffer, const glm::vec2& sourceSize, const glm::vec2& targetSize)
 		{
 		}
 
@@ -26,14 +27,8 @@ namespace Ainan {
 		void D3D11FrameBuffer::Bind() const
 		{
 		}
-
-		void D3D11FrameBuffer::Unbind() const
+		void D3D11FrameBuffer::Resize(const glm::vec2& newSize)
 		{
-		}
-
-		unsigned int D3D11FrameBuffer::GetRendererID() const
-		{
-			return 0;
 		}
 	}
 }

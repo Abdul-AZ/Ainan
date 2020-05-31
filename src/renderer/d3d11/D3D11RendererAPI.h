@@ -29,6 +29,7 @@ namespace Ainan {
 			virtual Rectangle GetCurrentScissor() override;
 			virtual RendererContext* GetContext() override { return &Context; };
 			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
+			virtual void SetRenderTargetApplicationWindow() override;
 
 		public:
 			D3D11RendererContext Context;

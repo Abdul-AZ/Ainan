@@ -35,6 +35,10 @@ namespace Ainan {
 			// Inherited via ShaderProgram
 			virtual void BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage) override;
 
+
+			// Inherited via ShaderProgram
+			virtual void BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage) override;
+
 			//there is no reason to keep the fragment shader code so it is immdediately freed after use
 		};
 	}

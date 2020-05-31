@@ -87,5 +87,10 @@ namespace Ainan {
 			Context->DeviceContext->PSSetShaderResources(slot, 1, &d3dTexture->D3DResourceView);
 			Context->DeviceContext->PSSetSamplers(slot, 1, &d3dTexture->D3DSampler);
 		}
+
+		void D3D11ShaderProgram::BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage)
+		{
+			//TODO
+		}
 	}
 }

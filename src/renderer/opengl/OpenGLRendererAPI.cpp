@@ -91,6 +91,11 @@ namespace Ainan {
 			}
 		}
 
+		void OpenGLRendererAPI::SetRenderTargetApplicationWindow()
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+
 		//we don't do anything because this is handled by OpenGL, it's different for other API's
 		void OpenGLRendererAPI::RecreateSwapchain(const glm::vec2& newSwapchainSize)
 		{

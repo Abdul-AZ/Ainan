@@ -203,7 +203,7 @@ namespace Ainan {
 		SceneDescription desc;
 		desc.SceneCamera = RealCamera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
 		desc.Blur = env.BlurEnabled;
 		desc.BlurRadius = env.BlurRadius;
 		Renderer::BeginScene(desc);

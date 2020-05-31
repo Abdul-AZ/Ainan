@@ -5,6 +5,7 @@
 #include "file/AssetManager.h" //for reading shader files
 #include "OpenGLUniformBuffer.h"
 #include "OpenGLTexture.h"
+#include "OpenGLFrameBuffer.h"
 
 namespace Ainan {
 	namespace OpenGL {
@@ -86,6 +87,13 @@ namespace Ainan {
 		int OpenGLShaderProgram::GetRendererID() const
 		{
 			return m_RendererID;
+		}
+
+		void OpenGLShaderProgram::BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage)
+		{
+			std::shared_ptr<OpenGLFrameBuffer> openglTexture = std::static_pointer_cast<OpenGLFrameBuffer>(framebuffer);
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_2D, openglTexture->m_TextureID);
 		}
 
 		void OpenGLShaderProgram::BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage)

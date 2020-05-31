@@ -34,12 +34,12 @@ namespace Ainan {
 			bufferDesc.Scaling = DXGI_MODE_SCALING_CENTERED;
 
 			swapchainDesc.BufferDesc = bufferDesc;
-			swapchainDesc.SampleDesc.Count = 4;
+			swapchainDesc.SampleDesc.Count = 1;
 			swapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-			swapchainDesc.BufferCount = 1;
+			swapchainDesc.BufferCount = 2;
 			swapchainDesc.OutputWindow = glfwGetWin32Window(Window::Ptr);
 			swapchainDesc.Windowed = 1;
-			swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+			swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 			swapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 			ASSERT_D3D_CALL(D3D11CreateDeviceAndSwapChain(
 				0,
@@ -120,7 +120,7 @@ namespace Ainan {
 
 		void D3D11RendererAPI::ClearScreen()
 		{
-			float clearColor[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+			float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 			Context.DeviceContext->ClearRenderTargetView(Context.BackbufferView, clearColor);
 		}
 
@@ -152,15 +152,24 @@ namespace Ainan {
 		{
 		}
 
+		void D3D11RendererAPI::SetRenderTargetApplicationWindow()
+		{
+			Context.DeviceContext->OMSetRenderTargets(1, &Context.BackbufferView, nullptr);
+		}
+
 		void D3D11RendererAPI::Present()
 		{
-			Context.Swapchain->Present(0, 0);
+			Context.Swapchain->Present(1, 0);
+			Context.DeviceContext->OMSetRenderTargets(1, &Context.BackbufferView, nullptr);
 		}
 
 		void D3D11RendererAPI::RecreateSwapchain(const glm::vec2& newSwapchainSize)
 		{
+			Context.DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 			Context.BackbufferView->Release();
-			Context.Swapchain->ResizeBuffers(1, newSwapchainSize.x, newSwapchainSize.y, DXGI_FORMAT_UNKNOWN, 0);
+			Context.DeviceContext->Flush();
+
+			Context.Swapchain->ResizeBuffers(2, newSwapchainSize.x, newSwapchainSize.y, DXGI_FORMAT_UNKNOWN, 0);
 
 			ID3D11Texture2D* backbuffer;
 			ASSERT_D3D_CALL(Context.Swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backbuffer));

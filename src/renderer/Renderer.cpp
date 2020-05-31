@@ -111,8 +111,7 @@ namespace Ainan {
 		Rdata->m_QuadBatchTextures[0]->SetImage(img);
 
 		//setup postprocessing
-		Rdata->m_BlurTexture = CreateTexture(Window::FramebufferSize, TextureFormat::RGB);
-		Rdata->m_BlurFrameBuffer = CreateFrameBuffer();
+		Rdata->m_BlurFrameBuffer = CreateFrameBuffer(Window::FramebufferSize);
 
 		float quadVertices[] = {
 			// positions   // texCoords
@@ -227,10 +226,10 @@ namespace Ainan {
 
 		if (Rdata->m_CurrentSceneDescription.Blur && Rdata->m_CurrentBlendMode != RenderingBlendMode::Screen)
 		{
-			Blur(Rdata->m_CurrentSceneDescription.SceneDrawTarget, Rdata->m_CurrentSceneDescription.SceneDrawTargetTexture, Rdata->m_CurrentSceneDescription.BlurRadius);
+			Blur(Rdata->m_CurrentSceneDescription.SceneDrawTarget, Rdata->m_CurrentSceneDescription.BlurRadius);
 		}
 
-		Rdata->m_CurrentSceneDescription.SceneDrawTarget->Unbind();
+		SetRenderTargetApplicationWindow();
 
 		memset(&Rdata->m_CurrentSceneDescription, 0, sizeof(SceneDescription));
 		Rdata->NumberOfDrawCallsLastScene = Rdata->CurrentNumberOfDrawCalls;
@@ -456,7 +455,7 @@ namespace Ainan {
 		Rdata->m_CurrentActiveAPI->RecreateSwapchain(newSwapchainSize);
 	}
 
-	void Renderer::Blur(std::shared_ptr<FrameBuffer>& target, std::shared_ptr<Texture>& targetTexture,  float radius)
+	void Renderer::Blur(std::shared_ptr<FrameBuffer>& target, float radius)
 	{
 		Rectangle lastViewport = Renderer::GetCurrentViewport();
 
@@ -483,16 +482,13 @@ namespace Ainan {
 		Rdata->m_BlurUniformBuffer->UpdateData(bufferData);
 
 		//Horizontal blur
-		Rdata->m_BlurTexture->SetImage(target->GetSize());
-		Rdata->m_BlurTexture->SetDefaultTextureSettings();
-		Rdata->m_BlurFrameBuffer->Bind();
-		Rdata->m_BlurFrameBuffer->SetActiveTexture(*Rdata->m_BlurTexture);
+		Rdata->m_BlurFrameBuffer->Resize(target->GetSize());
 
 		Rdata->m_BlurFrameBuffer->Bind();
 		ClearScreen();
 
 		//do the horizontal blur to the surface we revieved and put the result in tempSurface
-		shader->BindTexture(targetTexture, 0, RenderingStage::FragmentShader);
+		shader->BindTexture(target, 0, RenderingStage::FragmentShader);
 		Draw(*Rdata->m_BlurVertexBuffer, *shader, Primitive::Triangles, 6);
 
 		//this specifies that we are doing vertical blur
@@ -504,7 +500,7 @@ namespace Ainan {
 		Renderer::ClearScreen();
 
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
-		shader->BindTexture(Rdata->m_BlurTexture, 0, RenderingStage::FragmentShader);
+		shader->BindTexture(Rdata->m_BlurFrameBuffer, 0, RenderingStage::FragmentShader);
 		Draw(*Rdata->m_BlurVertexBuffer, *shader, Primitive::Triangles, 6);
 
 		Renderer::SetViewport(lastViewport);
@@ -553,6 +549,11 @@ namespace Ainan {
 			assert(false);
 			return Rectangle();
 		}
+	}
+
+	void Renderer::SetRenderTargetApplicationWindow()
+	{
+		Rdata->m_CurrentActiveAPI->SetRenderTargetApplicationWindow();
 	}
 
 	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, unsigned int size,
@@ -634,17 +635,17 @@ namespace Ainan {
 		}
 	}
 
-	std::shared_ptr<FrameBuffer> Renderer::CreateFrameBuffer()
+	std::shared_ptr<FrameBuffer> Renderer::CreateFrameBuffer(const glm::vec2& size)
 	{
 		switch (Rdata->m_CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
-			return std::make_shared<OpenGL::OpenGLFrameBuffer>();
+			return std::make_shared<OpenGL::OpenGLFrameBuffer>(size);
 
 #ifdef PLATFORM_WINDOWS
 
 		case RendererType::D3D11:
-			return std::make_shared<D3D11::D3D11FrameBuffer>();
+			return std::make_shared<D3D11::D3D11FrameBuffer>(Rdata->m_CurrentActiveAPI->GetContext());
 #endif
 
 		default:

@@ -43,6 +43,8 @@ namespace Ainan {
 
 		virtual void ClearScreen() = 0;
 
+		virtual void SetRenderTargetApplicationWindow() = 0;
+
 		virtual void Present() = 0;
 
 		virtual void RecreateSwapchain(const glm::vec2& newSwapchainSize) = 0;

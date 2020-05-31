@@ -43,6 +43,7 @@ namespace Ainan {
 			virtual void ClearScreen() override;
 			virtual void Present() override;
 			virtual void RecreateSwapchain(const glm::vec2& newSwapchainSize) override;
+			virtual void SetRenderTargetApplicationWindow() override;
 
 			virtual void SetViewport(const Rectangle& viewport) override;
 			virtual Rectangle GetCurrentViewport() override;

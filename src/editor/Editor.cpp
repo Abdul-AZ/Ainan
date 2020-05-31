@@ -416,7 +416,7 @@ namespace Ainan
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -575,7 +575,7 @@ namespace Ainan
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -616,7 +616,7 @@ namespace Ainan
 
 		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
 
-		m_RenderSurface.SurfaceFrameBuffer->Unbind();
+		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
 		ImGuiWrapper::NewFrame();
@@ -717,7 +717,7 @@ namespace Ainan
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -758,7 +758,7 @@ namespace Ainan
 
 		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
 
-		m_RenderSurface.SurfaceFrameBuffer->Unbind();
+		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
 		ImGuiWrapper::NewFrame();
@@ -859,7 +859,7 @@ namespace Ainan
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -906,7 +906,7 @@ namespace Ainan
 			m_ExportedFrame = true;
 		}
 
-		m_RenderSurface.SurfaceFrameBuffer->Unbind();
+		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
 		ImGuiWrapper::NewFrame();

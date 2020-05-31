@@ -26,7 +26,6 @@ namespace Ainan {
 	{
 		Camera SceneCamera = {};								   //Required
 		std::shared_ptr<FrameBuffer> SceneDrawTarget = nullptr;    //Required
-		std::shared_ptr<Texture> SceneDrawTargetTexture = nullptr; //Required if there is postprocessing effects
 		bool Blur = false;										   //Required
 		float BlurRadius = 0.0f;								   //Required if Blur == true
 	};
@@ -70,7 +69,7 @@ namespace Ainan {
 
 		static void RecreateSwapchain(const glm::vec2& newSwapchainSize);
 
-		static void Blur(std::shared_ptr<FrameBuffer>& target, std::shared_ptr<Texture>& targetShader, float radius);
+		static void Blur(std::shared_ptr<FrameBuffer>& target, float radius);
 
 		static void SetBlendMode(RenderingBlendMode blendMode);
 
@@ -79,6 +78,8 @@ namespace Ainan {
 
 		static void SetScissor(const Rectangle& scissor);
 		static Rectangle GetCurrentScissor();
+
+		static void SetRenderTargetApplicationWindow();
 
 		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size,
 			const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
@@ -93,7 +94,7 @@ namespace Ainan {
 		//this is used when you want to create shaders with source code and not from files
 		static std::shared_ptr<ShaderProgram> CreateShaderProgramRaw(const std::string& vertSrc, const std::string& fragSrc);
 
-		static std::shared_ptr<FrameBuffer> CreateFrameBuffer();
+		static std::shared_ptr<FrameBuffer> CreateFrameBuffer(const glm::vec2& size);
 
 		static std::shared_ptr<Texture> CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
 		static std::shared_ptr<Texture> CreateTexture(Image& img);
@@ -121,7 +122,6 @@ namespace Ainan {
 			uint32_t m_QuadBatchTextureSlotsUsed = 0;
 
 			//Postprocessing data
-			std::shared_ptr<Texture> m_BlurTexture = nullptr;
 			std::shared_ptr<FrameBuffer> m_BlurFrameBuffer = nullptr;
 			std::shared_ptr<VertexBuffer> m_BlurVertexBuffer = nullptr;
 			std::shared_ptr<UniformBuffer> m_BlurUniformBuffer = nullptr;

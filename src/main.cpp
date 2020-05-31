@@ -11,7 +11,7 @@ int main()
 {
 	using namespace Ainan;
 
-	auto api = RendererType::D3D11;
+	auto api = RendererType::OpenGL;
 	
 	Window::Init(api);
 	Renderer::Init(api);
@@ -24,7 +24,7 @@ int main()
 	while (Window::ShouldClose == false)
 	{
 		Renderer::ClearScreen();
-		
+
 		editor->StartFrame();
 		
 		Window::HandleWindowEvents();
@@ -32,7 +32,7 @@ int main()
 		editor->Draw();
 		
 		editor->EndFrame();
-		
+
 		Renderer::Present();
 	}
 	

@@ -10,12 +10,10 @@ namespace Ainan {
 		class D3D11FrameBuffer : public FrameBuffer
 		{
 		public:
-
+			D3D11FrameBuffer(RendererContext* context);
 
 			// Inherited via FrameBuffer
 			virtual void Blit(FrameBuffer* otherBuffer, const glm::vec2& sourceSize, const glm::vec2& targetSize) override;
-
-			virtual void SetActiveTexture(const Texture& texture) override;
 
 			virtual glm::vec2 GetSize() const override;
 
@@ -23,10 +21,11 @@ namespace Ainan {
 
 			virtual void Bind() const override;
 
-			virtual void Unbind() const override;
+		public:
+			D3D11RendererContext* Context;
 
-			virtual unsigned int GetRendererID() const override;
-
+			// Inherited via FrameBuffer
+			virtual void Resize(const glm::vec2& newSize) override;
 		};
 	}
 }
