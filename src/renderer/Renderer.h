@@ -105,34 +105,34 @@ namespace Ainan {
 		struct RendererData
 		{
 			//scene data
-			RendererAPI* m_CurrentActiveAPI = nullptr;
-			SceneDescription m_CurrentSceneDescription = {};
+			RendererAPI* CurrentActiveAPI = nullptr;
+			SceneDescription CurrentSceneDescription = {};
 			std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary;
-			glm::mat4 m_CurrentViewProjection = glm::mat4(1.0f);
+			glm::mat4 CurrentViewProjection = glm::mat4(1.0f);
 			std::shared_ptr<UniformBuffer> SceneUniformbuffer = nullptr;
 			RenderingBlendMode m_CurrentBlendMode = RenderingBlendMode::Additive;
 
 			//batch renderer data
-			std::shared_ptr<VertexBuffer> m_QuadBatchVertexBuffer = nullptr;
-			std::shared_ptr<IndexBuffer> m_QuadBatchIndexBuffer = nullptr;
-			QuadVertex* m_QuadBatchVertexBufferDataOrigin = nullptr;
-			QuadVertex* m_QuadBatchVertexBufferDataPtr = nullptr;
+			std::shared_ptr<VertexBuffer> QuadBatchVertexBuffer = nullptr;
+			std::shared_ptr<IndexBuffer> QuadBatchIndexBuffer = nullptr;
+			QuadVertex* QuadBatchVertexBufferDataOrigin = nullptr;
+			QuadVertex* QuadBatchVertexBufferDataPtr = nullptr;
 			//first one is reserved for blank white texture, so we have c_MaxQuadTexturesPerBatch - 1 textures in total
-			std::array<std::shared_ptr<Texture>, c_MaxQuadTexturesPerBatch> m_QuadBatchTextures;
-			uint32_t m_QuadBatchTextureSlotsUsed = 0;
+			std::array<std::shared_ptr<Texture>, c_MaxQuadTexturesPerBatch> QuadBatchTextures;
+			uint32_t QuadBatchTextureSlotsUsed = 0;
 
 			//Postprocessing data
-			std::shared_ptr<FrameBuffer> m_BlurFrameBuffer = nullptr;
-			std::shared_ptr<VertexBuffer> m_BlurVertexBuffer = nullptr;
-			std::shared_ptr<UniformBuffer> m_BlurUniformBuffer = nullptr;
+			std::shared_ptr<FrameBuffer> BlurFrameBuffer = nullptr;
+			std::shared_ptr<VertexBuffer> BlurVertexBuffer = nullptr;
+			std::shared_ptr<UniformBuffer> BlurUniformBuffer = nullptr;
 
 			//profiling data
 			uint32_t NumberOfDrawCallsLastScene = 0;
 			uint32_t CurrentNumberOfDrawCalls = 0;
 			//refrences to created objects
-			std::vector<std::weak_ptr<Texture>> m_ReservedTextures;
-			std::vector<std::weak_ptr<VertexBuffer>> m_ReservedVertexBuffers;
-			std::vector<std::weak_ptr<IndexBuffer>> m_ReservedIndexBuffers;
+			std::vector<std::weak_ptr<Texture>> ReservedTextures;
+			std::vector<std::weak_ptr<VertexBuffer>> ReservedVertexBuffers;
+			std::vector<std::weak_ptr<IndexBuffer>> ReservedIndexBuffers;
 		};
 
 		static RendererData* Rdata;

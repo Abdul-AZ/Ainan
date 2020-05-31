@@ -55,11 +55,11 @@ namespace Ainan {
 		switch (api)
 		{
 		case RendererType::D3D11:
-			Rdata->m_CurrentActiveAPI = new D3D11::D3D11RendererAPI();
+			Rdata->CurrentActiveAPI = new D3D11::D3D11RendererAPI();
 			break;
 
 		case RendererType::OpenGL:
-			Rdata->m_CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
+			Rdata->CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
 			break;
 		}
 
@@ -77,7 +77,7 @@ namespace Ainan {
 			layout[2] = { "aTexture", ShaderVariableType::Float };
 			layout[3] = { "aTexCoords", ShaderVariableType::Vec2 };
 
-			Rdata->m_QuadBatchVertexBuffer = CreateVertexBuffer(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex),
+			Rdata->QuadBatchVertexBuffer = CreateVertexBuffer(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex),
 				layout, Rdata->ShaderLibrary["QuadBatchShader"], true);
 		}
 
@@ -94,24 +94,24 @@ namespace Ainan {
 			indicies[i + 5] = 3 + u;
 			u += 4;
 		}
-		Rdata->m_QuadBatchIndexBuffer = CreateIndexBuffer(indicies, c_MaxQuadsPerBatch * 6);
+		Rdata->QuadBatchIndexBuffer = CreateIndexBuffer(indicies, c_MaxQuadsPerBatch * 6);
 		delete[] indicies;
 
-		Rdata->m_QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
-		Rdata->m_QuadBatchVertexBufferDataPtr = Rdata->m_QuadBatchVertexBufferDataOrigin;
+		Rdata->QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
+		Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
 
-		Rdata->m_QuadBatchTextures[0] = CreateTexture(glm::vec2(1,1), TextureFormat::RGBA);
-		Rdata->m_QuadBatchTextures[0]->SetDefaultTextureSettings();
+		Rdata->QuadBatchTextures[0] = CreateTexture(glm::vec2(1,1), TextureFormat::RGBA);
+		Rdata->QuadBatchTextures[0]->SetDefaultTextureSettings();
 		Image img;
 		img.m_Width = 1;
 		img.m_Height = 1;
 		img.Format = TextureFormat::RGBA;
 		img.m_Data = new unsigned char[4];
 		memset(img.m_Data, (unsigned char)255, 4);
-		Rdata->m_QuadBatchTextures[0]->SetImage(img);
+		Rdata->QuadBatchTextures[0]->SetImage(img);
 
 		//setup postprocessing
-		Rdata->m_BlurFrameBuffer = CreateFrameBuffer(Window::FramebufferSize);
+		Rdata->BlurFrameBuffer = CreateFrameBuffer(Window::FramebufferSize);
 
 		float quadVertices[] = {
 			// positions   // texCoords
@@ -128,7 +128,7 @@ namespace Ainan {
 			VertexLayout layout(2);
 			layout[0] = { "aPos", ShaderVariableType::Vec2 };
 			layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
-			Rdata->m_BlurVertexBuffer = CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, Rdata->ShaderLibrary["BlurShader"]);
+			Rdata->BlurVertexBuffer = CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, Rdata->ShaderLibrary["BlurShader"]);
 		}
 		{
 			VertexLayout bufferLayout =
@@ -137,8 +137,8 @@ namespace Ainan {
 				{ "u_BlurDirection", ShaderVariableType::Vec2 },
 				{ "u_Radius", ShaderVariableType::Float }
 			};
-			Rdata->m_BlurUniformBuffer = CreateUniformBuffer("BlurData", 1, bufferLayout, nullptr);
-			Rdata->ShaderLibrary["BlurShader"]->BindUniformBuffer(Rdata->m_BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+			Rdata->BlurUniformBuffer = CreateUniformBuffer("BlurData", 1, bufferLayout, nullptr);
+			Rdata->ShaderLibrary["BlurShader"]->BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 		}
 
 		SetBlendMode(Rdata->m_CurrentBlendMode);
@@ -160,15 +160,15 @@ namespace Ainan {
 	{
 		Rdata->ShaderLibrary.erase(Rdata->ShaderLibrary.begin(), Rdata->ShaderLibrary.end());
 
-		auto type = Rdata->m_CurrentActiveAPI->GetContext()->GetType();
+		auto type = Rdata->CurrentActiveAPI->GetContext()->GetType();
 
-		delete Rdata->m_CurrentActiveAPI;
+		delete Rdata->CurrentActiveAPI;
 
 		//batch renderer data
-		Rdata->m_QuadBatchVertexBuffer.reset();
-		Rdata->m_QuadBatchIndexBuffer.reset();
-		delete[] Rdata->m_QuadBatchVertexBufferDataOrigin;
-		Rdata->m_QuadBatchTextures[0].reset();
+		Rdata->QuadBatchVertexBuffer.reset();
+		Rdata->QuadBatchIndexBuffer.reset();
+		delete[] Rdata->QuadBatchVertexBufferDataOrigin;
+		Rdata->QuadBatchTextures[0].reset();
 
 		delete Rdata;
 	}
@@ -177,33 +177,33 @@ namespace Ainan {
 	{
 		assert(desc.SceneDrawTarget);
 
-		Rdata->m_CurrentSceneDescription = desc;
-		Rdata->m_CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
+		Rdata->CurrentSceneDescription = desc;
+		Rdata->CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
 		Rdata->CurrentNumberOfDrawCalls = 0;
 
-		Rdata->m_CurrentSceneDescription.SceneDrawTarget->Bind();
+		Rdata->CurrentSceneDescription.SceneDrawTarget->Bind();
 		ClearScreen();
 
 		//update the per-frame uniform buffer
-		Rdata->SceneUniformbuffer->UpdateData(&Rdata->m_CurrentViewProjection);
+		Rdata->SceneUniformbuffer->UpdateData(&Rdata->CurrentViewProjection);
 
 		//update diagnostics stuff
-		for (size_t i = 0; i < Rdata->m_ReservedTextures.size(); i++)
-			if (Rdata->m_ReservedTextures[i].expired())
+		for (size_t i = 0; i < Rdata->ReservedTextures.size(); i++)
+			if (Rdata->ReservedTextures[i].expired())
 			{
-				Rdata->m_ReservedTextures.erase(Rdata->m_ReservedTextures.begin() + i);
+				Rdata->ReservedTextures.erase(Rdata->ReservedTextures.begin() + i);
 				i = 0;
 			}
-		for (size_t i = 0; i < Rdata->m_ReservedVertexBuffers.size(); i++)
-			if (Rdata->m_ReservedVertexBuffers[i].expired())
+		for (size_t i = 0; i < Rdata->ReservedVertexBuffers.size(); i++)
+			if (Rdata->ReservedVertexBuffers[i].expired())
 			{
-				Rdata->m_ReservedVertexBuffers.erase(Rdata->m_ReservedVertexBuffers.begin() + i);
+				Rdata->ReservedVertexBuffers.erase(Rdata->ReservedVertexBuffers.begin() + i);
 				i = 0;
 			}
-		for (size_t i = 0; i < Rdata->m_ReservedIndexBuffers.size(); i++)
-			if (Rdata->m_ReservedIndexBuffers[i].expired())
+		for (size_t i = 0; i < Rdata->ReservedIndexBuffers.size(); i++)
+			if (Rdata->ReservedIndexBuffers[i].expired())
 			{
-				Rdata->m_ReservedIndexBuffers.erase(Rdata->m_ReservedIndexBuffers.begin() + i);
+				Rdata->ReservedIndexBuffers.erase(Rdata->ReservedIndexBuffers.begin() + i);
 				i = 0;
 			}
 	}
@@ -212,7 +212,7 @@ namespace Ainan {
 	{
 		vertexBuffer.Bind();
 
-		Rdata->m_CurrentActiveAPI->Draw(shader, mode, vertexCount);
+		Rdata->CurrentActiveAPI->Draw(shader, mode, vertexCount);
 
 		vertexBuffer.Unbind();
 
@@ -221,24 +221,24 @@ namespace Ainan {
 
 	void Renderer::EndScene()
 	{
-		if(Rdata->m_QuadBatchVertexBufferDataPtr != Rdata->m_QuadBatchVertexBufferDataOrigin)
+		if(Rdata->QuadBatchVertexBufferDataPtr != Rdata->QuadBatchVertexBufferDataOrigin)
 			FlushQuadBatch();
 
-		if (Rdata->m_CurrentSceneDescription.Blur && Rdata->m_CurrentBlendMode != RenderingBlendMode::Screen)
+		if (Rdata->CurrentSceneDescription.Blur && Rdata->m_CurrentBlendMode != RenderingBlendMode::Screen)
 		{
-			Blur(Rdata->m_CurrentSceneDescription.SceneDrawTarget, Rdata->m_CurrentSceneDescription.BlurRadius);
+			Blur(Rdata->CurrentSceneDescription.SceneDrawTarget, Rdata->CurrentSceneDescription.BlurRadius);
 		}
 
 		SetRenderTargetApplicationWindow();
 
-		memset(&Rdata->m_CurrentSceneDescription, 0, sizeof(SceneDescription));
+		memset(&Rdata->CurrentSceneDescription, 0, sizeof(SceneDescription));
 		Rdata->NumberOfDrawCallsLastScene = Rdata->CurrentNumberOfDrawCalls;
 	}
 
 	void Ainan::Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture)
 	{
-		if ((Rdata->m_QuadBatchVertexBufferDataPtr - Rdata->m_QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
-			Rdata->m_QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
+		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
+			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
 			FlushQuadBatch();
 
 		float textureSlot;
@@ -248,9 +248,9 @@ namespace Ainan {
 		{
 			bool foundTexture = false;
 			//check if texture is already used
-			for (size_t i = 0; i < Rdata->m_QuadBatchTextureSlotsUsed; i++)
+			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
-				if (Rdata->m_QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
+				if (Rdata->QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
 				{
 					foundTexture = true;
 					textureSlot = i;
@@ -260,41 +260,41 @@ namespace Ainan {
 			
 			if (!foundTexture)
 			{
-				Rdata->m_QuadBatchTextures[Rdata->m_QuadBatchTextureSlotsUsed] = texture;
-				textureSlot = Rdata->m_QuadBatchTextureSlotsUsed;
-				Rdata->m_QuadBatchTextureSlotsUsed++;
+				Rdata->QuadBatchTextures[Rdata->QuadBatchTextureSlotsUsed] = texture;
+				textureSlot = Rdata->QuadBatchTextureSlotsUsed;
+				Rdata->QuadBatchTextureSlotsUsed++;
 			}
 		}
 
-		Rdata->m_QuadBatchVertexBufferDataPtr->Position = position;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Color = color;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-		Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
-		Rdata->m_QuadBatchVertexBufferDataPtr++;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->m_QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(0.0f, 1.0f) * scale;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Color = color;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-		Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
-		Rdata->m_QuadBatchVertexBufferDataPtr++;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(0.0f, 1.0f) * scale;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->m_QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 1.0f) * scale;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Color = color;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-		Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
-		Rdata->m_QuadBatchVertexBufferDataPtr++;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 1.0f) * scale;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->m_QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 0.0f) * scale;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Color = color;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-		Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
-		Rdata->m_QuadBatchVertexBufferDataPtr++;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 0.0f) * scale;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
 	}
 
 	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, std::shared_ptr<Texture> texture)
 	{
-		if ((Rdata->m_QuadBatchVertexBufferDataPtr - Rdata->m_QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
-			Rdata->m_QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
+		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
+			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
 			FlushQuadBatch();
 
 		float textureSlot;
@@ -304,9 +304,9 @@ namespace Ainan {
 		{
 			bool foundTexture = false;
 			//check if texture is already used
-			for (size_t i = 0; i < Rdata->m_QuadBatchTextureSlotsUsed; i++)
+			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
-				if (Rdata->m_QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
+				if (Rdata->QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
 				{
 					foundTexture = true;
 					textureSlot = i;
@@ -316,9 +316,9 @@ namespace Ainan {
 
 			if (!foundTexture)
 			{
-				Rdata->m_QuadBatchTextures[Rdata->m_QuadBatchTextureSlotsUsed] = texture;
-				textureSlot = Rdata->m_QuadBatchTextureSlotsUsed;
-				Rdata->m_QuadBatchTextureSlotsUsed++;
+				Rdata->QuadBatchTextures[Rdata->QuadBatchTextureSlotsUsed] = texture;
+				textureSlot = Rdata->QuadBatchTextureSlotsUsed;
+				Rdata->QuadBatchTextureSlotsUsed++;
 			}
 		}
 
@@ -331,37 +331,37 @@ namespace Ainan {
 		glm::vec2 relPosV2 = glm::vec2((+distance) * cosine - (+distance) * sine, (+distance) * sine + (+distance) * cosine);
 		glm::vec2 relPosV3 = glm::vec2((+distance) * cosine - (-distance) * sine, (+distance) * sine + (-distance) * cosine);
 
-		Rdata->m_QuadBatchVertexBufferDataPtr->Position = position + relPosV0;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Color = color;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-		Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
-		Rdata->m_QuadBatchVertexBufferDataPtr++;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV0;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->m_QuadBatchVertexBufferDataPtr->Position = position + relPosV1;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Color = color;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-		Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
-		Rdata->m_QuadBatchVertexBufferDataPtr++;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV1;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->m_QuadBatchVertexBufferDataPtr->Position = position + relPosV2;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Color = color;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-		Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
-		Rdata->m_QuadBatchVertexBufferDataPtr++;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV2;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->m_QuadBatchVertexBufferDataPtr->Position = position + relPosV3;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Color = color;
-		Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-		Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
-		Rdata->m_QuadBatchVertexBufferDataPtr++;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV3;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
 	}
 
 	void Renderer::DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, std::shared_ptr<Texture> texture)
 	{
 		assert(count < c_MaxQuadsPerBatch);
 
-		if ((Rdata->m_QuadBatchVertexBufferDataPtr - Rdata->m_QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > count * 4 ||
-			Rdata->m_QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
+		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > count * 4 ||
+			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
 			FlushQuadBatch();
 
 		float textureSlot;
@@ -371,9 +371,9 @@ namespace Ainan {
 		{
 			bool foundTexture = false;
 			//check if texture is already used
-			for (size_t i = 0; i < Rdata->m_QuadBatchTextureSlotsUsed; i++)
+			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
-				if (Rdata->m_QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
+				if (Rdata->QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
 				{
 					foundTexture = true;
 					textureSlot = i;
@@ -383,37 +383,37 @@ namespace Ainan {
 
 			if (!foundTexture)
 			{
-				Rdata->m_QuadBatchTextures[Rdata->m_QuadBatchTextureSlotsUsed] = texture;
-				textureSlot = Rdata->m_QuadBatchTextureSlotsUsed;
-				Rdata->m_QuadBatchTextureSlotsUsed++;
+				Rdata->QuadBatchTextures[Rdata->QuadBatchTextureSlotsUsed] = texture;
+				textureSlot = Rdata->QuadBatchTextureSlotsUsed;
+				Rdata->QuadBatchTextureSlotsUsed++;
 			}
 		}
 
 		for (size_t i = 0; i < count; i++)
 		{
-			Rdata->m_QuadBatchVertexBufferDataPtr->Position = position[i];
-			Rdata->m_QuadBatchVertexBufferDataPtr->Color = color[i];
-			Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
-			Rdata->m_QuadBatchVertexBufferDataPtr++;
+			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
+			Rdata->QuadBatchVertexBufferDataPtr++;
 
-			Rdata->m_QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(0.0f, 1.0f) * scale[i];
-			Rdata->m_QuadBatchVertexBufferDataPtr->Color = color[i];
-			Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
-			Rdata->m_QuadBatchVertexBufferDataPtr++;
+			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(0.0f, 1.0f) * scale[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
+			Rdata->QuadBatchVertexBufferDataPtr++;
 
-			Rdata->m_QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 1.0f) * scale[i];
-			Rdata->m_QuadBatchVertexBufferDataPtr->Color = color[i];
-			Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
-			Rdata->m_QuadBatchVertexBufferDataPtr++;
+			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 1.0f) * scale[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
+			Rdata->QuadBatchVertexBufferDataPtr++;
 
-			Rdata->m_QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 0.0f) * scale[i];
-			Rdata->m_QuadBatchVertexBufferDataPtr->Color = color[i];
-			Rdata->m_QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->m_QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
-			Rdata->m_QuadBatchVertexBufferDataPtr++;
+			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 0.0f) * scale[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
+			Rdata->QuadBatchVertexBufferDataPtr++;
 		}
 	}
 
@@ -422,7 +422,7 @@ namespace Ainan {
 		vertexBuffer.Bind();
 		indexBuffer.Bind();
 
-		Rdata->m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer);
+		Rdata->CurrentActiveAPI->Draw(shader, primitive, indexBuffer);
 
 		vertexBuffer.Unbind();
 
@@ -433,7 +433,7 @@ namespace Ainan {
 	{
 		vertexBuffer.Bind();
 
-		Rdata->m_CurrentActiveAPI->Draw(shader, primitive, indexBuffer, vertexCount);
+		Rdata->CurrentActiveAPI->Draw(shader, primitive, indexBuffer, vertexCount);
 
 		vertexBuffer.Unbind();
 
@@ -442,17 +442,17 @@ namespace Ainan {
 
 	void Renderer::ClearScreen()
 	{
-		Rdata->m_CurrentActiveAPI->ClearScreen();
+		Rdata->CurrentActiveAPI->ClearScreen();
 	}
 
 	void Renderer::Present()
 	{
-		Rdata->m_CurrentActiveAPI->Present();
+		Rdata->CurrentActiveAPI->Present();
 	}
 
 	void Renderer::RecreateSwapchain(const glm::vec2& newSwapchainSize)
 	{
-		Rdata->m_CurrentActiveAPI->RecreateSwapchain(newSwapchainSize);
+		Rdata->CurrentActiveAPI->RecreateSwapchain(newSwapchainSize);
 	}
 
 	void Renderer::Blur(std::shared_ptr<FrameBuffer>& target, float radius)
@@ -467,7 +467,7 @@ namespace Ainan {
 
 		Renderer::SetViewport(viewport);
 		auto& shader = Rdata->ShaderLibrary["BlurShader"];
-		shader->BindUniformBuffer(Rdata->m_BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+		shader->BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 
 		auto resolution = target->GetSize();
 		//make a buffer for all the uniform data
@@ -479,53 +479,53 @@ namespace Ainan {
 		memcpy(bufferData, &resolution, sizeof(glm::vec2));
 		memcpy(bufferData + 8, &horizonatlDirection, sizeof(glm::vec2));
 		memcpy(bufferData + 16, &radius, sizeof(float));
-		Rdata->m_BlurUniformBuffer->UpdateData(bufferData);
+		Rdata->BlurUniformBuffer->UpdateData(bufferData);
 
 		//Horizontal blur
-		Rdata->m_BlurFrameBuffer->Resize(target->GetSize());
+		Rdata->BlurFrameBuffer->Resize(target->GetSize());
 
-		Rdata->m_BlurFrameBuffer->Bind();
+		Rdata->BlurFrameBuffer->Bind();
 		ClearScreen();
 
 		//do the horizontal blur to the surface we revieved and put the result in tempSurface
 		shader->BindTexture(target, 0, RenderingStage::FragmentShader);
-		Draw(*Rdata->m_BlurVertexBuffer, *shader, Primitive::Triangles, 6);
+		Draw(*Rdata->BlurVertexBuffer, *shader, Primitive::Triangles, 6);
 
 		//this specifies that we are doing vertical blur
 		memcpy(bufferData + 8, &verticalDirection, sizeof(glm::vec2));
-		Rdata->m_BlurUniformBuffer->UpdateData(bufferData);
+		Rdata->BlurUniformBuffer->UpdateData(bufferData);
 
 		//clear the buffer we recieved
 		target->Bind();
 		Renderer::ClearScreen();
 
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
-		shader->BindTexture(Rdata->m_BlurFrameBuffer, 0, RenderingStage::FragmentShader);
-		Draw(*Rdata->m_BlurVertexBuffer, *shader, Primitive::Triangles, 6);
+		shader->BindTexture(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
+		Draw(*Rdata->BlurVertexBuffer, *shader, Primitive::Triangles, 6);
 
 		Renderer::SetViewport(lastViewport);
 	}
 
 	void Renderer::SetBlendMode(RenderingBlendMode blendMode)
 	{
-		Rdata->m_CurrentActiveAPI->SetBlendMode(blendMode);
+		Rdata->CurrentActiveAPI->SetBlendMode(blendMode);
 		Rdata->m_CurrentBlendMode = blendMode;
 	}
 
 	void Renderer::SetViewport(const Rectangle& viewport)
 	{
-		Rdata->m_CurrentActiveAPI->SetViewport(viewport);
+		Rdata->CurrentActiveAPI->SetViewport(viewport);
 	}
 
 	Rectangle Renderer::GetCurrentViewport()
 	{
-		switch (Rdata->m_CurrentActiveAPI->GetContext()->GetType())
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
-			return Rdata->m_CurrentActiveAPI->GetCurrentViewport();
+			return Rdata->CurrentActiveAPI->GetCurrentViewport();
 
 		case RendererType::D3D11:
-			return Rdata->m_CurrentActiveAPI->GetCurrentViewport();
+			return Rdata->CurrentActiveAPI->GetCurrentViewport();
 
 		default:
 			assert(false);
@@ -535,15 +535,15 @@ namespace Ainan {
 
 	void Renderer::SetScissor(const Rectangle& scissor)
 	{
-		Rdata->m_CurrentActiveAPI->SetScissor(scissor);
+		Rdata->CurrentActiveAPI->SetScissor(scissor);
 	}
 
 	Rectangle Renderer::GetCurrentScissor()
 	{
-		switch (Rdata->m_CurrentActiveAPI->GetContext()->GetType())
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
-			return Rdata->m_CurrentActiveAPI->GetCurrentScissor();
+			return Rdata->CurrentActiveAPI->GetCurrentScissor();
 
 		default:
 			assert(false);
@@ -553,7 +553,7 @@ namespace Ainan {
 
 	void Renderer::SetRenderTargetApplicationWindow()
 	{
-		Rdata->m_CurrentActiveAPI->SetRenderTargetApplicationWindow();
+		Rdata->CurrentActiveAPI->SetRenderTargetApplicationWindow();
 	}
 
 	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, unsigned int size,
@@ -562,7 +562,7 @@ namespace Ainan {
 	{
 		std::shared_ptr<VertexBuffer> buffer;
 
-		switch (Rdata->m_CurrentActiveAPI->GetContext()->GetType())
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			buffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(data, size, layout, dynamic);
@@ -570,7 +570,7 @@ namespace Ainan {
 
 #ifdef PLATFORM_WINDOWS
 		case RendererType::D3D11:
-			buffer = std::make_shared<D3D11::D3D11VertexBuffer>(data, size, layout, shaderProgram, dynamic, Rdata->m_CurrentActiveAPI->GetContext());
+			buffer = std::make_shared<D3D11::D3D11VertexBuffer>(data, size, layout, shaderProgram, dynamic, Rdata->CurrentActiveAPI->GetContext());
 			break;
 #endif // PLATFORM_WINDOWS
 
@@ -578,7 +578,7 @@ namespace Ainan {
 			assert(false);
 		}
 
-		Rdata->m_ReservedVertexBuffers.push_back(buffer);
+		Rdata->ReservedVertexBuffers.push_back(buffer);
 
 		return buffer;
 	}
@@ -587,34 +587,34 @@ namespace Ainan {
 	{
 		std::shared_ptr<IndexBuffer> buffer;
 
-		switch (Rdata->m_CurrentActiveAPI->GetContext()->GetType())
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			buffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(data, count);
 			break;
 
 		case RendererType::D3D11:
-			buffer = std::make_shared<D3D11::D3D11IndexBuffer>(data, count, Rdata->m_CurrentActiveAPI->GetContext());
+			buffer = std::make_shared<D3D11::D3D11IndexBuffer>(data, count, Rdata->CurrentActiveAPI->GetContext());
 			break;
 
 		default:
 			assert(false);
 		}
 
-		Rdata->m_ReservedIndexBuffers.push_back(buffer);
+		Rdata->ReservedIndexBuffers.push_back(buffer);
 
 		return buffer;
 	}
 
 	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgram(const std::string& vertPath, const std::string& fragPath)
 	{
-		switch (Rdata->m_CurrentActiveAPI->GetContext()->GetType())
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			return std::make_shared<OpenGL::OpenGLShaderProgram>(vertPath, fragPath);
 
 		case RendererType::D3D11:
-			return std::make_shared<D3D11::D3D11ShaderProgram>(vertPath, fragPath, Rdata->m_CurrentActiveAPI->GetContext());
+			return std::make_shared<D3D11::D3D11ShaderProgram>(vertPath, fragPath, Rdata->CurrentActiveAPI->GetContext());
 
 		default:
 			assert(false);
@@ -624,7 +624,7 @@ namespace Ainan {
 
 	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgramRaw(const std::string& vertSrc, const std::string& fragSrc)
 	{
-		switch (Rdata->m_CurrentActiveAPI->GetContext()->GetType())
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			return OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
@@ -637,7 +637,7 @@ namespace Ainan {
 
 	std::shared_ptr<FrameBuffer> Renderer::CreateFrameBuffer(const glm::vec2& size)
 	{
-		switch (Rdata->m_CurrentActiveAPI->GetContext()->GetType())
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			return std::make_shared<OpenGL::OpenGLFrameBuffer>(size);
@@ -645,7 +645,7 @@ namespace Ainan {
 #ifdef PLATFORM_WINDOWS
 
 		case RendererType::D3D11:
-			return std::make_shared<D3D11::D3D11FrameBuffer>(Rdata->m_CurrentActiveAPI->GetContext());
+			return std::make_shared<D3D11::D3D11FrameBuffer>(Rdata->CurrentActiveAPI->GetContext());
 #endif
 
 		default:
@@ -658,7 +658,7 @@ namespace Ainan {
 	{
 		std::shared_ptr<Texture> texture;
 
-		switch (Rdata->m_CurrentActiveAPI->GetContext()->GetType())
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			texture = std::make_shared<OpenGL::OpenGLTexture>(size, format, data);
@@ -666,7 +666,7 @@ namespace Ainan {
 
 #ifdef PLATFORM_WINDOWS
 		case RendererType::D3D11:
-			texture = std::make_shared<D3D11::D3D11Texture>(size, data, Rdata->m_CurrentActiveAPI->GetContext());
+			texture = std::make_shared<D3D11::D3D11Texture>(size, data, Rdata->CurrentActiveAPI->GetContext());
 			break;
 #endif // PLATFORM_WINDOWS
 
@@ -674,7 +674,7 @@ namespace Ainan {
 			assert(false);
 		}
 
-		Rdata->m_ReservedTextures.push_back(texture);
+		Rdata->ReservedTextures.push_back(texture);
 
 		return texture;
 	}
@@ -683,7 +683,7 @@ namespace Ainan {
 	{
 		std::shared_ptr<Texture> texture;
 
-		switch (Rdata->m_CurrentActiveAPI->GetContext()->GetType())
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			texture = std::make_shared<OpenGL::OpenGLTexture>(glm::vec2(img.m_Width, img.m_Height), img.Format, img.m_Data);
@@ -691,7 +691,7 @@ namespace Ainan {
 
 #ifdef PLATFORM_WINDOWS
 		case RendererType::D3D11:
-			texture = std::make_shared<D3D11::D3D11Texture>(glm::vec2(img.m_Width, img.m_Height), img.m_Data, Rdata->m_CurrentActiveAPI->GetContext());
+			texture = std::make_shared<D3D11::D3D11Texture>(glm::vec2(img.m_Width, img.m_Height), img.m_Data, Rdata->CurrentActiveAPI->GetContext());
 			break;
 #endif // PLATFORM_WINDOWS
 
@@ -699,7 +699,7 @@ namespace Ainan {
 			assert(false);
 		}
 
-		Rdata->m_ReservedTextures.push_back(texture);
+		Rdata->ReservedTextures.push_back(texture);
 
 		return texture;
 	}
@@ -708,7 +708,7 @@ namespace Ainan {
 	{
 		std::shared_ptr<UniformBuffer> buffer;
 
-		switch (Rdata->m_CurrentActiveAPI->GetContext()->GetType())
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 		{
 		case RendererType::OpenGL:
 			buffer = std::make_shared<OpenGL::OpenGLUniformBuffer>(name, layout, data);
@@ -716,7 +716,7 @@ namespace Ainan {
 
 #ifdef PLATFORM_WINDOWS
 		case RendererType::D3D11:
-			buffer = std::make_shared<D3D11::D3D11UniformBuffer>(name, reg, layout, data, Rdata->m_CurrentActiveAPI->GetContext());
+			buffer = std::make_shared<D3D11::D3D11UniformBuffer>(name, reg, layout, data, Rdata->CurrentActiveAPI->GetContext());
 			break;
 #endif // PLATFORM_WINDOWS
 
@@ -729,23 +729,23 @@ namespace Ainan {
 
 	void Ainan::Renderer::FlushQuadBatch()
 	{
-		for (size_t i = 0; i < Rdata->m_QuadBatchTextureSlotsUsed; i++)
-			Rdata->ShaderLibrary["QuadBatchShader"]->BindTexture(Rdata->m_QuadBatchTextures[i], i, RenderingStage::FragmentShader);
+		for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
+			Rdata->ShaderLibrary["QuadBatchShader"]->BindTexture(Rdata->QuadBatchTextures[i], i, RenderingStage::FragmentShader);
 
-		int numVertices = (Rdata->m_QuadBatchVertexBufferDataPtr - Rdata->m_QuadBatchVertexBufferDataOrigin);
+		int numVertices = (Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin);
 
-		Rdata->m_QuadBatchVertexBuffer->UpdateData(0,
+		Rdata->QuadBatchVertexBuffer->UpdateData(0,
 			numVertices * sizeof(QuadVertex),
-			Rdata->m_QuadBatchVertexBufferDataOrigin);
+			Rdata->QuadBatchVertexBufferDataOrigin);
 
-		Renderer::Draw(*Rdata->m_QuadBatchVertexBuffer,
+		Renderer::Draw(*Rdata->QuadBatchVertexBuffer,
 			*Rdata->ShaderLibrary["QuadBatchShader"],
 			Primitive::Triangles,
-			*Rdata->m_QuadBatchIndexBuffer,
+			*Rdata->QuadBatchIndexBuffer,
 			(numVertices * 3) / 2);
 
 		//reset data so we can accept the next batch
-		Rdata->m_QuadBatchVertexBufferDataPtr = Rdata->m_QuadBatchVertexBufferDataOrigin;
-		Rdata->m_QuadBatchTextureSlotsUsed = 1;
+		Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
+		Rdata->QuadBatchTextureSlotsUsed = 1;
 	}
 }

@@ -1794,17 +1794,17 @@ namespace Ainan
 
 			ImGui::Text("Textures: ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->m_ReservedTextures.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->ReservedTextures.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   VBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->m_ReservedVertexBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->ReservedVertexBuffers.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   EBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->m_ReservedIndexBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->ReservedIndexBuffers.size()).c_str());
 		}
 		break;
 
@@ -1867,7 +1867,7 @@ namespace Ainan
 
 	void Editor::UpdateTitle()
 	{
-		RendererType currentRendererType = Renderer::Rdata->m_CurrentActiveAPI->GetContext()->GetType();
+		RendererType currentRendererType = Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType();
 
 		switch (currentRendererType)
 		{

@@ -91,8 +91,8 @@ namespace Ainan {
 		glm::vec2 objectPositionWS = objectPosition * c_GlobalScaleFactor;
 		glm::vec2 realMousePositionNDC = glm::vec2(NDC_xpos, NDC_ypos);
 
-		glm::mat4 invView = glm::inverse(Renderer::Rdata->m_CurrentSceneDescription.SceneCamera.ViewMatrix);
-		glm::mat4 invProj = glm::inverse(Renderer::Rdata->m_CurrentSceneDescription.SceneCamera.ProjectionMatrix);
+		glm::mat4 invView = glm::inverse(Renderer::Rdata->CurrentSceneDescription.SceneCamera.ViewMatrix);
+		glm::mat4 invProj = glm::inverse(Renderer::Rdata->CurrentSceneDescription.SceneCamera.ProjectionMatrix);
 
 		glm::vec4 result = invView * invProj * glm::vec4(realMousePositionNDC.x, realMousePositionNDC.y, 0.0f, 1.0f);
 
@@ -167,7 +167,7 @@ namespace Ainan {
 
 		ColorUniformBuffer->UpdateData(&color);
 		TransformUniformBuffer->UpdateData(&model);
-		glm::vec2 mousePosWS = Renderer::Rdata->m_CurrentSceneDescription.SceneCamera.Position + realMousePositionNDC * c_GlobalScaleFactor;
+		glm::vec2 mousePosWS = Renderer::Rdata->CurrentSceneDescription.SceneCamera.Position + realMousePositionNDC * c_GlobalScaleFactor;
 		glm::vec2 objectPosWS = objectPositionWS * c_GlobalScaleFactor;
 
 		Renderer::Draw(*VBO, *shader, Primitive::Triangles, *EBO);

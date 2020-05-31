@@ -95,7 +95,7 @@ namespace Ainan {
 	void ImGuiWrapper::Init()
 	{
 		//TEMPORARY
-		if (Renderer::Rdata->m_CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
+		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
 		{
 			ImGui::CreateContext();
 
@@ -104,7 +104,7 @@ namespace Ainan {
 			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
 			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;           // Enable viewports
 
-			auto context = (D3D11::D3D11RendererContext*)Renderer::Rdata->m_CurrentActiveAPI->GetContext();
+			auto context = (D3D11::D3D11RendererContext*)Renderer::Rdata->CurrentActiveAPI->GetContext();
 			auto x = ImGui_ImplDX11_Init(context->Device, context->DeviceContext);
 			ImGui_ImplGlfw_Init(Window::Ptr, false, GlfwClientApi_Unknown);
 
@@ -125,7 +125,7 @@ namespace Ainan {
 	void ImGuiWrapper::Terminate()
 	{
 		//TEMPORARY
-		if (Renderer::Rdata->m_CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
+		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
 		{
 			ImGui_ImplDX11_Shutdown();
 
@@ -141,7 +141,7 @@ namespace Ainan {
 	void ImGuiWrapper::NewFrame()
 	{
 		//TEMPORARY
-		if (Renderer::Rdata->m_CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
+		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
 		{
 			ImGui_ImplDX11_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
@@ -182,7 +182,7 @@ namespace Ainan {
 	void ImGuiWrapper::Render()
 	{
 		//TEMPORARY
-		if (Renderer::Rdata->m_CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
+		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
 		{
 			ImGui::Render();
 			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
