@@ -9,14 +9,14 @@
 
 namespace Ainan {
 	namespace D3D11 {
-		D3D11Texture::D3D11Texture(const glm::vec2& size, uint8_t* data, RendererContext* context)
+		D3D11Texture::D3D11Texture(const glm::vec2& size, TextureFormat format, uint8_t* data, RendererContext* context)
 		{
 			Context = (D3D11RendererContext*)context;
+
 
 			D3D11_TEXTURE2D_DESC desc{};
 			desc.Width = size.x;
 			desc.Height = size.y;
-			desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 			desc.SampleDesc.Count = 1;
 			//TODO pass dynamic parameter
 			desc.Usage = D3D11_USAGE_DYNAMIC;
@@ -24,6 +24,30 @@ namespace Ainan {
 			desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 			desc.ArraySize = 1;
 			desc.MipLevels = 1;
+
+			switch (format)
+			{
+			case Ainan::TextureFormat::RGBA:
+				desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				break;
+
+			case Ainan::TextureFormat::RGB:
+				assert(false, "Format not supported");
+				break;
+
+			case Ainan::TextureFormat::RG:
+				desc.Format = DXGI_FORMAT_R8G8_UNORM;
+				break;
+
+			case Ainan::TextureFormat::R:
+				desc.Format = DXGI_FORMAT_R8_UNORM;
+				break;
+
+			case Ainan::TextureFormat::Unspecified:
+			default:
+				assert(false, "Unknown image format");
+				break;
+			}
 
 			if (data)
 			{
@@ -116,11 +140,6 @@ namespace Ainan {
 		glm::vec2 D3D11Texture::GetSize() const
 		{
 			return glm::vec2();
-		}
-
-		unsigned int D3D11Texture::GetRendererID() const
-		{
-			return 0;
 		}
 	}
 }

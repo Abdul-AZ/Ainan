@@ -16,10 +16,6 @@ namespace Ainan
 		m_PlayButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PlayButton.png"));
 		m_PauseButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PauseButton.png"));
 		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png"));
-
-		//m_PlayButtonTexture->SetImage(Image::LoadFromFile("res/PlayButton.png", 4));
-		//m_PauseButtonTexture->SetImage(Image::LoadFromFile("res/PauseButton.png", 4));
-		//m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 4));
 	}
 
 	Editor::~Editor()
@@ -1133,7 +1129,7 @@ namespace Ainan
 		//code for displaying each of the control buttons in lambdas so that we can reuse it
 		auto displayPlayButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 playButtonoTint = s_playButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton((void*)(uintptr_t)m_PlayButtonTexture->GetRendererID(),
+			if (ImGui::ImageButton(m_PlayButtonTexture->GetTextureID(),
 				c_buttonSize,
 				ImVec2(0, 0),
 				ImVec2(1, 1),
@@ -1157,7 +1153,7 @@ namespace Ainan
 
 		auto displayStopButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 stopButtonoTint = s_stopButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton((void*)(uintptr_t)m_StopButtonTexture->GetRendererID(),
+			if (ImGui::ImageButton(m_StopButtonTexture->GetTextureID(),
 				ImVec2(50, 50),
 				ImVec2(0, 0),
 				ImVec2(1, 1),
@@ -1181,7 +1177,7 @@ namespace Ainan
 
 		auto displayPauseButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 pauseButtonoTint = s_pauseButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton((void*)(uintptr_t)m_PauseButtonTexture->GetRendererID(),
+			if (ImGui::ImageButton(m_PauseButtonTexture->GetTextureID(),
 				ImVec2(50, 50),
 				ImVec2(0, 0),
 				ImVec2(1, 1),

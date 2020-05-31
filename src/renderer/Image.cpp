@@ -130,7 +130,7 @@ namespace Ainan {
 
 		size_t pixelCount = image.m_Width * image.m_Height;
 
-		unsigned char* buffer = (unsigned char* )malloc(sizeof(unsigned char) * pixelCount * 3);
+		uint8_t* buffer = (uint8_t* )malloc(sizeof(uint8_t) * pixelCount * 3);
 
 		for (size_t i = 0; i < pixelCount; i++)
 		{
@@ -140,6 +140,27 @@ namespace Ainan {
 		}
 
 		image.Format = TextureFormat::RGB;
+		free(image.m_Data);
+		image.m_Data = buffer;
+	}
+
+	void Image::GrayScaleToRGBA(Image& image)
+	{
+		assert(image.Format == TextureFormat::R);
+
+		size_t pixelCount = image.m_Width * image.m_Height;
+
+		uint8_t* buffer = (uint8_t*)malloc(sizeof(uint8_t) * pixelCount * 4);
+
+		for (size_t i = 0; i < pixelCount; i++)
+		{
+			buffer[i * 4] = image.m_Data[i];
+			buffer[i * 4 + 1] = image.m_Data[i];
+			buffer[i * 4 + 2] = image.m_Data[i];
+			buffer[i * 4 + 3] = 255;
+		}
+
+		image.Format = TextureFormat::RGBA;
 		free(image.m_Data);
 		image.m_Data = buffer;
 	}

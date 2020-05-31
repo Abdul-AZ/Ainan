@@ -250,7 +250,7 @@ namespace Ainan {
 			//check if texture is already used
 			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
-				if (Rdata->QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
+				if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
 				{
 					foundTexture = true;
 					textureSlot = i;
@@ -306,7 +306,7 @@ namespace Ainan {
 			//check if texture is already used
 			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
-				if (Rdata->QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
+				if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
 				{
 					foundTexture = true;
 					textureSlot = i;
@@ -373,7 +373,7 @@ namespace Ainan {
 			//check if texture is already used
 			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
-				if (Rdata->QuadBatchTextures[i]->GetRendererID() == texture->GetRendererID())
+				if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
 				{
 					foundTexture = true;
 					textureSlot = i;
@@ -519,18 +519,7 @@ namespace Ainan {
 
 	Rectangle Renderer::GetCurrentViewport()
 	{
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-		{
-		case RendererType::OpenGL:
-			return Rdata->CurrentActiveAPI->GetCurrentViewport();
-
-		case RendererType::D3D11:
-			return Rdata->CurrentActiveAPI->GetCurrentViewport();
-
-		default:
-			assert(false);
-			return Rectangle();
-		}
+		return Rdata->CurrentActiveAPI->GetCurrentViewport();
 	}
 
 	void Renderer::SetScissor(const Rectangle& scissor)
@@ -540,15 +529,7 @@ namespace Ainan {
 
 	Rectangle Renderer::GetCurrentScissor()
 	{
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-		{
-		case RendererType::OpenGL:
-			return Rdata->CurrentActiveAPI->GetCurrentScissor();
-
-		default:
-			assert(false);
-			return Rectangle();
-		}
+		return Rdata->CurrentActiveAPI->GetCurrentScissor();
 	}
 
 	void Renderer::SetRenderTargetApplicationWindow()
@@ -666,7 +647,7 @@ namespace Ainan {
 
 #ifdef PLATFORM_WINDOWS
 		case RendererType::D3D11:
-			texture = std::make_shared<D3D11::D3D11Texture>(size, data, Rdata->CurrentActiveAPI->GetContext());
+			texture = std::make_shared<D3D11::D3D11Texture>(size, format, data, Rdata->CurrentActiveAPI->GetContext());
 			break;
 #endif // PLATFORM_WINDOWS
 
@@ -691,7 +672,7 @@ namespace Ainan {
 
 #ifdef PLATFORM_WINDOWS
 		case RendererType::D3D11:
-			texture = std::make_shared<D3D11::D3D11Texture>(glm::vec2(img.m_Width, img.m_Height), img.m_Data, Rdata->CurrentActiveAPI->GetContext());
+			texture = std::make_shared<D3D11::D3D11Texture>(glm::vec2(img.m_Width, img.m_Height), img.Format, img.m_Data, Rdata->CurrentActiveAPI->GetContext());
 			break;
 #endif // PLATFORM_WINDOWS
 

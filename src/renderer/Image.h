@@ -71,6 +71,7 @@ namespace Ainan {
 		//this is because modern OpenGL does not render GrayscaleImages well(as it treats it as RGB but G = 0 and B = 0)
 		//that is why we change it to RGB so that grayscale colors are rendered correctly and dont look red
 		static void GrayScaleToRGB(Image& image);
+		static void GrayScaleToRGBA(Image& image);
 
 	public:
 		//pointer to the image pixel array

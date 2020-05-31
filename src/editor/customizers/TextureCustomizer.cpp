@@ -62,7 +62,7 @@ namespace Ainan {
 			if (!UseDefaultTexture) {
 				ImGui::Text("Current Selected Texture");
 				if(ParticleTexture)
-					ImGui::Image((void*)(uintptr_t)ParticleTexture->GetRendererID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
+					ImGui::Image(ParticleTexture->GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 			}
 
 			ImGui::TreePop();

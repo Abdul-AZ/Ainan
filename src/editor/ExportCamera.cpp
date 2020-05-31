@@ -188,7 +188,7 @@ namespace Ainan {
 
 				int scale = 250;
 				ImVec2 size = ImVec2(scale * m_ExportTargetImage->m_Width / m_ExportTargetImage->m_Height, scale);
-				ImGui::Image((void*)(uintptr_t)m_ExportTargetTexture->GetRendererID(), size);
+				ImGui::Image(m_ExportTargetTexture->GetTextureID(), size);
 			}
 
 			ImGui::End();

@@ -127,8 +127,8 @@ namespace Ainan {
 		void D3D11RendererAPI::SetViewport(const Rectangle& viewport)
 		{
 			D3D11_VIEWPORT d3d_viewport{};
-			d3d_viewport.TopLeftX = 0;
-			d3d_viewport.TopLeftY = 0;
+			d3d_viewport.TopLeftX = viewport.X;
+			d3d_viewport.TopLeftY = viewport.Y;
 			d3d_viewport.Width = viewport.Width;
 			d3d_viewport.Height = viewport.Height;
 			Context.DeviceContext->RSSetViewports(1, &d3d_viewport);
@@ -136,7 +136,17 @@ namespace Ainan {
 
 		Rectangle D3D11RendererAPI::GetCurrentViewport()
 		{
-			return Rectangle();
+			D3D11_VIEWPORT d3dviewport{};
+			uint32_t viewportCount = 1;
+			Context.DeviceContext->RSGetViewports(&viewportCount, &d3dviewport);
+			Rectangle viewport;
+
+			viewport.X = d3dviewport.TopLeftX;
+			viewport.Y = d3dviewport.TopLeftY;
+			viewport.Width = d3dviewport.Width;
+			viewport.Height = d3dviewport.Height;
+
+			return viewport;
 		}
 
 		void D3D11RendererAPI::SetScissor(const Rectangle& scissor)
