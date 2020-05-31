@@ -95,7 +95,13 @@ namespace Ainan {
 
 		void D3D11VertexBuffer::UpdateData(const int& offset, const int& size, void* data)
 		{
-			//TODO
+			D3D11_MAPPED_SUBRESOURCE resource{};
+
+			ASSERT_D3D_CALL(Context->DeviceContext->Map(Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource));
+
+			memcpy((uint8_t*)resource.pData + offset, data, size);
+
+			Context->DeviceContext->Unmap(Buffer, 0);
 		}
 
 		unsigned int D3D11VertexBuffer::GetRendererID()

@@ -13,7 +13,6 @@ namespace Ainan {
 		{
 			Context = (D3D11RendererContext*)context;
 
-
 			D3D11_TEXTURE2D_DESC desc{};
 			desc.Width = size.x;
 			desc.Height = size.y;

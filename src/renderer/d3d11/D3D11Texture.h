@@ -28,8 +28,6 @@ namespace Ainan {
 			ID3D11ShaderResourceView* D3DResourceView;
 			ID3D11SamplerState* D3DSampler;
 			D3D11RendererContext* Context;
-
-			// Inherited via Texture
 		};
 	}
 }

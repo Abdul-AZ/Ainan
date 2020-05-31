@@ -13,6 +13,7 @@ namespace Ainan {
 
 			ID3D11Device* Device;
 			ID3D11DeviceContext* DeviceContext;
+			ID3D11Texture2D* Backbuffer;
 			ID3D11RenderTargetView* BackbufferView;
 			IDXGISwapChain* Swapchain;
 		};

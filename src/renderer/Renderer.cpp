@@ -432,10 +432,12 @@ namespace Ainan {
 	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
 	{
 		vertexBuffer.Bind();
+		indexBuffer.Bind();
 
 		Rdata->CurrentActiveAPI->Draw(shader, primitive, indexBuffer, vertexCount);
 
 		vertexBuffer.Unbind();
+		indexBuffer.Unbind();
 
 		Rdata->CurrentNumberOfDrawCalls++;
 	}
@@ -626,7 +628,7 @@ namespace Ainan {
 #ifdef PLATFORM_WINDOWS
 
 		case RendererType::D3D11:
-			return std::make_shared<D3D11::D3D11FrameBuffer>(Rdata->CurrentActiveAPI->GetContext());
+			return std::make_shared<D3D11::D3D11FrameBuffer>(size, Rdata->CurrentActiveAPI->GetContext());
 #endif
 
 		default:

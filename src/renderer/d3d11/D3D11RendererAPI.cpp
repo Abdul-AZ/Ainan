@@ -55,10 +55,8 @@ namespace Ainan {
 				0,
 				&Context.DeviceContext));
 
-			ID3D11Texture2D* backbuffer;
-			ASSERT_D3D_CALL(Context.Swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backbuffer));
-			ASSERT_D3D_CALL(Context.Device->CreateRenderTargetView(backbuffer, 0, &Context.BackbufferView));
-			backbuffer->Release();
+			ASSERT_D3D_CALL(Context.Swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&Context.Backbuffer));
+			ASSERT_D3D_CALL(Context.Device->CreateRenderTargetView(Context.Backbuffer, 0, &Context.BackbufferView));
 
 			Context.DeviceContext->OMSetRenderTargets(1, &Context.BackbufferView, 0);
 
@@ -93,6 +91,7 @@ namespace Ainan {
 		D3D11RendererAPI::~D3D11RendererAPI()
 		{
 			Context.BackbufferView->Release();
+			Context.Backbuffer->Release();
 			Context.Swapchain->Release();
 			Context.DeviceContext->Release();
 			Context.Device->Release();
@@ -116,6 +115,14 @@ namespace Ainan {
 
 		void D3D11RendererAPI::Draw(ShaderProgram& shader, const Primitive& mode, const IndexBuffer& indexBuffer, int vertexCount)
 		{
+			Context.DeviceContext->IASetPrimitiveTopology(GetD3DPrimitive(mode));
+
+			D3D11ShaderProgram* d3dShader = (D3D11ShaderProgram*)&shader;;
+
+			Context.DeviceContext->VSSetShader(d3dShader->VertexShader, 0, 0);
+			Context.DeviceContext->PSSetShader(d3dShader->FragmentShader, 0, 0);
+			
+			Context.DeviceContext->DrawIndexed(vertexCount, 0, 0);
 		}
 
 		void D3D11RendererAPI::ClearScreen()
@@ -177,14 +184,13 @@ namespace Ainan {
 		{
 			Context.DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 			Context.BackbufferView->Release();
+			Context.Backbuffer->Release();
 			Context.DeviceContext->Flush();
 
 			Context.Swapchain->ResizeBuffers(2, newSwapchainSize.x, newSwapchainSize.y, DXGI_FORMAT_UNKNOWN, 0);
 
-			ID3D11Texture2D* backbuffer;
-			ASSERT_D3D_CALL(Context.Swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backbuffer));
-			ASSERT_D3D_CALL(Context.Device->CreateRenderTargetView(backbuffer, 0, &Context.BackbufferView));
-			backbuffer->Release();
+			ASSERT_D3D_CALL(Context.Swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&Context.Backbuffer));
+			ASSERT_D3D_CALL(Context.Device->CreateRenderTargetView(Context.Backbuffer, 0, &Context.BackbufferView));
 
 			Context.DeviceContext->OMSetRenderTargets(1, &Context.BackbufferView, 0);
 		}
