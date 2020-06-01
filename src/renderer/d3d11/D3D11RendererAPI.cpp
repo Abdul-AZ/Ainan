@@ -39,8 +39,8 @@ namespace Ainan {
 			swapchainDesc.BufferCount = 2;
 			swapchainDesc.OutputWindow = glfwGetWin32Window(Window::Ptr);
 			swapchainDesc.Windowed = 1;
-			swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-			swapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+			swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+			swapchainDesc.Flags = 0;
 			ASSERT_D3D_CALL(D3D11CreateDeviceAndSwapChain(
 				0,
 				D3D_DRIVER_TYPE_HARDWARE,
@@ -64,6 +64,37 @@ namespace Ainan {
 			viewport.Width = Window::FramebufferSize.x;
 			viewport.Height = Window::FramebufferSize.y;
 			SetViewport(viewport);
+
+
+			D3D11_RENDER_TARGET_BLEND_DESC additiveBlendDesc{};
+			additiveBlendDesc.BlendEnable = true;
+			additiveBlendDesc.SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
+			additiveBlendDesc.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+			additiveBlendDesc.DestBlendAlpha = D3D11_BLEND_DEST_ALPHA;
+			additiveBlendDesc.DestBlend = D3D11_BLEND_ONE;
+			additiveBlendDesc.BlendOp = D3D11_BLEND_OP_ADD;
+			additiveBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+			additiveBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+			D3D11_RENDER_TARGET_BLEND_DESC screenBlendDesc{};
+			screenBlendDesc.BlendEnable = true;
+			screenBlendDesc.SrcBlendAlpha = D3D11_BLEND_ZERO;
+			screenBlendDesc.SrcBlend = D3D11_BLEND_ZERO;
+			screenBlendDesc.DestBlendAlpha = D3D11_BLEND_ONE;
+			screenBlendDesc.DestBlend = D3D11_BLEND_INV_SRC_COLOR;
+			screenBlendDesc.BlendOp = D3D11_BLEND_OP_MAX;
+			screenBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_MAX;
+			screenBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+			D3D11_BLEND_DESC blendDesc{};
+			blendDesc.RenderTarget[0] = additiveBlendDesc; 
+			blendDesc.AlphaToCoverageEnable = 0;
+			blendDesc.IndependentBlendEnable = 0;
+
+			ASSERT_D3D_CALL(Context.Device->CreateBlendState(&blendDesc, &AdditiveBlendMode));
+
+			blendDesc.RenderTarget[0] = screenBlendDesc;
+			ASSERT_D3D_CALL(Context.Device->CreateBlendState(&blendDesc, &ScreenBlendMode));
 		}
 
 		constexpr D3D11_PRIMITIVE_TOPOLOGY GetD3DPrimitive(Primitive primitive)
@@ -90,6 +121,8 @@ namespace Ainan {
 
 		D3D11RendererAPI::~D3D11RendererAPI()
 		{
+			AdditiveBlendMode->Release();
+			ScreenBlendMode->Release();
 			Context.BackbufferView->Release();
 			Context.Backbuffer->Release();
 			Context.Swapchain->Release();
@@ -167,6 +200,21 @@ namespace Ainan {
 
 		void D3D11RendererAPI::SetBlendMode(RenderingBlendMode blendMode)
 		{
+			switch (blendMode)
+			{
+			case Ainan::RenderingBlendMode::Additive:
+				Context.DeviceContext->OMSetBlendState(AdditiveBlendMode, 0, 0xffffffff);
+				break;
+
+			case Ainan::RenderingBlendMode::Screen:
+				Context.DeviceContext->OMSetBlendState(ScreenBlendMode, 0, 0xffffffff);
+				break;
+
+			case Ainan::RenderingBlendMode::NotSpecified:
+			default:
+				assert(false);
+				break;
+			}
 		}
 
 		void D3D11RendererAPI::SetRenderTargetApplicationWindow()
