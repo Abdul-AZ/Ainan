@@ -24,10 +24,12 @@ namespace Ainan {
 			desc.ArraySize = 1;
 			desc.MipLevels = 1;
 
+			D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc{};
 			switch (format)
 			{
 			case Ainan::TextureFormat::RGBA:
 				desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				viewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 				break;
 
 			case Ainan::TextureFormat::RGB:
@@ -36,10 +38,12 @@ namespace Ainan {
 
 			case Ainan::TextureFormat::RG:
 				desc.Format = DXGI_FORMAT_R8G8_UNORM;
+				viewDesc.Format = DXGI_FORMAT_R8G8_UNORM;
 				break;
 
 			case Ainan::TextureFormat::R:
 				desc.Format = DXGI_FORMAT_R8_UNORM;
+				viewDesc.Format = DXGI_FORMAT_R8_UNORM;
 				break;
 
 			case Ainan::TextureFormat::Unspecified:
@@ -58,8 +62,6 @@ namespace Ainan {
 			else
 				ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, nullptr, &D3DTexture));
 
-			D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc{};
-			viewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			viewDesc.Texture2D.MipLevels = 1;

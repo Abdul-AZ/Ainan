@@ -22,6 +22,8 @@ namespace Ainan {
 		public:
 			D3D11RendererContext* Context;
 			ID3D11Texture2D* RenderTargetTexture;
+			ID3D11ShaderResourceView* RenderTargetTextureView;
+			ID3D11SamplerState* RenderTargetTextureSampler;
 			ID3D11RenderTargetView* RenderTargetView;
 			glm::vec2 Size;
 

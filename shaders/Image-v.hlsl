@@ -19,7 +19,7 @@ struct vsOut
 vsOut main( vsInput vsIn )
 {
     vsOut output;
-    output.tPos = mul(u_ViewProjection, float4(vsIn.vPos, 0, 1));
+    output.tPos = float4(vsIn.vPos, 0, 1);
     output.tTexCoords = vsIn.TexCoords;
     return output;    
 }

@@ -113,16 +113,43 @@ namespace Ainan {
 		//setup postprocessing
 		Rdata->BlurFrameBuffer = CreateFrameBuffer(Window::FramebufferSize);
 
-		float quadVertices[] = {
-			// positions   // texCoords
-			-1.0f,  1.0f,  0.0f, 1.0f,
-			-1.0f, -1.0f,  0.0f, 0.0f,
-			 1.0f, -1.0f,  1.0f, 0.0f,
+		float quadVertices[24];
+		{
+			switch (api)
+			{
+			case Ainan::RendererType::OpenGL:
+			{
+				float openglVertices[] = {
+					-1.0f, -1.0f, 0.0f, 0.0f,
+					-1.0f, 1.0f, 0.0f, 1.0f,
+					1.0f, -1.0f, 1.0f, 0.0f,
 
-			-1.0f,  1.0f,  0.0f, 1.0f,
-			 1.0f, -1.0f,  1.0f, 0.0f,
-			 1.0f,  1.0f,  1.0f, 1.0f
-		};
+					-1.0f, 1.0f, 0.0f, 1.0f,
+					1.0f, 1.0f, 1.0f, 1.0f,
+					1.0f, -1.0f, 1.0f, 0.0f
+				};
+				memcpy(quadVertices, openglVertices, sizeof(quadVertices));
+				break;
+			}
+
+			case Ainan::RendererType::D3D11:
+			{
+				float d3dVertices[] = {
+					// positions   // texCoords
+					-1.0f,  1.0f,  0.0f, 0.0f,
+					 1.0f, -1.0f,  1.0f, 1.0f,
+					-1.0f, -1.0f,  0.0f, 1.0f,
+
+					-1.0f,  1.0f,  0.0f, 0.0f,
+					 1.0f,  1.0f,  1.0f, 0.0f,
+					 1.0f, -1.0f,  1.0f, 1.0f
+				};
+				memcpy(quadVertices, d3dVertices, sizeof(quadVertices));
+				break;
+			}
+			}
+		}
+
 
 		{
 			VertexLayout layout(2);
@@ -460,6 +487,8 @@ namespace Ainan {
 	void Renderer::Blur(std::shared_ptr<FrameBuffer>& target, float radius)
 	{
 		Rectangle lastViewport = Renderer::GetCurrentViewport();
+		RenderingBlendMode lastBlendMode = Rdata->m_CurrentBlendMode;
+		SetBlendMode(RenderingBlendMode::Screen);
 
 		Rectangle viewport;
 		viewport.X = 0;
@@ -506,6 +535,7 @@ namespace Ainan {
 		Draw(*Rdata->BlurVertexBuffer, *shader, Primitive::Triangles, 6);
 
 		Renderer::SetViewport(lastViewport);
+		SetBlendMode(lastBlendMode);
 	}
 
 	void Renderer::SetBlendMode(RenderingBlendMode blendMode)

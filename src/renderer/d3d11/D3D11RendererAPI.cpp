@@ -77,11 +77,11 @@ namespace Ainan {
 			additiveBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
 			D3D11_RENDER_TARGET_BLEND_DESC screenBlendDesc{};
-			screenBlendDesc.BlendEnable = true;
+			screenBlendDesc.BlendEnable = false;
 			screenBlendDesc.SrcBlendAlpha = D3D11_BLEND_ZERO;
 			screenBlendDesc.SrcBlend = D3D11_BLEND_ZERO;
-			screenBlendDesc.DestBlendAlpha = D3D11_BLEND_ONE;
-			screenBlendDesc.DestBlend = D3D11_BLEND_INV_SRC_COLOR;
+			screenBlendDesc.DestBlendAlpha = D3D11_BLEND_DEST_ALPHA;
+			screenBlendDesc.DestBlend = D3D11_BLEND_DEST_COLOR;
 			screenBlendDesc.BlendOp = D3D11_BLEND_OP_MAX;
 			screenBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_MAX;
 			screenBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
@@ -132,6 +132,14 @@ namespace Ainan {
 
 		void D3D11RendererAPI::Draw(ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
 		{
+			Context.DeviceContext->IASetPrimitiveTopology(GetD3DPrimitive(mode));
+
+			D3D11ShaderProgram* d3dShader = (D3D11ShaderProgram*)&shader;;
+
+			Context.DeviceContext->VSSetShader(d3dShader->VertexShader, 0, 0);
+			Context.DeviceContext->PSSetShader(d3dShader->FragmentShader, 0, 0);
+
+			Context.DeviceContext->Draw(vertexCount, 0);
 		}
 
 		void D3D11RendererAPI::Draw(ShaderProgram& shader, const Primitive& mode, const IndexBuffer& indexBuffer)

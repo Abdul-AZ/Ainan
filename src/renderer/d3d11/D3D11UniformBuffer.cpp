@@ -16,8 +16,7 @@ namespace Ainan {
 			{
 				for (auto& layoutPart : layout)
 				{
-					
-					if (BufferSize % sizeof(glm::vec4) != 0)
+					if (BufferSize % sizeof(glm::vec4) != 0 && (BufferSize % sizeof(glm::vec4)) > layoutPart.GetSize())
 					{
 						BufferSize += sizeof(glm::vec4) - BufferSize % sizeof(glm::vec4);
 					}
@@ -66,7 +65,7 @@ namespace Ainan {
 			for (auto& layoutPart : Layout)
 			{
 				uint32_t size = layoutPart.GetSize();
-				if (alignedDataIndex % sizeof(glm::vec4) != 0)
+				if (alignedDataIndex % sizeof(glm::vec4) != 0 && (alignedDataIndex % sizeof(glm::vec4)) > layoutPart.GetSize())
 					alignedDataIndex += sizeof(glm::vec4) - alignedDataIndex % sizeof(glm::vec4);
 
 				memcpy(&alignedData[alignedDataIndex], &unalignedData[unalignedDataIndex], size);

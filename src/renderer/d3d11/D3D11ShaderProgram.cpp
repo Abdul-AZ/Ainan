@@ -6,6 +6,7 @@
 #include "D3D11RendererContext.h"
 #include "D3D11UniformBuffer.h"
 #include "D3D11Texture.h"
+#include "D3D11FrameBuffer.h"
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 
 namespace Ainan {
@@ -75,22 +76,54 @@ namespace Ainan {
 		{
 			std::shared_ptr<D3D11UniformBuffer> d3dBuffer = std::static_pointer_cast<D3D11UniformBuffer>(buffer);
 
-			if (stage == RenderingStage::VertexShader)
+			switch (stage)
+			{
+			case Ainan::RenderingStage::VertexShader:
 				Context->DeviceContext->VSSetConstantBuffers(slot, 1, &d3dBuffer->Buffer);
-			else if (stage == RenderingStage::FragmentShader)
+				break;
+
+			case Ainan::RenderingStage::FragmentShader:
 				Context->DeviceContext->PSSetConstantBuffers(slot, 1, &d3dBuffer->Buffer);
+				break;
+			}
 		}
 
 		void D3D11ShaderProgram::BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage)
 		{
 			auto d3dTexture = std::static_pointer_cast<D3D11Texture>(texture);
-			Context->DeviceContext->PSSetShaderResources(slot, 1, &d3dTexture->D3DResourceView);
-			Context->DeviceContext->PSSetSamplers(slot, 1, &d3dTexture->D3DSampler);
+
+			switch (stage)
+			{
+			case RenderingStage::VertexShader:
+				Context->DeviceContext->VSSetShaderResources(slot, 1, &d3dTexture->D3DResourceView);
+				Context->DeviceContext->VSSetSamplers(slot, 1, &d3dTexture->D3DSampler);
+				break;
+
+			case RenderingStage::FragmentShader:
+				Context->DeviceContext->PSSetShaderResources(slot, 1, &d3dTexture->D3DResourceView);
+				Context->DeviceContext->PSSetSamplers(slot, 1, &d3dTexture->D3DSampler);
+				break;
+			}
+
+			
 		}
 
 		void D3D11ShaderProgram::BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage)
 		{
-			//TODO
+			auto d3dframebuffer = std::static_pointer_cast<D3D11FrameBuffer>(framebuffer);
+
+			switch (stage)
+			{
+			case RenderingStage::VertexShader:
+				Context->DeviceContext->VSSetShaderResources(slot, 1, &d3dframebuffer->RenderTargetTextureView);
+				Context->DeviceContext->VSSetSamplers(slot, 1, &d3dframebuffer->RenderTargetTextureSampler);
+				break;
+
+			case RenderingStage::FragmentShader:
+				Context->DeviceContext->PSSetShaderResources(slot, 1, &d3dframebuffer->RenderTargetTextureView);
+				Context->DeviceContext->PSSetSamplers(slot, 1, &d3dframebuffer->RenderTargetTextureSampler);
+				break;
+			}
 		}
 	}
 }

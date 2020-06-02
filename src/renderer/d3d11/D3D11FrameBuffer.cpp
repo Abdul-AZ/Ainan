@@ -16,7 +16,7 @@ namespace Ainan {
 			desc.Height = size.y;
 			desc.SampleDesc.Count = 1;
 			desc.Usage = D3D11_USAGE_DEFAULT;
-			desc.BindFlags = D3D11_BIND_RENDER_TARGET;
+			desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 			desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
 			desc.ArraySize = 1;
 			desc.MipLevels = 1;
@@ -29,10 +29,29 @@ namespace Ainan {
 			viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
 			ASSERT_D3D_CALL(Context->Device->CreateRenderTargetView(RenderTargetTexture, &viewDesc, &RenderTargetView));
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC textureViewDesc{};
+			textureViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			textureViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			textureViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			textureViewDesc.Texture2D.MipLevels = 1;
+
+			ASSERT_D3D_CALL(Context->Device->CreateShaderResourceView(RenderTargetTexture, &textureViewDesc, &RenderTargetTextureView));
+
+			D3D11_SAMPLER_DESC samplerDesc{};
+			samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+			samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+
+			ASSERT_D3D_CALL(Context->Device->CreateSamplerState(&samplerDesc, &RenderTargetTextureSampler));
 		}
 
 		D3D11FrameBuffer::~D3D11FrameBuffer()
 		{
+			RenderTargetTextureSampler->Release();
+			RenderTargetTextureView->Release();
 			RenderTargetView->Release();
 			RenderTargetTexture->Release();
 		}
@@ -64,6 +83,7 @@ namespace Ainan {
 		{
 			RenderTargetView->Release();
 			RenderTargetTexture->Release();
+			RenderTargetTextureView->Release();
 
 			Size = newSize;
 
@@ -72,13 +92,22 @@ namespace Ainan {
 			desc.Height = newSize.y;
 			desc.SampleDesc.Count = 1;
 			desc.Usage = D3D11_USAGE_DEFAULT;
-			desc.BindFlags = D3D11_BIND_RENDER_TARGET;
+			desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 			desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
 			desc.ArraySize = 1;
 			desc.MipLevels = 1;
 			desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
 			ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, nullptr, &RenderTargetTexture));
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC textureViewDesc{};
+			textureViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			textureViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			textureViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			textureViewDesc.Texture2D.MipLevels = 1;
+
+			ASSERT_D3D_CALL(Context->Device->CreateShaderResourceView(RenderTargetTexture, &textureViewDesc, &RenderTargetTextureView));
+
 
 			D3D11_RENDER_TARGET_VIEW_DESC viewDesc{};
 			viewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
