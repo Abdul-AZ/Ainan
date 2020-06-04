@@ -740,6 +740,53 @@ namespace Ainan {
 		return buffer;
 	}
 
+	std::array<glm::vec2, 6> Renderer::GetQuadVertices()
+	{
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+		{
+		case RendererType::OpenGL:
+		{
+			//these are in clockwise ordering
+			std::array<glm::vec2, 6> openglVertices =
+			{
+				 glm::vec2(-1.0f, -1.0f), //bottom left
+				 glm::vec2(1.0f, -1.0f),  //bottom right
+				 glm::vec2(-1.0f, 1.0f),  //top left
+
+				 glm::vec2(1.0f, -1.0f),  //bottom right
+				 glm::vec2(1.0f, 1.0f),   //top right
+				 glm::vec2(-1.0f, 1.0f)   //top left
+			};
+			return openglVertices;
+		}
+
+#ifdef PLATFORM_WINDOWS
+		case RendererType::D3D11:
+		{
+			//these are in clockwise ordering
+			std::array<glm::vec2, 6> d3d11Vertices =
+			{
+				 glm::vec2(-1.0f,  1.0f),  //top left
+				 glm::vec2(1.0f,   1.0f),  //top right
+				 glm::vec2(-1.0f, -1.0f),  //bottom left
+		
+				 glm::vec2(1.0f,   1.0f),  //top left
+				 glm::vec2(1.0f,  -1.0f),  //bottom right
+				 glm::vec2(-1.0f, -1.0f)   //bottom left
+			};
+			return d3d11Vertices;
+		}
+#endif //PLATFORM_WINDOWS
+
+		default:
+		{
+			assert(false);
+			std::array<glm::vec2, 6> fallback;
+			return fallback;
+		}
+		}
+	}
+
 	void Ainan::Renderer::FlushQuadBatch()
 	{
 		for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)

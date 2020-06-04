@@ -1868,9 +1868,15 @@ namespace Ainan
 		switch (currentRendererType)
 		{
 		case RendererType::OpenGL:
-			Window::SetTitle("Ainan - OpenGL (3.3) - " + m_Env->Name);
+			Window::SetTitle("Ainan - OpenGL (4.2) - " + m_Env->Name);
+			break;
+
+#ifdef PLATFORM_WINDOWS
+		case RendererType::D3D11:
+			Window::SetTitle("Ainan - DirectX 11 - " + m_Env->Name);
 			break;
 		}
+#endif // PLATFORM_WINDOWS
 	}
 
 	void Editor::StartFrame()

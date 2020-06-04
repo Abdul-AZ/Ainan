@@ -16,11 +16,22 @@ namespace Ainan {
 			{
 				for (auto& layoutPart : layout)
 				{
-					if (BufferSize % sizeof(glm::vec4) != 0 && (BufferSize % sizeof(glm::vec4)) > layoutPart.GetSize())
+					if (layoutPart.Count == 1) 
 					{
-						BufferSize += sizeof(glm::vec4) - BufferSize % sizeof(glm::vec4);
+						if (BufferSize % sizeof(glm::vec4) != 0 && (sizeof(glm::vec4) - (BufferSize % sizeof(glm::vec4)) < layoutPart.GetSize()))
+						{
+							BufferSize += sizeof(glm::vec4) - BufferSize % sizeof(glm::vec4);
+						}
+						BufferSize += layoutPart.GetSize();
 					}
-					BufferSize += layoutPart.GetSize();
+					else
+					{
+						if (BufferSize % sizeof(glm::vec4) != 0)
+						{
+							BufferSize += sizeof(glm::vec4) - BufferSize % sizeof(glm::vec4);
+						}
+						BufferSize += layoutPart.Count * sizeof(glm::vec4);
+					}
 				}
 			}
 
@@ -62,15 +73,35 @@ namespace Ainan {
 			uint32_t unalignedDataIndex = 0;
 			uint8_t* unalignedData = (uint8_t*)data;
 			uint8_t* alignedData = (uint8_t*)subresource.pData;
-			for (auto& layoutPart : Layout)
+			for (auto& layoutPart : Layout) 
 			{
-				uint32_t size = layoutPart.GetSize();
-				if (alignedDataIndex % sizeof(glm::vec4) != 0 && (alignedDataIndex % sizeof(glm::vec4)) > layoutPart.GetSize())
-					alignedDataIndex += sizeof(glm::vec4) - alignedDataIndex % sizeof(glm::vec4);
+				if (layoutPart.Count == 1)
+				{
+					uint32_t size = layoutPart.GetSize();
 
-				memcpy(&alignedData[alignedDataIndex], &unalignedData[unalignedDataIndex], size);
-				alignedDataIndex += size;
-				unalignedDataIndex += size;
+					if (alignedDataIndex % sizeof(glm::vec4) != 0 && (alignedDataIndex % sizeof(glm::vec4)) < layoutPart.GetSize())
+						alignedDataIndex += sizeof(glm::vec4) - alignedDataIndex % sizeof(glm::vec4);
+
+					memcpy(&alignedData[alignedDataIndex], &unalignedData[unalignedDataIndex], size);
+					alignedDataIndex += size;
+					unalignedDataIndex += size;
+				}
+				else
+				{
+					size_t elementSize = layoutPart.GetSize() / layoutPart.Count;
+					for (size_t i = 0; i < layoutPart.Count; i++)
+					{
+						if (alignedDataIndex % sizeof(glm::vec4) != 0)
+						{
+							alignedDataIndex += sizeof(glm::vec4) - alignedDataIndex % sizeof(glm::vec4);
+						}
+						memcpy(&alignedData[alignedDataIndex], &unalignedData[unalignedDataIndex], elementSize);
+
+						alignedDataIndex += elementSize;
+						unalignedDataIndex += elementSize;
+					}
+				}
+			
 			}
 
 			Context->DeviceContext->Unmap(Buffer, 0);

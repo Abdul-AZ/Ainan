@@ -8,17 +8,11 @@ namespace Ainan {
 
 	Background::Background()
 	{
-		glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f),
-								 glm::vec2(1.0f, -1.0f),
-								 glm::vec2(-1.0f, 1.0f),
-
-								 glm::vec2(1.0f, -1.0f),
-								 glm::vec2(1.0f, 1.0f),
-								 glm::vec2(-1.0f, 1.0f) };
+		auto vertices = Renderer::GetQuadVertices();
 
 		VertexLayout layout(1);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
-		VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices), layout, Renderer::ShaderLibrary()["BackgroundShader"]);
+		VBO = Renderer::CreateVertexBuffer(vertices.data(), vertices.size() * sizeof(glm::vec2), layout, Renderer::ShaderLibrary()["BackgroundShader"]);
 
 		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { {"u_Model", ShaderVariableType::Mat4} }, nullptr);
 

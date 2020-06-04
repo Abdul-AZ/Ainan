@@ -102,6 +102,10 @@ namespace Ainan {
 		static std::shared_ptr<UniformBuffer> CreateUniformBuffer(const std::string& name, uint32_t reg,
 			const VertexLayout& layout, void* data);
 
+		//because quad vertices are different in each API depending on if the y axis is pointing up or down
+		//this returns 6 quad vertices that are used to draw a quad WITHOUT using an index buffer
+		static std::array<glm::vec2, 6> GetQuadVertices();
+
 		struct RendererData
 		{
 			//scene data
