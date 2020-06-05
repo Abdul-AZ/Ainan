@@ -26,7 +26,7 @@ Still to be made, I'm planning to slowly build it through time. It will be avail
 ![](github/appScreenshot.PNG)
 
 # Contribute
-Every contribution is welcome, don't be afraid to open an issue regarding anything from bug fixes to question.
+Every contribution is welcome, don't be afraid to open an issue regarding anything from bug fixes to questions.
 
 # Libraries used
 * GLFW
