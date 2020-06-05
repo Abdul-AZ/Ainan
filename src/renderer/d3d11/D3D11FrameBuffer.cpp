@@ -71,7 +71,51 @@ namespace Ainan {
 
 		Image Ainan::D3D11::D3D11FrameBuffer::ReadPixels(glm::vec2 bottomLeftPixel, glm::vec2 topRightPixel)
 		{
-			return Image();
+			//create a staging texture
+			ID3D11Texture2D* stagingTexture = nullptr;
+
+			D3D11_TEXTURE2D_DESC desc{};
+			desc.Width = Size.x;
+			desc.Height = Size.y;
+			desc.SampleDesc.Count = 1;
+			desc.Usage = D3D11_USAGE_STAGING;
+			desc.BindFlags = 0;
+			desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+			desc.ArraySize = 1;
+			desc.MipLevels = 1;
+			desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+			ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, nullptr, &stagingTexture));
+
+			//TODO support cpying parts of the framebuffer and not just all of it
+			Context->DeviceContext->CopyResource(stagingTexture, RenderTargetTexture);
+
+			D3D11_MAPPED_SUBRESOURCE resource{};
+
+			Context->DeviceContext->Map(stagingTexture, 0, D3D11_MAP_READ, 0, &resource);
+			Image img;
+
+			img.Format = TextureFormat::RGBA;
+			img.m_Width = Size.x;
+			img.m_Height = Size.y;
+			img.m_Data = new uint8_t[Size.x * Size.y * 4];
+
+			uint8_t* srcPtr = (uint8_t*)resource.pData;
+			uint8_t* destPtr = (uint8_t*)img.m_Data;
+			const uint32_t unpaddedRowSize = Size.x * 4;
+			for (size_t i = 0; i < Size.y - 1; i++)
+			{
+				memcpy(destPtr, srcPtr, unpaddedRowSize);
+				if (i == Size.y - 2)
+					break;
+				srcPtr += resource.RowPitch;
+				destPtr += unpaddedRowSize;
+			}
+
+			Context->DeviceContext->Unmap(stagingTexture, 0);
+			stagingTexture->Release();
+
+			return img;
 		}
 
 		void D3D11FrameBuffer::Bind() const
@@ -107,7 +151,6 @@ namespace Ainan {
 			textureViewDesc.Texture2D.MipLevels = 1;
 
 			ASSERT_D3D_CALL(Context->Device->CreateShaderResourceView(RenderTargetTexture, &textureViewDesc, &RenderTargetTextureView));
-
 
 			D3D11_RENDER_TARGET_VIEW_DESC viewDesc{};
 			viewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
