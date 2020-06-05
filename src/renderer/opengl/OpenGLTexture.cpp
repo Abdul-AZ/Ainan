@@ -6,9 +6,11 @@
 namespace Ainan {
 	namespace OpenGL {
 
-		OpenGLTexture::OpenGLTexture()
+		OpenGLTexture::OpenGLTexture(const glm::vec2& size, TextureFormat format, uint8_t* data)
 		{
 			glGenTextures(1, &m_RendererID);
+
+			AllocateTexture(size, format, data);
 		}
 
 		OpenGLTexture::~OpenGLTexture()
@@ -18,31 +20,7 @@ namespace Ainan {
 
 		void OpenGLTexture::SetImage(const Image& image)
 		{
-			Bind();
-
-			if (image.m_Comp == 3)
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, image.m_Width, image.m_Height, 0, GL_RGB, GL_UNSIGNED_BYTE, image.m_Data);
-			else if (image.m_Comp == 4)
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.m_Width, image.m_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.m_Data);
-			else if(image.m_Comp == 1)
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, image.m_Width, image.m_Height, 0, GL_RED, GL_UNSIGNED_BYTE, image.m_Data);
-			else
-				assert(false);
-
-			glGenerateMipmap(GL_TEXTURE_2D);
-			m_Size = { image.m_Width, image.m_Height };
-		}
-
-		void OpenGLTexture::Bind(const int& slot) const
-		{
-			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D, m_RendererID);
-		}
-
-		void OpenGLTexture::Unbind(const int& slot) const
-		{
-			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			AllocateTexture({ image.m_Width, image.m_Height }, image.Format, image.m_Data);
 		}
 
 		void OpenGLTexture::SetDefaultTextureSettings()
@@ -53,9 +31,40 @@ namespace Ainan {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 
+		inline void OpenGLTexture::AllocateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data)
+		{
+			glBindTexture(GL_TEXTURE_2D, m_RendererID);
+
+			switch (format)
+			{
+			case TextureFormat::RGBA:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+				break;
+
+			case TextureFormat::RGB:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+				break;
+
+			case TextureFormat::RG:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, size.x, size.y, 0, GL_RG, GL_UNSIGNED_BYTE, data);
+				break;
+
+			case TextureFormat::R:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, size.x, size.y, 0, GL_RED, GL_UNSIGNED_BYTE, data);
+				break;
+
+			case TextureFormat::Unspecified:
+				assert(false);
+			}
+
+			glGenerateMipmap(GL_TEXTURE_2D);
+			m_Size = size;
+		}
+
 		void OpenGLTexture::SetImage(const glm::vec2& size, int comp)
 		{
-			Bind();
+			glBindTexture(GL_TEXTURE_2D, m_RendererID);
+
 			if (comp == 3)
 			{
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, (GLsizei)size.x, (GLsizei)size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);

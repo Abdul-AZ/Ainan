@@ -17,8 +17,7 @@ namespace Ainan {
 
 		virtual glm::vec2 GetSize() const = 0;
 
-		virtual void Bind(const int& slot = 0) const = 0;
-		virtual void Unbind(const int& slot = 0) const = 0;
-		virtual unsigned int GetRendererID() const = 0;
+		//used by ImGui
+		virtual void* GetTextureID() = 0;
 	};
 }

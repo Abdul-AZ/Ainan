@@ -54,17 +54,15 @@ namespace Ainan {
 
 	Gizmo::Gizmo()
 	{
-		VAO = Renderer::CreateVertexArray();
-		VAO->Bind();
-
-		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices));
-		VBO->Bind();
-		VBO->SetLayout({ ShaderVariableType::Vec2 });
+		VertexLayout layout(1);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibrary()["GizmoShader"]);
 
 		EBO = Renderer::CreateIndexBuffer((unsigned int*)arrowIndecies, sizeof(arrowIndecies) / sizeof(unsigned int));
 		EBO->Bind();
 
-		VAO->Unbind();
+		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { {"u_Model", ShaderVariableType::Mat4} }, nullptr);
+		ColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 2, { {"u_Color", ShaderVariableType::Vec4} }, nullptr);
 	}
 
 	void Gizmo::Draw(glm::vec2& objectPosition, const Rectangle& viewport)
@@ -93,8 +91,8 @@ namespace Ainan {
 		glm::vec2 objectPositionWS = objectPosition * c_GlobalScaleFactor;
 		glm::vec2 realMousePositionNDC = glm::vec2(NDC_xpos, NDC_ypos);
 
-		glm::mat4 invView = glm::inverse(Renderer::m_CurrentSceneDescription.SceneCamera.ViewMatrix);
-		glm::mat4 invProj = glm::inverse(Renderer::m_CurrentSceneDescription.SceneCamera.ProjectionMatrix);
+		glm::mat4 invView = glm::inverse(Renderer::Rdata->CurrentSceneDescription.SceneCamera.ViewMatrix);
+		glm::mat4 invProj = glm::inverse(Renderer::Rdata->CurrentSceneDescription.SceneCamera.ProjectionMatrix);
 
 		glm::vec4 result = invView * invProj * glm::vec4(realMousePositionNDC.x, realMousePositionNDC.y, 0.0f, 1.0f);
 
@@ -149,11 +147,15 @@ namespace Ainan {
 		else
 			color = glm::vec4(0.75f, 0.0f, 0.0f, 1.0f);
 
-		auto& shader = Renderer::ShaderLibrary["GizmoShader"];
+		auto& shader = Renderer::ShaderLibrary()["GizmoShader"];
 
-		shader->SetUniformVec4("u_Color", color);
-		shader->SetUniformMat4("u_Model", model);
-		Renderer::Draw(*VAO, *shader, Primitive::Triangles, *EBO);
+		shader->BindUniformBuffer(TransformUniformBuffer, 1, RenderingStage::VertexShader);
+		TransformUniformBuffer->UpdateData(&model);
+
+		shader->BindUniformBuffer(ColorUniformBuffer, 2, RenderingStage::FragmentShader);
+		ColorUniformBuffer->UpdateData(&color);
+
+		Renderer::Draw(*VBO, *shader, Primitive::Triangles, *EBO);
 
 		model = glm::rotate(model, -PI / 2, glm::vec3(0.0f, 0.0f, -1.0f));
 
@@ -163,12 +165,12 @@ namespace Ainan {
 		else
 			color = glm::vec4(0.0f, 0.75f, 0.0f, 1.0f);
 
-		shader->SetUniformVec4("u_Color", color);
-		shader->SetUniformMat4("u_Model", model);
-		glm::vec2 mousePosWS = Renderer::m_CurrentSceneDescription.SceneCamera.Position + realMousePositionNDC * c_GlobalScaleFactor;
+		ColorUniformBuffer->UpdateData(&color);
+		TransformUniformBuffer->UpdateData(&model);
+		glm::vec2 mousePosWS = Renderer::Rdata->CurrentSceneDescription.SceneCamera.Position + realMousePositionNDC * c_GlobalScaleFactor;
 		glm::vec2 objectPosWS = objectPositionWS * c_GlobalScaleFactor;
 
-		Renderer::Draw(*VAO, *shader, Primitive::Triangles, *EBO);
+		Renderer::Draw(*VBO, *shader, Primitive::Triangles, *EBO);
 	}
 
 	bool Gizmo::CheckIfInsideArrow(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point)

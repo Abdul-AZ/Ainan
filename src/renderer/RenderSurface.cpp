@@ -6,25 +6,10 @@ namespace Ainan {
 
 	RenderSurface::RenderSurface()
 	{
-		SurfaceFrameBuffer = Renderer::CreateFrameBuffer();
+		SurfaceFrameBuffer = Renderer::CreateFrameBuffer(Window::FramebufferSize);
 
 		SurfaceFrameBuffer->Bind();
 
-		m_Texture = Renderer::CreateTexture();
-
-		m_Size = Window::FramebufferSize;
-		
-		m_Texture->SetImage(m_Size, 3);
-
-		m_Texture->SetDefaultTextureSettings();
-		m_Texture->Unbind();
-
-		SurfaceFrameBuffer->SetActiveTexture(*m_Texture);
-
-		m_VertexArray = Renderer::CreateVertexArray();
-		m_VertexArray->Bind();
-
-		// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
 		float quadVertices[] = { 
 			// positions   // texCoords
 			-1.0f,  1.0f,  0.0f, 1.0f,
@@ -36,30 +21,31 @@ namespace Ainan {
 			 1.0f,  1.0f,  1.0f, 1.0f
 		};
 
-		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices));
-		m_VertexBuffer->SetLayout({ ShaderVariableType::Vec2, ShaderVariableType::Vec2 });
+		VertexLayout layout(2);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
+		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, Renderer::ShaderLibrary()["ImageShader"]);
 
-		SurfaceFrameBuffer->Unbind();
+		Renderer::SetRenderTargetApplicationWindow();
 	}
 
 	void RenderSurface::Render()
 	{
-		auto& shader = Renderer::ShaderLibrary["ImageShader"];
-		shader->SetUniform1i("u_ScreenTexture", 0);
-		m_Texture->Bind();
-		Renderer::Draw(*m_VertexArray, *shader, Primitive::Triangles, 6);
+		auto& shader = Renderer::ShaderLibrary()["ImageShader"];
+		shader->BindTexture(SurfaceFrameBuffer, 0, RenderingStage::FragmentShader);
+		Renderer::Draw(*m_VertexBuffer, *shader, Primitive::Triangles, 6);
 	}
 
 	void RenderSurface::Render(ShaderProgram& shader)
 	{
-		m_Texture->Bind();
-		Renderer::Draw(*m_VertexArray, shader, Primitive::Triangles, 6);
+		shader.BindTexture(SurfaceFrameBuffer, 0, RenderingStage::FragmentShader);
+		Renderer::Draw(*m_VertexBuffer, shader, Primitive::Triangles, 6);
 	}
 
 	void RenderSurface::RenderToScreen(const Rectangle& viewport)
 	{
 		//nullptr means we are copying to the default render buffer (which is the one being displayed)
-		SurfaceFrameBuffer->Blit(nullptr, m_Size, m_Size);
+		SurfaceFrameBuffer->Blit(nullptr, SurfaceFrameBuffer->GetSize(), SurfaceFrameBuffer->GetSize());
 
 		Rectangle screenViewport;
 		screenViewport.X = 0;
@@ -70,22 +56,8 @@ namespace Ainan {
 		Renderer::SetViewport(viewport);
 	}
 
-	void RenderSurface::SetSize(const glm::vec2 & size)
+	void RenderSurface::SetSize(const glm::vec2& size)
 	{
-		m_Size = size;
-		SurfaceFrameBuffer->Bind();
-		
-		//delete old trexture
-		m_Texture.reset();
-	
-		//create a new one with the window size
-		m_Texture = Renderer::CreateTexture();
-		m_Texture->SetImage(size, 3);
-	
-		m_Texture->SetDefaultTextureSettings();
-		m_Texture->Unbind();
-	
-		SurfaceFrameBuffer->SetActiveTexture(*m_Texture);
-		SurfaceFrameBuffer->Unbind();
+		SurfaceFrameBuffer->Resize(size);
 	}
 }

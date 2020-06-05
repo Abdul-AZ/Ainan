@@ -1,11 +1,11 @@
-#version 330 core
+#version 420 core
 
 in vec4 Color;
 in vec2 TextureCoordinates;
 in float Texture;
 out vec4 FragColor;
 
-uniform sampler2D u_Textures[16];
+layout(binding = 0) uniform sampler2D u_Textures[16];
 
 void main()
 {

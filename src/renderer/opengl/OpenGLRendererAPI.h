@@ -5,6 +5,8 @@
 #include "renderer/IndexBuffer.h"
 #include "renderer/Rectangle.h"
 
+#include "OpenGLRendererContext.h"
+
 #include <glad/glad.h>
 
 namespace Ainan {
@@ -36,11 +38,12 @@ namespace Ainan {
 
 			// Inherited via RendererAPI
 			virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount) override;
-			virtual void DrawInstanced(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount, const unsigned int& objectCount) override;
 			virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer) override;
 			virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount) override;
-
 			virtual void ClearScreen() override;
+			virtual void Present() override;
+			virtual void RecreateSwapchain(const glm::vec2& newSwapchainSize) override;
+			virtual void SetRenderTargetApplicationWindow() override;
 
 			virtual void SetViewport(const Rectangle& viewport) override;
 			virtual Rectangle GetCurrentViewport() override;
@@ -48,7 +51,11 @@ namespace Ainan {
 			virtual void SetScissor(const Rectangle& scissor) override;
 			virtual Rectangle GetCurrentScissor() override;
 
-			virtual RendererType GetType() const override { return RendererType::OpenGL; }
+			virtual RendererContext* GetContext() override { return &Context; };
+
+			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
+
+			OpenGLRendererContext Context;
 		};
 	}
 }

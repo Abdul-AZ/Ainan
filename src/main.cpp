@@ -5,36 +5,40 @@
 
 #include "editor/Editor.h"
 
+#include "renderer/d3d11/D3D11RendererAPI.h"
+
 int main() 
 {
 	using namespace Ainan;
 
-	Window::Init();
-	Renderer::Init();
+	auto api = RendererType::D3D11;
+	
+	Window::Init(api);
+	Renderer::Init(api);
 	
 	ImGuiWrapper::Init();
 	SetEditorStyle(EditorStyle::Dark_Gray);
-
+	
 	Editor* editor = new Editor;
-
+	
 	while (Window::ShouldClose == false)
 	{
 		Renderer::ClearScreen();
 
 		editor->StartFrame();
-
+		
 		Window::HandleWindowEvents();
 		editor->Update();
 		editor->Draw();
-
+		
 		editor->EndFrame();
 
-		Window::Present();
+		Renderer::Present();
 	}
-
+	
 	delete editor;
-
-	Renderer::Terminate();
+	
 	ImGuiWrapper::Terminate();
+	Renderer::Terminate();
 	Window::Terminate();
 }

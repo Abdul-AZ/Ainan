@@ -27,6 +27,7 @@ namespace Ainan {
 
 		std::shared_ptr<IndexBuffer> EBO;
 		std::shared_ptr<VertexBuffer> VBO;
-		std::shared_ptr<VertexArray> VAO;
+		std::shared_ptr<UniformBuffer> TransformUniformBuffer;
+		std::shared_ptr<UniformBuffer> ColorUniformBuffer;
 	};
 }

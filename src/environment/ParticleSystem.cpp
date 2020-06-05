@@ -3,6 +3,7 @@
 
 namespace Ainan {
 	static std::shared_ptr<Texture> DefaultTexture;
+	static int s_DefaultTextureUserCount = 0;
 
 	ParticleSystem::ParticleSystem()
 	{
@@ -27,11 +28,18 @@ namespace Ainan {
 		m_Particles.RemainingLifeTime.resize(c_ParticlePoolSize);
 
 		//initilize the default shader
-		if (DefaultTexture == nullptr) {
-			DefaultTexture = Renderer::CreateTexture();
-			DefaultTexture->SetImage(Image::LoadFromFile("res/Circle.png"));
-			DefaultTexture->Bind();
+		s_DefaultTextureUserCount++;
+		if (s_DefaultTextureUserCount == 1)
+		{
+			DefaultTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Circle.png"));
 		}
+	}
+
+	ParticleSystem::~ParticleSystem()
+	{
+		s_DefaultTextureUserCount--;
+		if (s_DefaultTextureUserCount == 0)
+			DefaultTexture.reset();
 	}
 
 	void ParticleSystem::Update(const float deltaTime)

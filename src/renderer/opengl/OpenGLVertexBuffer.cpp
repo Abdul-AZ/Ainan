@@ -29,14 +29,41 @@ namespace Ainan {
 			}
 		}
 
-		OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, unsigned int size, bool dynamic)
+		OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, unsigned int size, const VertexLayout& layout, bool dynamic)
 		{
+			glGenVertexArrays(1, &m_VertexArray);
+			glBindVertexArray(m_VertexArray);
+
+			//create buffer
 			glGenBuffers(1, &m_RendererID);
 			Bind();
 			if(dynamic)
 				glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
 			else
 				glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+
+			//set layout
+			int index = 0;
+			int offset = 0;
+			int stride = 0;
+
+			for (auto& layoutPart : layout)
+			{
+				stride += layoutPart.GetSize();
+			}
+
+			for (auto& layoutPart : layout)
+			{
+				int size = layoutPart.GetSize();
+				int componentCount = GetShaderVariableComponentCount(layoutPart.Type);
+				GLenum openglType = GetOpenglTypeFromShaderType(layoutPart.Type);
+
+				glVertexAttribPointer(index, componentCount, openglType, false, stride, (void*)(uintptr_t)offset);
+				offset += size;
+
+				glEnableVertexAttribArray(index);
+				index++;
+			}
 		}
 
 		OpenGLVertexBuffer::~OpenGLVertexBuffer()
@@ -47,44 +74,19 @@ namespace Ainan {
 		void OpenGLVertexBuffer::Bind() const
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
+			glBindVertexArray(m_VertexArray);
 		}
 
 		void OpenGLVertexBuffer::Unbind() const
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
 		}
 
 		void OpenGLVertexBuffer::UpdateData(const int& offset, const int& size, void* data)
 		{
 			Bind();
 			glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
-		}
-
-		void OpenGLVertexBuffer::SetLayout(const VertexLayout& layout)
-		{
-			Bind();
-
-			int index = 0;
-			int offset = 0;
-			int stride = 0;
-
-			for (auto& type : layout)
-			{
-				stride += GetShaderVariableSize(type);
-			}
-
-			for (auto& type : layout)
-			{
-				int size = GetShaderVariableSize(type);
-				int componentCount = GetShaderVariableComponentCount(type);
-				GLenum openglType = GetOpenglTypeFromShaderType(type);
-
-				glVertexAttribPointer(index, componentCount, openglType, false, stride, (void*)(uintptr_t)offset);
-				offset += size;
-
-				glEnableVertexAttribArray(index);
-				index++;
-			}
 		}
 	}
 }

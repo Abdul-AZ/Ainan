@@ -2,6 +2,9 @@
 #include <glad/glad.h>
 
 #include "OpenGLRendererAPI.h"
+#include "editor/Window.h"
+#include <GLFW/glfw3.h>
+#include "OpenGLShaderProgram.h"
 
 namespace Ainan {
 	namespace OpenGL {
@@ -19,22 +22,24 @@ namespace Ainan {
 #endif // DEBUG
 
 			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		}
-
-		void OpenGLRendererAPI::DrawInstanced(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount, const unsigned int& objectCount)
-		{
-			glDrawArraysInstanced(GetOpenGLPrimitive(primitive), 0, vertexCount, objectCount);
 		}
 
 		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
 		{
+			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
+
+			glUseProgram(openglShader->m_RendererID);
 			glDrawElements(GetOpenGLPrimitive(primitive), indexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
+			glUseProgram(0);
 		}
 
 		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
 		{
+			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
+
+			glUseProgram(openglShader->m_RendererID);
 			glDrawElements(GetOpenGLPrimitive(primitive), vertexCount, GL_UNSIGNED_INT, nullptr);
+			glUseProgram(0);
 		}
 
 		void OpenGLRendererAPI::ClearScreen()
@@ -70,9 +75,44 @@ namespace Ainan {
 			return scissor;
 		}
 
+		void OpenGLRendererAPI::SetBlendMode(RenderingBlendMode blendMode)
+		{
+			glEnable(GL_BLEND);
+
+			switch (blendMode)
+			{
+			case RenderingBlendMode::Additive:
+					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+				break;
+			case RenderingBlendMode::Screen:
+					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+				break;
+			}
+		}
+
+		void OpenGLRendererAPI::SetRenderTargetApplicationWindow()
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+
+		//we don't do anything because this is handled by OpenGL, it's different for other API's
+		void OpenGLRendererAPI::RecreateSwapchain(const glm::vec2& newSwapchainSize)
+		{
+		}
+
+		void OpenGLRendererAPI::Present()
+		{
+			glfwSwapBuffers(Window::Ptr);
+			Window::WindowSizeChangedSinceLastFrame = false;
+		}
+
 		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount)
 		{
+			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
+
+			glUseProgram(openglShader->m_RendererID);
 			glDrawArrays(GetOpenGLPrimitive(primitive), 0, vertexCount);
+			glUseProgram(0);
 		}
 	}
 }

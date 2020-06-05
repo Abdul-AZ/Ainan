@@ -10,13 +10,12 @@ namespace Ainan {
 		m_Name = "Sprite";
 		EditorOpen = false;
 
-		m_Texture = Renderer::CreateTexture();
 
 		Image img = Image::LoadFromFile("res/CheckerBoard.png");
 
-		Image::GrayScaleToRGB(img);
+		Image::GrayScaleToRGBA(img);
 
-		m_Texture->SetImage(img);
+		m_Texture = Renderer::CreateTexture(img);
 	}
 
 	void Sprite::Update(const float deltaTime)
@@ -39,7 +38,7 @@ namespace Ainan {
 
 		ImGui::Text("Texture: ");
 		ImGui::SameLine();
-		ImGui::Image((ImTextureID)m_Texture->GetRendererID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
+		ImGui::Image(m_Texture->GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 
 		if (ImGui::BeginCombo("##Texture: ", m_TexturePath == "" ? "None" : std::filesystem::path(m_TexturePath).filename().u8string().c_str()))
 		{
@@ -98,14 +97,14 @@ namespace Ainan {
 	{
 		m_Texture.reset();
 
-		m_Texture = Renderer::CreateTexture();
 
 		Image img = Image::LoadFromFile(path);
 
-		if (img.m_Comp == 1)
+		if (img.Format == TextureFormat::R)
 			Image::GrayScaleToRGB(img);
 
-		m_Texture->SetImage(img);
+		m_Texture = Renderer::CreateTexture(img);
+		//m_Texture->SetImage(img);
 	}
 
 }

@@ -12,5 +12,10 @@ namespace Ainan {
 	public:
 		Grid();
 		void Draw();
+
+	private:
+		std::shared_ptr<VertexBuffer> VBO = nullptr;
+		std::shared_ptr<IndexBuffer> EBO = nullptr;
+		std::shared_ptr<UniformBuffer> ColorUniformBuffer = nullptr;
 	};
 }

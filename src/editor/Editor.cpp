@@ -13,13 +13,9 @@ namespace Ainan
 			Window::CenterWindow();
 		};
 
-		m_PlayButtonTexture = Renderer::CreateTexture();
-		m_PauseButtonTexture = Renderer::CreateTexture();
-		m_StopButtonTexture = Renderer::CreateTexture();
-
-		m_PlayButtonTexture->SetImage(Image::LoadFromFile("res/PlayButton.png", 4));
-		m_PauseButtonTexture->SetImage(Image::LoadFromFile("res/PauseButton.png", 4));
-		m_StopButtonTexture->SetImage(Image::LoadFromFile("res/StopButton.png", 4));
+		m_PlayButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PlayButton.png"));
+		m_PauseButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PauseButton.png"));
+		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png"));
 	}
 
 	Editor::~Editor()
@@ -374,29 +370,26 @@ namespace Ainan
 
 		if (ImGui::Button("Create", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
 		{
-			if (canSaveEnvironment) {
+			if (canSaveEnvironment) 
+			{
 				Window::Maximize();
 
 				//make sure the folder path has a backslash at the end
 				if (m_EnvironmentCreateFolderPath[m_EnvironmentCreateFolderPath.size() - 1] != '\\')
 					m_EnvironmentCreateFolderPath = m_EnvironmentCreateFolderPath + "\\";
 
-				std::string dirPath = "";
 				if (m_CreateEvironmentDirectory)
 				{
-					dirPath = m_EnvironmentCreateFolderPath + m_EnvironmentCreateName + "\\";
-					std::filesystem::create_directory(dirPath);
-				}
-				else
-				{
-					dirPath = m_EnvironmentCreateFolderPath;
+					m_EnvironmentCreateFolderPath = m_EnvironmentCreateFolderPath + m_EnvironmentCreateName + "\\";
+					std::filesystem::create_directory(m_EnvironmentCreateFolderPath);
 				}
 
 				m_Env = new Environment;
 				m_Env->Name = m_EnvironmentCreateName;
 
 				if (m_IncludeStarterAssets)
-					std::filesystem::copy("res\\StarterAssets", dirPath + "\\StarterAssets");
+					std::filesystem::copy("res\\StarterAssets", m_EnvironmentCreateFolderPath + "\\StarterAssets");
+				m_EnvironmentFolderPath = m_EnvironmentCreateFolderPath;
 
 				m_State = State_EditorMode;
 				OnEnvironmentLoad();
@@ -407,8 +400,8 @@ namespace Ainan
 
 		ImGui::End();
 
-		m_FolderBrowser.DisplayGUI([this](const std::string& dir) {
-			m_EnvironmentCreateFolderPath = dir;
+		m_FolderBrowser.DisplayGUI([this](const std::filesystem::path& dir) {
+			m_EnvironmentCreateFolderPath = dir.u8string();
 			});
 
 		ImGuiWrapper::Render();
@@ -419,7 +412,7 @@ namespace Ainan
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -516,6 +509,8 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Additive;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
 
@@ -525,15 +520,10 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Screen;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
-				glEnable(GL_BLEND);
-
-				if (m_Env->BlendMode == RenderingBlendMode::Additive)
-					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
-					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-
 				ImGui::EndCombo();
 
 			}
@@ -581,7 +571,7 @@ namespace Ainan
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -622,7 +612,7 @@ namespace Ainan
 
 		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
 
-		m_RenderSurface.SurfaceFrameBuffer->Unbind();
+		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
 		ImGuiWrapper::NewFrame();
@@ -661,6 +651,8 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Additive;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
 
@@ -670,17 +662,12 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Screen;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
-				glEnable(GL_BLEND);
-
-				if (m_Env->BlendMode == RenderingBlendMode::Additive)
-					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
-					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 
 				ImGui::EndCombo();
-
 			}
 
 			ImGui::TreePop();
@@ -726,7 +713,7 @@ namespace Ainan
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -767,7 +754,7 @@ namespace Ainan
 
 		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
 
-		m_RenderSurface.SurfaceFrameBuffer->Unbind();
+		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
 		ImGuiWrapper::NewFrame();
@@ -806,6 +793,8 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Additive;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
 
@@ -815,17 +804,12 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Screen;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
-				glEnable(GL_BLEND);
-
-				if (m_Env->BlendMode == RenderingBlendMode::Additive)
-					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
-					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 
 				ImGui::EndCombo();
-
 			}
 
 			ImGui::TreePop();
@@ -871,7 +855,7 @@ namespace Ainan
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -918,7 +902,7 @@ namespace Ainan
 			m_ExportedFrame = true;
 		}
 
-		m_RenderSurface.SurfaceFrameBuffer->Unbind();
+		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
 		ImGuiWrapper::NewFrame();
@@ -957,6 +941,8 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Additive;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
 
@@ -966,17 +952,12 @@ namespace Ainan
 
 						ImGui::SetItemDefaultFocus();
 						m_Env->BlendMode = RenderingBlendMode::Screen;
+
+						Renderer::SetBlendMode(m_Env->BlendMode);
 					}
 				}
-				glEnable(GL_BLEND);
-
-				if (m_Env->BlendMode == RenderingBlendMode::Additive)
-					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-				else if (m_Env->BlendMode == RenderingBlendMode::Screen)
-					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 
 				ImGui::EndCombo();
-
 			}
 
 			ImGui::TreePop();
@@ -1148,7 +1129,7 @@ namespace Ainan
 		//code for displaying each of the control buttons in lambdas so that we can reuse it
 		auto displayPlayButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 playButtonoTint = s_playButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton((void*)(uintptr_t)m_PlayButtonTexture->GetRendererID(),
+			if (ImGui::ImageButton(m_PlayButtonTexture->GetTextureID(),
 				c_buttonSize,
 				ImVec2(0, 0),
 				ImVec2(1, 1),
@@ -1172,7 +1153,7 @@ namespace Ainan
 
 		auto displayStopButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 stopButtonoTint = s_stopButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton((void*)(uintptr_t)m_StopButtonTexture->GetRendererID(),
+			if (ImGui::ImageButton(m_StopButtonTexture->GetTextureID(),
 				ImVec2(50, 50),
 				ImVec2(0, 0),
 				ImVec2(1, 1),
@@ -1196,7 +1177,7 @@ namespace Ainan
 
 		auto displayPauseButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 pauseButtonoTint = s_pauseButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton((void*)(uintptr_t)m_PauseButtonTexture->GetRendererID(),
+			if (ImGui::ImageButton(m_PauseButtonTexture->GetTextureID(),
 				ImVec2(50, 50),
 				ImVec2(0, 0),
 				ImVec2(1, 1),
@@ -1790,7 +1771,7 @@ namespace Ainan
 		{
 			ImGui::Text("Draw Calls: ");
 			ImGui::SameLine();
-			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(Renderer::NumberOfDrawCallsLastScene).c_str());
+			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(Renderer::Rdata->NumberOfDrawCallsLastScene).c_str());
 			ImGui::SameLine();
 
 
@@ -1809,17 +1790,17 @@ namespace Ainan
 
 			ImGui::Text("Textures: ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::m_ReservedTextures.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->ReservedTextures.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   VBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::m_ReservedVertexBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->ReservedVertexBuffers.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   EBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::m_ReservedIndexBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->ReservedIndexBuffers.size()).c_str());
 		}
 		break;
 
@@ -1882,14 +1863,20 @@ namespace Ainan
 
 	void Editor::UpdateTitle()
 	{
-		RendererType currentRendererType = Renderer::m_CurrentActiveAPI->GetType();
+		RendererType currentRendererType = Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType();
 
 		switch (currentRendererType)
 		{
 		case RendererType::OpenGL:
-			Window::SetTitle("Ainan - OpenGL (3.3) - " + m_Env->Name);
+			Window::SetTitle("Ainan - OpenGL (4.2) - " + m_Env->Name);
+			break;
+
+#ifdef PLATFORM_WINDOWS
+		case RendererType::D3D11:
+			Window::SetTitle("Ainan - DirectX 11 - " + m_Env->Name);
 			break;
 		}
+#endif // PLATFORM_WINDOWS
 	}
 
 	void Editor::StartFrame()

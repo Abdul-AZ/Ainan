@@ -1,7 +1,10 @@
-#version 330 core
+#version 420 core
 out vec4 FragColor;
 
-uniform vec4 u_Color;
+layout (std140, binding = 1) uniform ObjectColor
+{
+	uniform vec4 u_Color;
+};
 
 void main()
 {

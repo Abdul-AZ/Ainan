@@ -25,7 +25,6 @@ namespace Ainan {
 	private:
 		std::vector<glm::vec2> m_Vertices;
 
-		std::shared_ptr<VertexArray> VAO = nullptr;
 		std::shared_ptr<VertexBuffer> VBO = nullptr;
 
 		friend class ParticleCustomizer;

@@ -7,7 +7,7 @@ namespace Ainan {
 	//TODO use environment directory instead of default
 	ExportCamera::ExportCamera() :
 		m_ImageLocationBrowser(STARTING_BROWSER_DIRECTORY, "Save Image"), 
-		RealCamera(CameraMode::CentreIsBottomLeft)
+		RealCamera(CameraMode::CentreIsMidPoint)
 	{
 		memset(m_Edges, 0, sizeof(m_Edges));
 
@@ -25,10 +25,11 @@ namespace Ainan {
 
 	void ExportCamera::SetSize()
 	{
-		m_Edges[0] = m_ExportCameraPosition;                                                                                          //bottom left
-		m_Edges[1] = glm::vec2(m_ExportCameraPosition.x, m_ExportCameraPosition.y + m_ExportCameraSize.y);                            //top left
-		m_Edges[2] = glm::vec2(m_ExportCameraPosition.x + m_ExportCameraSize.x, m_ExportCameraPosition.y + m_ExportCameraSize.y);     //top right
-		m_Edges[3] = glm::vec2(m_ExportCameraPosition.x + m_ExportCameraSize.x, m_ExportCameraPosition.y);                            //bottom right
+		glm::vec2 size = glm::vec2(RealCamera.ZoomFactor * m_AspectRatio, RealCamera.ZoomFactor) / c_GlobalScaleFactor;
+		m_Edges[0] = m_ExportCameraPosition - (size / 2.0f); //bottom left
+		m_Edges[1] = m_ExportCameraPosition + glm::vec2(-size.x, size.y) / 2.0f; //top left
+		m_Edges[2] = m_ExportCameraPosition + (size / 2.0f);     //top right
+		m_Edges[3] = m_ExportCameraPosition + glm::vec2(size.x, -size.y) / 2.0f; //bottom right
 
 		std::array<glm::vec2, 8> vertices =
 		{
@@ -41,6 +42,7 @@ namespace Ainan {
 
 		RealCamera.Update(0.0f, Renderer::GetCurrentViewport());
 		glm::vec2 reversedPos = glm::vec2(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y);
+
 		RealCamera.SetPosition(reversedPos * c_GlobalScaleFactor);
 	}
 
@@ -68,27 +70,16 @@ namespace Ainan {
 				ImGui::Text("Size");
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(100);
-				if (ImGui::DragFloat2("##Size", &m_ExportCameraSize.x, 0.01f))
-					SetSize();
-
-				//clamp the size, so it is always positive
-				m_ExportCameraSize.x = std::clamp(m_ExportCameraSize.x, 0.0f, 100000.0f);
-				m_ExportCameraSize.y = std::clamp(m_ExportCameraSize.y, 0.0f, 100000.0f);
 
 				ImGui::TreePop();
 			}
 
 			if (ImGui::TreeNode("Image Saving:"))
 			{
-				ImGui::Text("Image Resolution");
-				ImGui::Text("Width");
-				ImGui::SameLine();
-				ImGui::SetCursorPosX(85);
-				ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.0f, 1.0f), std::to_string(static_cast<int>(m_ExportCameraSize.x * c_GlobalScaleFactor)).c_str());
-				ImGui::Text("Height");
-				ImGui::SameLine();
-				ImGui::SetCursorPosX(85);
-				ImGui::TextColored(ImVec4(0.0f, 0.8f, 0.0f, 1.0f), std::to_string(static_cast<int>(m_ExportCameraSize.y * c_GlobalScaleFactor)).c_str());
+				if (ImGui::DragFloat("Aspect Ratio", &m_AspectRatio, 0.001f, 0.0f, 1000.0f))
+					SetSize();
+				if (ImGui::DragFloat("Zoom Factor", &RealCamera.ZoomFactor, 1.0f, 0.0f, 5000.0f))
+					SetSize();
 
 				ImGui::TreePop();
 			}
@@ -188,7 +179,7 @@ namespace Ainan {
 
 				int scale = 250;
 				ImVec2 size = ImVec2(scale * m_ExportTargetImage->m_Width / m_ExportTargetImage->m_Height, scale);
-				ImGui::Image((void*)(uintptr_t)m_ExportTargetTexture->GetRendererID(), size);
+				ImGui::Image(m_ExportTargetTexture->GetTextureID(), size);
 			}
 
 			ImGui::End();
@@ -203,15 +194,12 @@ namespace Ainan {
 		SceneDescription desc;
 		desc.SceneCamera = RealCamera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
 		desc.Blur = env.BlurEnabled;
 		desc.BlurRadius = env.BlurRadius;
 		Renderer::BeginScene(desc);
 
-		m_RenderSurface.SetSize(m_ExportCameraSize * c_GlobalScaleFactor);
+		m_RenderSurface.SetSize(glm::ivec2(RealCamera.ZoomFactor * m_AspectRatio, RealCamera.ZoomFactor));
 		m_RenderSurface.SurfaceFrameBuffer->Bind();
-
-		Renderer::SetViewport({ 0, 0, (int)Window::FramebufferSize.x, (int)Window::FramebufferSize.y });
 
 		for (pEnvironmentObject& obj : env.Objects)
 		{
@@ -234,11 +222,12 @@ namespace Ainan {
 
 		delete m_ExportTargetImage;
 
-		m_ExportTargetImage = new Image(Image::FromFrameBuffer(m_RenderSurface, m_RenderSurface.GetSize()));
+		m_ExportTargetImage = new Image(m_RenderSurface.SurfaceFrameBuffer->ReadPixels());
 
-		m_ExportTargetTexture = Renderer::CreateTexture();
-		m_ExportTargetTexture->SetDefaultTextureSettings();
-		m_ExportTargetTexture->SetImage(*m_ExportTargetImage);
+		if(Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+			m_ExportTargetImage->FlipHorizontally();
+
+		m_ExportTargetTexture = Renderer::CreateTexture(*m_ExportTargetImage);
 
 		m_FinalizeExportWindowOpen = true;
 	}

@@ -2,25 +2,50 @@
 
 #include "Background.h"
 
+#include <numeric>
+
 namespace Ainan {
 
 	Background::Background()
 	{
-		VAO = Renderer::CreateVertexArray();
-		VAO->Bind();
+		auto vertices = Renderer::GetQuadVertices();
 
-		glm::vec2 vertices[] = { glm::vec2(-1.0f, -1.0f),
-								 glm::vec2(1.0f, -1.0f),
-								 glm::vec2(-1.0f, 1.0f),
+		VertexLayout layout(1);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		VBO = Renderer::CreateVertexBuffer(vertices.data(), vertices.size() * sizeof(glm::vec2), layout, Renderer::ShaderLibrary()["BackgroundShader"]);
 
-								 glm::vec2(1.0f, -1.0f),
-								 glm::vec2(1.0f, 1.0f),
-								 glm::vec2(-1.0f, 1.0f) };
+		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { {"u_Model", ShaderVariableType::Mat4} }, nullptr);
 
-		VBO = Renderer::CreateVertexBuffer(vertices, sizeof(vertices));
-		VBO->SetLayout({ ShaderVariableType::Vec2 });
+		VertexLayout uniformBufferLayout = 
+		{
+			{"g_BaseColor", ShaderVariableType::Vec3},
+			{"g_BaseLight", ShaderVariableType::Float},
+			{"g_Constant", ShaderVariableType::Float},
+			{"g_Linear", ShaderVariableType::Float},
+			{"g_Quadratic", ShaderVariableType::Float},
+			{"RadialLightPosition", ShaderVariableType::Vec2Array, MAX_NUM_RADIAL_LIGHTS},
+			{"RadialLightColor", ShaderVariableType::Vec3Array, MAX_NUM_RADIAL_LIGHTS},
+			{"RadialLightIntensity", ShaderVariableType::FloatArray, MAX_NUM_RADIAL_LIGHTS},
+			{"SpotLightPosition", ShaderVariableType::Vec2Array, MAX_NUM_SPOT_LIGHTS},
+			{"SpotLightColor", ShaderVariableType::Vec3Array, MAX_NUM_SPOT_LIGHTS},
+			{"SpotLightAngle", ShaderVariableType::FloatArray, MAX_NUM_SPOT_LIGHTS},
+			{"SpotLightInnerCutoff", ShaderVariableType::FloatArray, MAX_NUM_SPOT_LIGHTS},
+			{"SpotLightOuterCutoff", ShaderVariableType::FloatArray, MAX_NUM_SPOT_LIGHTS},
+			{"SpotLightIntensity", ShaderVariableType::FloatArray, MAX_NUM_SPOT_LIGHTS}
+		};
 
-		VAO->Unbind();
+		LightingUniformBuffer = Renderer::CreateUniformBuffer("LightingData", 2, uniformBufferLayout, nullptr);
+		LightDataPackingBufferSize = std::accumulate(uniformBufferLayout.begin(), uniformBufferLayout.end(), 0,
+			[](const uint32_t& a, const VertexLayoutPart& b)
+			{
+				return a + b.GetSize();
+			});
+		LightDataPackingBuffer = new uint8_t[LightDataPackingBufferSize]();
+	}
+
+	Background::~Background()
+	{
+		delete[] LightDataPackingBuffer;
 	}
 
 	void Background::SubmitLight(const RadialLight& light)
@@ -79,9 +104,7 @@ namespace Ainan {
 
 	void Background::Draw(Environment& env)
 	{
-		VAO->Unbind();
-		auto& shader = Renderer::ShaderLibrary["BackgroundShader"];
-		shader->Bind();
+		auto& shader = Renderer::ShaderLibrary()["BackgroundShader"];
 
 		//not used light spots
 		for (int i = m_RadialLightSubmissionCount; i < MAX_NUM_RADIAL_LIGHTS; i++)
@@ -89,34 +112,57 @@ namespace Ainan {
 
 		for (int i = m_SpotLightSubmissionCount; i < MAX_NUM_SPOT_LIGHTS; i++)
 			m_SpotLightIntensityBuffer[i] = 0.0f;
+
+		//zero buffer
+		memset(LightDataPackingBuffer, 0, LightDataPackingBufferSize);
+		//copy all data in the order of the layout
+		{
+			uint8_t* copyPtr = LightDataPackingBuffer;
+			//copy material data
+			memcpy(copyPtr, &env.BackgroundColor, sizeof(glm::vec3));
+			copyPtr += sizeof(glm::vec3);
+			memcpy(copyPtr, &env.BackgroundBaseLight, sizeof(float));
+			copyPtr += sizeof(float);
+			memcpy(copyPtr, &env.BackgroundConstant, sizeof(float));
+			copyPtr += sizeof(float);
+			memcpy(copyPtr, &env.BackgroundLinear, sizeof(float));
+			copyPtr += sizeof(float);
+			memcpy(copyPtr, &env.BackgroundQuadratic, sizeof(float));
+			copyPtr += sizeof(float);
+
+			//copy radial light data
+			memcpy(copyPtr, m_RadialLightPositionBuffer, sizeof(glm::vec2) * m_RadialLightSubmissionCount);
+			copyPtr += sizeof(glm::vec2) * MAX_NUM_RADIAL_LIGHTS;
+			memcpy(copyPtr, m_RadialLightColorBuffer, sizeof(glm::vec3) * m_RadialLightSubmissionCount);
+			copyPtr += sizeof(glm::vec3) * MAX_NUM_RADIAL_LIGHTS;
+			memcpy(copyPtr, m_RadialLightIntensityBuffer, sizeof(float) * m_RadialLightSubmissionCount);
+			copyPtr += sizeof(float) * MAX_NUM_RADIAL_LIGHTS;
+
+			//copy spot light data
+			memcpy(copyPtr, m_SpotLightPositionBuffer, sizeof(glm::vec2) * m_SpotLightSubmissionCount);
+			copyPtr += sizeof(glm::vec2) * MAX_NUM_SPOT_LIGHTS;
+			memcpy(copyPtr, m_SpotLightColorBuffer, sizeof(glm::vec3) * m_SpotLightSubmissionCount);
+			copyPtr += sizeof(glm::vec3) * MAX_NUM_SPOT_LIGHTS;
+			memcpy(copyPtr, m_SpotLightAngleBuffer, sizeof(float) * m_SpotLightSubmissionCount);
+			copyPtr += sizeof(float) * MAX_NUM_SPOT_LIGHTS;
+			memcpy(copyPtr, m_SpotLightInnerCutoffBuffer, sizeof(float) * m_SpotLightSubmissionCount);
+			copyPtr += sizeof(float) * MAX_NUM_SPOT_LIGHTS;
+			memcpy(copyPtr, m_SpotLightOuterCutoffBuffer, sizeof(float) * m_SpotLightSubmissionCount);
+			copyPtr += sizeof(float) * MAX_NUM_SPOT_LIGHTS;
+			memcpy(copyPtr, m_SpotLightIntensityBuffer, sizeof(float) * m_SpotLightSubmissionCount);
+			copyPtr += sizeof(float) * MAX_NUM_SPOT_LIGHTS;
+		}
 		
-		shader->SetUniformVec3("u_BaseColor", env.BackgroundColor);
-		shader->SetUniform1f("u_BaseLight", env.BackgroundBaseLight);
-		shader->SetUniform1f("u_Constant", env.BackgroundConstant);
-		shader->SetUniform1f("u_Linear", env.BackgroundLinear);
-		shader->SetUniform1f("u_Quadratic", env.BackgroundQuadratic);
-
-		//radial light data
-		shader->SetUniformVec2s("u_RadialLights.Position", m_RadialLightPositionBuffer, MAX_NUM_RADIAL_LIGHTS);
-		shader->SetUniformVec3s("u_RadialLights.Color", m_RadialLightColorBuffer, MAX_NUM_RADIAL_LIGHTS);
-		shader->SetUniform1fs("u_RadialLights.Intensity", m_RadialLightIntensityBuffer, MAX_NUM_RADIAL_LIGHTS);
-
-		//spot light data
-		shader->SetUniformVec2s("u_SpotLights.Position", m_SpotLightPositionBuffer, MAX_NUM_SPOT_LIGHTS);
-		shader->SetUniformVec3s("u_SpotLights.Color", m_SpotLightColorBuffer, MAX_NUM_SPOT_LIGHTS);
-		shader->SetUniform1fs("u_SpotLights.Angle", m_SpotLightAngleBuffer, MAX_NUM_SPOT_LIGHTS);
-		shader->SetUniform1fs("u_SpotLights.InnerCutoff", m_SpotLightInnerCutoffBuffer, MAX_NUM_SPOT_LIGHTS);
-		shader->SetUniform1fs("u_SpotLights.OuterCutoff", m_SpotLightOuterCutoffBuffer, MAX_NUM_SPOT_LIGHTS);
-		shader->SetUniform1fs("u_SpotLights.Intensity", m_SpotLightIntensityBuffer, MAX_NUM_SPOT_LIGHTS);
-
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::scale(model, glm::vec3(5000.0f));
-		shader->SetUniformMat4("u_Model", model);
 
-		Renderer::Draw(*VAO, *shader, Primitive::Triangles, 6);
+		shader->BindUniformBuffer(TransformUniformBuffer, 1, RenderingStage::VertexShader);
+		TransformUniformBuffer->UpdateData(&model);
 
-		VAO->Unbind();
-		shader->Unbind();
+		shader->BindUniformBuffer(LightingUniformBuffer, 2, RenderingStage::FragmentShader);
+		LightingUniformBuffer->UpdateData(LightDataPackingBuffer);
+
+		Renderer::Draw(*VBO, *shader, Primitive::Triangles, 6);
 
 		m_RadialLightSubmissionCount = 0;
 		m_SpotLightSubmissionCount = 0;

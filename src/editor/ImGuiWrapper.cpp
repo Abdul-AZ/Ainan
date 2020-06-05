@@ -3,6 +3,16 @@
 #include "ImGuiWrapper.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+//TEMPORARY
+#ifdef PLATFORM_WINDOWS
+#include "imgui_impl_dx11.cpp"
+#include "renderer/d3d11/D3D11RendererAPI.h"
+#include "imgui_impl_glfw.cpp"
+#endif // PLATFORM_WINDOWS
+
+
+
 #ifdef _WIN32
 #undef APIENTRY
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -84,6 +94,23 @@ namespace Ainan {
 
 	void ImGuiWrapper::Init()
 	{
+		//TEMPORARY
+		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
+		{
+			ImGui::CreateContext();
+
+
+			ImGuiIO& io = ImGui::GetIO(); (void)io;
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;           // Enable viewports
+
+			auto context = (D3D11::D3D11RendererContext*)Renderer::Rdata->CurrentActiveAPI->GetContext();
+			auto x = ImGui_ImplDX11_Init(context->Device, context->DeviceContext);
+			ImGui_ImplGlfw_Init(Window::Ptr, false, GlfwClientApi_Unknown);
+
+			return;
+		}
+		
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGui::StyleColorsDark();
@@ -97,6 +124,14 @@ namespace Ainan {
 
 	void ImGuiWrapper::Terminate()
 	{
+		//TEMPORARY
+		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
+		{
+			ImGui_ImplDX11_Shutdown();
+
+			return;
+		}
+
 		ImGui::DestroyPlatformWindows();
 		DestroyDeviceObjects();
 		Glfw_Shutdown();
@@ -105,6 +140,16 @@ namespace Ainan {
 
 	void ImGuiWrapper::NewFrame()
 	{
+		//TEMPORARY
+		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
+		{
+			ImGui_ImplDX11_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
+			return;
+		}
+
 		if (!FontTexture)
 			CreateDeviceObjects();
 
@@ -136,6 +181,23 @@ namespace Ainan {
 
 	void ImGuiWrapper::Render()
 	{
+		//TEMPORARY
+		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::D3D11)
+		{
+			ImGui::Render();
+			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+			// Update and Render additional Platform Windows
+			ImGuiIO& io = ImGui::GetIO(); (void)io;
+			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+			}
+
+			return;
+		}
+
 		ImGui::Render();
 		Ainan::RenderDrawData(ImGui::GetDrawData());
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -773,7 +835,7 @@ namespace Ainan {
 		glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
 
 		// Parse GLSL version string
-		int glsl_version = 130;
+		int glsl_version = 420;
 		assert(sscanf(GlslVersionString, "#version %d", &glsl_version));
 
 		const GLchar* vertex_shader_glsl_120 = 
@@ -886,7 +948,7 @@ namespace Ainan {
 			R"(
 			in vec2 Frag_UV;
 			in vec4 Frag_Color;
-			uniform sampler2D Texture;
+			layout(binding = 0) uniform sampler2D Texture;
 			layout (location = 0) out vec4 Out_Color;
 
 			void main()
@@ -918,8 +980,8 @@ namespace Ainan {
 			fragment_shader = fragment_shader_glsl_130;
 		}
 
-		std::string vertSrc = (std::string)GlslVersionString + (std::string)vertex_shader;
-		std::string fragSrc = (std::string)GlslVersionString + (std::string)fragment_shader;
+		std::string vertSrc = (std::string)"#version 420 core" + (std::string)vertex_shader;
+		std::string fragSrc = (std::string)"#version 420 core" + (std::string)fragment_shader;
 
 		ImGuiShader = Renderer::CreateShaderProgramRaw(vertSrc, fragSrc);
 
@@ -928,7 +990,8 @@ namespace Ainan {
 		AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->GetRendererID(), "Color");
 
 		// Create buffers
-		ImGuiVertexBuffer = Renderer::CreateVertexBuffer(nullptr, 0);
+		VertexLayout layout;
+		ImGuiVertexBuffer = Renderer::CreateVertexBuffer(nullptr, 0, layout, ImGuiShader);
 		ImGuiIndexBuffer = Renderer::CreateIndexBuffer(nullptr, 0);
 
 		Ainan::ImGui_ImplOpenGL3_CreateFontsTexture();
@@ -1034,14 +1097,14 @@ namespace Ainan {
 			{ (R + L) / (L - R),  (T + B) / (B - T),  0.0f,   1.0f },
 		};
 
-		ImGuiShader->Bind();
-		ImGuiShader->SetUniform1i("Texture", 0);
-		ImGuiShader->SetUniformMat4("ProjMtx", orthoProjection);
+		glUseProgram(ImGuiShader->GetRendererID());
+		//ImGuiShader->SetUniformMat4("ProjMtx", orthoProjection);
+		glUniformMatrix4fv(glGetUniformLocation(ImGuiShader->GetRendererID(), "ProjMtx"), 1, GL_FALSE, (GLfloat*)&orthoProjection);
 #ifdef GL_SAMPLER_BINDING
 		glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 #endif
-
-		std::shared_ptr<VertexArray> tempVA = Renderer::CreateVertexArray();
+		VertexLayout layout;
+		std::shared_ptr<VertexBuffer> tempVA = Renderer::CreateVertexBuffer(nullptr,0, layout,ImGuiShader);
 		tempVA->Bind();
 
 		// Bind vertex/index buffers and setup attributes for ImDrawVert

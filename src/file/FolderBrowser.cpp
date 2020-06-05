@@ -6,19 +6,19 @@ namespace Ainan {
 	namespace fs = std::filesystem;
 
 	FolderBrowser::FolderBrowser(const std::string & startingFolder, const std::string& windowName) :
-		m_CurrentFolder(startingFolder),
+		SelectedFolder(startingFolder),
 		m_WindowName(windowName),
 		m_InputFolder(startingFolder)
 	{}
 
-	FolderBrowser::FolderBrowser()
+	FolderBrowser::FolderBrowser() : 
+		SelectedFolder(STARTING_BROWSER_DIRECTORY)
 	{
-		m_CurrentFolder = STARTING_BROWSER_DIRECTORY;
 		m_WindowName = "Folder Browser";
-		m_InputFolder = m_CurrentFolder;
+		m_InputFolder = STARTING_BROWSER_DIRECTORY;
 	}
 
-	void FolderBrowser::DisplayGUI(std::function<void(const std::string&)> onSelect)
+	void FolderBrowser::DisplayGUI(std::function<void(const fs::path&)> onSelect)
 	{
 		if (!WindowOpen)
 			return;
@@ -31,42 +31,49 @@ namespace Ainan {
 
 		ImGui::Text("Current Directory :");
 		auto flags = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;
+
 		if (ImGui::InputText("##empty", &m_InputFolder, flags)) {
 			if (fs::exists(m_InputFolder))
-				m_CurrentFolder = m_InputFolder;
+				SelectedFolder = m_InputFolder;
 		}
 
 		ImGui::PushItemWidth(-1);
 		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetWindowSize().y - 100))) {
 
 			//check if we can go back
-			if (std::count(m_CurrentFolder.begin(), m_CurrentFolder.end(), '\\') > 0) {
+			if (SelectedFolder.parent_path() != SelectedFolder) {
 				//back button
 				if (ImGui::Button("..")) {
-					auto lastBackslashLoc = m_CurrentFolder.find_last_of('\\');
-					if (std::count(m_CurrentFolder.begin(), m_CurrentFolder.end(), '\\') == 1)
-						m_CurrentFolder.erase(lastBackslashLoc + 1, m_CurrentFolder.size() - lastBackslashLoc + 1);
-					else
-						m_CurrentFolder.erase(lastBackslashLoc, m_CurrentFolder.size() - lastBackslashLoc);
-					m_InputFolder = m_CurrentFolder;
+					SelectedFolder = SelectedFolder.parent_path();
+					m_InputFolder = SelectedFolder.u8string();
 				}
 			}
 
-			for (const auto & entry : fs::directory_iterator(m_CurrentFolder)) {
-				if (entry.status().type() == fs::file_type::directory && entry.path().filename() != "System Volume Information" && entry.path().filename() != "$RECYCLE.BIN") {
-					if (ImGui::Button(entry.path().filename().u8string().c_str())) {
-						m_CurrentFolder += "\\" + entry.path().filename().u8string();
-						m_InputFolder = m_CurrentFolder;
-					}
+			//for (const auto & entry : fs::directory_iterator(m_CurrentFolder)) {
+			//	if (entry.status().type() == fs::file_type::directory && entry.path().filename() != "System Volume Information" && entry.path().filename() != "$RECYCLE.BIN") {
+			//		if (ImGui::Button(entry.path().filename().u8string().c_str())) {
+			//			m_CurrentFolder += "\\" + entry.path().filename().u8string();
+			//			m_InputFolder = m_CurrentFolder;
+			//		}
+			//	}
+			//}
+
+			for (const auto& entry : fs::directory_iterator(SelectedFolder)) {
+				if (entry.status().type() == fs::file_type::directory) {
+
+					bool is_selected = (SelectedFolder == entry.path());
+					if (ImGui::Selectable(entry.path().filename().u8string().c_str(), &is_selected))
+						SelectedFolder = entry.path();
 				}
 			}
+
 			ImGui::ListBoxFooter();
 		}
 
 		if (ImGui::Button("Select"))
 		{
 			if (onSelect != nullptr)
-				onSelect(m_CurrentFolder);
+				onSelect(SelectedFolder);
 			WindowOpen = false;
 		}
 

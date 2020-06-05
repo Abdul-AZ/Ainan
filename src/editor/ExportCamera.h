@@ -7,6 +7,8 @@
 #include "renderer/Renderer.h"
 #include "environment/ParticleSystem.h"
 #include "environment/EnvironmentObjectInterface.h"
+#include "renderer/RenderSurface.h"
+#include "renderer/Image.h"
 
 namespace Ainan {
 
@@ -21,7 +23,7 @@ namespace Ainan {
 		bool SettingsWindowOpen = true;
 
 		glm::vec2 m_ExportCameraPosition = { 0.0f,0.0f };
-		glm::vec2 m_ExportCameraSize = { 1.0f, 1.0f * 9.0f / 16.0f };
+		float m_AspectRatio = 16.0f / 9.0f;
 
 		Camera RealCamera;
 		RenderSurface m_RenderSurface;

@@ -6,13 +6,9 @@ namespace Ainan {
 
 	Line::Line()
 	{
-		VAO = Renderer::CreateVertexArray();
-		VAO->Bind();
-
-		VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2);
-		VBO->SetLayout({ ShaderVariableType::Vec2 });
-
-		VAO->Unbind();
+		VertexLayout layout(1);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibrary()["LineShader"], true);
 	}
 
 	void Line::SetVertices(const std::vector<glm::vec2> vertices)
@@ -22,12 +18,9 @@ namespace Ainan {
 		{
 			VBO.reset();
 
-			VAO->Bind();
-
-			VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * vertices.size());
-			VBO->SetLayout({ ShaderVariableType::Vec2 });
-
-			VAO->Unbind();
+			VertexLayout layout(1);
+			layout[0] = { "aPos", ShaderVariableType::Vec2 };
+			VBO = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * vertices.size(), layout, Renderer::ShaderLibrary()["LineShader"], true);
 		}
 		m_Vertices = vertices;
 
@@ -40,16 +33,9 @@ namespace Ainan {
 	{
 		VBO->UpdateData(0, sizeof(glm::vec2) * m_Vertices.size(), m_Vertices.data());
 
-		auto& shader = Renderer::ShaderLibrary["LineShader"];
+		auto& shader = Renderer::ShaderLibrary()["LineShader"];
 
-		shader->SetUniformVec4("u_Color", Color);
-		shader->Bind();
-		VAO->Bind();
-
-		Renderer::Draw(*VAO, *shader, Primitive::Lines, m_Vertices.size());
-
-		VAO->Unbind();
-		shader->Unbind();
+		Renderer::Draw(*VBO, *shader, Primitive::Lines, m_Vertices.size());
 	}
 
 	float Line::GetSlope(size_t startVertex, size_t endVertex)

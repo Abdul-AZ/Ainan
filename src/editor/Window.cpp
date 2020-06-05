@@ -6,6 +6,13 @@
 
 namespace Ainan {
 
+	class Renderer
+	{
+	public:
+		static void SetViewport(const Rectangle& viewport);
+		static void RecreateSwapchain(const glm::vec2& newSwapchainSize);
+	};
+
 	bool Window::ShouldClose = false;
 	Rectangle Window::WindowViewport = { 0 };
 	bool Window::WindowSizeChangedSinceLastFrame = false;
@@ -20,7 +27,14 @@ namespace Ainan {
 		Window::FramebufferSize = { width, height };
 		Window::WindowViewport.Width = width;
 		Window::WindowViewport.Height = height;
-		glViewport(0, 0, width, height);
+
+		Rectangle viewport{};
+		viewport.X = 0;
+		viewport.Y = 0;
+		viewport.Width = width;
+		viewport.Height = height;
+		Renderer::RecreateSwapchain(Window::FramebufferSize);
+		Renderer::SetViewport(viewport);
 	}
 
 	void window_size_callback(GLFWwindow* window, int width, int height)
@@ -40,7 +54,7 @@ namespace Ainan {
 		std::cout << message << std::endl;
 	}
 
-	void Window::Init()
+	void Window::Init(RendererType api)
 	{
 #ifdef DEBUG
 		glfwSetErrorCallback(error_callback);
@@ -48,13 +62,20 @@ namespace Ainan {
 
 		glfwInit();
 
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		if (api == RendererType::OpenGL)
+		{
+			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef DEBUG
-		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+			glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif // !NDEBUG
+		}
+		else
+		{
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		}
 
 		Ptr = glfwCreateWindow(500, 500 * 9 / 16, "Ainan", nullptr, nullptr);
 		int fbWidth = 0;
@@ -63,20 +84,16 @@ namespace Ainan {
 		FramebufferSize = { fbWidth, fbHeight };
 		CenterWindow();
 
-		glfwMakeContextCurrent(Ptr);
-
 		glfwSetWindowSizeCallback(Ptr, window_size_callback);
 		glfwSetFramebufferSizeCallback(Ptr, framebuffer_size_callback);
 		glfwSetWindowPosCallback(Ptr, pos_callback);
 
-		gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		glfwSwapInterval(1);
-	}
-
-	void Window::Present()
-	{
-		glfwSwapBuffers(Ptr);
-		WindowSizeChangedSinceLastFrame = false;
+		if (api == RendererType::OpenGL) 
+		{
+			glfwMakeContextCurrent(Ptr);
+			gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+			glfwSwapInterval(1);
+		}
 	}
 
 	void Window::HandleWindowEvents()

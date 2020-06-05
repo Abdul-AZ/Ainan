@@ -4,6 +4,7 @@
 #include "file/FileBrowser.h"
 #include "environment/ExposeToJson.h"
 #include "file/AssetManager.h"
+#include "renderer/Image.h"
 
 namespace Ainan {
 

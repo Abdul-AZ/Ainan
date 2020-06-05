@@ -1,10 +1,13 @@
-#version 330 core
+#version 420 core
 layout(location = 0) in vec2 aPos;
 layout(location = 1) in vec4 aColor;
 layout(location = 2) in float aTexture;
 layout(location = 3) in vec2 aTexCoords;
 
-uniform mat4 u_ViewProjection;
+layout (std140, binding = 0) uniform FrameData
+{
+	mat4 u_ViewProjection;
+};
 
 out vec2 TextureCoordinates;
 out vec4 Color;

@@ -15,8 +15,8 @@ namespace Ainan {
 
 		if (!UseDefaultTexture)
 		{
-			ParticleTexture = Renderer::CreateTexture();
-			ParticleTexture->SetImage(Image::LoadFromFile(customizer.m_TexturePath));
+			ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(customizer.m_TexturePath));
+			//ParticleTexture->SetImage(Image::LoadFromFile(customizer.m_TexturePath));
 		}
 	}
 
@@ -47,8 +47,8 @@ namespace Ainan {
 					{
 						if (textureFileName != "Default") 
 						{
-							ParticleTexture = Renderer::CreateTexture();
-							ParticleTexture->SetImage(Image::LoadFromFile(tex));
+							ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(tex));
+							//ParticleTexture->SetImage(Image::LoadFromFile(tex));
 							UseDefaultTexture = false;
 							std::string absolutePathToEnv = AssetManager::s_EnvironmentDirectory.u8string();
 							m_TexturePath = tex.substr(absolutePathToEnv.size(), tex.size() - absolutePathToEnv.size());
@@ -62,7 +62,7 @@ namespace Ainan {
 			if (!UseDefaultTexture) {
 				ImGui::Text("Current Selected Texture");
 				if(ParticleTexture)
-					ImGui::Image((void*)(uintptr_t)ParticleTexture->GetRendererID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
+					ImGui::Image(ParticleTexture->GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 			}
 
 			ImGui::TreePop();

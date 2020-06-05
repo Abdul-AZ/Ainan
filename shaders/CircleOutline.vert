@@ -1,9 +1,16 @@
-#version 330 core
+#version 420 core
 
 layout(location = 0) in vec2 aPos;
 
-uniform mat4 u_ViewProjection;
-uniform mat4 u_Model;
+layout (std140, binding = 0) uniform FrameData
+{
+	mat4 u_ViewProjection;
+};
+
+layout (std140, binding = 1) uniform ObjectTransform
+{
+	uniform mat4 u_Model;
+};
 
 void main()
 {
