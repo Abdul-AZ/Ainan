@@ -51,7 +51,6 @@ namespace Ainan {
 			ASSERT_D3D_CALL(Context->Device->CreateVertexShader(VertexByteCode, VertexByteCodeSize, 0, &VertexShader));
 			ASSERT_D3D_CALL(Context->Device->CreatePixelShader(fragmentByteCode, fragmentByteCodeSize, 0, &FragmentShader));
 
-
 			delete[] fragmentByteCode;
 		}
 
@@ -60,11 +59,6 @@ namespace Ainan {
 			delete[] VertexByteCode;
 			VertexShader->Release();
 			FragmentShader->Release();
-		}
-
-		int D3D11ShaderProgram::GetUniformLocation(const char* name)
-		{
-			return 0;
 		}
 
 		int D3D11ShaderProgram::GetRendererID() const

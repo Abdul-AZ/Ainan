@@ -9,6 +9,7 @@ namespace Ainan {
 	class FrameBuffer
 	{
 	public:
+		virtual ~FrameBuffer() {};
 		//we take a pointer instead of a refrence because sometimes we need to the render to the default buffer (by passing nullptr)
 		//this makes us avoid having to create a buffer for bliting the default buffer
 		//basically this function copies the buffer to another buffer

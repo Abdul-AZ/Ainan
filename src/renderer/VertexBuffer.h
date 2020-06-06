@@ -87,7 +87,6 @@ namespace Ainan {
 		//offset is the start of the memory location you want to update
 		virtual void UpdateData(const int& offset, const int& size, void* data) = 0;
 
-		virtual unsigned int GetRendererID() = 0;
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 	};

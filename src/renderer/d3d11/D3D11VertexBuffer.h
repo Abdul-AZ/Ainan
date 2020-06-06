@@ -19,7 +19,6 @@ namespace Ainan {
 
 			// Inherited via VertexBuffer
 			virtual void UpdateData(const int& offset, const int& size, void* data) override;
-			virtual unsigned int GetRendererID() override;
 			virtual void Bind() const override;
 			virtual void Unbind() const override;
 

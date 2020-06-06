@@ -7,8 +7,7 @@ namespace Ainan {
 	public:
 		virtual ~IndexBuffer() {};
 
-		virtual unsigned int GetRendererID() = 0;
-		virtual int GetCount() const = 0;
+		virtual uint32_t GetCount() const = 0;
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 	};

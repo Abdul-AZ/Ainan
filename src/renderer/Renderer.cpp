@@ -208,7 +208,7 @@ namespace Ainan {
 		Rdata->CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
 		Rdata->CurrentNumberOfDrawCalls = 0;
 
-		Rdata->CurrentSceneDescription.SceneDrawTarget->Bind();
+		(*Rdata->CurrentSceneDescription.SceneDrawTarget)->Bind();
 		ClearScreen();
 
 		//update the per-frame uniform buffer
@@ -253,7 +253,7 @@ namespace Ainan {
 
 		if (Rdata->CurrentSceneDescription.Blur && Rdata->m_CurrentBlendMode != RenderingBlendMode::Screen)
 		{
-			Blur(Rdata->CurrentSceneDescription.SceneDrawTarget, Rdata->CurrentSceneDescription.BlurRadius);
+			Blur(*Rdata->CurrentSceneDescription.SceneDrawTarget, Rdata->CurrentSceneDescription.BlurRadius);
 		}
 
 		SetRenderTargetApplicationWindow();
@@ -452,6 +452,7 @@ namespace Ainan {
 		Rdata->CurrentActiveAPI->Draw(shader, primitive, indexBuffer);
 
 		vertexBuffer.Unbind();
+		indexBuffer.Unbind();
 
 		Rdata->CurrentNumberOfDrawCalls++;
 	}

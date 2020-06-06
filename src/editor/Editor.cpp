@@ -411,8 +411,7 @@ namespace Ainan
 	{
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
-		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -570,8 +569,7 @@ namespace Ainan
 	{
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
-		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -712,8 +710,7 @@ namespace Ainan
 	{
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
-		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -854,8 +851,7 @@ namespace Ainan
 	{
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
-		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
-		//desc.SceneDrawTargetTexture = m_RenderSurface.m_Texture;
+		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);

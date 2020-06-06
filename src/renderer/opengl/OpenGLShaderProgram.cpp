@@ -75,15 +75,6 @@ namespace Ainan {
 			glDeleteProgram(m_RendererID);
 		}
 
-		int OpenGLShaderProgram::GetUniformLocation(const char* name)
-		{
-			if (m_UniformLocationMap.find(name) != m_UniformLocationMap.end())
-				return m_UniformLocationMap[name];
-
-			m_UniformLocationMap[name] = glGetUniformLocation(m_RendererID, name);
-			return m_UniformLocationMap[name];
-		}
-
 		int OpenGLShaderProgram::GetRendererID() const
 		{
 			return m_RendererID;

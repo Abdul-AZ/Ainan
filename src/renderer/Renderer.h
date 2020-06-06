@@ -25,7 +25,7 @@ namespace Ainan {
 	struct SceneDescription
 	{
 		Camera SceneCamera = {};								   //Required
-		std::shared_ptr<FrameBuffer> SceneDrawTarget = nullptr;    //Required
+		std::shared_ptr<FrameBuffer>* SceneDrawTarget = nullptr;    //Required
 		bool Blur = false;										   //Required
 		float BlurRadius = 0.0f;								   //Required if Blur == true
 	};

@@ -34,16 +34,6 @@ namespace Ainan {
 			Buffer->Release();
 		}
 
-		unsigned int D3D11IndexBuffer::GetRendererID()
-		{
-			return 0;
-		}
-
-		int D3D11IndexBuffer::GetCount() const
-		{
-			return IndexCount;
-		}
-
 		void D3D11IndexBuffer::Bind() const
 		{
 			Context->DeviceContext->IASetIndexBuffer(Buffer, DXGI_FORMAT_R32_UINT, 0);

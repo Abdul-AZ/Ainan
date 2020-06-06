@@ -14,8 +14,7 @@ namespace Ainan {
 			virtual ~D3D11IndexBuffer();
 
 			// Inherited via IndexBuffer
-			virtual unsigned int GetRendererID() override;
-			virtual int GetCount() const override;
+			virtual uint32_t GetCount() const override { return IndexCount; };
 			virtual void Bind() const override;
 			virtual void Unbind() const override;
 

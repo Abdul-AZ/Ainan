@@ -104,12 +104,6 @@ namespace Ainan {
 			Context->DeviceContext->Unmap(Buffer, 0);
 		}
 
-		unsigned int D3D11VertexBuffer::GetRendererID()
-		{
-			//TODO
-			return 0;
-		}
-
 		void D3D11VertexBuffer::Bind() const
 		{
 			uint32_t offset = 0;

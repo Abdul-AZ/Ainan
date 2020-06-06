@@ -16,14 +16,10 @@ namespace Ainan {
 			virtual void BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage) override;
 			virtual void BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage) override;
 
-			int GetUniformLocation(const char* name) override;
 			virtual int GetRendererID() const override;
 
 		public:
 			unsigned int m_RendererID;
-
-			//this is to avoid getting uniform location repeatedly which is not very performant
-			std::unordered_map<std::string, int> m_UniformLocationMap;
 		};
 	}
 }
