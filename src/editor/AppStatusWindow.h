@@ -7,7 +7,7 @@ namespace Ainan {
 	class AppStatusWindow
 	{
 	public:
-		void DisplayGUI(ImGuiID& viewportDockID);
+		void DisplayGUI();
 		void Update(float deltaTime);
 
 		void SetText(const std::string& text, float time = 1.0f);

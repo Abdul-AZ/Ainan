@@ -1,31 +1,47 @@
 #include <pch.h>
 
 #include "ViewportWindow.h"
+#include "renderer/Renderer.h"
 
 namespace Ainan {
 
-	void ViewportWindow::DisplayGUI()
+	void ViewportWindow::DisplayGUI(std::shared_ptr<FrameBuffer>& fb)
 	{
 		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 10.0f);
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, { 0.0f,0.0f,0.0f,0.0f });
-		ImGui::Begin("Viewport", nullptr , ImGuiWindowFlags_NoBackground);
-		ImGui::PopStyleColor();
-		ImGui::PopStyleVar();
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+		ImGui::Begin("Viewport", nullptr, 0);
 
-		RenderViewport.X = ImGui::GetWindowPos().x;
+		ImGui::DockBuilderGetNode(ImGui::GetWindowDockID())->LocalFlags &= ~ImGuiDockNodeFlags_NoTabBar;
 
-		RenderViewport.Y = Window::FramebufferSize.y - (ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMax().y + ImGui::GetFrameHeightWithSpacing());
+		RenderViewport.Width = ImGui::GetWindowContentRegionMax().x;
+		RenderViewport.Height = ImGui::GetWindowContentRegionMax().y - ImGui::GetFrameHeight();
 
-		RenderViewport.Width = ImGui::GetWindowSize().x;
-		RenderViewport.Height = ImGui::GetWindowSize().y;
+		RenderViewport.X = 0;
+		RenderViewport.Y = 0;
 
-		RenderViewport.X -= Window::Position.x;
-		RenderViewport.Y += Window::Position.y; //negative because y axis is inverted in screen coordinates
+		ImVec2 uv0;
+		ImVec2 uv1;
+
+		auto data = Renderer::Rdata;
+
+		//flip horizontally if we are in OpenGL
+		if (data->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+		{
+			uv0 = ImVec2(0, 1);
+			uv1 = ImVec2(1, 0);
+		}
+		else
+		{
+			uv0 = ImVec2(0, 0);
+			uv1 = ImVec2(1, 1);
+		}
+
+		ImGui::Image(fb->GetTextureID(), ImVec2(RenderViewport.Width, RenderViewport.Height), uv0, uv1);
 
 		IsFocused = ImGui::IsWindowFocused();
 		ImGui::End();
+		ImGui::PopStyleVar();
 	}
 
 }

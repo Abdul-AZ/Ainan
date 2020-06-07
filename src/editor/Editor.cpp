@@ -217,34 +217,34 @@ namespace Ainan
 		};
 
 		ImGuiWrapper::NewFrame();
+		ImGuiWrapper::BeginGlobalDocking(false);
 
-		ImGui::SetNextWindowPos({ 0,0 });
-		ImGui::SetNextWindowSize({ (float)Window::FramebufferSize.x , Window::FramebufferSize.y });
+		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
+		ImGui::SetNextWindowDockID(ImGui::GetID("GlobalDockSpace"));
+		ImGui::Begin("Start Menu", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoNavFocus);
 
-		ImGui::SetNextWindowDockID(ImGui::DockSpaceOverViewport(), ImGuiCond_::ImGuiCond_Always);
-		ImGui::Begin("Start Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
+		ImGui::DockBuilderGetNode(ImGui::GetWindowDockID())->LocalFlags |= ImGuiDockNodeFlags_NoTabBar;
 
-		ImGui::SetWindowSize(ImVec2(Window::Size.x, Window::FramebufferSize.y));
+		const ImVec2 buttonSize = ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT);
+		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)buttonSize.x / 2);
 
-		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
-
-		if (ImGui::Button("Create New Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		if (ImGui::Button("Create New Environment", buttonSize))
 		{
 			m_State = State_CreateEnv;
 			Window::SetSize({ WINDOW_SIZE_ON_CREATE_ENVIRONMENT_X, WINDOW_SIZE_ON_CREATE_ENVIRONMENT_Y });
 			Window::CenterWindow();
 		}
 
-		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
+		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)buttonSize.x / 2);
 
-		if (ImGui::Button("Load Environment", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		if (ImGui::Button("Load Environment", buttonSize))
 		{
 			m_LoadEnvironmentBrowser.OpenWindow();
 		}
 
-		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)START_MENU_BUTTON_WIDTH / 2);
+		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)buttonSize.x / 2);
 
-		if (ImGui::Button("Exit App", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		if (ImGui::Button("Exit App", buttonSize))
 		{
 			Window::SetShouldClose();
 		}
@@ -267,6 +267,7 @@ namespace Ainan
 				}
 			});
 
+		ImGuiWrapper::EndGlobalDocking();
 		ImGuiWrapper::Render();
 	}
 
@@ -466,32 +467,23 @@ namespace Ainan
 		}
 
 		Renderer::EndScene();
-		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
+		m_RenderSurface.SurfaceFrameBuffer->Bind();
 		if (m_ShowGrid)
 			m_Grid.Draw();
 		m_ExportCamera.DrawOutline();
+		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
 		ImGuiWrapper::NewFrame();
+		ImGuiWrapper::BeginGlobalDocking(true);
 
 		DisplayMainMenuBarGUI();
-
-		float menuBarHeight = ImGui::GetFrameHeightWithSpacing();
-		ImGuiViewport viewport;
-		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y - menuBarHeight);
-		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
-
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
-		ImGui::PopStyleColor();
-
-		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
 
 		AssetManager::DisplayGUI();
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
 		DisplayProfilerGUI();
-		m_AppStatusWindow.DisplayGUI(viewportDockID);
+		m_AppStatusWindow.DisplayGUI();
 
 		//Settings window
 		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
@@ -559,9 +551,10 @@ namespace Ainan
 			obj->DisplayGUI();
 
 		InputManager::DisplayGUI();
-		m_ViewportWindow.DisplayGUI();
-		ImGui::PopStyleColor();
+		
+		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
 
+		ImGuiWrapper::EndGlobalDocking();
 		ImGuiWrapper::Render();
 	}
 
@@ -608,23 +601,13 @@ namespace Ainan
 		//draw this after the scene is drawn so that post processing effects do not apply to it
 		m_ExportCamera.DrawOutline();
 
-		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
-
 		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
 		ImGuiWrapper::NewFrame();
+		ImGuiWrapper::BeginGlobalDocking(true);
 
 		DisplayMainMenuBarGUI();
-
-		float menuBarHeight = ImGui::GetFrameHeightWithSpacing();
-		ImGuiViewport viewport;
-		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y - menuBarHeight);
-		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
-
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
-		ImGui::PopStyleColor();
 
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
 
@@ -632,7 +615,7 @@ namespace Ainan
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
 		DisplayProfilerGUI();
-		m_AppStatusWindow.DisplayGUI(viewportDockID);
+		m_AppStatusWindow.DisplayGUI();
 
 		//Settings window
 		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
@@ -700,9 +683,10 @@ namespace Ainan
 			obj->DisplayGUI();
 
 		InputManager::DisplayGUI();
-		m_ViewportWindow.DisplayGUI();
+		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
 		ImGui::PopStyleColor();
 
+		ImGuiWrapper::EndGlobalDocking();
 		ImGuiWrapper::Render();
 	}
 
@@ -749,31 +733,19 @@ namespace Ainan
 		//draw this after the scene is drawn so that post processing effects do not apply to it
 		m_ExportCamera.DrawOutline();
 
-		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
-
 		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
 		ImGuiWrapper::NewFrame();
+		ImGuiWrapper::BeginGlobalDocking(true);
 
 		DisplayMainMenuBarGUI();
-
-		float menuBarHeight = ImGui::GetFrameHeightWithSpacing();
-		ImGuiViewport viewport;
-		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y - menuBarHeight);
-		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
-
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
-		ImGui::PopStyleColor();
-
-		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
 
 		AssetManager::DisplayGUI();
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
 		DisplayProfilerGUI();
-		m_AppStatusWindow.DisplayGUI(viewportDockID);
+		m_AppStatusWindow.DisplayGUI();
 
 		//Settings window
 		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
@@ -841,9 +813,10 @@ namespace Ainan
 			obj->DisplayGUI();
 
 		InputManager::DisplayGUI();
-		m_ViewportWindow.DisplayGUI();
-		ImGui::PopStyleColor();
 
+		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
+
+		ImGuiWrapper::EndGlobalDocking();
 		ImGuiWrapper::Render();
 	}
 
@@ -890,8 +863,6 @@ namespace Ainan
 		//draw this after the scene is drawn so that post processing effects do not apply to it
 		m_ExportCamera.DrawOutline();
 
-		m_RenderSurface.RenderToScreen(m_ViewportWindow.RenderViewport);
-
 		if (m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted)
 		{
 			m_ExportCamera.ExportFrame(*m_Env);
@@ -902,25 +873,14 @@ namespace Ainan
 
 		//GUI
 		ImGuiWrapper::NewFrame();
+		ImGuiWrapper::BeginGlobalDocking(true);
 
 		DisplayMainMenuBarGUI();
-
-		float menuBarHeight = ImGui::GetFrameHeightWithSpacing();
-		ImGuiViewport viewport;
-		viewport.Size = ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y - menuBarHeight);
-		viewport.Pos = ImVec2(Window::Position.x, Window::Position.y + menuBarHeight);
-
-		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
-		auto viewportDockID = ImGui::DockSpaceOverViewport(&viewport, ImGuiDockNodeFlags_PassthruCentralNode, 0);
-		ImGui::PopStyleColor();
-
-		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
-
 		AssetManager::DisplayGUI();
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
 		DisplayProfilerGUI();
-		m_AppStatusWindow.DisplayGUI(viewportDockID);
+		m_AppStatusWindow.DisplayGUI();
 
 		//Settings window
 		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
@@ -988,9 +948,9 @@ namespace Ainan
 			obj->DisplayGUI();
 
 		InputManager::DisplayGUI();
-		m_ViewportWindow.DisplayGUI();
-		ImGui::PopStyleColor();
+		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
 
+		ImGuiWrapper::EndGlobalDocking();
 		ImGuiWrapper::Render();
 	}
 

@@ -10,6 +10,8 @@ namespace Ainan {
 	{
 	public:
 		static void Init();
+		static void BeginGlobalDocking(bool hasMenuBar);
+		static void EndGlobalDocking();
 		static void Terminate();
 		static void NewFrame();
 		static void Render();
