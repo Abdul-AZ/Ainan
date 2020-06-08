@@ -52,16 +52,21 @@ namespace Ainan {
 		else
 			image.m_Data = stbi_load(pathAndName.c_str(), &image.m_Width, &image.m_Height, &comp, 0);
 
-		if (comp == 4)
-			image.Format = TextureFormat::RGBA;
-		else if (comp == 3)
-			image.Format = TextureFormat::RGB;
-		else if (comp == 2)
-			image.Format = TextureFormat::RG;
-		else if (comp == 1)
-			image.Format = TextureFormat::R;
-		else
-			assert(false);
+		if (desiredFormat != TextureFormat::Unspecified)
+			image.Format = desiredFormat;
+		else 
+		{
+			if (comp == 4)
+				image.Format = TextureFormat::RGBA;
+			else if (comp == 3)
+				image.Format = TextureFormat::RGB;
+			else if (comp == 2)
+				image.Format = TextureFormat::RG;
+			else if (comp == 1)
+				image.Format = TextureFormat::R;
+			else
+				assert(false);
+		}
 
 		return image;
 	}

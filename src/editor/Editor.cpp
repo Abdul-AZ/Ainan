@@ -16,6 +16,10 @@ namespace Ainan
 		m_PlayButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PlayButton.png"));
 		m_PauseButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PauseButton.png"));
 		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png"));
+		m_SpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Sprite.png", TextureFormat::RGBA));
+		m_ParticleSystemIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/ParticleSystem.png", TextureFormat::RGBA));
+		m_RadialLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/RadialLight.png", TextureFormat::RGBA));
+		m_SpotLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
 	}
 
 	Editor::~Editor()
@@ -1241,13 +1245,16 @@ namespace Ainan
 		ImGui::Spacing();
 
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() - 30);
-		if (ImGui::ListBoxHeader("##Inspector", -1, 30)) {
+		if (ImGui::ListBoxHeader("##Inspector", -1)) {
 
 			for (int i = 0; i < m_Env->Objects.size(); i++)
 			{
 				ImGui::PushID(m_Env->Objects[i].get());
 
-				if (ImGui::Selectable((m_Env->Objects[i]->m_Name.size() > 0) ? m_Env->Objects[i]->m_Name.c_str() : "No Name", &m_Env->Objects[i]->Selected))
+				//the vertical size of each row
+				const int32_t elementSize = 25;
+				
+				if (ImGui::Selectable("##object", &m_Env->Objects[i]->Selected, 0, ImVec2(0, elementSize)))
 				{
 					//if this is selected. deselect all other particle systems
 					for (auto& particle : m_Env->Objects) {
@@ -1255,31 +1262,6 @@ namespace Ainan
 							particle->Selected = false;
 					}
 				}
-
-				if (ImGui::BeginDragDropSource())
-				{
-					ImGui::Text(("Moving: " + m_Env->Objects[i]->m_Name).c_str());
-					ImGui::SetDragDropPayload("re-order", &m_Env->Objects[i]->Order, sizeof(int), ImGuiCond_Once);
-					ImGui::EndDragDropSource();
-				}
-
-				if (ImGui::BeginDragDropTarget())
-				{
-					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("re-order"))
-					{
-						size_t switchTarget1 = *(int*)payload->Data;
-						size_t switchTarget2 = i;
-
-						EnvironmentObjectInterface* temp = m_Env->Objects[switchTarget1].release();
-						m_Env->Objects[switchTarget1] = std::unique_ptr<EnvironmentObjectInterface>(m_Env->Objects[switchTarget2].release());
-						m_Env->Objects[switchTarget2] = std::unique_ptr<EnvironmentObjectInterface>(temp);
-
-						RefreshObjectOrdering();
-					}
-
-					ImGui::EndDragDropTarget();
-				}
-
 				//show menu when right clicking
 				if (ImGui::BeginPopupContextItem("Object Popup"))
 				{
@@ -1301,9 +1283,41 @@ namespace Ainan
 					if (ImGui::Selectable("Rename"))
 						m_Env->Objects[i]->RenameTextOpen = !m_Env->Objects[i]->RenameTextOpen;
 
-
 					ImGui::EndPopup();
 				}
+
+				ImTextureID icon = nullptr;
+
+				//choose icon that displays the object type
+				switch (m_Env->Objects[i]->Type)
+				{
+				case EnvironmentObjectType::SpriteType:
+					icon = m_SpriteIconTexture->GetTextureID();
+					break;
+
+				case EnvironmentObjectType::ParticleSystemType:
+					icon = m_ParticleSystemIconTexture->GetTextureID();
+					break;
+
+				case EnvironmentObjectType::RadialLightType:
+					icon = m_RadialLightIconTexture->GetTextureID();
+					break;
+
+				case EnvironmentObjectType::SpotLightType:
+					icon = m_SpotLightIconTexture->GetTextureID();
+					break;
+				}
+				//display the image in the same line
+				ImGui::SameLine();
+				ImGui::Image(icon, ImVec2(25, elementSize));
+				//add tooltip for the image
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip(EnvironmentObjectTypeToString(m_Env->Objects[i]->Type).c_str());
+
+				//add text displaying the objects name to the right of the image
+				ImGui::SameLine();
+				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetItemRectSize().y / 4.0f);
+				ImGui::Text(m_Env->Objects[i]->m_Name.c_str());
 
 				//display particle system buttons only if it is selected
 				if (m_Env->Objects[i]->Selected)
