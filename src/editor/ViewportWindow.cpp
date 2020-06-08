@@ -12,6 +12,10 @@ namespace Ainan {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 		ImGui::Begin("Viewport", nullptr, 0);
 
+		WindowPosition = { ImGui::GetWindowPos().x, ImGui::GetWindowPos().y };
+		WindowSize = { ImGui::GetWindowSize().x, ImGui::GetWindowSize().y };
+		WindowContentRegionSize = { ImGui::GetContentRegionMax().x, ImGui::GetContentRegionMax().y };
+
 		ImGui::DockBuilderGetNode(ImGui::GetWindowDockID())->LocalFlags &= ~ImGuiDockNodeFlags_NoTabBar;
 
 		RenderViewport.Width = ImGui::GetWindowContentRegionMax().x;

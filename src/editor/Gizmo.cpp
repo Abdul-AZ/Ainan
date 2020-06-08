@@ -6,10 +6,10 @@
 
 namespace Ainan {
 
-#define GIZMO_LINE_LENGTH_TILL_TIP 1.0f
-#define GIZMO_LINE_LENGTH_TILL_WINGS 0.9f
-#define GIZMO_LINE_WIDTH 0.075f
-#define GIZMO_LINE_WINGS_HEIGHT 0.1f
+#define GIZMO_LINE_LENGTH_TILL_TIP 1.5f
+#define GIZMO_LINE_LENGTH_TILL_WINGS 1.3f
+#define GIZMO_LINE_WIDTH 0.15f
+#define GIZMO_LINE_WINGS_HEIGHT 0.2f
 #define GIZMO_LINE_START_X 0
 #define GIZMO_LINE_START_Y 0
 
@@ -43,12 +43,21 @@ namespace Ainan {
 
 	};
 
-	static const unsigned int arrowIndecies[] =
+	static const unsigned int c_OpenGLArrowIndecies[] =
 	{
 		0,1,2,
 		2,3,4,
 		4,5,6,
 		6,4,2,
+		0,2,6
+	};
+
+	static const unsigned int c_DirectXArrowIndecies[] =
+	{
+		0,1,2,
+		2,3,4,
+		4,5,6,
+		2,4,6,
 		0,2,6
 	};
 
@@ -58,17 +67,32 @@ namespace Ainan {
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
 		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibrary()["GizmoShader"]);
 
-		EBO = Renderer::CreateIndexBuffer((unsigned int*)arrowIndecies, sizeof(arrowIndecies) / sizeof(unsigned int));
+		if(Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+			EBO = Renderer::CreateIndexBuffer((unsigned int*)c_OpenGLArrowIndecies, sizeof(c_OpenGLArrowIndecies) / sizeof(unsigned int));
+		else
+			EBO = Renderer::CreateIndexBuffer((unsigned int*)c_DirectXArrowIndecies, sizeof(c_DirectXArrowIndecies) / sizeof(unsigned int));
+
 		EBO->Bind();
 
 		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { {"u_Model", ShaderVariableType::Mat4} }, nullptr);
 		ColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 2, { {"u_Color", ShaderVariableType::Vec4} }, nullptr);
 	}
 
-	void Gizmo::Draw(glm::vec2& objectPosition, const Rectangle& viewport)
+	void Gizmo::Draw(glm::vec2& objectPosition,
+		const glm::vec2& viewportWindowPos,
+		const glm::vec2& viewportWindowSize,
+		const glm::vec2& viewportWindowContentRegionSize)
 	{
 		double xpos, ypos;
 		glfwGetCursorPos(Window::Ptr, &xpos, &ypos);
+
+		Rectangle viewport{};
+		viewport.X = viewportWindowPos.x - Window::Position.x;
+		viewport.Y = Window::FramebufferSize.y
+			- (viewportWindowPos.y + viewportWindowContentRegionSize.y + ImGui::GetFrameHeightWithSpacing() / 4.0f)
+			+ Window::Position.y;
+		viewport.Width = viewportWindowSize.x;
+		viewport.Height = viewportWindowSize.y;
 
 		//change from being relative to top left to being relative to bottom left
 		ypos = -ypos + Window::Size.y;
