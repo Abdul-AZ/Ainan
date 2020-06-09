@@ -36,3 +36,4 @@ Every contribution is welcome, don't be afraid to open an issue regarding anythi
 * GLM
 * Premake5
 * nlohmann/json
+* FastNoise
