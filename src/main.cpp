@@ -1,11 +1,8 @@
 #include <pch.h>
 
 #include "editor/Window.h"
-#include "renderer/Renderer.h"
-
 #include "editor/Editor.h"
-
-#include "renderer/d3d11/D3D11RendererAPI.h"
+#include "renderer/Renderer.h"
 
 int main() 
 {

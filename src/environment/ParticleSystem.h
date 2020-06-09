@@ -1,8 +1,6 @@
 #pragma once
 
 #include "EnvironmentObjectInterface.h"
-//#include "Particle.h"
-#include "math/PerlinNoise2D.h"
 #include "editor/Window.h"
 #include "editor/Camera.h"
 #include "editor/ParticleCustomizer.h"
@@ -60,6 +58,5 @@ namespace Ainan {
 		size_t m_ParticleDrawCount = 0;
 
 		ParticlesData m_Particles;
-		PerlinNoise2D m_Noise;
 	};
 }

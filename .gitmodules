@@ -10,3 +10,6 @@
 	path = submodules/glfw
 	url = https://github.com/glfw/glfw.git
 	branch = 3.3-stable
+[submodule "submodules/FastNoise"]
+	path = submodules/FastNoise
+	url = https://github.com/Auburns/FastNoise.git

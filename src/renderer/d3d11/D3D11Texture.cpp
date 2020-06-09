@@ -9,6 +9,56 @@
 
 namespace Ainan {
 	namespace D3D11 {
+		DXGI_FORMAT D3DFormat(TextureFormat format)
+		{
+			switch (format)
+			{
+			case Ainan::TextureFormat::RGBA:
+				return DXGI_FORMAT_R8G8B8A8_UNORM;
+
+			case Ainan::TextureFormat::RGB:
+				assert(false, "Format not supported");
+
+			case Ainan::TextureFormat::RG:
+				return DXGI_FORMAT_R8G8_UNORM;
+
+			case Ainan::TextureFormat::R:
+				return DXGI_FORMAT_R8_UNORM;
+
+			case Ainan::TextureFormat::Unspecified:
+				return DXGI_FORMAT_UNKNOWN;
+
+			default:
+				assert(false);
+				return DXGI_FORMAT_UNKNOWN;
+			}
+		}
+
+		int32_t FormatBytesPerPixel(TextureFormat format)
+		{
+			switch (format)
+			{
+			case Ainan::TextureFormat::RGBA:
+				return 4;
+
+			case Ainan::TextureFormat::RGB:
+				assert(false, "Format not supported");
+
+			case Ainan::TextureFormat::RG:
+				return 2;
+
+			case Ainan::TextureFormat::R:
+				return 1;
+
+			case Ainan::TextureFormat::Unspecified:
+				return 0;
+
+			default:
+				assert(false);
+				return 0;
+			}
+		}
+
 		D3D11Texture::D3D11Texture(const glm::vec2& size, TextureFormat format, uint8_t* data, RendererContext* context)
 		{
 			Context = (D3D11RendererContext*)context;
@@ -23,48 +73,23 @@ namespace Ainan {
 			desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 			desc.ArraySize = 1;
 			desc.MipLevels = 1;
-
-			D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc{};
-			switch (format)
-			{
-			case Ainan::TextureFormat::RGBA:
-				desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				viewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-				break;
-
-			case Ainan::TextureFormat::RGB:
-				assert(false, "Format not supported");
-				break;
-
-			case Ainan::TextureFormat::RG:
-				desc.Format = DXGI_FORMAT_R8G8_UNORM;
-				viewDesc.Format = DXGI_FORMAT_R8G8_UNORM;
-				break;
-
-			case Ainan::TextureFormat::R:
-				desc.Format = DXGI_FORMAT_R8_UNORM;
-				viewDesc.Format = DXGI_FORMAT_R8_UNORM;
-				break;
-
-			case Ainan::TextureFormat::Unspecified:
-			default:
-				assert(false, "Unknown image format");
-				break;
-			}
+			desc.Format = D3DFormat(format);
 
 			if (data)
 			{
 				D3D11_SUBRESOURCE_DATA subresource{};
 				subresource.pSysMem = data;
-				subresource.SysMemPitch = size.x * sizeof(uint8_t) * 4;
+				subresource.SysMemPitch = size.x * sizeof(uint8_t) * FormatBytesPerPixel(format);
 				ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, &subresource, &D3DTexture));
 			}
 			else
 				ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, nullptr, &D3DTexture));
 
+			D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc{};
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			viewDesc.Texture2D.MipLevels = 1;
+			viewDesc.Format = D3DFormat(format);
 			
 			ASSERT_D3D_CALL(Context->Device->CreateShaderResourceView(D3DTexture, &viewDesc, &D3DResourceView));
 
@@ -91,13 +116,13 @@ namespace Ainan {
 		void D3D11Texture::SetImage(const Image& image)
 		{
 			D3DTexture->Release();
+			D3DResourceView->Release();
 
 			D3D11_TEXTURE2D_DESC desc{};
 			desc.Width = image.m_Width;
 			desc.Height = image.m_Height;
-			desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			desc.Format = D3DFormat(image.Format);
 			desc.SampleDesc.Count = 1;
-			//TODO pass dynamic parameter
 			desc.Usage = D3D11_USAGE_DYNAMIC;
 			desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 			desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
@@ -108,30 +133,19 @@ namespace Ainan {
 			{
 				D3D11_SUBRESOURCE_DATA subresource{};
 				subresource.pSysMem = image.m_Data;
-				subresource.SysMemPitch = image.m_Width * sizeof(uint8_t) * 4;
+				subresource.SysMemPitch = image.m_Width * sizeof(uint8_t) * FormatBytesPerPixel(image.Format);
 				ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, &subresource, &D3DTexture));
 			}
 			else
 				ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, nullptr, &D3DTexture));
-		}
 
-		void D3D11Texture::SetImage(const glm::vec2& size, int comp)
-		{
-			D3DTexture->Release();
+			D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc{};
+			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			viewDesc.Texture2D.MipLevels = 1;
+			viewDesc.Format = D3DFormat(image.Format);
 
-			D3D11_TEXTURE2D_DESC desc{};
-			desc.Width = size.x;
-			desc.Height = size.y;
-			desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			desc.SampleDesc.Count = 1;
-			//TODO pass dynamic parameter
-			desc.Usage = D3D11_USAGE_DYNAMIC;
-			desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-			desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-			desc.ArraySize = 1;
-			desc.MipLevels = 1;
-
-			ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, nullptr, &D3DTexture));
+			ASSERT_D3D_CALL(Context->Device->CreateShaderResourceView(D3DTexture, &viewDesc, &D3DResourceView));
 		}
 
 		void D3D11Texture::SetDefaultTextureSettings()

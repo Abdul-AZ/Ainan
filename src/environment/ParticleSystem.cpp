@@ -11,8 +11,6 @@ namespace Ainan {
 
 		m_Name = "Particle System";
 
-		m_Noise.Init();
-
 		m_ParticleDrawTranslationBuffer.resize(c_ParticlePoolSize);
 		m_ParticleDrawScaleBuffer.resize(c_ParticlePoolSize);
 		m_ParticleDrawColorBuffer.resize(c_ParticlePoolSize);
@@ -45,17 +43,21 @@ namespace Ainan {
 	void ParticleSystem::Update(const float deltaTime)
 	{
 		SpawnAllParticlesOnQue(deltaTime);
+		auto& noise = Customizer.m_NoiseCustomizer;
 
 		ActiveParticleCount = 0;
 		for (size_t i = 0; i < c_ParticlePoolSize; i++) {
 
-			if (m_Particles.IsActive[i]) 
+			if(m_Particles.IsActive[i]) 
 			{
 				//add noise if it is enabled
-				if (Customizer.m_NoiseCustomizer.m_NoiseEnabled)
+				if(noise.m_NoiseEnabled)
 				{
-					m_Particles.Velocity[i].x += m_Noise.Noise(m_Particles.Position[i].x, m_Particles.Position[i].y) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
-					m_Particles.Velocity[i].y += m_Noise.Noise(m_Particles.Position[i].x + 30, m_Particles.Position[i].y - 30) * Customizer.m_NoiseCustomizer.m_NoiseStrength;
+					//this is so that the noise is different in every particle
+					glm::vec2 noiseInput = m_Particles.Position[i] + (float)i * glm::vec2(100, 100);
+
+					m_Particles.Velocity[i].x += noise.GetNoise(noiseInput) * noise.m_NoiseStrength;
+					m_Particles.Velocity[i].y += noise.GetNoise(-noiseInput) * noise.m_NoiseStrength;
 				}
 
 				//add forces to the particle
@@ -66,7 +68,6 @@ namespace Ainan {
 				}
 
 				//update particle speed, lifetime etc
-				//particle.Update(deltaTime);
 				m_Particles.Velocity[i] += m_Particles.Acceleration[i];
 				m_Particles.Position[i] += m_Particles.Velocity[i] * deltaTime;
 
@@ -226,9 +227,6 @@ namespace Ainan {
 		m_Name = Psystem.m_Name;
 		EditorOpen = Psystem.EditorOpen;
 		RenameTextOpen = Psystem.RenameTextOpen;
-
-		//initilize the noise class
-		m_Noise.Init();
 	}
 
 	ParticleSystem ParticleSystem::operator=(const ParticleSystem & Psystem)

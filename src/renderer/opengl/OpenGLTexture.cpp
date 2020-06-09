@@ -60,23 +60,5 @@ namespace Ainan {
 			glGenerateMipmap(GL_TEXTURE_2D);
 			m_Size = size;
 		}
-
-		void OpenGLTexture::SetImage(const glm::vec2& size, int comp)
-		{
-			glBindTexture(GL_TEXTURE_2D, m_RendererID);
-
-			if (comp == 3)
-			{
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, (GLsizei)size.x, (GLsizei)size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-			}
-			else if (comp == 4)
-			{
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, (GLsizei)size.x, (GLsizei)size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-			}
-			else
-				assert(false);
-
-			m_Size = size;
-		}
 	}
 }

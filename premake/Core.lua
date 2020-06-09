@@ -7,7 +7,10 @@ project "Core"
   compileas "C++"
 
   files { 
-    "../src/**.h", "../src/**.hpp", "../src/**.cpp", "../src/**.c", "../shaders/**.vert", "../shaders/**.frag"
+    --c and c++ code
+    "../src/**.h", "../src/**.hpp", "../src/**.cpp", "../src/**.c",
+    --glsl code
+    "../shaders/**.vert", "../shaders/**.frag"
    }
 
   pchheader "pch.h"

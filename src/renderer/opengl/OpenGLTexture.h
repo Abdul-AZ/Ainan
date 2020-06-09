@@ -14,7 +14,6 @@ namespace Ainan {
 
 			// Inherited via Texture
 			virtual void SetImage(const Image& image) override;
-			virtual void SetImage(const glm::vec2& size, int comp = 4) override;
 			virtual void SetDefaultTextureSettings() override;
 			
 			virtual glm::vec2 GetSize() const override { return m_Size; }
