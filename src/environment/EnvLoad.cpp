@@ -16,8 +16,8 @@ using json = nlohmann::json;
 
 namespace Ainan {
 
-	std::string CheckEnvironmentFile(const std::string& path) {
-
+	std::string CheckEnvironmentFile(const std::string& path) 
+	{
 		json data;
 		try
 		{
@@ -84,8 +84,6 @@ namespace Ainan {
 				break;
 			}
 		}
-		//env->UpdateTitle(); //TODO
-
 		return env;
 	}
 
@@ -144,6 +142,9 @@ namespace Ainan {
 		//Noise data
 		ps->Customizer.m_NoiseCustomizer.m_NoiseEnabled = data[id + "NoiseEnabled"].get<bool>();
 		ps->Customizer.m_NoiseCustomizer.m_NoiseStrength = data[id + "NoiseStrength"].get<float>();
+		ps->Customizer.m_NoiseCustomizer.m_NoiseFrequency = data[id + "NoiseFrequency"].get<float>();
+		ps->Customizer.m_NoiseCustomizer.NoiseTarget = NoiseCustomizer::NoiseApplyTargetVal(data[id + "NoiseTarget"].get<std::string>());
+		ps->Customizer.m_NoiseCustomizer.NoiseInterpolationMode = NoiseCustomizer::NoiseInterpolationModeVal(data[id + "NoiseInterpolationMode"].get<std::string>());
 
 		//Texture data
 		ps->Customizer.m_TextureCustomizer.UseDefaultTexture = data[id + "UseDefaultTexture"].get<bool>();
@@ -151,7 +152,6 @@ namespace Ainan {
 		if (!ps->Customizer.m_TextureCustomizer.UseDefaultTexture)
 		{
 			ps->Customizer.m_TextureCustomizer.ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(AssetManager::s_EnvironmentDirectory.u8string() + ps->Customizer.m_TextureCustomizer.m_TexturePath));
-			//ps->Customizer.m_TextureCustomizer.ParticleTexture->SetImage(Image::LoadFromFile(AssetManager::s_EnvironmentDirectory.u8string() + ps->Customizer.m_TextureCustomizer.m_TexturePath));
 		}
 
 		//Force data

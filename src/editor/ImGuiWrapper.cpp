@@ -105,8 +105,8 @@ namespace Ainan {
 			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;           // Enable viewports
 
 			auto context = (D3D11::D3D11RendererContext*)Renderer::Rdata->CurrentActiveAPI->GetContext();
-			auto x = ImGui_ImplDX11_Init(context->Device, context->DeviceContext);
-			ImGui_ImplGlfw_Init(Window::Ptr, false, GlfwClientApi_Unknown);
+			ImGui_ImplDX11_Init(context->Device, context->DeviceContext);
+			ImGui_ImplGlfw_Init(Window::Ptr, true, GlfwClientApi_Unknown);
 
 			return;
 		}

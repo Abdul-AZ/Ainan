@@ -14,7 +14,9 @@ namespace Ainan {
 
 	void ForceCustomizer::DisplayGUI()
 	{
-		if (ImGui::TreeNode("Forces")) {
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		if (ImGui::TreeNode("Forces"))
+		{
 
 			if(ImGui::Button("Add Force"))
 				m_DisplayAddForceSettings = true;

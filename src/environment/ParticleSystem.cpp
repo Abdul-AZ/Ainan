@@ -43,22 +43,17 @@ namespace Ainan {
 	void ParticleSystem::Update(const float deltaTime)
 	{
 		SpawnAllParticlesOnQue(deltaTime);
-		auto& noise = Customizer.m_NoiseCustomizer;
 
 		ActiveParticleCount = 0;
 		for (size_t i = 0; i < c_ParticlePoolSize; i++) {
 
 			if(m_Particles.IsActive[i]) 
 			{
-				//add noise if it is enabled
-				if(noise.m_NoiseEnabled)
-				{
-					//this is so that the noise is different in every particle
-					glm::vec2 noiseInput = m_Particles.Position[i] + (float)i * glm::vec2(100, 100);
-
-					m_Particles.Velocity[i].x += noise.GetNoise(noiseInput) * noise.m_NoiseStrength;
-					m_Particles.Velocity[i].y += noise.GetNoise(-noiseInput) * noise.m_NoiseStrength;
-				}
+				//do noise calculations
+				Customizer.m_NoiseCustomizer.ApplyNoise(m_Particles.Position[i],
+					m_Particles.Velocity[i],
+					m_Particles.Acceleration[i],
+					i);
 
 				//add forces to the particle
 				for (auto& force : Customizer.m_ForceCustomizer.m_Forces)

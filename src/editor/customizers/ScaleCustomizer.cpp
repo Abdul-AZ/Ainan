@@ -3,14 +3,11 @@
 
 namespace Ainan {
 
-	ScaleCustomizer::ScaleCustomizer() :
-		mt(std::random_device{}())
-		//m_Interpolator(InterpolationType::Fixed, 0.0f, 0.0f)
-	{}
-
 	void ScaleCustomizer::DisplayGUI()
 	{
-		if (ImGui::TreeNode("Scale")) {
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		if (ImGui::TreeNode("Scale"))
+		{
 
 			ImGui::Text("Starting Scale");
 
@@ -71,23 +68,4 @@ namespace Ainan {
 			ImGui::TreePop();
 		}
 	}
-
-	//InterpolationSelector<float> ScaleCustomizer::GetScaleInterpolator()
-	//{
-	//	if (m_RandomScale) {
-	//		std::uniform_real_distribution<float> dist_scale(m_MinScale, m_MaxScale);
-	//
-	//		m_Interpolator.startPoint = dist_scale(mt);
-	//		m_Interpolator.endPoint = m_EndScale;
-	//
-	//		return m_Interpolator;
-	//	}
-	//	else {
-	//
-	//		m_Interpolator.startPoint = m_DefinedScale;
-	//		m_Interpolator.endPoint = m_EndScale;
-	//
-	//		return m_Interpolator;
-	//	}
-	//}
 }

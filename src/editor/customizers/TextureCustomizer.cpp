@@ -16,7 +16,6 @@ namespace Ainan {
 		if (!UseDefaultTexture)
 		{
 			ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(customizer.m_TexturePath));
-			//ParticleTexture->SetImage(Image::LoadFromFile(customizer.m_TexturePath));
 		}
 	}
 
@@ -27,7 +26,8 @@ namespace Ainan {
 
 	void TextureCustomizer::DisplayGUI()
 	{
-		if (ImGui::TreeNode("Texture")) 
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		if (ImGui::TreeNode("Texture"))
 		{
 			ImGui::Text("Texture: ");
 			ImGui::SameLine();

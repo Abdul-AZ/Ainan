@@ -3,7 +3,8 @@
 
 namespace Ainan {
 
-	std::string LimitTypeToString(VelocityCustomizer::VelocityLimitType type) {
+	std::string LimitTypeToString(VelocityCustomizer::VelocityLimitType type) 
+	{
 		switch (type)
 		{
 		case VelocityCustomizer::NoLimit:
@@ -18,7 +19,8 @@ namespace Ainan {
 		}
 	}
 
-	VelocityCustomizer::VelocityLimitType StringToLimitType(const std::string& type) {
+	VelocityCustomizer::VelocityLimitType StringToLimitType(const std::string& type) 
+	{
 
 		if (type == "No Limit")
 			return VelocityCustomizer::NoLimit;
@@ -37,7 +39,9 @@ namespace Ainan {
 
 	void VelocityCustomizer::DisplayGUI()
 	{
-		if (ImGui::TreeNode("Velocity")) {
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		if (ImGui::TreeNode("Velocity"))
+		{
 
 			ImGui::Text("Starting Velocity");
 

@@ -115,7 +115,9 @@ namespace Ainan {
 
 		m_TextureCustomizer.DisplayGUI();
 
-		if (ImGui::TreeNode("Emission")) {
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		if (ImGui::TreeNode("Emission")) 
+		{
 
 			ImGui::Text("Particles\nPer Second: ");
 			ImGui::SameLine();
@@ -124,8 +126,11 @@ namespace Ainan {
 			ImGui::TreePop();
 		}
 
-		if (Mode == SpawnMode::SpawnOnPoint) {
-			if (ImGui::TreeNode("Position")) {
+		if (Mode == SpawnMode::SpawnOnPoint) 
+		{
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+			if (ImGui::TreeNode("Position"))
+			{
 
 				ImGui::Text("Starting Position:");
 				ImGui::SameLine();
@@ -136,7 +141,9 @@ namespace Ainan {
 		}
 		else if (Mode == SpawnMode::SpawnOnLine)
 		{
-			if (ImGui::TreeNode("Position")) {
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+			if (ImGui::TreeNode("Position"))
+			{
 
 				ImGui::Text("Line Position: ");
 				ImGui::SameLine();
@@ -158,9 +165,9 @@ namespace Ainan {
 		}
 		else if (Mode == SpawnMode::SpawnOnCircle || Mode == SpawnMode::SpawnInsideCircle)
 		{
-			if (ImGui::TreeNode("Position")) 
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+			if (ImGui::TreeNode("Position"))
 			{
-
 				ImGui::Text("Circle Position: ");
 				ImGui::SameLine();
 				float xPos = ImGui::GetCursorPosX();

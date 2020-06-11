@@ -9,7 +9,6 @@ namespace Ainan {
 	class ScaleCustomizer
 	{
 	public:
-		ScaleCustomizer();
 		void DisplayGUI();
 
 		//InterpolationSelector<float> GetScaleInterpolator();
@@ -25,11 +24,6 @@ namespace Ainan {
 		float m_EndScale = m_DefinedScale;
 
 	private:
-		//scale over time
-		//InterpolationSelector<float> m_Interpolator;
-
-		//random number generator
-		std::mt19937 mt;
 
 		EXPOSE_CUSTOMIZER_TO_JSON
 	};

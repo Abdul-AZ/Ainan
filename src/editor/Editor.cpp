@@ -279,7 +279,7 @@ namespace Ainan
 	{
 		ImGuiWrapper::NewFrame();
 
-		ImGui::SetNextWindowDockID(ImGui::DockSpaceOverViewport(), ImGuiCond_::ImGuiCond_Always);
+		ImGuiWrapper::BeginGlobalDocking(false);
 		ImGui::Begin("Create Environment", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
 
 		ImGui::Text("Environment Folder");
@@ -408,6 +408,8 @@ namespace Ainan
 		m_FolderBrowser.DisplayGUI([this](const std::filesystem::path& dir) {
 			m_EnvironmentCreateFolderPath = dir.u8string();
 			});
+
+		ImGuiWrapper::EndGlobalDocking();
 
 		ImGuiWrapper::Render();
 	}

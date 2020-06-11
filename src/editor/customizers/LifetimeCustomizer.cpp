@@ -10,7 +10,9 @@ namespace Ainan {
 
 	void LifetimeCustomizer::DisplayGUI()
 	{
-		if (ImGui::TreeNode("Starting Lifetime")) {
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		if (ImGui::TreeNode("Starting Lifetime"))
+		{
 
 			ImGui::Text("Random Between 2 Numbers");
 			ImGui::SameLine();

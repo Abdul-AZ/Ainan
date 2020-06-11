@@ -128,6 +128,9 @@ namespace Ainan {
 		//Noise data
 		j[id + "NoiseEnabled"] = ps.Customizer.m_NoiseCustomizer.m_NoiseEnabled;
 		j[id + "NoiseStrength"] = ps.Customizer.m_NoiseCustomizer.m_NoiseStrength;
+		j[id + "NoiseFrequency"] = ps.Customizer.m_NoiseCustomizer.m_NoiseFrequency;
+		j[id + "NoiseTarget"] = NoiseCustomizer::NoiseApplyTargetStr(ps.Customizer.m_NoiseCustomizer.NoiseTarget);
+		j[id + "NoiseInterpolationMode"] = NoiseCustomizer::NoiseInterpolationModeStr(ps.Customizer.m_NoiseCustomizer.NoiseInterpolationMode);
 
 		//Texture data
 		j[id + "UseDefaultTexture"] = ps.Customizer.m_TextureCustomizer.UseDefaultTexture;
