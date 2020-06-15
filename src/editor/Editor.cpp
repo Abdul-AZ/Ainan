@@ -5,7 +5,8 @@
 namespace Ainan 
 {
 	Editor::Editor():
-		m_LoadEnvironmentBrowser(STARTING_BROWSER_DIRECTORY, "Load Environment")
+		m_LoadEnvironmentBrowser(STARTING_BROWSER_DIRECTORY, "Load Environment"),
+		m_Grid(200.0f)
 	{
 		m_LoadEnvironmentBrowser.Filter.push_back(".env");
 		m_LoadEnvironmentBrowser.OnCloseWindow = []() {
@@ -481,7 +482,7 @@ namespace Ainan
 		Renderer::EndScene();
 		m_RenderSurface.SurfaceFrameBuffer->Bind();
 		if (m_ShowGrid)
-			m_Grid.Draw();
+			m_Grid.Draw(m_Camera);
 		m_ExportCamera.DrawOutline();
 		Renderer::SetRenderTargetApplicationWindow();
 

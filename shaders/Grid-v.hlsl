@@ -1,10 +1,9 @@
-
 cbuffer FrameData : register(b0)
 {
     matrix<float, 4, 4> u_ViewProjection;
 }
 
-cbuffer ObjectData : register(b1)
+cbuffer ObjectTransform : register(b1)
 {
     matrix<float, 4, 4> u_Model;
 }

@@ -43,6 +43,7 @@ namespace Ainan {
 		{ "LineShader"          , "shaders/Line"          , "shaders/FlatColor"      },
 		{ "BlurShader"          , "shaders/Image"         , "shaders/Blur"           },
 		{ "GizmoShader"         , "shaders/Gizmo"         , "shaders/Gizmo"          },
+		{ "GridShader"          , "shaders/Grid"          , "shaders/Grid"           },
 		{ "ImageShader"         , "shaders/Image"         , "shaders/Image"          },
 		{ "QuadBatchShader"     , "shaders/QuadBatch"     , "shaders/QuadBatch"      }
 	};

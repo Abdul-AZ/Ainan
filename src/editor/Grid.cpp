@@ -2,78 +2,70 @@
 
 #include "Grid.h"
 
-#define VERTICES_PER_AXIS 75
-#define GRID_SCALE        5.0f
-
 namespace Ainan {
 
-	Grid::Grid()
+	Grid::Grid(float unitLength, int32_t numLinesPerAxis) : 
+		m_UnitLength(unitLength)
 	{
 		//reserve vector space for vertices
 		std::vector<glm::vec2> vertices;
 		std::vector<uint32_t> indecies;
-		vertices.reserve(VERTICES_PER_AXIS * 4 + 2);
-		indecies.reserve(VERTICES_PER_AXIS * 4 + 2);
+
+		vertices.reserve((size_t)numLinesPerAxis * 4);
+		indecies.reserve((size_t)numLinesPerAxis * 4);
+
+		glm::vec2 bottomLeftVertex = { -(numLinesPerAxis - 1) * unitLength / 2.0f, -(numLinesPerAxis - 1) * unitLength / 2.0f };
 
 		//generate vertices
-		//these are the vertices that are on each side
+		for (size_t i = 0; i < numLinesPerAxis; i++) //bottom
+			vertices.push_back({ bottomLeftVertex.x + i * unitLength, bottomLeftVertex.y });
 
-		//bottom line vertices
-		for (size_t i = 0; i < VERTICES_PER_AXIS; i++)
+		for (size_t i = 0; i < numLinesPerAxis; i++) //top
+			vertices.push_back({ bottomLeftVertex.x + i * unitLength, -bottomLeftVertex.y });
+
+		for (size_t i = 0; i < numLinesPerAxis; i++) //left
+			vertices.push_back({ bottomLeftVertex.x, bottomLeftVertex.y + i * unitLength });
+
+		for (size_t i = 0; i < numLinesPerAxis; i++) //right
+			vertices.push_back({ -bottomLeftVertex.x, bottomLeftVertex.y + i * unitLength });
+
+		//generate indecies
+		for (size_t i = 0; i < numLinesPerAxis; i++) //bottom to top lines
 		{
-			vertices.push_back(glm::vec2(-c_GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * c_GlobalScaleFactor, -c_GlobalScaleFactor) * GRID_SCALE);
+			indecies.push_back(i);
+			indecies.push_back((uint32_t)i + numLinesPerAxis);
 		}
 
-		//top line vertices
-		for (size_t i = 0; i <= VERTICES_PER_AXIS; i++)
+		for (size_t i = 0; i < numLinesPerAxis; i++) //left to right lines
 		{
-			vertices.push_back(glm::vec2(-c_GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * c_GlobalScaleFactor, c_GlobalScaleFactor) * GRID_SCALE);
+			indecies.push_back((uint32_t)numLinesPerAxis * 2 + i);
+			indecies.push_back((uint32_t)numLinesPerAxis * 2 + i + numLinesPerAxis);
 		}
 
-		//left line vertices
-		for (size_t i = 0; i < VERTICES_PER_AXIS; i++)
-		{
-			vertices.push_back(glm::vec2(-c_GlobalScaleFactor, -c_GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * c_GlobalScaleFactor) * GRID_SCALE);
-		}
+		m_VertexBuffer = Renderer::CreateVertexBuffer(vertices.data(),
+			(uint32_t)sizeof(glm::vec2) * vertices.size(),
+			{ { "aPos", ShaderVariableType::Vec2 } },
+			Renderer::ShaderLibrary()["LineShader"]);
 
-		//right line vertices
-		for (size_t i = 0; i <= VERTICES_PER_AXIS; i++)
-		{
-			vertices.push_back(glm::vec2(c_GlobalScaleFactor, -c_GlobalScaleFactor + i * (1.0f / VERTICES_PER_AXIS) * 2 * c_GlobalScaleFactor) * GRID_SCALE);
-		}
+		m_IndexBuffer = Renderer::CreateIndexBuffer(indecies.data(), (uint32_t)indecies.size());
 
-		//vertical line indecies
-		for (size_t i = 0; i <= VERTICES_PER_AXIS; i++)
-		{
-			indecies.push_back((unsigned int)i);
-			indecies.push_back((unsigned int)i + VERTICES_PER_AXIS);
-		}
-
-		//horizontal line indecies
-		for (size_t i = 0; i <= VERTICES_PER_AXIS; i++)
-		{
-			indecies.push_back((unsigned int)i + VERTICES_PER_AXIS * 2 + 1);
-			indecies.push_back((unsigned int)i + VERTICES_PER_AXIS * 3 + 1);
-		}
-
-		VertexLayout layout(1);
-		layout[0] = { "aPos", ShaderVariableType::Vec2 };
-		VBO = Renderer::CreateVertexBuffer(vertices.data(),(unsigned int)sizeof(glm::vec2) * (unsigned int)vertices.size(),
-			layout, Renderer::ShaderLibrary()["LineShader"]);
-
-		EBO = Renderer::CreateIndexBuffer(indecies.data(), (unsigned int)indecies.size());
-
-		ColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, { {"u_Color", ShaderVariableType::Vec4} }, nullptr);
+		m_TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform",
+			1,
+			{ {"u_Model", ShaderVariableType::Mat4} },
+			nullptr);
 	}
 
-	void Grid::Draw()
+	void Grid::Draw(const Camera& camera)
 	{
-		auto& shader = Renderer::ShaderLibrary()["LineShader"];
+		auto& shader = Renderer::ShaderLibrary()["GridShader"];
 
-		shader->BindUniformBuffer(ColorUniformBuffer, 1, RenderingStage::FragmentShader);
-		auto color = glm::vec4(1.0f, 1.0f, 1.0f, 0.3f);
-		ColorUniformBuffer->UpdateData(&color);
+		glm::vec2 pos = glm::vec2(std::round(camera.Position.x / m_UnitLength), std::round(camera.Position.y / m_UnitLength)) * m_UnitLength;
 
-		Renderer::Draw(*VBO, *shader, Primitive::Lines, *EBO);
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3{ -pos, 0.0f });
+		m_TransformUniformBuffer->UpdateData(&model);
+
+		shader->BindUniformBuffer(m_TransformUniformBuffer, 1, RenderingStage::VertexShader);
+
+		Renderer::Draw(*m_VertexBuffer, *shader, Primitive::Lines, *m_IndexBuffer);
 	}
 }
