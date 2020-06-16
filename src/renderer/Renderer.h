@@ -63,6 +63,9 @@ namespace Ainan {
 		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive,
 						 const IndexBuffer& indexBuffer, int vertexCount);
 
+		static void ImGuiNewFrame();
+		static void ImGuiEndFrame();
+
 		static void ClearScreen();
 
 		static void Present();
@@ -143,6 +146,7 @@ namespace Ainan {
 
 		static decltype(Rdata->ShaderLibrary)& ShaderLibrary() { return Rdata->ShaderLibrary; }
 
+		static void DrawImGui(ImDrawData* drawData);
 	private:
 		static void FlushQuadBatch();
 	};

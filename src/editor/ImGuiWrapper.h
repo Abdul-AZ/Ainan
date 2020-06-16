@@ -5,15 +5,11 @@
 
 namespace Ainan {
 
-	//abstracts the Dear ImGui library
+	//helper functions for ImGui
 	class ImGuiWrapper
 	{
 	public:
-		static void Init();
 		static void BeginGlobalDocking(bool hasMenuBar);
 		static void EndGlobalDocking();
-		static void Terminate();
-		static void NewFrame();
-		static void Render();
 	};
 }

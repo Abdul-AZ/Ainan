@@ -41,6 +41,11 @@ namespace Ainan {
 		virtual void Draw(ShaderProgram& shader, const Primitive& mode,
 						  const IndexBuffer& indexBuffer, int vertexCount) = 0;
 
+		virtual void InitImGui() = 0;
+		virtual void ImGuiNewFrame() = 0;
+		virtual void ImGuiEndFrame() = 0;
+		virtual void DrawImGui(ImDrawData* drawData) = 0;
+
 		virtual void ClearScreen() = 0;
 
 		virtual void SetRenderTargetApplicationWindow() = 0;

@@ -182,6 +182,8 @@ namespace Ainan {
 				shaderTuple.second->BindUniformBuffer(Rdata->SceneUniformbuffer, 0, RenderingStage::VertexShader);
 			}
 		}
+
+		Rdata->CurrentActiveAPI->InitImGui();
 	}
 
 	void Renderer::Terminate()
@@ -469,6 +471,21 @@ namespace Ainan {
 		indexBuffer.Unbind();
 
 		Rdata->CurrentNumberOfDrawCalls++;
+	}
+
+	void Renderer::ImGuiNewFrame()
+	{
+		Rdata->CurrentActiveAPI->ImGuiNewFrame();
+	}
+
+	void Renderer::ImGuiEndFrame()
+	{
+		Rdata->CurrentActiveAPI->ImGuiEndFrame();
+	}
+
+	void Renderer::DrawImGui(ImDrawData* drawData)
+	{
+		Rdata->CurrentActiveAPI->DrawImGui(drawData);
 	}
 
 	void Renderer::ClearScreen()

@@ -221,7 +221,7 @@ namespace Ainan
 			Window::CenterWindow();
 		};
 
-		ImGuiWrapper::NewFrame();
+		Renderer::ImGuiNewFrame();
 		ImGuiWrapper::BeginGlobalDocking(false);
 
 		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
@@ -273,12 +273,12 @@ namespace Ainan
 			});
 
 		ImGuiWrapper::EndGlobalDocking();
-		ImGuiWrapper::Render();
+		Renderer::ImGuiEndFrame();
 	}
 
 	void Editor::Draw_CreateEnv()
 	{
-		ImGuiWrapper::NewFrame();
+		Renderer::ImGuiNewFrame();
 
 		ImGuiWrapper::BeginGlobalDocking(false);
 		ImGui::Begin("Create Environment", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
@@ -412,7 +412,7 @@ namespace Ainan
 
 		ImGuiWrapper::EndGlobalDocking();
 
-		ImGuiWrapper::Render();
+		Renderer::ImGuiEndFrame();
 	}
 
 	void Editor::Draw_EditorMode()
@@ -487,7 +487,7 @@ namespace Ainan
 		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
-		ImGuiWrapper::NewFrame();
+		Renderer::ImGuiNewFrame();
 		ImGuiWrapper::BeginGlobalDocking(true);
 
 		DisplayMainMenuBarGUI();
@@ -568,7 +568,7 @@ namespace Ainan
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
 
 		ImGuiWrapper::EndGlobalDocking();
-		ImGuiWrapper::Render();
+		Renderer::ImGuiEndFrame();
 	}
 
 	void Editor::Draw_PlayMode()
@@ -617,7 +617,7 @@ namespace Ainan
 		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
-		ImGuiWrapper::NewFrame();
+		Renderer::ImGuiNewFrame();
 		ImGuiWrapper::BeginGlobalDocking(true);
 
 		DisplayMainMenuBarGUI();
@@ -700,7 +700,7 @@ namespace Ainan
 		ImGui::PopStyleColor();
 
 		ImGuiWrapper::EndGlobalDocking();
-		ImGuiWrapper::Render();
+		Renderer::ImGuiEndFrame();
 	}
 
 	void Editor::Draw_PauseMode()
@@ -749,7 +749,7 @@ namespace Ainan
 		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
-		ImGuiWrapper::NewFrame();
+		Renderer::ImGuiNewFrame();
 		ImGuiWrapper::BeginGlobalDocking(true);
 
 		DisplayMainMenuBarGUI();
@@ -830,7 +830,7 @@ namespace Ainan
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
 
 		ImGuiWrapper::EndGlobalDocking();
-		ImGuiWrapper::Render();
+		Renderer::ImGuiEndFrame();
 	}
 
 	void Editor::Draw_ExportMode()
@@ -885,7 +885,7 @@ namespace Ainan
 		Renderer::SetRenderTargetApplicationWindow();
 
 		//GUI
-		ImGuiWrapper::NewFrame();
+		Renderer::ImGuiNewFrame();
 		ImGuiWrapper::BeginGlobalDocking(true);
 
 		DisplayMainMenuBarGUI();
@@ -964,7 +964,7 @@ namespace Ainan
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
 
 		ImGuiWrapper::EndGlobalDocking();
-		ImGuiWrapper::Render();
+		Renderer::ImGuiEndFrame();
 	}
 
 	void Editor::OnEnvironmentLoad()

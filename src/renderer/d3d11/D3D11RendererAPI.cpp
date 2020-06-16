@@ -13,6 +13,10 @@
 
 #include "D3D11ShaderProgram.h"
 
+#include "imgui_impl_dx11.cpp"
+#include "renderer/d3d11/D3D11RendererAPI.h"
+#include "imgui_impl_glfw.cpp"
+
 
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 
@@ -121,6 +125,7 @@ namespace Ainan {
 
 		D3D11RendererAPI::~D3D11RendererAPI()
 		{
+			ImGui_ImplDX11_Shutdown();
 			AdditiveBlendMode->Release();
 			ScreenBlendMode->Release();
 			Context.BackbufferView->Release();
@@ -228,6 +233,44 @@ namespace Ainan {
 		void D3D11RendererAPI::SetRenderTargetApplicationWindow()
 		{
 			Context.DeviceContext->OMSetRenderTargets(1, &Context.BackbufferView, nullptr);
+		}
+
+		void D3D11RendererAPI::ImGuiNewFrame()
+		{
+			ImGui_ImplDX11_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+		}
+
+		void D3D11RendererAPI::ImGuiEndFrame()
+		{
+			ImGui::Render();
+			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+			// Update and Render additional Platform Windows
+			ImGuiIO& io = ImGui::GetIO(); (void)io;
+			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+			}
+		}
+
+		void D3D11RendererAPI::InitImGui()
+		{
+			ImGui::CreateContext();
+			ImGuiIO& io = ImGui::GetIO();
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable viewports
+
+			//TEMPORARY
+			ImGui_ImplDX11_Init(Context.Device, Context.DeviceContext);
+			ImGui_ImplGlfw_Init(Window::Ptr, true, GlfwClientApi_Unknown);
+		}
+
+		//TODO
+		void D3D11RendererAPI::DrawImGui(ImDrawData* drawData)
+		{
 		}
 
 		void D3D11RendererAPI::Present()
