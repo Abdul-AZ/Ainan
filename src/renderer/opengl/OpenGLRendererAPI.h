@@ -3,6 +3,7 @@
 #include "renderer/RendererAPI.h"
 #include "renderer/ShaderProgram.h"
 #include "renderer/IndexBuffer.h"
+#include "renderer/VertexBuffer.h"
 #include "renderer/Rectangle.h"
 
 #include "OpenGLRendererContext.h"
@@ -61,6 +62,20 @@ namespace Ainan {
 			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
 
 			OpenGLRendererContext Context;
+
+			static OpenGLRendererAPI& Snigleton() { assert(SingletonInstance); return *SingletonInstance; };
+
+		private:
+			static OpenGLRendererAPI* SingletonInstance;
+			//imgui data
+			double Time = 0.0;
+			int32_t AttribLocationVtxPos;
+			int32_t AttribLocationVtxUV;
+			int32_t AttribLocationVtxColor;
+			std::shared_ptr<ShaderProgram> ImGuiShader;
+			std::shared_ptr<IndexBuffer> ImGuiIndexBuffer;
+			std::shared_ptr<VertexBuffer> ImGuiVertexBuffer;
+			uint32_t FontTexture = 0;
 		};
 	}
 }

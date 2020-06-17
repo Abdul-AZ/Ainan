@@ -8,402 +8,230 @@
 #include "OpenGLVertexBuffer.h"
 #include "OpenGLIndexBuffer.h"
 
-#include <Windows.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-
 namespace Ainan {
-	//TODO make these memebr variables
-	double Time = 0.0;
-	static OpenGL::OpenGLRendererAPI* currentAPI = nullptr;
-	std::shared_ptr<ShaderProgram> ImGuiShader;
-	std::shared_ptr<IndexBuffer> ImGuiIndexBuffer;
-	std::shared_ptr<VertexBuffer> ImGuiVertexBuffer;
-	int AttribLocationVtxPos;
-	int AttribLocationVtxUV;
-	int AttribLocationVtxColor; // Vertex attributes location
-
-	bool                 MouseJustPressed[5] = { false, false, false, false, false };
-	GLFWcursor* MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
-	bool                 WantUpdateMonitors = true;
-	char					GlslVersionString[32] = "";
-	GLuint				FontTexture = 0;
-	GLFWmousebuttonfun   PrevUserCallbackMousebutton = NULL;
-	GLFWscrollfun        PrevUserCallbackScroll = NULL;
-	GLFWkeyfun           PrevUserCallbackKey = NULL;
-	GLFWcharfun          PrevUserCallbackChar = NULL;
-
-
-	bool ImGui_ImplOpenGL3_CreateFontsTexture()
-	{
-		using namespace Ainan;
-		// Build texture atlas
-		ImGuiIO& io = ImGui::GetIO();
-		unsigned char* pixels;
-		int width, height;
-		io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bits (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
-
-		// Upload texture to graphics system
-		GLint last_texture;
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-		glGenTextures(1, &FontTexture);
-		glBindTexture(GL_TEXTURE_2D, FontTexture);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-#ifdef GL_UNPACK_ROW_LENGTH
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-#endif
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
-		// Store our identifier
-		io.Fonts->TexID = (ImTextureID)(intptr_t)FontTexture;
-
-		// Restore state
-		glBindTexture(GL_TEXTURE_2D, last_texture);
-
-		return true;
-	}
-
-	static void Glfw_SetClipboardText(void* user_data, const char* text)
-	{
-		glfwSetClipboardString((GLFWwindow*)user_data, text);
-	}
-
-	static const char* Glfw_GetClipboardText(void* user_data)
-	{
-		return glfwGetClipboardString((GLFWwindow*)user_data);
-	}
-
-
-	static bool CreateDeviceObjects()
-	{
-		// Backup GL state
-		GLint last_texture, last_array_buffer;
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-		glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
-
-		const GLchar* vertexShaderSrc =
-			R"(
-			layout (location = 0) in vec2 Position;
-			layout (location = 1) in vec2 UV;
-			layout (location = 2) in vec4 Color;
-			uniform mat4 ProjMtx;
-			out vec2 Frag_UV;
-			out vec4 Frag_Color;
-
-			void main()
-			{
-			    Frag_UV = UV;
-			    Frag_Color = Color;
-			    gl_Position = ProjMtx * vec4(Position.xy,0,1);
-			})";
-
-		const GLchar* fragmentShaderSrc =
-			R"(
-			in vec2 Frag_UV;
-			in vec4 Frag_Color;
-			layout(binding = 0) uniform sampler2D Texture;
-			layout (location = 0) out vec4 Out_Color;
-
-			void main()
-			{
-			    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);
-			})";
-
-		std::string vertSrc = (std::string)"#version 420 core" + (std::string)vertexShaderSrc;
-		std::string fragSrc = (std::string)"#version 420 core" + (std::string)fragmentShaderSrc;
-
-		ImGuiShader = OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
-
-		AttribLocationVtxPos = glGetAttribLocation(ImGuiShader->GetRendererID(), "Position");
-		AttribLocationVtxUV = glGetAttribLocation(ImGuiShader->GetRendererID(), "UV");
-		AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->GetRendererID(), "Color");
-
-		// Create buffers
-		VertexLayout layout;
-		ImGuiVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(nullptr, 0, layout, false);
-		ImGuiIndexBuffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(nullptr, 0);
-
-		ImGui_ImplOpenGL3_CreateFontsTexture();
-
-		// Restore modified GL state
-		glBindTexture(GL_TEXTURE_2D, last_texture);
-		glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
-
-		return true;
-	}
-
-
-	struct ImGuiViewportDataGlfw
-	{
-		GLFWwindow* Window;
-		bool        WindowOwned;
-
-		ImGuiViewportDataGlfw() { Window = NULL; WindowOwned = false; }
-		~ImGuiViewportDataGlfw() { IM_ASSERT(Window == NULL); }
-	};
-
-
-	static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
-	{
-		using namespace Ainan;
-		if (PrevUserCallbackMousebutton != NULL && window == Window::Ptr)
-			PrevUserCallbackMousebutton(window, button, action, mods);
-
-		if (action == GLFW_PRESS && button >= 0 && button < IM_ARRAYSIZE(MouseJustPressed))
-			MouseJustPressed[button] = true;
-	}
-
-	static void Glfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
-	{
-		using namespace Ainan;
-		if (PrevUserCallbackScroll != NULL && window == Window::Ptr)
-			PrevUserCallbackScroll(window, xoffset, yoffset);
-
-		ImGuiIO& io = ImGui::GetIO();
-		io.MouseWheelH += (float)xoffset;
-		io.MouseWheel += (float)yoffset;
-	}
-
-	static void Glfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-	{
-		using namespace Ainan;
-		if (PrevUserCallbackKey != NULL && window == Window::Ptr)
-			PrevUserCallbackKey(window, key, scancode, action, mods);
-
-		ImGuiIO& io = ImGui::GetIO();
-		if (action == GLFW_PRESS)
-			io.KeysDown[key] = true;
-		if (action == GLFW_RELEASE)
-			io.KeysDown[key] = false;
-
-		// Modifiers are not reliable across systems
-		io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
-		io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
-		io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
-		io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
-	}
-
-	void CharCallback(GLFWwindow* window, unsigned int c)
-	{
-		using namespace Ainan;
-		if (PrevUserCallbackChar != NULL && window == Window::Ptr)
-			PrevUserCallbackChar(window, c);
-
-		ImGuiIO& io = ImGui::GetIO();
-		if (c > 0 && c < 0x10000)
-			io.AddInputCharacter((unsigned short)c);
-	}
-
-	static void ImGui_ImplGlfw_WindowCloseCallback(GLFWwindow* window)
-	{
-		if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
-			viewport->PlatformRequestClose = true;
-	}
-
-	static void ImGui_ImplGlfw_WindowPosCallback(GLFWwindow* window, int, int)
-	{
-		if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
-			viewport->PlatformRequestMove = true;
-	}
-
-	static void ImGui_ImplGlfw_WindowSizeCallback(GLFWwindow* window, int, int)
-	{
-		if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
-			viewport->PlatformRequestResize = true;
-	}
-
-	static void Glfw_CreateWindow(ImGuiViewport* viewport)
-	{
-		ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
-		viewport->PlatformUserData = data;
-
-		// GLFW 3.2 unfortunately always set focus on glfwCreateWindow() if GLFW_VISIBLE is set, regardless of GLFW_FOCUSED
-		glfwWindowHint(GLFW_VISIBLE, false);
-		glfwWindowHint(GLFW_FOCUSED, false);
-		glfwWindowHint(GLFW_DECORATED, (viewport->Flags & ImGuiViewportFlags_NoDecoration) ? false : true);
-		GLFWwindow* share_window = Window::Ptr;
-		data->Window = glfwCreateWindow((int)viewport->Size.x, (int)viewport->Size.y, "No Title Yet", NULL, share_window);
-		data->WindowOwned = true;
-		viewport->PlatformHandle = (void*)data->Window;
-		glfwSetWindowPos(data->Window, (int)viewport->Pos.x, (int)viewport->Pos.y);
-
-		// Install callbacks for secondary viewports
-		glfwSetMouseButtonCallback(data->Window, MouseButtonCallback);
-		glfwSetScrollCallback(data->Window, Glfw_ScrollCallback);
-		glfwSetKeyCallback(data->Window, Glfw_KeyCallback);
-		glfwSetCharCallback(data->Window, CharCallback);
-		glfwSetWindowCloseCallback(data->Window, ImGui_ImplGlfw_WindowCloseCallback);
-		glfwSetWindowPosCallback(data->Window, ImGui_ImplGlfw_WindowPosCallback);
-		glfwSetWindowSizeCallback(data->Window, ImGui_ImplGlfw_WindowSizeCallback);
-		glfwMakeContextCurrent(data->Window);
-	}
-
-	static void Glfw_DestroyWindow(ImGuiViewport* viewport)
-	{
-		if (ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData)
-		{
-			if (data->WindowOwned)
-			{
-				glfwDestroyWindow(data->Window);
-			}
-			data->Window = NULL;
-			IM_DELETE(data);
-		}
-		viewport->PlatformUserData = viewport->PlatformHandle = NULL;
-	}
-
-	static void Glfw_ShowWindow(ImGuiViewport* viewport)
-	{
-		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
-
-		// GLFW hack: Hide icon from task bar
-		HWND hwnd = glfwGetWin32Window(data->Window);
-		if (viewport->Flags & ImGuiViewportFlags_NoTaskBarIcon)
-		{
-			LONG ex_style = ::GetWindowLong(hwnd, GWL_EXSTYLE);
-			ex_style &= ~WS_EX_APPWINDOW;
-			ex_style |= WS_EX_TOOLWINDOW;
-			::SetWindowLong(hwnd, GWL_EXSTYLE, ex_style);
-		}
-
-		// GLFW hack: GLFW 3.2 has a bug where glfwShowWindow() also activates/focus the window.
-		// The fix was pushed to GLFW repository on 2018/01/09 and should be included in GLFW 3.3 via a GLFW_FOCUS_ON_SHOW window attribute.
-		// See https://github.com/glfw/glfw/issues/1189
-		// FIXME-VIEWPORT: Implement same work-around for Linux/OSX in the meanwhile.
-		if (viewport->Flags & ImGuiViewportFlags_NoFocusOnAppearing)
-		{
-			::ShowWindow(hwnd, SW_SHOWNA);
-			return;
-		}
-
-		glfwShowWindow(data->Window);
-	}
-
-	static ImVec2 Glfw_GetWindowPos(ImGuiViewport* viewport)
-	{
-		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
-		int x = 0, y = 0;
-		glfwGetWindowPos(data->Window, &x, &y);
-		return ImVec2((float)x, (float)y);
-	}
-
-	static void Glfw_SetWindowPos(ImGuiViewport* viewport, ImVec2 pos)
-	{
-		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
-		glfwSetWindowPos(data->Window, (int)pos.x, (int)pos.y);
-	}
-
-	static ImVec2 Glfw_GetWindowSize(ImGuiViewport* viewport)
-	{
-		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
-		int w = 0, h = 0;
-		glfwGetWindowSize(data->Window, &w, &h);
-		return ImVec2((float)w, (float)h);
-	}
-
-	static void Glfw_SetWindowSize(ImGuiViewport* viewport, ImVec2 size)
-	{
-		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
-		glfwSetWindowSize(data->Window, (int)size.x, (int)size.y);
-	}
-
-	static void Glfw_SetWindowTitle(ImGuiViewport* viewport, const char* title)
-	{
-		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
-		glfwSetWindowTitle(data->Window, title);
-	}
-
-	static void Glfw_SetWindowFocus(ImGuiViewport* viewport)
-	{
-		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
-		glfwFocusWindow(data->Window);
-	}
-
-	static bool Glfw_GetWindowFocus(ImGuiViewport* viewport)
-	{
-		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
-		return glfwGetWindowAttrib(data->Window, GLFW_FOCUSED) != 0;
-	}
-
-	static bool Glfw_GetWindowMinimized(ImGuiViewport* viewport)
-	{
-		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
-		return glfwGetWindowAttrib(data->Window, GLFW_ICONIFIED) != 0;
-	}
-
-	static void Glfw_RenderWindow(ImGuiViewport* viewport, void*)
-	{
-		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
-		glfwMakeContextCurrent(data->Window);
-	}
-
-	static void Glfw_SwapBuffers(ImGuiViewport* viewport, void*)
-	{
-		ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData;
-		glfwMakeContextCurrent(data->Window);
-		glfwSwapBuffers(data->Window);
-	}
-
-	// FIXME-PLATFORM: GLFW doesn't export monitor work area (see https://github.com/glfw/glfw/pull/989)
-	static void Glfw_UpdateMonitors()
-	{
-		ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-		int monitors_count = 0;
-		GLFWmonitor** glfw_monitors = glfwGetMonitors(&monitors_count);
-		platform_io.Monitors.resize(0);
-		for (int n = 0; n < monitors_count; n++)
-		{
-			ImGuiPlatformMonitor monitor;
-			int x, y;
-			glfwGetMonitorPos(glfw_monitors[n], &x, &y);
-			const GLFWvidmode* vid_mode = glfwGetVideoMode(glfw_monitors[n]);
-			monitor.MainPos = monitor.WorkPos = ImVec2((float)x, (float)y);
-			monitor.MainSize = monitor.WorkSize = ImVec2((float)vid_mode->width, (float)vid_mode->height);
-			platform_io.Monitors.push_back(monitor);
-		}
-		WantUpdateMonitors = false;
-	}
-
-	void Glfw_MonitorCallback(GLFWmonitor*, int)
-	{
-		WantUpdateMonitors = true;
-	}
-
-	void Glfw_ShutdownPlatformInterface() {}
-
-	void Glfw_InitPlatformInterface()
-	{
-		// Register platform interface (will be coupled with a renderer interface)
-		ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-		platform_io.Platform_CreateWindow = Glfw_CreateWindow;
-		platform_io.Platform_DestroyWindow = Glfw_DestroyWindow;
-		platform_io.Platform_ShowWindow = Glfw_ShowWindow;
-		platform_io.Platform_SetWindowPos = Glfw_SetWindowPos;
-		platform_io.Platform_GetWindowPos = Glfw_GetWindowPos;
-		platform_io.Platform_SetWindowSize = Glfw_SetWindowSize;
-		platform_io.Platform_GetWindowSize = Glfw_GetWindowSize;
-		platform_io.Platform_SetWindowFocus = Glfw_SetWindowFocus;
-		platform_io.Platform_GetWindowFocus = Glfw_GetWindowFocus;
-		platform_io.Platform_GetWindowMinimized = Glfw_GetWindowMinimized;
-		platform_io.Platform_SetWindowTitle = Glfw_SetWindowTitle;
-		platform_io.Platform_RenderWindow = Glfw_RenderWindow;
-		platform_io.Platform_SwapBuffers = Glfw_SwapBuffers;
-
-		// Note: monitor callback are broken GLFW 3.2 and earlier (see github.com/glfw/glfw/issues/784)
-		Glfw_UpdateMonitors();
-		glfwSetMonitorCallback(Glfw_MonitorCallback);
-
-		// Register main window handle (which is owned by the main application, not by us)
-		ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-		ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
-		data->Window = Window::Ptr;
-		data->WindowOwned = false;
-		main_viewport->PlatformUserData = data;
-		main_viewport->PlatformHandle = (void*)Window::Ptr;
-	}
-
 	namespace OpenGL {
+		//TODO these stuff really belong to the window class and not here
+		bool                 MouseJustPressed[5] = { false, false, false, false, false };
+		GLFWcursor* MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
+		bool                 WantUpdateMonitors = true;
+		GLFWmousebuttonfun   PrevUserCallbackMousebutton = NULL;
+		GLFWscrollfun        PrevUserCallbackScroll = NULL;
+		GLFWkeyfun           PrevUserCallbackKey = NULL;
+		GLFWcharfun          PrevUserCallbackChar = NULL;
+
+		struct ImGuiViewportDataGlfw
+		{
+			GLFWwindow* Window;
+			bool        WindowOwned;
+
+			ImGuiViewportDataGlfw() { Window = NULL; WindowOwned = false; }
+			~ImGuiViewportDataGlfw() { IM_ASSERT(Window == NULL); }
+		};
+
+		void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+		{
+			if (PrevUserCallbackMousebutton != NULL && window == Window::Ptr)
+				PrevUserCallbackMousebutton(window, button, action, mods);
+
+			if (action == GLFW_PRESS && button >= 0 && button < IM_ARRAYSIZE(MouseJustPressed))
+				MouseJustPressed[button] = true;
+		}
+
+		void Glfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+		{
+			if (PrevUserCallbackScroll != NULL && window == Window::Ptr)
+				PrevUserCallbackScroll(window, xoffset, yoffset);
+
+			ImGuiIO& io = ImGui::GetIO();
+			io.MouseWheelH += (float)xoffset;
+			io.MouseWheel += (float)yoffset;
+		}
+
+		void Glfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+		{
+			if (PrevUserCallbackKey != NULL && window == Window::Ptr)
+				PrevUserCallbackKey(window, key, scancode, action, mods);
+
+			ImGuiIO& io = ImGui::GetIO();
+			if (action == GLFW_PRESS)
+				io.KeysDown[key] = true;
+			if (action == GLFW_RELEASE)
+				io.KeysDown[key] = false;
+
+			// Modifiers are not reliable across systems
+			io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
+			io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
+			io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
+			io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
+		}
+
+		void CharCallback(GLFWwindow* window, unsigned int c)
+		{
+			if (PrevUserCallbackChar != NULL && window == Window::Ptr)
+				PrevUserCallbackChar(window, c);
+
+			ImGuiIO& io = ImGui::GetIO();
+			if (c > 0 && c < 0x10000)
+				io.AddInputCharacter((unsigned short)c);
+		}
+
+		void Glfw_UpdateMonitors()
+		{
+			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+			int monitors_count = 0;
+			GLFWmonitor** glfw_monitors = glfwGetMonitors(&monitors_count);
+			platform_io.Monitors.resize(0);
+			for (int n = 0; n < monitors_count; n++)
+			{
+				ImGuiPlatformMonitor monitor;
+				int x, y;
+				glfwGetMonitorPos(glfw_monitors[n], &x, &y);
+				const GLFWvidmode* vid_mode = glfwGetVideoMode(glfw_monitors[n]);
+				monitor.MainPos = monitor.WorkPos = ImVec2((float)x, (float)y);
+				monitor.MainSize = monitor.WorkSize = ImVec2((float)vid_mode->width, (float)vid_mode->height);
+				platform_io.Monitors.push_back(monitor);
+			}
+			WantUpdateMonitors = false;
+		}
+
+		void Glfw_InitPlatformInterface()
+		{
+			//for cleaner code
+#define GET_WINDOW(x) GLFWwindow* x = ((ImGuiViewportDataGlfw*)viewport->PlatformUserData)->Window;
+
+			// Register platform interface (will be coupled with a renderer interface)
+			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+			platform_io.Platform_CreateWindow = [](ImGuiViewport* viewport)
+			{
+				ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
+				viewport->PlatformUserData = data;
+
+				// GLFW 3.2 unfortunately always set focus on glfwCreateWindow() if GLFW_VISIBLE is set, regardless of GLFW_FOCUSED
+				glfwWindowHint(GLFW_VISIBLE, false);
+				glfwWindowHint(GLFW_FOCUSED, false);
+				glfwWindowHint(GLFW_DECORATED, (viewport->Flags & ImGuiViewportFlags_NoDecoration) ? false : true);
+				GLFWwindow* share_window = Window::Ptr;
+				data->Window = glfwCreateWindow((int)viewport->Size.x, (int)viewport->Size.y, "No Title Yet", NULL, share_window);
+				data->WindowOwned = true;
+				viewport->PlatformHandle = (void*)data->Window;
+				glfwSetWindowPos(data->Window, (int)viewport->Pos.x, (int)viewport->Pos.y);
+
+				// Install callbacks for secondary viewports
+				glfwSetMouseButtonCallback(data->Window, MouseButtonCallback);
+				glfwSetScrollCallback(data->Window, Glfw_ScrollCallback);
+				glfwSetKeyCallback(data->Window, Glfw_KeyCallback);
+				glfwSetCharCallback(data->Window, CharCallback);
+				glfwSetWindowCloseCallback(data->Window, [](GLFWwindow* window)
+					{
+						if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
+							viewport->PlatformRequestClose = true;
+					});
+				glfwSetWindowPosCallback(data->Window, [](GLFWwindow* window, int, int)
+					{
+						if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
+							viewport->PlatformRequestMove = true;
+					});
+				glfwSetWindowSizeCallback(data->Window, [](GLFWwindow* window, int, int)
+					{
+						if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
+							viewport->PlatformRequestResize = true;
+					}
+				);
+				glfwMakeContextCurrent(data->Window);
+			};
+			platform_io.Platform_DestroyWindow = [](ImGuiViewport* viewport)
+			{
+				if (ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData)
+				{
+					if (data->WindowOwned)
+					{
+						glfwDestroyWindow(data->Window);
+					}
+					data->Window = NULL;
+					IM_DELETE(data);
+				}
+				viewport->PlatformUserData = viewport->PlatformHandle = NULL;
+			};
+			platform_io.Platform_ShowWindow = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				glfwShowWindow(window);
+			};
+			platform_io.Platform_SetWindowPos = [](ImGuiViewport* viewport, ImVec2 pos)
+			{
+				GET_WINDOW(window);
+				glfwSetWindowPos(window, (int)pos.x, (int)pos.y);
+			};
+			platform_io.Platform_GetWindowPos = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				int x = 0, y = 0;
+				glfwGetWindowPos(window, &x, &y);
+				return ImVec2((float)x, (float)y);
+			};
+			platform_io.Platform_SetWindowSize = [](ImGuiViewport* viewport, ImVec2 size)
+			{
+				GET_WINDOW(window);
+				glfwSetWindowSize(window, (int)size.x, (int)size.y);
+			};
+			platform_io.Platform_GetWindowSize = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				int w = 0, h = 0;
+				glfwGetWindowSize(window, &w, &h);
+				return ImVec2((float)w, (float)h);
+			};
+			platform_io.Platform_SetWindowFocus = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				glfwFocusWindow(window);
+			};
+			platform_io.Platform_GetWindowFocus = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				return glfwGetWindowAttrib(window, GLFW_FOCUSED) != 0;
+			};
+			platform_io.Platform_GetWindowMinimized = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				return glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0;
+			};
+			platform_io.Platform_SetWindowTitle = [](ImGuiViewport* viewport, const char* title)
+			{
+				GET_WINDOW(window);
+				glfwSetWindowTitle(window, title);
+			};
+			platform_io.Platform_RenderWindow = [](ImGuiViewport* viewport, void*)
+			{
+				GET_WINDOW(window);
+				glfwMakeContextCurrent(window);
+			};
+			platform_io.Platform_SwapBuffers = [](ImGuiViewport* viewport, void*)
+			{
+				GET_WINDOW(window);
+				glfwMakeContextCurrent(window);
+				glfwSwapBuffers(window);
+			};
+#undef GET_WINDOW(x)
+
+			// Note: monitor callback are broken GLFW 3.2 and earlier (see github.com/glfw/glfw/issues/784)
+			Glfw_UpdateMonitors();
+			glfwSetMonitorCallback([](GLFWmonitor*, int)
+				{
+					WantUpdateMonitors = true;
+				});
+
+			// Register main window handle (which is owned by the main application, not by us)
+			ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+			ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
+			data->Window = Window::Ptr;
+			data->WindowOwned = false;
+			main_viewport->PlatformUserData = data;
+			main_viewport->PlatformHandle = (void*)Window::Ptr;
+		}
+
+
+		OpenGLRendererAPI* OpenGLRendererAPI::SingletonInstance = nullptr;
 
 		static void opengl_debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 		{
@@ -418,12 +246,15 @@ namespace Ainan {
 #endif // DEBUG
 
 			glEnable(GL_BLEND);
-			currentAPI = this;
+			SingletonInstance = this;
 		}
 
-		static void ImGui_ImplOpenGL3_DestroyFontsTexture()
+		OpenGLRendererAPI::~OpenGLRendererAPI()
 		{
-			using namespace Ainan;
+			SingletonInstance = nullptr;
+
+			//terminate ImGui
+			ImGui::DestroyPlatformWindows();
 			if (FontTexture)
 			{
 				ImGuiIO& io = ImGui::GetIO();
@@ -431,36 +262,11 @@ namespace Ainan {
 				io.Fonts->TexID = 0;
 				FontTexture = 0;
 			}
-		}
-
-		static void DestroyDeviceObjects()
-		{
-			using namespace Ainan;
-			ImGuiVertexBuffer.reset();
-			ImGuiIndexBuffer.reset();
-
-			ImGuiShader.reset();
-
-			ImGui_ImplOpenGL3_DestroyFontsTexture();
-		}
-
-		static void Glfw_Shutdown()
-		{
-			using namespace Ainan;
-			Glfw_ShutdownPlatformInterface();
-
 			for (ImGuiMouseCursor cursor_n = 0; cursor_n < ImGuiMouseCursor_COUNT; cursor_n++)
 			{
 				glfwDestroyCursor(MouseCursors[cursor_n]);
 				MouseCursors[cursor_n] = NULL;
 			}
-		}
-
-		OpenGLRendererAPI::~OpenGLRendererAPI()
-		{
-			ImGui::DestroyPlatformWindows();
-			DestroyDeviceObjects();
-			Glfw_Shutdown();
 			ImGui::DestroyContext();
 		}
 
@@ -530,10 +336,105 @@ namespace Ainan {
 			}
 		}
 
-
-		static void UpdateMousePosAndButtons()
+		void OpenGLRendererAPI::ImGuiNewFrame()
 		{
+			if (!FontTexture)
+			{
+				// Backup GL state
+				GLint last_texture, last_array_buffer;
+				glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
+				glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
+
+				const GLchar* vertexShaderSrc =
+					R"(
+			layout (location = 0) in vec2 Position;
+			layout (location = 1) in vec2 UV;
+			layout (location = 2) in vec4 Color;
+			uniform mat4 ProjMtx;
+			out vec2 Frag_UV;
+			out vec4 Frag_Color;
+
+			void main()
+			{
+			    Frag_UV = UV;
+			    Frag_Color = Color;
+			    gl_Position = ProjMtx * vec4(Position.xy,0,1);
+			})";
+
+				const GLchar* fragmentShaderSrc =
+					R"(
+			in vec2 Frag_UV;
+			in vec4 Frag_Color;
+			layout(binding = 0) uniform sampler2D Texture;
+			layout (location = 0) out vec4 Out_Color;
+
+			void main()
+			{
+			    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);
+			})";
+
+				std::string vertSrc = (std::string)"#version 420 core" + (std::string)vertexShaderSrc;
+				std::string fragSrc = (std::string)"#version 420 core" + (std::string)fragmentShaderSrc;
+
+				ImGuiShader = OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
+
+				AttribLocationVtxPos = glGetAttribLocation(ImGuiShader->GetRendererID(), "Position");
+				AttribLocationVtxUV = glGetAttribLocation(ImGuiShader->GetRendererID(), "UV");
+				AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->GetRendererID(), "Color");
+
+				// Create buffers
+				VertexLayout layout;
+				ImGuiVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(nullptr, 0, layout, false);
+				ImGuiIndexBuffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(nullptr, 0);
+
+				// Build texture atlas
+				ImGuiIO& io = ImGui::GetIO();
+				unsigned char* pixels;
+				int width, height;
+				io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bits (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
+
+				// Upload texture to graphics system
+				GLint last_font_texture;
+				glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_font_texture);
+				glGenTextures(1, &FontTexture);
+				glBindTexture(GL_TEXTURE_2D, FontTexture);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+				// Store our identifier
+				io.Fonts->TexID = (ImTextureID)(intptr_t)FontTexture;
+
+				// Restore state
+				glBindTexture(GL_TEXTURE_2D, last_font_texture);
+
+				// Restore modified GL state
+				glBindTexture(GL_TEXTURE_2D, last_texture);
+				glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
+
+			}
+
 			ImGuiIO& io = ImGui::GetIO();
+			IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end."
+				"Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
+
+			// Setup display size (every frame to accommodate for window resizing)
+			int w, h;
+			int display_w, display_h;
+			glfwGetWindowSize(Window::Ptr, &w, &h);
+			glfwGetFramebufferSize(Window::Ptr, &display_w, &display_h);
+			io.DisplaySize = ImVec2((float)w, (float)h);
+			if (w > 0 && h > 0)
+				io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
+			if (WantUpdateMonitors)
+				Glfw_UpdateMonitors();
+
+			// Setup time step
+			double current_time = glfwGetTime();
+			io.DeltaTime = Time > 0.0 ? (float)(current_time - Time) : (float)(1.0f / 60.0f);
+			Time = current_time;
+
 			// Update buttons
 			for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
 			{
@@ -580,76 +481,33 @@ namespace Ainan {
 					for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
 						io.MouseDown[i] |= glfwGetMouseButton(window, i) != 0;
 				}
-
-				// (Optional) When using multiple viewports: set io.MouseHoveredViewport to the viewport the OS mouse cursor is hovering.
-				// Important: this information is not easy to provide and many high-level windowing library won't be able to provide it correctly, because
-				// - This is _ignoring_ viewports with the ImGuiViewportFlags_NoInputs flag (pass-through windows).
-				// - This is _regardless_ of whether another viewport is focused or being dragged from.
-				// If ImGuiBackendFlags_HasMouseHoveredViewport is not set by the back-end, imgui will ignore this field and infer the information by relying on the
-				// rectangles and last focused time of every viewports it knows about. It will be unaware of other windows that may be sitting between or over your windows.
-				// [GLFW] FIXME: This is currently only correct on Win32. See what we do below with the WM_NCHITTEST, missing an equivalent for other systems.
-				// See https://github.com/glfw/glfw/issues/1236 if you want to help in making this a GLFW feature.
-#if GLFW_HAS_GLFW_HOVERED && defined(_WIN32)
-				if (glfwGetWindowAttrib(window, GLFW_HOVERED) && !(viewport->Flags & ImGuiViewportFlags_NoInputs))
-					io.MouseHoveredViewport = viewport->ID;
-#endif
 			}
-		}
 
-
-		static void UpdateMouseCursor()
-		{
-			ImGuiIO& io = ImGui::GetIO();
 			if ((io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) || glfwGetInputMode(Window::Ptr, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
-				return;
-
-			ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-			for (int n = 0; n < platform_io.Viewports.Size; n++)
 			{
-				GLFWwindow* window = (GLFWwindow*)platform_io.Viewports[n]->PlatformHandle;
-				if (imgui_cursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
+
+			}
+			else 
+			{
+				ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
+				ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+				for (int n = 0; n < platform_io.Viewports.Size; n++)
 				{
-					// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
-					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-				}
-				else
-				{
-					// Show OS mouse cursor
-					// FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
-					glfwSetCursor(window, MouseCursors[imgui_cursor] ? MouseCursors[imgui_cursor] : MouseCursors[ImGuiMouseCursor_Arrow]);
-					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+					GLFWwindow* window = (GLFWwindow*)platform_io.Viewports[n]->PlatformHandle;
+					if (imgui_cursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
+					{
+						// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
+						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+					}
+					else
+					{
+						// Show OS mouse cursor
+						// FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
+						glfwSetCursor(window, MouseCursors[imgui_cursor] ? MouseCursors[imgui_cursor] : MouseCursors[ImGuiMouseCursor_Arrow]);
+						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+					}
 				}
 			}
-		}
-
-		void OpenGLRendererAPI::ImGuiNewFrame()
-		{
-			if (!FontTexture)
-				CreateDeviceObjects();
-
-			ImGuiIO& io = ImGui::GetIO();
-			IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end."
-				"Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
-
-			// Setup display size (every frame to accommodate for window resizing)
-			int w, h;
-			int display_w, display_h;
-			glfwGetWindowSize(Window::Ptr, &w, &h);
-			glfwGetFramebufferSize(Window::Ptr, &display_w, &display_h);
-			io.DisplaySize = ImVec2((float)w, (float)h);
-			if (w > 0 && h > 0)
-				io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
-			if (WantUpdateMonitors)
-				Glfw_UpdateMonitors();
-
-			// Setup time step
-			double current_time = glfwGetTime();
-			io.DeltaTime = Time > 0.0 ? (float)(current_time - Time) : (float)(1.0f / 60.0f);
-			Time = current_time;
-
-			UpdateMousePosAndButtons();
-			UpdateMouseCursor();
 
 			ImGui::NewFrame();
 		}
@@ -666,23 +524,6 @@ namespace Ainan {
 				ImGui::RenderPlatformWindowsDefault();
 				glfwMakeContextCurrent(backup_current_context);
 			}
-		}
-
-		static void RenderWindow(ImGuiViewport* viewport, void*)
-		{
-			if (!(viewport->Flags & ImGuiViewportFlags_NoRendererClear))
-			{
-				ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-				glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
-				glClear(GL_COLOR_BUFFER_BIT);
-			}
-			currentAPI->DrawImGui(viewport->DrawData);
-		}
-
-		static void InitPlatformInterface()
-		{
-			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-			platform_io.Renderer_RenderWindow = RenderWindow;
 		}
 
 		void OpenGLRendererAPI::InitImGui()
@@ -724,8 +565,16 @@ namespace Ainan {
 			io.KeyMap[ImGuiKey_Y] = GLFW_KEY_Y;
 			io.KeyMap[ImGuiKey_Z] = GLFW_KEY_Z;
 
-			io.SetClipboardTextFn = Glfw_SetClipboardText;
-			io.GetClipboardTextFn = Glfw_GetClipboardText;
+			io.SetClipboardTextFn = [](void* user_data, const char* text)
+			{
+				return glfwSetClipboardString((GLFWwindow*)user_data, text);
+			};
+
+			io.GetClipboardTextFn = [](void* user_data)
+			{
+				return glfwGetClipboardString((GLFWwindow*)user_data);
+			};
+
 			io.ClipboardUserData = (void*)Window::Ptr;
 
 			MouseCursors[ImGuiMouseCursor_Arrow] = glfwCreateStandardCursor(GLFW_ARROW_CURSOR);
@@ -750,25 +599,28 @@ namespace Ainan {
 			// Our mouse update function expect PlatformHandle to be filled for the main viewport
 			ImGuiViewport* main_viewport = ImGui::GetMainViewport();
 			main_viewport->PlatformHandle = (void*)Window::Ptr;
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-				Glfw_InitPlatformInterface();
+			Glfw_InitPlatformInterface();
 
 			// Setup back-end capabilities flags
-			io.BackendRendererName = "imgui_impl_opengl3";
+			io.BackendRendererName = "OpenGL 4.2";
 
 			// Store GLSL version string so we can refer to it later in case we recreate shaders. Note: GLSL version is NOT the same as GL version. Leave this to NULL if unsure.
+			char GlslVersionString[32] = "";
 			IM_ASSERT((int)strlen(glsl_version) + 2 < IM_ARRAYSIZE(GlslVersionString));
 			strcpy(GlslVersionString, glsl_version);
 			strcat(GlslVersionString, "\n");
 
-			// Make a dummy GL call (we don't actually need the result)
-			// IF YOU GET A CRASH HERE: it probably means that you haven't initialized the OpenGL function loader used by this code.
-			// Desktop OpenGL 3/4 need a function loader. See the IMGUI_IMPL_OPENGL_LOADER_xxx explanation above.
-			GLint current_texture;
-			glGetIntegerv(GL_TEXTURE_BINDING_2D, &current_texture);
-
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-				InitPlatformInterface();
+			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+			platform_io.Renderer_RenderWindow = [](ImGuiViewport* viewport, void*)
+			{
+				if (!(viewport->Flags & ImGuiViewportFlags_NoRendererClear))
+				{
+					ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+					glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+					glClear(GL_COLOR_BUFFER_BIT);
+				}
+				OpenGLRendererAPI::Snigleton().DrawImGui(viewport->DrawData);
+			};
 		}
 
 		void OpenGLRendererAPI::DrawImGui(ImDrawData* drawData)
@@ -918,8 +770,7 @@ namespace Ainan {
 
 		//we don't do anything because this is handled by OpenGL, it's different for other API's
 		void OpenGLRendererAPI::RecreateSwapchain(const glm::vec2& newSwapchainSize)
-		{
-		}
+		{}
 
 		void OpenGLRendererAPI::Present()
 		{
