@@ -64,8 +64,8 @@ namespace Ainan {
 
 		if (api == RendererType::OpenGL)
 		{
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef DEBUG
@@ -77,7 +77,7 @@ namespace Ainan {
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		}
 
-		Ptr = glfwCreateWindow(500, 500 * 9 / 16, "Ainan", nullptr, nullptr);
+		Ptr = glfwCreateWindow(c_StartMenuWidth, c_StartMenuHeight, "Ainan", nullptr, nullptr);
 		int fbWidth = 0;
 		int fbHeight = 0;
 		glfwGetFramebufferSize(Ptr, &fbWidth, &fbHeight);
@@ -137,6 +137,11 @@ namespace Ainan {
 	void Window::SetSize(const glm::ivec2& size)
 	{
 		glfwSetWindowSize(Ptr, size.x, size.y);
+	}
+
+	void Window::SetSize(int32_t width, int32_t height)
+	{
+		glfwSetWindowSize(Ptr, width, height);
 	}
 
 	void Window::SetShouldClose()

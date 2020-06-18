@@ -3,14 +3,13 @@
 #include "renderer/Rectangle.h"
 #include "renderer/RendererAPI.h"
 
-#define WINDOW_SIZE_ON_LAUNCH_X 500
-#define WINDOW_SIZE_ON_LAUNCH_Y 500 * 9 / 16
-#define WINDOW_SIZE_ON_CREATE_ENVIRONMENT_X 700
-#define WINDOW_SIZE_ON_CREATE_ENVIRONMENT_Y 700 * 9 / 16
-
 namespace Ainan {
 
 	const float c_GlobalScaleFactor = 1000.0f;
+	const int32_t c_StartMenuWidth = 450;
+	const int32_t c_StartMenuHeight = 350;
+	const int32_t c_CreateEnvironmentWindowWidth = 700;
+	const int32_t c_CreateEnvironmentWindowHeight = 700 * 9 / 16;
 
 	class Window
 	{
@@ -23,6 +22,7 @@ namespace Ainan {
 		static void Maximize();
 
 		static void SetSize(const glm::ivec2& size);
+		static void SetSize(int32_t width, int32_t height);
 		static void SetShouldClose();
 		static void SetTitle(const std::string& title);
 

@@ -9,8 +9,9 @@ namespace Ainan
 		m_Grid(200.0f)
 	{
 		m_LoadEnvironmentBrowser.Filter.push_back(".env");
-		m_LoadEnvironmentBrowser.OnCloseWindow = []() {
-			Window::SetSize({ WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 });
+		m_LoadEnvironmentBrowser.OnCloseWindow = []() 
+		{
+			Window::SetSize(c_StartMenuWidth, c_StartMenuHeight);
 			Window::CenterWindow();
 		};
 
@@ -21,6 +22,8 @@ namespace Ainan
 		m_ParticleSystemIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/ParticleSystem.png", TextureFormat::RGBA));
 		m_RadialLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/RadialLight.png", TextureFormat::RGBA));
 		m_SpotLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
+
+		UpdateTitle();
 	}
 
 	Editor::~Editor()
@@ -215,14 +218,34 @@ namespace Ainan
 
 	void Editor::Draw_NoEnvLoaded()
 	{
-		if (m_LoadEnvironmentBrowser.OnCloseWindow == nullptr)
-			m_LoadEnvironmentBrowser.OnCloseWindow = []() {
-			Window::SetSize({ WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 });
-			Window::CenterWindow();
-		};
+		if (m_LoadEnvironmentBrowser.OnCloseWindow == nullptr) 
+		{
+			m_LoadEnvironmentBrowser.OnCloseWindow = []() 
+			{
+				Window::SetSize(c_StartMenuWidth, c_StartMenuHeight);
+				Window::CenterWindow();
+			};
+		}
 
 		Renderer::ImGuiNewFrame();
-		ImGuiWrapper::BeginGlobalDocking(false);
+		ImGuiWrapper::BeginGlobalDocking(true);
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File")) 
+			{
+				if (ImGui::MenuItem("Preferences"))
+				{
+					//TODO
+				}
+
+				if (ImGui::MenuItem("Exit"))
+					Window::SetShouldClose();
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMainMenuBar();
+		}
 
 		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 		ImGui::SetNextWindowDockID(ImGui::GetID("GlobalDockSpace"));
@@ -230,28 +253,22 @@ namespace Ainan
 
 		ImGui::DockBuilderGetNode(ImGui::GetWindowDockID())->LocalFlags |= ImGuiDockNodeFlags_NoTabBar;
 
-		const ImVec2 buttonSize = ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT);
-		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)buttonSize.x / 2);
+		ImGui::SetCursorPosY(c_StartMenuBtnStartTop);
+		ImGui::SetCursorPosX(c_StartMenuBtnStartLeft);
 
-		if (ImGui::Button("Create New Environment", buttonSize))
+		if (ImGui::Button("Create New Environment", { c_StartMenuBtnWidth, c_StartMenuBtnHeight }))
 		{
 			m_State = State_CreateEnv;
-			Window::SetSize({ WINDOW_SIZE_ON_CREATE_ENVIRONMENT_X, WINDOW_SIZE_ON_CREATE_ENVIRONMENT_Y });
+			Window::SetSize(c_CreateEnvironmentWindowWidth, c_CreateEnvironmentWindowHeight);
 			Window::CenterWindow();
 		}
 
-		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)buttonSize.x / 2);
+		ImGui::SetCursorPosX(c_StartMenuBtnStartLeft);
+		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + c_StartMenuBtnMarginY);
 
-		if (ImGui::Button("Load Environment", buttonSize))
+		if (ImGui::Button("Load Environment", { c_StartMenuBtnWidth, c_StartMenuBtnHeight }))
 		{
 			m_LoadEnvironmentBrowser.OpenWindow();
-		}
-
-		ImGui::SetCursorPosX((float)Window::FramebufferSize.x / 2 - (float)buttonSize.x / 2);
-
-		if (ImGui::Button("Exit App", buttonSize))
-		{
-			Window::SetShouldClose();
 		}
 
 		ImGui::End();
@@ -259,7 +276,8 @@ namespace Ainan
 		m_LoadEnvironmentBrowser.DisplayGUI([this](const std::filesystem::path path)
 			{
 				//check if file is selected
-				if (path.extension().u8string() == ".env") {
+				if (path.extension().u8string() == ".env") 
+				{
 					assert(CheckEnvironmentFile(path.u8string()) == "");
 
 					//remove minimizing event on file browser window close
@@ -281,8 +299,10 @@ namespace Ainan
 		Renderer::ImGuiNewFrame();
 
 		ImGuiWrapper::BeginGlobalDocking(false);
-		ImGui::Begin("Create Environment", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
+		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
+		ImGui::SetNextWindowDockID(ImGui::GetID("GlobalDockSpace"));
 
+		ImGui::Begin("Create Environment", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
 		ImGui::Text("Environment Folder");
 		ImGui::SameLine();
 		ImGui::InputText("##Environment Folder", &m_EnvironmentCreateFolderPath);
@@ -355,12 +375,12 @@ namespace Ainan
 		ImGui::SameLine();
 		ImGui::Checkbox("##Include Starter Assets", &m_IncludeStarterAssets);
 
-		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - (START_MENU_BUTTON_HEIGHT + 10));
+		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - (c_CreateEnvBtnHeight + 10));
 
-		if (ImGui::Button("Cancel", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		if (ImGui::Button("Cancel", { c_CreateEnvBtnWidth, c_CreateEnvBtnHeight }))
 		{
 			m_State = State_NoEnvLoaded;
-			Window::SetSize({ WINDOW_SIZE_ON_LAUNCH_X, WINDOW_SIZE_ON_LAUNCH_Y });
+			Window::SetSize(c_StartMenuWidth, c_StartMenuHeight);
 			Window::CenterWindow();
 		}
 
@@ -371,10 +391,10 @@ namespace Ainan
 		else
 			ImGui::PushStyleColor(ImGuiCol_Button, { 0.8f, 0.0f, 0.0f, 1.0f });
 
-		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - (START_MENU_BUTTON_HEIGHT + 10));
-		ImGui::SetCursorPosX(ImGui::GetWindowSize().x - (START_MENU_BUTTON_WIDTH + 10));
+		ImGui::SetCursorPosY(ImGui::GetWindowSize().y - (c_CreateEnvBtnHeight + 10));
+		ImGui::SetCursorPosX(ImGui::GetWindowSize().x - (c_CreateEnvBtnWidth + 10));
 
-		if (ImGui::Button("Create", ImVec2(START_MENU_BUTTON_WIDTH, START_MENU_BUTTON_HEIGHT)))
+		if (ImGui::Button("Create", { c_CreateEnvBtnWidth, c_CreateEnvBtnHeight }))
 		{
 			if (canSaveEnvironment) 
 			{
@@ -582,11 +602,13 @@ namespace Ainan
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
-			if (obj->Type == RadialLightType) {
+			if (obj->Type == RadialLightType) 
+			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
 				m_Background.SubmitLight(*light);
 			}
-			else if (obj->Type == SpotLightType) {
+			else if (obj->Type == SpotLightType) 
+			{
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
 				m_Background.SubmitLight(*light);
 			}
@@ -676,9 +698,10 @@ namespace Ainan
 		ImGui::SetCursorPosX(100.0f);
 		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
 
-		if (m_Env->BlurEnabled) {
-			if (ImGui::TreeNode("Blur Settings: ")) {
-
+		if (m_Env->BlurEnabled) 
+		{
+			if (ImGui::TreeNode("Blur Settings: ")) 
+			{
 				ImGui::Text("Blur Radius: ");
 				ImGui::SameLine();
 				ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
@@ -714,11 +737,13 @@ namespace Ainan
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
-			if (obj->Type == RadialLightType) {
+			if (obj->Type == RadialLightType) 
+			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
 				m_Background.SubmitLight(*light);
 			}
-			else if (obj->Type == SpotLightType) {
+			else if (obj->Type == SpotLightType) 
+			{
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
 				m_Background.SubmitLight(*light);
 			}
@@ -806,9 +831,10 @@ namespace Ainan
 		ImGui::SetCursorPosX(100.0f);
 		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
 
-		if (m_Env->BlurEnabled) {
-			if (ImGui::TreeNode("Blur Settings: ")) {
-
+		if (m_Env->BlurEnabled) 
+		{
+			if (ImGui::TreeNode("Blur Settings: ")) 
+			{
 				ImGui::Text("Blur Radius: ");
 				ImGui::SameLine();
 				ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
@@ -844,11 +870,13 @@ namespace Ainan
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
-			if (obj->Type == RadialLightType) {
+			if (obj->Type == RadialLightType) 
+			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
 				m_Background.SubmitLight(*light);
 			}
-			else if (obj->Type == SpotLightType) {
+			else if (obj->Type == SpotLightType) 
+			{
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
 				m_Background.SubmitLight(*light);
 			}
@@ -941,8 +969,10 @@ namespace Ainan
 		ImGui::SetCursorPosX(100.0f);
 		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
 
-		if (m_Env->BlurEnabled) {
-			if (ImGui::TreeNode("Blur Settings: ")) {
+		if (m_Env->BlurEnabled) 
+		{
+			if (ImGui::TreeNode("Blur Settings: ")) 
+			{
 
 				ImGui::Text("Blur Radius: ");
 				ImGui::SameLine();
@@ -987,27 +1017,27 @@ namespace Ainan
 		AssetManager::Terminate();
 		InputManager::Terminate();
 		Window::Restore();
-		Window::SetSize({ WINDOW_SIZE_FACTOR_ON_LAUNCH, WINDOW_SIZE_FACTOR_ON_LAUNCH * 9 / 16 });
+		Window::SetSize(c_StartMenuWidth, c_StartMenuHeight);
 		Window::CenterWindow();
+		m_ShouldDeleteEnv = true;
 	}
 
 	void Editor::DisplayMainMenuBarGUI()
 	{
-		if (ImGui::BeginMainMenuBar()) {
-
+		if (ImGui::BeginMainMenuBar()) 
+		{
 			if (ImGui::BeginMenu("File")) {
 				if (ImGui::MenuItem("Save"))
 					SaveEnvironment(*m_Env, m_EnvironmentFolderPath.u8string() + "\\" + m_Env->Name + ".env");
 
 				if (ImGui::MenuItem("Close Environment"))
 				{
-					m_ShouldDeleteEnv = true;
 					OnEnvironmentDestroy();
 					m_State = State_NoEnvLoaded;
 				}
 
 				if (ImGui::MenuItem("Exit"))
-					exit(0);
+					Window::SetShouldClose();
 
 				ImGui::EndMenu();
 			}
@@ -1245,7 +1275,7 @@ namespace Ainan
 		if (!m_ObjectInspectorWindowOpen)
 			return;
 
-		auto flags = ImGuiWindowFlags_::ImGuiWindowFlags_AlwaysUseWindowPadding;
+		auto flags = ImGuiWindowFlags_AlwaysUseWindowPadding;
 		ImGui::Begin("Object Inspector", &m_ObjectInspectorWindowOpen, flags);
 
 		if (ImGui::Button("Add Object"))
@@ -1350,9 +1380,10 @@ namespace Ainan
 
 				ImGui::Spacing();
 
-				if (m_Env->Objects[i]->RenameTextOpen) {
-					auto flags = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;
-					if (ImGui::InputText("Name", &m_Env->Objects[i]->m_Name, flags)) {
+				if (m_Env->Objects[i]->RenameTextOpen) 
+				{
+					if (ImGui::InputText("Name", &m_Env->Objects[i]->m_Name, ImGuiInputTextFlags_EnterReturnsTrue))
+					{
 						m_Env->Objects[i]->RenameTextOpen = !m_Env->Objects[i]->RenameTextOpen;
 					}
 				}
@@ -1843,19 +1874,27 @@ namespace Ainan
 	void Editor::UpdateTitle()
 	{
 		RendererType currentRendererType = Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType();
-
+		std::string apiName = "";
 		switch (currentRendererType)
 		{
 		case RendererType::OpenGL:
-			Window::SetTitle("Ainan - OpenGL (4.2) - " + m_Env->Name);
+			apiName = "OpenGL 4.2";
 			break;
 
 #ifdef PLATFORM_WINDOWS
 		case RendererType::D3D11:
-			Window::SetTitle("Ainan - DirectX 11 - " + m_Env->Name);
+			apiName = "DirectX 11";
 			break;
-		}
 #endif // PLATFORM_WINDOWS
+		}
+
+		std::string environmentName = "";
+		if (m_Env)
+			environmentName = m_Env->Name;
+		else
+			environmentName = "Start Menu";
+
+		Window::SetTitle("Ainan - " + apiName + " - " + environmentName);
 	}
 
 	void Editor::StartFrame()
@@ -1864,6 +1903,7 @@ namespace Ainan
 		{
 			delete m_Env;
 			m_Env = nullptr;
+			UpdateTitle();
 			m_ShouldDeleteEnv = false;
 		}
 

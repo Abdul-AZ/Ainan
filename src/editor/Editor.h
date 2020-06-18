@@ -12,14 +12,18 @@
 #include "ExportCamera.h"
 #include "file/FolderBrowser.h"
 
-#define WINDOW_SIZE_FACTOR_ON_LAUNCH 500
-#define START_MENU_BUTTON_WIDTH 200
-#define START_MENU_BUTTON_HEIGHT 75
-
 namespace Ainan {
 	bool SaveEnvironment(const Environment& env, std::string path);
 	std::string CheckEnvironmentFile(const std::string& path);
 	Environment* LoadEnvironment(const std::string& path);
+
+	const float c_StartMenuBtnWidth     = 300.0f;
+	const float c_StartMenuBtnHeight    = 75.0f;
+	const float c_StartMenuBtnStartLeft = 60.0f;
+	const float c_StartMenuBtnStartTop  = 50.0f;
+	const float c_StartMenuBtnMarginY   = 10.0f;
+	const float c_CreateEnvBtnWidth     = 250.0f;
+	const float c_CreateEnvBtnHeight    = 75.0f;
 
 	class Editor
 	{
