@@ -186,4 +186,50 @@ namespace Ainan {
 			}
 		}
 	}
+
+	std::string EditorStyleStr(EditorStyle style)
+	{
+		switch (style)
+		{
+		case EditorStyle::Light:
+			return "Light";
+
+		case EditorStyle::DarkTransparent:
+			return "Dark Transparent";
+
+		case EditorStyle::Dark_Gray:
+			return "Dark Gray";
+
+		case EditorStyle::Dark:
+			return "Dark";
+
+		case EditorStyle::Classic:
+			return "Classic";
+
+		default:
+			assert(false);
+			return "";
+		}
+	}
+
+	EditorStyle EditorStyleVal(const std::string& name)
+	{
+		if (name == "Light")
+			return EditorStyle::Light;
+
+		else if (name == "Dark Transparent")
+			return EditorStyle::DarkTransparent;
+
+		else if (name == "Dark Gray")
+			return EditorStyle::Dark_Gray;
+
+		else if (name == "Dark")
+			return EditorStyle::Dark;
+
+		else if (name == "Classic")
+			return EditorStyle::Classic;
+
+		assert(false);
+		return EditorStyle::Light;
+	}
 }

@@ -827,4 +827,34 @@ namespace Ainan {
 		Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
 		Rdata->QuadBatchTextureSlotsUsed = 1;
 	}
+
+
+	std::string RendererTypeStr(RendererType type)
+	{
+		switch (type)
+		{
+#ifdef PLATFORM_WINDOWS
+		case RendererType::D3D11:
+			return "DirectX 11";
+#endif // PLATFORM_WINDOWS
+
+		case RendererType::OpenGL:
+		default:
+			return "OpenGL";
+		}
+	}
+
+	RendererType RendererTypeVal(const std::string& name)
+	{
+#ifdef PLATFORM_WINDOWS
+		if (name == "DirectX 11")
+			return RendererType::D3D11;
+#endif // PLATFORM_WINDOWS
+
+		if (name == "OpenGL")
+			return RendererType::OpenGL;
+
+		assert(false);
+		return RendererType::OpenGL;
+	}
 }

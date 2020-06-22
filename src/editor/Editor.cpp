@@ -6,7 +6,8 @@ namespace Ainan
 {
 	Editor::Editor():
 		m_LoadEnvironmentBrowser(STARTING_BROWSER_DIRECTORY, "Load Environment"),
-		m_Grid(200.0f)
+		m_Grid(200.0f),
+		m_Preferences(EditorPreferences::LoadFromDefaultPath())
 	{
 		m_LoadEnvironmentBrowser.Filter.push_back(".env");
 		m_LoadEnvironmentBrowser.OnCloseWindow = []() 
@@ -24,11 +25,13 @@ namespace Ainan
 		m_SpotLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
 
 		UpdateTitle();
+		SetEditorStyle(m_Preferences.Style);
 	}
 
 	Editor::~Editor()
 	{
 		delete m_Env;
+		m_Preferences.SaveToDefaultPath();
 	}
 
 	void Editor::Update()
@@ -235,7 +238,7 @@ namespace Ainan
 			{
 				if (ImGui::MenuItem("Preferences"))
 				{
-					//TODO
+					m_PreferencesWindowOpen = true;
 				}
 
 				if (ImGui::MenuItem("Exit"))
@@ -246,6 +249,8 @@ namespace Ainan
 
 			ImGui::EndMainMenuBar();
 		}
+
+		DisplayPreferencesGUI();
 
 		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 		ImGui::SetNextWindowDockID(ImGui::GetID("GlobalDockSpace"));
@@ -511,11 +516,11 @@ namespace Ainan
 		ImGuiWrapper::BeginGlobalDocking(true);
 
 		DisplayMainMenuBarGUI();
-
 		AssetManager::DisplayGUI();
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
 		DisplayProfilerGUI();
+		DisplayPreferencesGUI();
 		m_AppStatusWindow.DisplayGUI();
 
 		//Settings window
@@ -1002,7 +1007,11 @@ namespace Ainan
 		AssetManager::Init(m_EnvironmentFolderPath.u8string());
 		InputManager::Init();
 
-		Window::Maximize();
+		if (m_Preferences.WindowMaximized)
+			Window::Maximize();
+		else
+			Window::SetSize(m_Preferences.WindowSize);
+
 		Window::WindowSizeChangedSinceLastFrame = true;
 		m_RenderSurface.SetSize(Window::FramebufferSize);
 		RegisterEnvironmentInputKeys();
@@ -1026,8 +1035,9 @@ namespace Ainan
 	{
 		if (ImGui::BeginMainMenuBar()) 
 		{
-			if (ImGui::BeginMenu("File")) {
-				if (ImGui::MenuItem("Save"))
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("Save")) 
 					SaveEnvironment(*m_Env, m_EnvironmentFolderPath.u8string() + "\\" + m_Env->Name + ".env");
 
 				if (ImGui::MenuItem("Close Environment"))
@@ -1035,6 +1045,9 @@ namespace Ainan
 					OnEnvironmentDestroy();
 					m_State = State_NoEnvLoaded;
 				}
+
+				if (ImGui::MenuItem("Preferences"))
+					m_PreferencesWindowOpen = true;
 
 				if (ImGui::MenuItem("Exit"))
 					Window::SetShouldClose();
@@ -1050,7 +1063,8 @@ namespace Ainan
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Window")) {
+			if (ImGui::BeginMenu("Window")) 
+			{
 
 				ImGui::MenuItem("Environment Controls", nullptr, &m_EnvironmentControlsWindowOpen);
 				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
@@ -1062,29 +1076,8 @@ namespace Ainan
 				ImGui::EndMenu();
 			}
 
-			if (ImGui::BeginMenu("Editor Style")) {
-
-				if (ImGui::MenuItem("Dark(Transparent)"))
-					SetEditorStyle(EditorStyle::DarkTransparent);
-
-				if (ImGui::MenuItem("Dark/Gray(default)"))
-					SetEditorStyle(EditorStyle::Dark_Gray);
-
-				if (ImGui::MenuItem("Dark"))
-					SetEditorStyle(EditorStyle::Dark);
-
-				if (ImGui::MenuItem("Light"))
-					SetEditorStyle(EditorStyle::Light);
-
-				if (ImGui::MenuItem("Classic"))
-					SetEditorStyle(EditorStyle::Classic);
-
-				ImGui::EndMenu();
-			}
-
-
-			if (ImGui::BeginMenu("Help")) {
-
+			if (ImGui::BeginMenu("Help")) 
+			{
 				if (ImGui::MenuItem("Controls"))
 					InputManager::ControlsWindowOpen = !InputManager::ControlsWindowOpen;
 
@@ -1871,22 +1864,86 @@ namespace Ainan
 		ImGui::End();
 	}
 
+	void Editor::DisplayPreferencesGUI()
+	{
+		if (m_PreferencesWindowOpen == false)
+			return;
+
+		ImGui::Begin("Preferences", &m_PreferencesWindowOpen);
+
+		ImGui::Checkbox("Maximize Editor On Load", &m_Preferences.WindowMaximized);
+
+		if (ImGui::BeginCombo("Editor Style", EditorStyleStr(m_Preferences.Style).c_str()))
+		{
+			auto style = EditorStyle::DarkTransparent;
+			bool selected = m_Preferences.Style == style;
+			if (ImGui::Selectable(EditorStyleStr(style).c_str(), &selected))
+			{
+				m_Preferences.Style = style;
+				SetEditorStyle(style);
+			}
+
+			style = EditorStyle::Dark_Gray;
+			selected = m_Preferences.Style == style;
+			if (ImGui::Selectable(EditorStyleStr(style).c_str(), &selected))
+			{
+				m_Preferences.Style = style;
+				SetEditorStyle(style);
+			}
+
+			style = EditorStyle::Dark;
+			selected = m_Preferences.Style == style;
+			if (ImGui::Selectable(EditorStyleStr(style).c_str(), &selected))
+			{
+				m_Preferences.Style = style;
+				SetEditorStyle(style);
+			}
+
+			style = EditorStyle::Light;
+			selected = m_Preferences.Style == style;
+			if (ImGui::Selectable(EditorStyleStr(style).c_str(), &selected))
+			{
+				m_Preferences.Style = style;
+				SetEditorStyle(style);
+			}
+
+			style = EditorStyle::Classic;
+			selected = m_Preferences.Style == style;
+			if (ImGui::Selectable(EditorStyleStr(style).c_str(), &selected))
+			{
+				m_Preferences.Style = style;
+				SetEditorStyle(style);
+			}
+			
+			ImGui::EndCombo();
+		}
+
+		if (ImGui::BeginCombo("Backend", RendererTypeStr(m_Preferences.RenderingBackend).c_str()))
+		{
+			auto backend = RendererType::OpenGL;
+			auto selected = m_Preferences.RenderingBackend == backend;
+
+			if (ImGui::Selectable(RendererTypeStr(backend).c_str(), &selected))
+				m_Preferences.RenderingBackend = backend;
+
+#ifdef PLATFORM_WINDOWS
+			backend = RendererType::D3D11;
+			selected = m_Preferences.RenderingBackend == backend;
+			if (ImGui::Selectable(RendererTypeStr(backend).c_str(), &selected))
+				m_Preferences.RenderingBackend = backend;
+#endif // PLATFORM_WINDOWS
+
+			ImGui::EndCombo();
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("Backend will change only when the app is restarted");
+
+		ImGui::End();
+	}
+
 	void Editor::UpdateTitle()
 	{
 		RendererType currentRendererType = Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType();
-		std::string apiName = "";
-		switch (currentRendererType)
-		{
-		case RendererType::OpenGL:
-			apiName = "OpenGL 4.2";
-			break;
-
-#ifdef PLATFORM_WINDOWS
-		case RendererType::D3D11:
-			apiName = "DirectX 11";
-			break;
-#endif // PLATFORM_WINDOWS
-		}
 
 		std::string environmentName = "";
 		if (m_Env)
@@ -1894,7 +1951,7 @@ namespace Ainan
 		else
 			environmentName = "Start Menu";
 
-		Window::SetTitle("Ainan - " + apiName + " - " + environmentName);
+		Window::SetTitle("Ainan - " + RendererTypeStr(currentRendererType) + " - " + environmentName);
 	}
 
 	void Editor::StartFrame()

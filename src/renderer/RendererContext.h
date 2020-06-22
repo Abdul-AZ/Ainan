@@ -9,6 +9,11 @@ namespace Ainan {
 #endif
 		OpenGL
 	};
+
+	//for converting between enum and string
+	//defined in Renderer.cpp
+	std::string RendererTypeStr(RendererType type);
+	RendererType RendererTypeVal(const std::string& name);
 	
 	//this holds context data for each API
 	//to access the data you must include one the inheriting classes

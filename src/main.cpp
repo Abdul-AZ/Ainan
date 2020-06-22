@@ -2,13 +2,14 @@
 
 #include "editor/Window.h"
 #include "editor/Editor.h"
+#include "editor/EditorPreferences.h"
 #include "renderer/Renderer.h"
 
 int main() 
 {
 	using namespace Ainan;
 
-	auto api = RendererType::D3D11;
+	auto api = EditorPreferences::LoadFromDefaultPath().RenderingBackend;
 	
 	Window::Init(api);
 	Renderer::Init(api);
@@ -33,7 +34,7 @@ int main()
 	}
 	
 	delete editor;
-	
+
 	Renderer::Terminate();
 	Window::Terminate();
 }

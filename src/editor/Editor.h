@@ -11,6 +11,7 @@
 #include "environment/Sprite.h"
 #include "ExportCamera.h"
 #include "file/FolderBrowser.h"
+#include "EditorPreferences.h"
 
 namespace Ainan {
 	bool SaveEnvironment(const Environment& env, std::string path);
@@ -55,6 +56,7 @@ namespace Ainan {
 
 	private:
 		Environment* m_Env = nullptr;
+		EditorPreferences m_Preferences;
 		Camera m_Camera;
 		ViewportWindow m_ViewportWindow;
 		AppStatusWindow m_AppStatusWindow;
@@ -68,6 +70,7 @@ namespace Ainan {
 		bool m_ObjectInspectorWindowOpen = true;
 		bool m_ProfilerWindowOpen = true;
 		bool m_EnvironmentSettingsWindowOpen = true;
+		bool m_PreferencesWindowOpen = false;
 		bool m_ShowGrid = true;
 
 		EditorState m_State = State_NoEnvLoaded;
@@ -128,6 +131,7 @@ namespace Ainan {
 		void AddEnvironmentObject(EnvironmentObjectType type, const std::string& name);
 		void RegisterEnvironmentInputKeys();
 		void DisplayProfilerGUI();
+		void DisplayPreferencesGUI();
 		void UpdateTitle();
 	};
 }

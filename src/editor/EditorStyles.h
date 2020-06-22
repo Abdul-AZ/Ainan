@@ -12,4 +12,7 @@ namespace Ainan
 	};
 
 	void SetEditorStyle(const EditorStyle& style);
+
+	std::string EditorStyleStr(EditorStyle style);
+	EditorStyle EditorStyleVal(const std::string& name);
 }
