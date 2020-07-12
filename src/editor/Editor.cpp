@@ -105,7 +105,10 @@ namespace Ainan
 		std::mutex mutex;
 		while (true)
 		{
-			StartUpdating.wait(std::unique_lock(mutex));
+			{
+				std::unique_lock<std::mutex> lock(mutex);
+				StartUpdating.wait(lock);
+			}
 
 			if (DestroyThreads)
 				break;
@@ -124,7 +127,7 @@ namespace Ainan
 					}
 					else 
 					{
-						FinishedUpdating.notify_one();
+						FinishedUpdating.notify_all();
 						break;
 					}
 				}
@@ -177,15 +180,20 @@ namespace Ainan
 		m_AppStatusWindow.Update(realDeltaTime);
 
 		{
-			std::lock_guard lock(UpdateMutex);
-			for (auto& obj : m_Env->Objects)
 			{
-				UpdateQueue.push(obj.get());
-				StartUpdating.notify_one();
+				std::lock_guard lock(UpdateMutex);
+				for (auto& obj : m_Env->Objects)
+				{
+					UpdateQueue.push(obj.get());
+				}
 			}
+			StartUpdating.notify_all();
 		}
-		static std::mutex mutex;
-		FinishedUpdating.wait(std::unique_lock(mutex));
+		{
+			static std::mutex mutex;
+			std::unique_lock<std::mutex> lock(mutex);
+			FinishedUpdating.wait(lock);
+		}
 
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
 		for (int i = 0; i < m_Env->Objects.size(); i++) 
@@ -261,11 +269,20 @@ namespace Ainan
 		m_AppStatusWindow.Update(realDeltaTime);
 
 		//update all objects
-		for (auto& obj : m_Env->Objects)
 		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			obj->Update(realDeltaTime);
+			{
+				std::lock_guard lock(UpdateMutex);
+				for (auto& obj : m_Env->Objects)
+				{
+					UpdateQueue.push(obj.get());
+				}
+			}
+			StartUpdating.notify_all();
+		}
+		{
+			static std::mutex mutex;
+			std::unique_lock<std::mutex> lock(mutex);
+			FinishedUpdating.wait(lock);
 		}
 
 		if (Window::WindowSizeChangedSinceLastFrame)
