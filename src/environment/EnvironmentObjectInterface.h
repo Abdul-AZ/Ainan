@@ -17,11 +17,14 @@ namespace Ainan {
 	class EnvironmentObjectInterface
 	{
 	public:
+		EnvironmentObjectInterface();
+
 		//this function does no graphics works (no OpenGL calls)
 		virtual void Update(const float deltaTime) {};
 		virtual void Draw() {};
 		virtual void DisplayGUI() {};
 		virtual glm::vec2& GetPositionRef() { return glm::vec2(0.0f, 0.0f); };
+		virtual std::shared_ptr<std::mutex> GetMutex() { return ObjectMutex; };
 
 		virtual ~EnvironmentObjectInterface() {};
 
@@ -35,6 +38,9 @@ namespace Ainan {
 		bool ToBeDeleted = false;
 
 		EnvironmentObjectType Type;
+
+	private:
+		std::shared_ptr<std::mutex> ObjectMutex;
 	};
 
 	using pEnvironmentObject = std::unique_ptr<EnvironmentObjectInterface>;

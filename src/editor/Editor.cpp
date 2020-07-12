@@ -26,12 +26,26 @@ namespace Ainan
 
 		UpdateTitle();
 		SetEditorStyle(m_Preferences.Style);
+
+		//initlize worker threads
+		for (auto& thread : WorkerThreads)
+		{
+			thread = std::thread([this]() { WorkerThreadLoop(); });
+		}
 	}
 
 	Editor::~Editor()
 	{
 		delete m_Env;
 		m_Preferences.SaveToDefaultPath();
+
+		//terminate worker threads
+		DestroyThreads = true;
+		StartUpdating.notify_all();
+		for (auto& thread : WorkerThreads)
+		{
+			thread.join();
+		}
 	}
 
 	void Editor::Update()
@@ -86,6 +100,41 @@ namespace Ainan
 		}
 	}
 
+	void Editor::WorkerThreadLoop()
+	{
+		std::mutex mutex;
+		while (true)
+		{
+			StartUpdating.wait(std::unique_lock(mutex));
+
+			if (DestroyThreads)
+				break;
+
+			while (true)
+			{
+				EnvironmentObjectInterface* obj = nullptr;
+
+				float deltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
+				{
+					std::lock_guard lock(UpdateMutex);
+					if (UpdateQueue.size() > 0)
+					{
+						obj = UpdateQueue.front();
+						UpdateQueue.pop();
+					}
+					else 
+					{
+						FinishedUpdating.notify_one();
+						break;
+					}
+				}
+				auto mutexPtr = obj->GetMutex();
+				std::lock_guard lock(*mutexPtr);
+				obj->Update(deltaTime);
+			}
+		}
+	}
+
 	void Editor::Update_EditorMode()
 	{
 		//if time passed is less than a frame time, we use the time of a single frame
@@ -98,6 +147,9 @@ namespace Ainan
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
 		for (int i = 0; i < m_Env->Objects.size(); i++) 
 		{
+			auto mutexPtr = m_Env->Objects[i]->GetMutex();
+			std::lock_guard lock(*mutexPtr);
+
 			if (m_Env->Objects[i]->ToBeDeleted)
 			{
 				//display status that we are deleting the object (for 2 seconds)
@@ -124,11 +176,20 @@ namespace Ainan
 		m_Camera.Update(realDeltaTime, m_ViewportWindow.RenderViewport);
 		m_AppStatusWindow.Update(realDeltaTime);
 
+		{
+			std::lock_guard lock(UpdateMutex);
+			for (auto& obj : m_Env->Objects)
+			{
+				UpdateQueue.push(obj.get());
+				StartUpdating.notify_one();
+			}
+		}
+		static std::mutex mutex;
+		FinishedUpdating.wait(std::unique_lock(mutex));
+
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
 		for (int i = 0; i < m_Env->Objects.size(); i++) 
 		{
-			m_Env->Objects[i]->Update(realDeltaTime);
-
 			if (m_Env->Objects[i]->ToBeDeleted)
 			{
 				//display status that we are deleting the object (for 2 seconds)
@@ -170,6 +231,9 @@ namespace Ainan
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
 		for (int i = 0; i < m_Env->Objects.size(); i++) 
 		{
+			auto mutexPtr = m_Env->Objects[i]->GetMutex();
+			std::lock_guard lock(*mutexPtr);
+
 			if (m_Env->Objects[i]->ToBeDeleted)
 			{
 				//display status that we are deleting the object (for 2 seconds)
@@ -197,8 +261,12 @@ namespace Ainan
 		m_AppStatusWindow.Update(realDeltaTime);
 
 		//update all objects
-		for (auto& obj : m_Env->Objects) 
+		for (auto& obj : m_Env->Objects)
+		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			obj->Update(realDeltaTime);
+		}
 
 		if (Window::WindowSizeChangedSinceLastFrame)
 			m_RenderSurface.SetSize(Window::FramebufferSize);
@@ -451,7 +519,10 @@ namespace Ainan
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
-			if (obj->Type == RadialLightType) {
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
+			if (obj->Type == RadialLightType)
+			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
 				m_Background.SubmitLight(*light);
 			}
@@ -465,6 +536,8 @@ namespace Ainan
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			if (obj->Type == SpriteType)
 				obj->Draw();
 		}
@@ -493,6 +566,8 @@ namespace Ainan
 		//Render world space gui here because we need camera information for that
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			if (obj->Selected)
 				if (obj->Type == EnvironmentObjectType::ParticleSystemType)
 				{
@@ -585,8 +660,12 @@ namespace Ainan
 		m_ExportCamera.DisplayGUI();
 		m_Background.DisplayGUI(*m_Env);
 
-		for (pEnvironmentObject& obj : m_Env->Objects)
+		for (pEnvironmentObject& obj : m_Env->Objects) 
+		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			obj->DisplayGUI();
+		}
 
 		InputManager::DisplayGUI();
 		
@@ -607,7 +686,9 @@ namespace Ainan
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
-			if (obj->Type == RadialLightType) 
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
+			if (obj->Type == RadialLightType)
 			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
 				m_Background.SubmitLight(*light);
@@ -623,6 +704,8 @@ namespace Ainan
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			if (obj->Type == SpriteType)
 				obj->Draw();
 		}
@@ -630,6 +713,8 @@ namespace Ainan
 		//stuff to only render in play mode and export mode
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			//because we already drawed all the sprites
 			if (obj->Type == SpriteType)
 				continue;
@@ -721,7 +806,11 @@ namespace Ainan
 		m_Background.DisplayGUI(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			obj->DisplayGUI();
+		}
 
 		InputManager::DisplayGUI();
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
@@ -742,7 +831,9 @@ namespace Ainan
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
-			if (obj->Type == RadialLightType) 
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
+			if (obj->Type == RadialLightType)
 			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
 				m_Background.SubmitLight(*light);
@@ -758,6 +849,8 @@ namespace Ainan
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			if (obj->Type == SpriteType)
 				obj->Draw();
 		}
@@ -765,6 +858,8 @@ namespace Ainan
 		//stuff to only render in play mode and export mode
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			//because we already drawed all the sprites
 			if (obj->Type == SpriteType)
 				continue;
@@ -854,7 +949,11 @@ namespace Ainan
 		m_Background.DisplayGUI(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			obj->DisplayGUI();
+		}
 
 		InputManager::DisplayGUI();
 
@@ -875,7 +974,9 @@ namespace Ainan
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
-			if (obj->Type == RadialLightType) 
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
+			if (obj->Type == RadialLightType)
 			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
 				m_Background.SubmitLight(*light);
@@ -891,6 +992,8 @@ namespace Ainan
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			if (obj->Type == SpriteType)
 				obj->Draw();
 		}
@@ -898,6 +1001,8 @@ namespace Ainan
 		//stuff to only render in play mode and export mode
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			//because we already drawed all the sprites
 			if (obj->Type == SpriteType)
 				continue;
@@ -993,7 +1098,11 @@ namespace Ainan
 		m_Background.DisplayGUI(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
+		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			obj->DisplayGUI();
+		}
 
 		InputManager::DisplayGUI();
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
@@ -1059,6 +1168,7 @@ namespace Ainan
 
 				if (ImGui::MenuItem("Clear Particle Systems"))
 					m_Env->Objects.clear();
+
 
 				ImGui::EndMenu();
 			}
@@ -1230,8 +1340,12 @@ namespace Ainan
 	{
 		m_State = State_EditorMode;
 
-		for (pEnvironmentObject& obj : m_Env->Objects) {
-			if (obj->Type == EnvironmentObjectType::ParticleSystemType) {
+		for (pEnvironmentObject& obj : m_Env->Objects) 
+		{
+			auto mutexPtr = obj->GetMutex();
+			std::lock_guard lock(*mutexPtr);
+			if (obj->Type == EnvironmentObjectType::ParticleSystemType) 
+			{
 				ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
 				ps->ClearParticles();
 			}
@@ -1281,6 +1395,8 @@ namespace Ainan
 
 			for (int i = 0; i < m_Env->Objects.size(); i++)
 			{
+				auto mutexPtr = m_Env->Objects[i]->GetMutex();
+				std::lock_guard lock(*mutexPtr);
 				ImGui::PushID(m_Env->Objects[i].get());
 
 				//the vertical size of each row
@@ -1442,12 +1558,18 @@ namespace Ainan
 
 	void Editor::RefreshObjectOrdering()
 	{
-		for (size_t i = 0; i < m_Env->Objects.size(); i++)
+		for (size_t i = 0; i < m_Env->Objects.size(); i++) 
+		{
+			auto mutexPtr = m_Env->Objects[i]->GetMutex();
+			std::lock_guard lock(*mutexPtr);
 			m_Env->Objects[i]->Order = i;
+		}
 	}
 
 	void Editor::Duplicate(EnvironmentObjectInterface& obj)
 	{
+		auto mutexPtr = obj.GetMutex();
+		std::lock_guard lock(*mutexPtr);
 
 		//if this object is a particle system
 		if (obj.Type == EnvironmentObjectType::ParticleSystemType)
@@ -1456,6 +1578,8 @@ namespace Ainan
 			m_Env->Objects.push_back(std::make_unique<ParticleSystem>(*static_cast<ParticleSystem*>(&obj)));
 
 			//add a -copy to the name of the new particle system to indicate that it was copied
+			auto mutexPtr2 = m_Env->Objects[m_Env->Objects.size() - 1]->GetMutex();
+			std::lock_guard lock(*mutexPtr2);
 			m_Env->Objects[m_Env->Objects.size() - 1]->m_Name += "-copy";
 		}
 
@@ -1466,6 +1590,8 @@ namespace Ainan
 			m_Env->Objects.push_back(std::make_unique<RadialLight>(*static_cast<RadialLight*>(&obj)));
 
 			//add a -copy to the name of the new light to indicate that it was copied
+			auto mutexPtr2 = m_Env->Objects[m_Env->Objects.size() - 1]->GetMutex();
+			std::lock_guard lock(*mutexPtr2);
 			m_Env->Objects[m_Env->Objects.size() - 1]->m_Name += "-copy";
 		}
 
@@ -1476,6 +1602,8 @@ namespace Ainan
 			m_Env->Objects.push_back(std::make_unique<SpotLight>(*static_cast<SpotLight*>(&obj)));
 
 			//add a -copy to the name of the new light to indicate that it was copied
+			auto mutexPtr2 = m_Env->Objects[m_Env->Objects.size() - 1]->GetMutex();
+			std::lock_guard lock(*mutexPtr2);
 			m_Env->Objects[m_Env->Objects.size() - 1]->m_Name += "-copy";
 		}
 
@@ -1486,12 +1614,13 @@ namespace Ainan
 			m_Env->Objects.push_back(std::make_unique<Sprite>(*static_cast<Sprite*>(&obj)));
 
 			//add a -copy to the name of the new light to indicate that it was copied
+			auto mutexPtr2 = m_Env->Objects[m_Env->Objects.size() - 1]->GetMutex();
+			std::lock_guard lock(*mutexPtr2);
 			m_Env->Objects[m_Env->Objects.size() - 1]->m_Name += "-copy";
 		}
 	}
 	void Editor::FocusCameraOnObject(EnvironmentObjectInterface& object)
 	{
-
 		EnvironmentObjectType type = object.Type;
 
 		if (type == Ainan::ParticleSystemType) {
@@ -1595,8 +1724,12 @@ namespace Ainan
 
 		InputManager::RegisterKey(GLFW_KEY_SPACE, "Clear All Particles", [this]()
 			{
-				for (pEnvironmentObject& obj : m_Env->Objects) {
-					if (obj->Type == EnvironmentObjectType::ParticleSystemType) {
+				for (pEnvironmentObject& obj : m_Env->Objects) 
+				{
+					auto mutexPtr = obj->GetMutex();
+					std::lock_guard lock(*mutexPtr);
+					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
+					{
 						ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
 						ps->ClearParticles();
 					}
@@ -1666,7 +1799,9 @@ namespace Ainan
 			{
 				for (int i = 0; i < m_Env->Objects.size(); i++)
 				{
-					if (m_Env->Objects[i]->Selected) 
+					auto mutexPtr = m_Env->Objects[i]->GetMutex();
+					std::lock_guard lock(*mutexPtr);
+					if (m_Env->Objects[i]->Selected)
 					{
 						m_Env->Objects[i]->ToBeDeleted = true;
 						break;
@@ -1813,12 +1948,15 @@ namespace Ainan
 			ImGui::SameLine();
 
 			unsigned int activeParticleCount = 0;
-			for (pEnvironmentObject& object : m_Env->Objects)
+			for (pEnvironmentObject& obj : m_Env->Objects)
 			{
+				auto mutexPtr = obj->GetMutex();
+				std::lock_guard lock(*mutexPtr);
 				//if object is a particle system
-				if (object->Type == EnvironmentObjectType::ParticleSystemType) {
+				if (obj->Type == EnvironmentObjectType::ParticleSystemType)
+				{
 					//cast it to a particle system pointer
-					ParticleSystem* ps = static_cast<ParticleSystem*>(object.get());
+					ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
 
 					//increment active particles by how many particles are active in this particle system
 					activeParticleCount += ps->ActiveParticleCount;
@@ -1830,8 +1968,10 @@ namespace Ainan
 
 			for (pEnvironmentObject& pso : m_Env->Objects)
 			{
-				if (pso->Type == EnvironmentObjectType::ParticleSystemType) {
-
+				auto mutexPtr = pso->GetMutex();
+				std::lock_guard lock(*mutexPtr);
+				if (pso->Type == EnvironmentObjectType::ParticleSystemType)
+				{
 					ParticleSystem* ps = static_cast<ParticleSystem*>(pso.get());
 
 					ImGui::Text((pso->m_Name + ":").c_str());
