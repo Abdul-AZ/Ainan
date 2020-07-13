@@ -241,10 +241,12 @@ namespace Ainan {
 
 		OpenGLRendererAPI::OpenGLRendererAPI()
 		{
+			glfwMakeContextCurrent(Window::Ptr);
+			gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+			glfwSwapInterval(1);
 #ifdef DEBUG
 			glDebugMessageCallback(&opengl_debug_message_callback, nullptr);
 #endif // DEBUG
-
 			glEnable(GL_BLEND);
 			SingletonInstance = this;
 		}

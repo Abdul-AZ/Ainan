@@ -48,6 +48,8 @@ namespace Ainan {
 		static void BeginScene(const SceneDescription& desc);
 		static void EndScene();
 
+		static void SyncThreads();
+
 		//position is in world coordinates
 		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture = nullptr);
 		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, std::shared_ptr<Texture> texture = nullptr);
@@ -111,6 +113,16 @@ namespace Ainan {
 
 		struct RendererData
 		{
+			//sync objects
+			std::thread Thread;
+			std::atomic_bool DestroyThread = false;
+			std::condition_variable WorkAvailable;
+			std::condition_variable RendererInitilized;
+			std::condition_variable WorkFinished;
+			std::mutex DataMutex;
+			std::mutex QueueMutex;
+			std::queue<std::function<void()>> CommandBuffer;
+
 			//scene data
 			RendererAPI* CurrentActiveAPI = nullptr;
 			SceneDescription CurrentSceneDescription = {};
@@ -147,8 +159,11 @@ namespace Ainan {
 		static decltype(Rdata->ShaderLibrary)& ShaderLibrary() { return Rdata->ShaderLibrary; }
 
 		static void DrawImGui(ImDrawData* drawData);
+
 	private:
 		static void FlushQuadBatch();
+		static void RendererThreadLoop(RendererType api);
+		static void PushCommand(std::function<void()> func);
 	};
 
 }

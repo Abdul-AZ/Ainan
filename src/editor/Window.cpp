@@ -87,13 +87,6 @@ namespace Ainan {
 		glfwSetWindowSizeCallback(Ptr, window_size_callback);
 		glfwSetFramebufferSizeCallback(Ptr, framebuffer_size_callback);
 		glfwSetWindowPosCallback(Ptr, pos_callback);
-
-		if (api == RendererType::OpenGL) 
-		{
-			glfwMakeContextCurrent(Ptr);
-			gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-			glfwSwapInterval(1);
-		}
 	}
 
 	void Window::HandleWindowEvents()
