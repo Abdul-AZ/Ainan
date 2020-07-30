@@ -76,6 +76,18 @@ namespace Ainan {
 			std::shared_ptr<IndexBuffer> ImGuiIndexBuffer;
 			std::shared_ptr<VertexBuffer> ImGuiVertexBuffer;
 			uint32_t FontTexture = 0;
+
+			// Inherited via RendererAPI
+			virtual void ImGuiNewFrameUI() override;
+
+			// Inherited via RendererAPI
+			virtual void ImGuiEndFrameUI() override;
+
+			// Inherited via RendererAPI
+			virtual void ImGuiEndFrameUI1() override;
+
+			// Inherited via RendererAPI
+			virtual void ImGuiEndFrameUI2() override;
 		};
 	}
 }

@@ -38,7 +38,7 @@ namespace Ainan {
 			}
 		}
 
-		D3D11VertexBuffer::D3D11VertexBuffer(void* data, unsigned int size,
+		D3D11VertexBuffer::D3D11VertexBuffer(void* data, uint32_t size,
 			const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
 			bool dynamic, RendererContext* context)
 		{
@@ -93,7 +93,7 @@ namespace Ainan {
 			Buffer->Release();
 		}
 
-		void D3D11VertexBuffer::UpdateData(const int& offset, const int& size, void* data)
+		void D3D11VertexBuffer::UpdateData(int32_t offset, int32_t size, void* data)
 		{
 			D3D11_MAPPED_SUBRESOURCE resource{};
 
@@ -115,6 +115,10 @@ namespace Ainan {
 		{
 			Context->DeviceContext->IASetVertexBuffers(0, 0, 0, 0, 0);
 			Context->DeviceContext->IASetInputLayout(0);
+		}
+
+		void D3D11VertexBuffer::UpdateDataUnsafe(int32_t offset, int32_t size, void* data)
+		{
 		}
 	}
 }

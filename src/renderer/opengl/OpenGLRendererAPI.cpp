@@ -338,6 +338,105 @@ namespace Ainan {
 			}
 		}
 
+		void OpenGLRendererAPI::ImGuiNewFrameUI()
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end."
+				"Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
+
+			// Setup display size (every frame to accommodate for window resizing)
+			int w, h;
+			int display_w, display_h;
+			glfwGetWindowSize(Window::Ptr, &w, &h);
+			glfwGetFramebufferSize(Window::Ptr, &display_w, &display_h);
+			io.DisplaySize = ImVec2((float)w, (float)h);
+			if (w > 0 && h > 0)
+				io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
+			if (WantUpdateMonitors)
+				Glfw_UpdateMonitors();
+
+			// Setup time step
+			double current_time = glfwGetTime();
+			io.DeltaTime = Time > 0.0 ? (float)(current_time - Time) : (float)(1.0f / 60.0f);
+			Time = current_time;
+
+			// Update buttons
+			for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
+			{
+				// If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
+				io.MouseDown[i] = MouseJustPressed[i] || glfwGetMouseButton(Window::Ptr, i) != 0;
+				MouseJustPressed[i] = false;
+			}
+
+			// Update mouse position
+			const ImVec2 mouse_pos_backup = io.MousePos;
+			io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
+			io.MouseHoveredViewport = 0;
+
+			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+			for (int n = 0; n < platform_io.Viewports.Size; n++)
+			{
+				ImGuiViewport* viewport = platform_io.Viewports[n];
+				GLFWwindow* window = (GLFWwindow*)viewport->PlatformHandle;
+				IM_ASSERT(window != NULL);
+				const bool focused = glfwGetWindowAttrib(window, GLFW_FOCUSED) != 0;
+				if (focused)
+				{
+					if (io.WantSetMousePos)
+					{
+						glfwSetCursorPos(window, ((double)mouse_pos_backup.x - (double)viewport->Pos.x), ((double)mouse_pos_backup.y - (double)viewport->Pos.y));
+					}
+					else
+					{
+						double mouse_x, mouse_y;
+						glfwGetCursorPos(window, &mouse_x, &mouse_y);
+						if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+						{
+							// Multi-viewport mode: mouse position in OS absolute coordinates (io.MousePos is (0,0) when the mouse is on the upper-left of the primary monitor)
+							int window_x, window_y;
+							glfwGetWindowPos(window, &window_x, &window_y);
+							io.MousePos = ImVec2((float)mouse_x + window_x, (float)mouse_y + window_y);
+						}
+						else
+						{
+							// Single viewport mode: mouse position in client window coordinates (io.MousePos is (0,0) when the mouse is on the upper-left corner of the app window)
+							io.MousePos = ImVec2((float)mouse_x, (float)mouse_y);
+						}
+					}
+					for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
+						io.MouseDown[i] |= glfwGetMouseButton(window, i) != 0;
+				}
+			}
+
+			if ((io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) || glfwGetInputMode(Window::Ptr, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
+			{
+
+			}
+			else
+			{
+				ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
+				ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+				for (int n = 0; n < platform_io.Viewports.Size; n++)
+				{
+					GLFWwindow* window = (GLFWwindow*)platform_io.Viewports[n]->PlatformHandle;
+					if (imgui_cursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
+					{
+						// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
+						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+					}
+					else
+					{
+						// Show OS mouse cursor
+						// FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
+						glfwSetCursor(window, MouseCursors[imgui_cursor] ? MouseCursors[imgui_cursor] : MouseCursors[ImGuiMouseCursor_Arrow]);
+						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+					}
+				}
+			}
+
+			ImGui::NewFrame();
+		}
+
 		void OpenGLRendererAPI::ImGuiNewFrame()
 		{
 			if (!FontTexture)
@@ -416,113 +515,37 @@ namespace Ainan {
 				glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
 
 			}
-
-			ImGuiIO& io = ImGui::GetIO();
-			IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end."
-				"Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
-
-			// Setup display size (every frame to accommodate for window resizing)
-			int w, h;
-			int display_w, display_h;
-			glfwGetWindowSize(Window::Ptr, &w, &h);
-			glfwGetFramebufferSize(Window::Ptr, &display_w, &display_h);
-			io.DisplaySize = ImVec2((float)w, (float)h);
-			if (w > 0 && h > 0)
-				io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
-			if (WantUpdateMonitors)
-				Glfw_UpdateMonitors();
-
-			// Setup time step
-			double current_time = glfwGetTime();
-			io.DeltaTime = Time > 0.0 ? (float)(current_time - Time) : (float)(1.0f / 60.0f);
-			Time = current_time;
-
-			// Update buttons
-			for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
-			{
-				// If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-				io.MouseDown[i] = MouseJustPressed[i] || glfwGetMouseButton(Window::Ptr, i) != 0;
-				MouseJustPressed[i] = false;
-			}
-
-			// Update mouse position
-			const ImVec2 mouse_pos_backup = io.MousePos;
-			io.MousePos = ImVec2(-FLT_MAX, -FLT_MAX);
-			io.MouseHoveredViewport = 0;
-
-			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-			for (int n = 0; n < platform_io.Viewports.Size; n++)
-			{
-				ImGuiViewport* viewport = platform_io.Viewports[n];
-				GLFWwindow* window = (GLFWwindow*)viewport->PlatformHandle;
-				IM_ASSERT(window != NULL);
-				const bool focused = glfwGetWindowAttrib(window, GLFW_FOCUSED) != 0;
-				if (focused)
-				{
-					if (io.WantSetMousePos)
-					{
-						glfwSetCursorPos(window, ((double)mouse_pos_backup.x - (double)viewport->Pos.x), ((double)mouse_pos_backup.y - (double)viewport->Pos.y));
-					}
-					else
-					{
-						double mouse_x, mouse_y;
-						glfwGetCursorPos(window, &mouse_x, &mouse_y);
-						if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-						{
-							// Multi-viewport mode: mouse position in OS absolute coordinates (io.MousePos is (0,0) when the mouse is on the upper-left of the primary monitor)
-							int window_x, window_y;
-							glfwGetWindowPos(window, &window_x, &window_y);
-							io.MousePos = ImVec2((float)mouse_x + window_x, (float)mouse_y + window_y);
-						}
-						else
-						{
-							// Single viewport mode: mouse position in client window coordinates (io.MousePos is (0,0) when the mouse is on the upper-left corner of the app window)
-							io.MousePos = ImVec2((float)mouse_x, (float)mouse_y);
-						}
-					}
-					for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
-						io.MouseDown[i] |= glfwGetMouseButton(window, i) != 0;
-				}
-			}
-
-			if ((io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange) || glfwGetInputMode(Window::Ptr, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
-			{
-
-			}
-			else 
-			{
-				ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
-				ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-				for (int n = 0; n < platform_io.Viewports.Size; n++)
-				{
-					GLFWwindow* window = (GLFWwindow*)platform_io.Viewports[n]->PlatformHandle;
-					if (imgui_cursor == ImGuiMouseCursor_None || io.MouseDrawCursor)
-					{
-						// Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
-						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-					}
-					else
-					{
-						// Show OS mouse cursor
-						// FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
-						glfwSetCursor(window, MouseCursors[imgui_cursor] ? MouseCursors[imgui_cursor] : MouseCursors[ImGuiMouseCursor_Arrow]);
-						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-					}
-				}
-			}
-
-			ImGui::NewFrame();
 		}
 
 		void OpenGLRendererAPI::ImGuiEndFrame()
 		{
-			ImGui::Render();
 			DrawImGui(ImGui::GetDrawData());
+		}
+
+		void OpenGLRendererAPI::ImGuiEndFrameUI()
+		{
+			ImGui::Render();
+		}
+
+		void OpenGLRendererAPI::ImGuiEndFrameUI1()
+		{
 			ImGuiIO& io = ImGui::GetIO(); (void)io;
 			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 			{
 				GLFWwindow* backup_current_context = glfwGetCurrentContext();
 				ImGui::UpdatePlatformWindows();
+				//ImGui::RenderPlatformWindowsDefault();
+				glfwMakeContextCurrent(backup_current_context);
+			}
+		}
+
+		void OpenGLRendererAPI::ImGuiEndFrameUI2()
+		{
+			ImGuiIO& io = ImGui::GetIO(); (void)io;
+			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				GLFWwindow* backup_current_context = glfwGetCurrentContext();
+				//ImGui::UpdatePlatformWindows();
 				ImGui::RenderPlatformWindowsDefault();
 				glfwMakeContextCurrent(backup_current_context);
 			}

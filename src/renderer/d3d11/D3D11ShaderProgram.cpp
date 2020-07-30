@@ -66,6 +66,10 @@ namespace Ainan {
 			return 0;
 		}
 
+		void D3D11ShaderProgram::BindUniformBufferUnsafe(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
+		{
+		}
+
 		void D3D11ShaderProgram::BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
 		{
 			std::shared_ptr<D3D11UniformBuffer> d3dBuffer = std::static_pointer_cast<D3D11UniformBuffer>(buffer);

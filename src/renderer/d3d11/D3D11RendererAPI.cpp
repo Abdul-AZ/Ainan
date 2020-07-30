@@ -256,6 +256,22 @@ namespace Ainan {
 			}
 		}
 
+		void D3D11RendererAPI::ImGuiNewFrameUI()
+		{
+		}
+
+		void D3D11RendererAPI::ImGuiEndFrameUI()
+		{
+		}
+
+		void D3D11RendererAPI::ImGuiEndFrameUI1()
+		{
+		}
+
+		void D3D11RendererAPI::ImGuiEndFrameUI2()
+		{
+		}
+
 		void D3D11RendererAPI::InitImGui()
 		{
 			ImGui::CreateContext();

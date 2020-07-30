@@ -106,5 +106,8 @@ namespace Ainan {
 
 			Context->DeviceContext->Unmap(Buffer, 0);
 		}
+		void D3D11UniformBuffer::UpdateDataUnsafe(void* data)
+		{
+		}
 	}
 }

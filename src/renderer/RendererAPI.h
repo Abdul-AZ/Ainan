@@ -43,7 +43,11 @@ namespace Ainan {
 
 		virtual void InitImGui() = 0;
 		virtual void ImGuiNewFrame() = 0;
+		virtual void ImGuiNewFrameUI() = 0;
 		virtual void ImGuiEndFrame() = 0;
+		virtual void ImGuiEndFrameUI() = 0;
+		virtual void ImGuiEndFrameUI1() = 0;
+		virtual void ImGuiEndFrameUI2() = 0;
 		virtual void DrawImGui(ImDrawData* drawData) = 0;
 
 		virtual void ClearScreen() = 0;

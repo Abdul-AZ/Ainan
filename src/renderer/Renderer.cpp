@@ -22,6 +22,8 @@
 
 #endif // PLATFORM_WINDOWS
 
+#include <GLFW/glfw3.h>
+
 namespace Ainan {
 
 	Renderer::RendererData* Renderer::Rdata = nullptr;
@@ -82,6 +84,7 @@ namespace Ainan {
 				Rdata->CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
 				break;
 			}
+			
 
 			//load shaders
 			for (auto& shaderInfo : CompileOnInit)
@@ -266,7 +269,7 @@ namespace Ainan {
 				default:
 					assert(false);
 				}
-				Rdata->ShaderLibrary["BlurShader"]->BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+				Rdata->ShaderLibrary["BlurShader"]->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 			}
 
 			Rdata->CurrentActiveAPI->SetBlendMode(Rdata->m_CurrentBlendMode);
@@ -293,7 +296,7 @@ namespace Ainan {
 				}
 				for (auto& shaderTuple : Rdata->ShaderLibrary)
 				{
-					shaderTuple.second->BindUniformBuffer(Rdata->SceneUniformbuffer, 0, RenderingStage::VertexShader);
+					shaderTuple.second->BindUniformBufferUnsafe(Rdata->SceneUniformbuffer, 0, RenderingStage::VertexShader);
 				}
 			}
 
@@ -360,10 +363,10 @@ namespace Ainan {
 			Rdata->CurrentNumberOfDrawCalls = 0;
 
 			(*Rdata->CurrentSceneDescription.SceneDrawTarget)->Bind();
-			ClearScreen();
+			ClearScreenUnsafe();
 
 			//update the per-frame uniform buffer
-			Rdata->SceneUniformbuffer->UpdateData(&Rdata->CurrentViewProjection);
+			Rdata->SceneUniformbuffer->UpdateDataUnsafe(&Rdata->CurrentViewProjection);
 
 			//update diagnostics stuff
 			for (size_t i = 0; i < Rdata->ReservedTextures.size(); i++)
@@ -389,9 +392,9 @@ namespace Ainan {
 		PushCommand(func);
 	}
 
-	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
+	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive mode, const unsigned int& vertexCount)
 	{
-		auto func = [&vertexBuffer, &shader, &mode, &vertexCount]()
+		auto func = [&vertexBuffer, &shader, mode, vertexCount]()
 		{
 			vertexBuffer.Bind();
 
@@ -417,8 +420,6 @@ namespace Ainan {
 				Blur(*Rdata->CurrentSceneDescription.SceneDrawTarget, Rdata->CurrentSceneDescription.BlurRadius);
 			}
 
-			SetRenderTargetApplicationWindow();
-
 			memset(&Rdata->CurrentSceneDescription, 0, sizeof(SceneDescription));
 			Rdata->NumberOfDrawCallsLastScene = Rdata->CurrentNumberOfDrawCalls;
 		};
@@ -428,6 +429,8 @@ namespace Ainan {
 
 	void Renderer::SyncThreads()
 	{
+		if (Rdata->CommandBuffer.size() == 0)
+			return;
 		std::mutex mutex;
 		std::unique_lock<std::mutex> lock(mutex);
 		Rdata->WorkFinished.wait(lock);
@@ -630,9 +633,9 @@ namespace Ainan {
 		PushCommand(func);
 	}
 
-	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
+	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer)
 	{
-		auto func = [&vertexBuffer, &indexBuffer, &shader, &primitive]()
+		auto func = [&vertexBuffer, &indexBuffer, &shader, primitive]()
 		{
 			vertexBuffer.Bind();
 			indexBuffer.Bind();
@@ -646,9 +649,10 @@ namespace Ainan {
 		};
 
 		PushCommand(func);
+		SyncThreads();
 	}
 
-	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
+	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer, int vertexCount)
 	{
 		auto func = [&vertexBuffer, &shader, &indexBuffer, primitive, vertexCount]()
 		{
@@ -674,15 +678,31 @@ namespace Ainan {
 		};
 		PushCommand(func);
 		SyncThreads();
+		Rdata->CurrentActiveAPI->ImGuiNewFrameUI();
 	}
 
 	void Renderer::ImGuiEndFrame()
 	{
+		ImGui::Render();
 		auto func = []()
 		{
-			Rdata->CurrentActiveAPI->ImGuiEndFrame();
+			glfwMakeContextCurrent(nullptr);
 		};
 		PushCommand(func);
+		SyncThreads();
+
+		ImGuiIO& io = ImGui::GetIO();
+		glfwMakeContextCurrent(Window::Ptr);
+		ImGui::UpdatePlatformWindows();
+		glfwMakeContextCurrent(nullptr);
+
+		ImGui::RenderPlatformWindowsDefault();
+		auto func2 = []()
+		{
+			glfwMakeContextCurrent(Window::Ptr);
+			Rdata->CurrentActiveAPI->DrawImGui(ImGui::GetDrawData());
+		};
+		PushCommand(func2);
 		SyncThreads();
 	}
 
@@ -703,6 +723,11 @@ namespace Ainan {
 			Rdata->CurrentActiveAPI->ClearScreen();
 		};
 		PushCommand(func);
+	}
+
+	void Renderer::ClearScreenUnsafe()
+	{
+		Rdata->CurrentActiveAPI->ClearScreen();
 	}
 
 	void Renderer::Present()
@@ -739,7 +764,7 @@ namespace Ainan {
 
 			Renderer::SetViewport(viewport);
 			auto& shader = Rdata->ShaderLibrary["BlurShader"];
-			shader->BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+			shader->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 
 			auto resolution = target->GetSize();
 			//make a buffer for all the uniform data
@@ -830,7 +855,7 @@ namespace Ainan {
 		PushCommand(func);
 	}
 
-	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, unsigned int size,
+	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, uint32_t size,
 		const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
 		bool dynamic)
 	{
@@ -861,7 +886,7 @@ namespace Ainan {
 		return buffer;
 	}
 
-	std::shared_ptr<IndexBuffer> Renderer::CreateIndexBuffer(unsigned int* data, const int& count)
+	std::shared_ptr<IndexBuffer> Renderer::CreateIndexBuffer(uint32_t* data, uint32_t count)
 	{
 		std::shared_ptr<IndexBuffer> buffer;
 
@@ -1091,29 +1116,28 @@ namespace Ainan {
 
 	void Ainan::Renderer::FlushQuadBatch()
 	{
-		auto func = []()
-		{
-			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
-				Rdata->ShaderLibrary["QuadBatchShader"]->BindTexture(Rdata->QuadBatchTextures[i], i, RenderingStage::FragmentShader);
+		for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
+			Rdata->ShaderLibrary["QuadBatchShader"]->BindTexture(Rdata->QuadBatchTextures[i], i, RenderingStage::FragmentShader);
 
-			int numVertices = (Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin);
+		int numVertices = (Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin);
 
-			Rdata->QuadBatchVertexBuffer->UpdateData(0,
-				numVertices * sizeof(QuadVertex),
-				Rdata->QuadBatchVertexBufferDataOrigin);
+		Rdata->QuadBatchVertexBuffer->UpdateDataUnsafe(0,
+			numVertices * sizeof(QuadVertex),
+			Rdata->QuadBatchVertexBufferDataOrigin);
 
-			Renderer::Draw(*Rdata->QuadBatchVertexBuffer,
-				*Rdata->ShaderLibrary["QuadBatchShader"],
-				Primitive::Triangles,
-				*Rdata->QuadBatchIndexBuffer,
-				(numVertices * 3) / 2);
+		Rdata->QuadBatchVertexBuffer->Bind();
+		Rdata->QuadBatchIndexBuffer->Bind();
 
-			//reset data so we can accept the next batch
-			Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
-			Rdata->QuadBatchTextureSlotsUsed = 1;
-		};
+		Rdata->CurrentActiveAPI->Draw(*Rdata->ShaderLibrary["QuadBatchShader"], Primitive::Triangles, *Rdata->QuadBatchIndexBuffer, (numVertices * 3) / 2);
 
-		PushCommand(func);
+		Rdata->QuadBatchVertexBuffer->Unbind();
+		Rdata->QuadBatchIndexBuffer->Unbind();
+
+		Rdata->CurrentNumberOfDrawCalls++;
+
+		//reset data so we can accept the next batch
+		Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
+		Rdata->QuadBatchTextureSlotsUsed = 1;
 	}
 
 	std::string RendererTypeStr(RendererType type)

@@ -85,11 +85,52 @@ namespace Ainan {
 
 		OpenGLUniformBuffer::~OpenGLUniformBuffer()
 		{
-			glDeleteBuffers(1, &m_RendererID);
+			Renderer::PushCommand([this]()
+				{
+					glDeleteBuffers(1, &m_RendererID);
+				});
 			delete[] m_BufferMemory;
 		}
 
 		void OpenGLUniformBuffer::UpdateData(void* data)
+		{
+			//align data with std140 uniform layouts and put the result in m_BufferMemory
+			uint32_t unalignedDataIndex = 0;
+			uint32_t alignedDataIndex = 0;
+			uint8_t* unalignedData = (uint8_t*)data;
+			for (auto& layoutPart : m_Layout)
+			{
+				uint32_t size = layoutPart.GetSize();
+				if (layoutPart.Count > 1)
+				{
+					for (size_t i = 0; i < layoutPart.Count; i++)
+					{
+						alignedDataIndex += alignedDataIndex % 16 == 0 ? 0 : 16 - (alignedDataIndex % 16);
+						memcpy(&m_BufferMemory[alignedDataIndex], &unalignedData[unalignedDataIndex], size / layoutPart.Count);
+						unalignedDataIndex += size / layoutPart.Count;
+						alignedDataIndex += size / layoutPart.Count;
+					}
+				}
+				else
+				{
+					uint32_t baseAlignment = GetBasestd140Alignemnt(layoutPart.Type);
+
+					alignedDataIndex += alignedDataIndex % baseAlignment == 0 ? 0 : baseAlignment - (alignedDataIndex % baseAlignment);
+					memcpy(&m_BufferMemory[alignedDataIndex], &unalignedData[unalignedDataIndex], size);
+					alignedDataIndex += size;
+					unalignedDataIndex += size;
+				}
+			}
+
+			Renderer::PushCommand([this]()
+				{
+					glBindBuffer(GL_UNIFORM_BUFFER, m_RendererID);
+					glBufferSubData(GL_UNIFORM_BUFFER, 0, m_AlignedSize, m_BufferMemory);
+					glBindBuffer(GL_UNIFORM_BUFFER, 0);
+				});
+		}
+
+		void OpenGLUniformBuffer::UpdateDataUnsafe(void* data)
 		{
 			//align data with std140 uniform layouts and put the result in m_BufferMemory
 			uint32_t unalignedDataIndex = 0;

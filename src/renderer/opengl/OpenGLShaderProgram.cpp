@@ -96,6 +96,16 @@ namespace Ainan {
 
 		void OpenGLShaderProgram::BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
 		{
+			auto func = [this, slot, stage, buffer]()
+			{
+				std::shared_ptr<OpenGLUniformBuffer> openglBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(buffer);
+				glBindBufferRange(GL_UNIFORM_BUFFER, slot, openglBuffer->m_RendererID, 0, buffer->GetAlignedSize());
+			};
+			Renderer::PushCommand(func);
+		}
+
+		void OpenGLShaderProgram::BindUniformBufferUnsafe(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
+		{
 			std::shared_ptr<OpenGLUniformBuffer> openglBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(buffer);
 			glBindBufferRange(GL_UNIFORM_BUFFER, slot, openglBuffer->m_RendererID, 0, buffer->GetAlignedSize());
 		}

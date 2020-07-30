@@ -20,6 +20,9 @@ namespace Ainan {
 
 		public:
 			unsigned int m_RendererID;
+
+			// Inherited via ShaderProgram
+			virtual void BindUniformBufferUnsafe(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage) override;
 		};
 	}
 }

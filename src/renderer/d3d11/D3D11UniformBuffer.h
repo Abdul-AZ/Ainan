@@ -29,6 +29,9 @@ namespace Ainan {
 			uint32_t BufferSize = 0;
 			VertexLayout Layout;
 			D3D11RendererContext* Context;
+
+			// Inherited via UniformBuffer
+			virtual void UpdateDataUnsafe(void* data) override;
 		};
 	}
 }

@@ -55,7 +55,7 @@ namespace Ainan {
 	class Image
 	{
 	public:
-		Image() {};
+		Image() = default;
 		~Image();
 
 		static Image LoadFromFile(const std::string& pathAndName, TextureFormat desiredFormat = TextureFormat::Unspecified);
@@ -75,11 +75,9 @@ namespace Ainan {
 
 	public:
 		//pointer to the image pixel array
-		unsigned char* m_Data = nullptr;
-
-		TextureFormat Format;
-
-		int m_Width = 0;
-		int m_Height = 0;
+		uint8_t* m_Data = nullptr;
+		TextureFormat Format = TextureFormat::Unspecified;
+		int32_t m_Width = 0;
+		int32_t m_Height = 0;
 	};
 }

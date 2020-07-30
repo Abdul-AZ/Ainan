@@ -56,19 +56,20 @@ namespace Ainan {
 		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, std::shared_ptr<Texture> texture = nullptr);
 
 		//these overloads DO NOT use an index buffer
-		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& mode,
+		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive mode,
 						 const unsigned int& vertexCount);
 
 		//these overloads DO use an index buffer
-		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive,
+		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive primitive,
 						 const IndexBuffer& indexBuffer);
-		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive,
+		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive primitive,
 						 const IndexBuffer& indexBuffer, int vertexCount);
 
 		static void ImGuiNewFrame();
 		static void ImGuiEndFrame();
 
 		static void ClearScreen();
+		static void ClearScreenUnsafe();
 
 		static void Present();
 
@@ -86,12 +87,12 @@ namespace Ainan {
 
 		static void SetRenderTargetApplicationWindow();
 
-		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size,
+		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, uint32_t size,
 			const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
 			bool dynamic = false);
 
 		//data should ALWAYS an UNSIGNED INT array
-		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(unsigned int* data, const int& count);
+		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(uint32_t* data, uint32_t count);
 
 		//manually create a shader program (mostly used for testing new shaders)
 		//to properly add shaders add them to the CompileOnInit list in the cpp file and access them from the ShaderLibrary member
@@ -159,8 +160,7 @@ namespace Ainan {
 		static decltype(Rdata->ShaderLibrary)& ShaderLibrary() { return Rdata->ShaderLibrary; }
 
 		static void DrawImGui(ImDrawData* drawData);
-
-	private:
+	public:
 		static void FlushQuadBatch();
 		static void RendererThreadLoop(RendererType api);
 		static void PushCommand(std::function<void()> func);

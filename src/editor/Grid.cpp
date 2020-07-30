@@ -63,9 +63,9 @@ namespace Ainan {
 
 		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3{ -pos, 0.0f });
 		m_TransformUniformBuffer->UpdateData(&model);
+		Renderer::SyncThreads();
 
 		shader->BindUniformBuffer(m_TransformUniformBuffer, 1, RenderingStage::VertexShader);
-
 		Renderer::Draw(*m_VertexBuffer, *shader, Primitive::Lines, *m_IndexBuffer);
 	}
 }

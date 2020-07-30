@@ -42,6 +42,16 @@ namespace Ainan {
 			// Inherited via RendererAPI
 			virtual void ImGuiNewFrame() override;
 			virtual void ImGuiEndFrame() override;
+
+			// Inherited via RendererAPI
+			virtual void ImGuiNewFrameUI() override;
+
+			// Inherited via RendererAPI
+			virtual void ImGuiEndFrameUI() override;
+
+			// Inherited via RendererAPI
+			virtual void ImGuiEndFrameUI1() override;
+			virtual void ImGuiEndFrameUI2() override;
 		};
 
 	}
