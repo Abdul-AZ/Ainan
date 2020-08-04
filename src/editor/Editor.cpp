@@ -516,12 +516,12 @@ namespace Ainan
 
 		ImGui::End();
 
-		m_FolderBrowser.DisplayGUI([this](const std::filesystem::path& dir) {
+		m_FolderBrowser.DisplayGUI([this](const std::filesystem::path& dir) 
+			{
 			m_EnvironmentCreateFolderPath = dir.u8string();
 			});
 
 		ImGuiWrapper::EndGlobalDocking();
-
 		Renderer::ImGuiEndFrame();
 	}
 

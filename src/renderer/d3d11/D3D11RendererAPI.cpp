@@ -187,30 +187,6 @@ namespace Ainan {
 			Context.DeviceContext->RSSetViewports(1, &d3d_viewport);
 		}
 
-		Rectangle D3D11RendererAPI::GetCurrentViewport()
-		{
-			D3D11_VIEWPORT d3dviewport{};
-			uint32_t viewportCount = 1;
-			Context.DeviceContext->RSGetViewports(&viewportCount, &d3dviewport);
-			Rectangle viewport;
-
-			viewport.X = d3dviewport.TopLeftX;
-			viewport.Y = d3dviewport.TopLeftY;
-			viewport.Width = d3dviewport.Width;
-			viewport.Height = d3dviewport.Height;
-
-			return viewport;
-		}
-
-		void D3D11RendererAPI::SetScissor(const Rectangle& scissor)
-		{
-		}
-
-		Rectangle D3D11RendererAPI::GetCurrentScissor()
-		{
-			return Rectangle();
-		}
-
 		void D3D11RendererAPI::SetBlendMode(RenderingBlendMode blendMode)
 		{
 			switch (blendMode)
@@ -257,18 +233,6 @@ namespace Ainan {
 		}
 
 		void D3D11RendererAPI::ImGuiNewFrameUI()
-		{
-		}
-
-		void D3D11RendererAPI::ImGuiEndFrameUI()
-		{
-		}
-
-		void D3D11RendererAPI::ImGuiEndFrameUI1()
-		{
-		}
-
-		void D3D11RendererAPI::ImGuiEndFrameUI2()
 		{
 		}
 

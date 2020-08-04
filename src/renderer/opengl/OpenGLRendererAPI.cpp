@@ -300,28 +300,6 @@ namespace Ainan {
 			glViewport(viewport.X, viewport.Y, viewport.Width, viewport.Height);
 		}
 
-		Rectangle OpenGLRendererAPI::GetCurrentViewport()
-		{
-			Rectangle viewport;
-
-			glGetIntegerv(GL_VIEWPORT, &viewport.X);
-
-			return viewport;
-		}
-
-		void OpenGLRendererAPI::SetScissor(const Rectangle& scissor)
-		{
-			glScissor(scissor.X, scissor.Y, scissor.Width, scissor.Height);
-		}
-
-		Rectangle OpenGLRendererAPI::GetCurrentScissor()
-		{
-			Rectangle scissor;
-
-			glGetIntegerv(GL_SCISSOR_BOX, &scissor.X);
-
-			return scissor;
-		}
 
 		void OpenGLRendererAPI::SetBlendMode(RenderingBlendMode blendMode)
 		{
@@ -337,7 +315,6 @@ namespace Ainan {
 				break;
 			}
 		}
-
 		void OpenGLRendererAPI::ImGuiNewFrameUI()
 		{
 			ImGuiIO& io = ImGui::GetIO();
@@ -436,7 +413,6 @@ namespace Ainan {
 
 			ImGui::NewFrame();
 		}
-
 		void OpenGLRendererAPI::ImGuiNewFrame()
 		{
 			if (!FontTexture)
@@ -520,35 +496,6 @@ namespace Ainan {
 		void OpenGLRendererAPI::ImGuiEndFrame()
 		{
 			DrawImGui(ImGui::GetDrawData());
-		}
-
-		void OpenGLRendererAPI::ImGuiEndFrameUI()
-		{
-			ImGui::Render();
-		}
-
-		void OpenGLRendererAPI::ImGuiEndFrameUI1()
-		{
-			ImGuiIO& io = ImGui::GetIO(); (void)io;
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-			{
-				GLFWwindow* backup_current_context = glfwGetCurrentContext();
-				ImGui::UpdatePlatformWindows();
-				//ImGui::RenderPlatformWindowsDefault();
-				glfwMakeContextCurrent(backup_current_context);
-			}
-		}
-
-		void OpenGLRendererAPI::ImGuiEndFrameUI2()
-		{
-			ImGuiIO& io = ImGui::GetIO(); (void)io;
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-			{
-				GLFWwindow* backup_current_context = glfwGetCurrentContext();
-				//ImGui::UpdatePlatformWindows();
-				ImGui::RenderPlatformWindowsDefault();
-				glfwMakeContextCurrent(backup_current_context);
-			}
 		}
 
 		void OpenGLRendererAPI::InitImGui()
@@ -664,8 +611,12 @@ namespace Ainan {
 			GLint last_sampler; glGetIntegerv(GL_SAMPLER_BINDING, &last_sampler);
 			GLint last_array_buffer; glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
 			GLint last_polygon_mode[2]; glGetIntegerv(GL_POLYGON_MODE, last_polygon_mode);
-			Rectangle lastViewport = GetCurrentViewport();
-			Rectangle lastScissor = GetCurrentScissor();
+			Rectangle lastViewport;
+			glGetIntegerv(GL_VIEWPORT, &lastViewport.X);
+			Rectangle lastScissor;
+			glGetIntegerv(GL_SCISSOR_BOX, &lastScissor.X);
+
+
 			GLenum last_blend_src_rgb; glGetIntegerv(GL_BLEND_SRC_RGB, (GLint*)&last_blend_src_rgb);
 			GLenum last_blend_dst_rgb; glGetIntegerv(GL_BLEND_DST_RGB, (GLint*)&last_blend_dst_rgb);
 			GLenum last_blend_src_alpha; glGetIntegerv(GL_BLEND_SRC_ALPHA, (GLint*)&last_blend_src_alpha);
@@ -703,7 +654,6 @@ namespace Ainan {
 			};
 
 			glUseProgram(ImGuiShader->GetRendererID());
-			//ImGuiShader->SetUniformMat4("ProjMtx", orthoProjection);
 			glUniformMatrix4fv(glGetUniformLocation(ImGuiShader->GetRendererID(), "ProjMtx"), 1, GL_FALSE, (GLfloat*)&orthoProjection);
 			glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 
@@ -785,7 +735,7 @@ namespace Ainan {
 			glPolygonMode(GL_FRONT_AND_BACK, (GLenum)last_polygon_mode[0]);
 
 			SetViewport(lastViewport);
-			SetScissor(lastScissor);
+			glScissor(lastScissor.X, lastScissor.Y, lastScissor.Width, lastScissor.Height);
 		}
 
 		void OpenGLRendererAPI::SetRenderTargetApplicationWindow()

@@ -84,7 +84,6 @@ namespace Ainan {
 				Rdata->CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
 				break;
 			}
-			
 
 			//load shaders
 			for (auto& shaderInfo : CompileOnInit)
@@ -118,7 +117,7 @@ namespace Ainan {
 				Rdata->ReservedVertexBuffers.push_back(Rdata->QuadBatchVertexBuffer);
 			}
 
-			unsigned int* indicies = new unsigned int[c_MaxQuadsPerBatch * 6];
+			uint32_t* indicies = new uint32_t[c_MaxQuadsPerBatch * 6];
 			int u = 0;
 			for (size_t i = 0; i < c_MaxQuadsPerBatch * 6; i += 6)
 			{
@@ -427,7 +426,7 @@ namespace Ainan {
 		PushCommand(func);
 	}
 
-	void Renderer::SyncThreads()
+	void Renderer::WaitUntilRendererIdle()
 	{
 		if (Rdata->CommandBuffer.size() == 0)
 			return;
@@ -649,7 +648,7 @@ namespace Ainan {
 		};
 
 		PushCommand(func);
-		SyncThreads();
+		WaitUntilRendererIdle();
 	}
 
 	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer, int vertexCount)
@@ -677,7 +676,7 @@ namespace Ainan {
 			Rdata->CurrentActiveAPI->ImGuiNewFrame();
 		};
 		PushCommand(func);
-		SyncThreads();
+		WaitUntilRendererIdle();
 		Rdata->CurrentActiveAPI->ImGuiNewFrameUI();
 	}
 
@@ -689,9 +688,8 @@ namespace Ainan {
 			glfwMakeContextCurrent(nullptr);
 		};
 		PushCommand(func);
-		SyncThreads();
+		WaitUntilRendererIdle();
 
-		ImGuiIO& io = ImGui::GetIO();
 		glfwMakeContextCurrent(Window::Ptr);
 		ImGui::UpdatePlatformWindows();
 		glfwMakeContextCurrent(nullptr);
@@ -703,7 +701,7 @@ namespace Ainan {
 			Rdata->CurrentActiveAPI->DrawImGui(ImGui::GetDrawData());
 		};
 		PushCommand(func2);
-		SyncThreads();
+		WaitUntilRendererIdle();
 	}
 
 	void Renderer::DrawImGui(ImDrawData* drawData)
@@ -713,7 +711,7 @@ namespace Ainan {
 			Rdata->CurrentActiveAPI->DrawImGui(drawData);
 		};
 		PushCommand(func);
-		SyncThreads();
+		WaitUntilRendererIdle();
 	}
 
 	void Renderer::ClearScreen()
@@ -748,62 +746,69 @@ namespace Ainan {
 		PushCommand(func);
 	}
 
+	//Only called internally by the Renderer, and used only by the Renderer thread
 	void Renderer::Blur(std::shared_ptr<FrameBuffer>& target, float radius)
 	{
-		auto func = [&target, radius]()
+		Rectangle lastViewport = Renderer::GetCurrentViewport();
+		RenderingBlendMode lastBlendMode = Rdata->m_CurrentBlendMode;
+		Rdata->CurrentActiveAPI->SetBlendMode(RenderingBlendMode::Screen);
+
+		Rectangle viewport;
+		viewport.X = 0;
+		viewport.Y = 0;
+		viewport.Width = (int)target->GetSize().x;
+		viewport.Height = (int)target->GetSize().y;
+
+		Rdata->CurrentActiveAPI->SetViewport(viewport);
+		auto& shader = Rdata->ShaderLibrary["BlurShader"];
+		shader->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+
+		auto resolution = target->GetSize();
+		//make a buffer for all the uniform data
+		uint8_t bufferData[20];
+		glm::vec2 horizonatlDirection = glm::vec2(1.0f, 0.0f);
+		glm::vec2 verticalDirection = glm::vec2(0.0f, 1.0f);
+		memset(bufferData, 0, 20);
+
+		memcpy(bufferData, &resolution, sizeof(glm::vec2));
+		memcpy(bufferData + 8, &horizonatlDirection, sizeof(glm::vec2));
+		memcpy(bufferData + 16, &radius, sizeof(float));
+		Rdata->BlurUniformBuffer->UpdateDataUnsafe(bufferData);
+
+		//Horizontal blur
+		Rdata->BlurFrameBuffer->Resize(target->GetSize());
+
+		Rdata->BlurFrameBuffer->Bind();
+		Rdata->CurrentActiveAPI->ClearScreen();
+
+		//do the horizontal blur to the surface we revieved and put the result in tempSurface
+		shader->BindTexture(target, 0, RenderingStage::FragmentShader);
+		
 		{
-			Rectangle lastViewport = Renderer::GetCurrentViewport();
-			RenderingBlendMode lastBlendMode = Rdata->m_CurrentBlendMode;
-			SetBlendMode(RenderingBlendMode::Screen);
+			Rdata->BlurVertexBuffer->Bind();
+			Rdata->CurrentActiveAPI->Draw(*shader, Primitive::Triangles, 6);
+		}
 
-			Rectangle viewport;
-			viewport.X = 0;
-			viewport.Y = 0;
-			viewport.Width = (int)target->GetSize().x;
-			viewport.Height = (int)target->GetSize().y;
+		//this specifies that we are doing vertical blur
+		memcpy(bufferData + 8, &verticalDirection, sizeof(glm::vec2));
+		Rdata->BlurUniformBuffer->UpdateDataUnsafe(bufferData);
 
-			Renderer::SetViewport(viewport);
-			auto& shader = Rdata->ShaderLibrary["BlurShader"];
-			shader->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+		//clear the buffer we recieved
+		target->Bind();
+		Rdata->CurrentActiveAPI->ClearScreen();
 
-			auto resolution = target->GetSize();
-			//make a buffer for all the uniform data
-			uint8_t bufferData[20];
-			glm::vec2 horizonatlDirection = glm::vec2(1.0f, 0.0f);
-			glm::vec2 verticalDirection = glm::vec2(0.0f, 1.0f);
-			memset(bufferData, 0, 20);
+		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
+		shader->BindTexture(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
+		{
+			Rdata->BlurVertexBuffer->Bind();
+			Rdata->CurrentActiveAPI->Draw(*shader, Primitive::Triangles, 6);
+		}
 
-			memcpy(bufferData, &resolution, sizeof(glm::vec2));
-			memcpy(bufferData + 8, &horizonatlDirection, sizeof(glm::vec2));
-			memcpy(bufferData + 16, &radius, sizeof(float));
-			Rdata->BlurUniformBuffer->UpdateData(bufferData);
+		Rdata->CurrentActiveAPI->SetViewport(lastViewport);
+		Rdata->CurrentActiveAPI->SetBlendMode(lastBlendMode);
 
-			//Horizontal blur
-			Rdata->BlurFrameBuffer->Resize(target->GetSize());
-
-			Rdata->BlurFrameBuffer->Bind();
-			ClearScreen();
-
-			//do the horizontal blur to the surface we revieved and put the result in tempSurface
-			shader->BindTexture(target, 0, RenderingStage::FragmentShader);
-			Draw(*Rdata->BlurVertexBuffer, *shader, Primitive::Triangles, 6);
-
-			//this specifies that we are doing vertical blur
-			memcpy(bufferData + 8, &verticalDirection, sizeof(glm::vec2));
-			Rdata->BlurUniformBuffer->UpdateData(bufferData);
-
-			//clear the buffer we recieved
-			target->Bind();
-			Renderer::ClearScreen();
-
-			//do the vertical blur to the tempSurface and put the result in the buffer we recieved
-			shader->BindTexture(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
-			Draw(*Rdata->BlurVertexBuffer, *shader, Primitive::Triangles, 6);
-
-			Renderer::SetViewport(lastViewport);
-			SetBlendMode(lastBlendMode);
-		};
-		PushCommand(func);
+		std::lock_guard lock(Rdata->DataMutex);
+		Rdata->CurrentNumberOfDrawCalls += 2;
 	}
 
 	void Renderer::SetBlendMode(RenderingBlendMode blendMode)
@@ -811,9 +816,11 @@ namespace Ainan {
 		auto func = [blendMode]()
 		{
 			Rdata->CurrentActiveAPI->SetBlendMode(blendMode);
-			Rdata->m_CurrentBlendMode = blendMode;
 		};
 		PushCommand(func);
+
+		std::lock_guard lock(Rdata->DataMutex);
+		Rdata->m_CurrentBlendMode = blendMode;
 	}
 
 	void Renderer::SetViewport(const Rectangle& viewport)
@@ -823,27 +830,13 @@ namespace Ainan {
 			Rdata->CurrentActiveAPI->SetViewport(viewport);
 		};
 		PushCommand(func);
+		std::lock_guard lock(Rdata->DataMutex);
+		Rdata->CurrentViewport = viewport;
 	}
 
 	Rectangle Renderer::GetCurrentViewport()
 	{
-		//return Rdata->CurrentActiveAPI->GetCurrentViewport();
-		return {};
-	}
-
-	void Renderer::SetScissor(const Rectangle& scissor)
-	{
-		auto func = [scissor]()
-		{
-			Rdata->CurrentActiveAPI->SetScissor(scissor);
-		};
-		PushCommand(func);
-	}
-
-	Rectangle Renderer::GetCurrentScissor()
-	{
-		//temp
-		return {};
+		return Rdata->CurrentViewport;
 	}
 
 	void Renderer::SetRenderTargetApplicationWindow()
@@ -882,7 +875,7 @@ namespace Ainan {
 
 		PushCommand(func);
 
-		SyncThreads();
+		WaitUntilRendererIdle();
 		return buffer;
 	}
 
@@ -910,7 +903,7 @@ namespace Ainan {
 
 		PushCommand(func);
 
-		SyncThreads();
+		WaitUntilRendererIdle();
 		return buffer;
 	}
 
@@ -948,7 +941,7 @@ namespace Ainan {
 		};
 
 		PushCommand(func);
-		SyncThreads();
+		WaitUntilRendererIdle();
 		return shader;
 	}
 
@@ -977,7 +970,7 @@ namespace Ainan {
 		};
 
 		PushCommand(func);
-		SyncThreads();
+		WaitUntilRendererIdle();
 		return buffer;
 	}
 
@@ -1007,7 +1000,7 @@ namespace Ainan {
 		};
 
 		PushCommand(func);
-		SyncThreads();
+		WaitUntilRendererIdle();
 		return texture;
 	}
 
@@ -1035,7 +1028,7 @@ namespace Ainan {
 		};
 
 		PushCommand(func);
-		SyncThreads();
+		WaitUntilRendererIdle();
 		return texture;
 	}
 
@@ -1063,7 +1056,7 @@ namespace Ainan {
 		};
 
 		PushCommand(func);
-		SyncThreads();
+		WaitUntilRendererIdle();
 		return buffer;
 	}
 

@@ -27,9 +27,6 @@ namespace Ainan {
 			virtual void Present() override;
 			virtual void RecreateSwapchain(const glm::vec2& newSwapchainSize) override;
 			virtual void SetViewport(const Rectangle& viewport) override;
-			virtual Rectangle GetCurrentViewport() override;
-			virtual void SetScissor(const Rectangle& scissor) override;
-			virtual Rectangle GetCurrentScissor() override;
 			virtual RendererContext* GetContext() override { return &Context; };
 			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
 			virtual void SetRenderTargetApplicationWindow() override;
@@ -42,16 +39,7 @@ namespace Ainan {
 			// Inherited via RendererAPI
 			virtual void ImGuiNewFrame() override;
 			virtual void ImGuiEndFrame() override;
-
-			// Inherited via RendererAPI
 			virtual void ImGuiNewFrameUI() override;
-
-			// Inherited via RendererAPI
-			virtual void ImGuiEndFrameUI() override;
-
-			// Inherited via RendererAPI
-			virtual void ImGuiEndFrameUI1() override;
-			virtual void ImGuiEndFrameUI2() override;
 		};
 
 	}

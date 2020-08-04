@@ -43,11 +43,8 @@ namespace Ainan {
 
 		virtual void InitImGui() = 0;
 		virtual void ImGuiNewFrame() = 0;
-		virtual void ImGuiNewFrameUI() = 0;
 		virtual void ImGuiEndFrame() = 0;
-		virtual void ImGuiEndFrameUI() = 0;
-		virtual void ImGuiEndFrameUI1() = 0;
-		virtual void ImGuiEndFrameUI2() = 0;
+		virtual void ImGuiNewFrameUI() = 0;
 		virtual void DrawImGui(ImDrawData* drawData) = 0;
 
 		virtual void ClearScreen() = 0;
@@ -61,10 +58,6 @@ namespace Ainan {
 		virtual void SetBlendMode(RenderingBlendMode blendMode) = 0;
 
 		virtual void SetViewport(const Rectangle& viewport) = 0;
-		virtual Rectangle GetCurrentViewport() = 0;
-
-		virtual void SetScissor(const Rectangle& scissor) = 0;
-		virtual Rectangle GetCurrentScissor() = 0;
 
 		virtual RendererContext* GetContext() = 0;
 	};
