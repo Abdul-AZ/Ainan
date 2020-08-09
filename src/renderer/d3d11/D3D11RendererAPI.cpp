@@ -16,6 +16,7 @@
 #include "imgui_impl_dx11.cpp"
 #include "renderer/d3d11/D3D11RendererAPI.h"
 #include "imgui_impl_glfw.cpp"
+#include "renderer/Renderer.h"
 
 
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
@@ -135,7 +136,7 @@ namespace Ainan {
 			Context.Device->Release();
 		}
 
-		void D3D11RendererAPI::Draw(ShaderProgram& shader, const Primitive& mode, const unsigned int& vertexCount)
+		void D3D11RendererAPI::Draw(ShaderProgram& shader, Primitive mode, uint32_t vertexCount)
 		{
 			Context.DeviceContext->IASetPrimitiveTopology(GetD3DPrimitive(mode));
 
@@ -147,7 +148,7 @@ namespace Ainan {
 			Context.DeviceContext->Draw(vertexCount, 0);
 		}
 
-		void D3D11RendererAPI::Draw(ShaderProgram& shader, const Primitive& mode, const IndexBuffer& indexBuffer)
+		void D3D11RendererAPI::Draw(ShaderProgram& shader, Primitive mode, const IndexBuffer& indexBuffer)
 		{
 			Context.DeviceContext->IASetPrimitiveTopology(GetD3DPrimitive(mode));
 
@@ -159,7 +160,7 @@ namespace Ainan {
 			Context.DeviceContext->DrawIndexed(indexBuffer.GetCount(), 0, 0);
 		}
 
-		void D3D11RendererAPI::Draw(ShaderProgram& shader, const Primitive& mode, const IndexBuffer& indexBuffer, int vertexCount)
+		void D3D11RendererAPI::Draw(ShaderProgram& shader, Primitive mode, const IndexBuffer& indexBuffer, uint32_t vertexCount)
 		{
 			Context.DeviceContext->IASetPrimitiveTopology(GetD3DPrimitive(mode));
 
@@ -213,7 +214,12 @@ namespace Ainan {
 
 		void D3D11RendererAPI::ImGuiNewFrame()
 		{
-			ImGui_ImplDX11_NewFrame();
+			auto func = []()
+			{
+				ImGui_ImplDX11_NewFrame();
+			};
+			Renderer::PushCommand(func);
+			Renderer::WaitUntilRendererIdle();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 		}
@@ -221,19 +227,21 @@ namespace Ainan {
 		void D3D11RendererAPI::ImGuiEndFrame()
 		{
 			ImGui::Render();
-			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-
-			// Update and Render additional Platform Windows
 			ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+			auto func2 = [this]()
+			{
+				ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+			};
+			Renderer::PushCommand(func2);
+			Renderer::WaitUntilRendererIdle();
+
 			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 			{
 				ImGui::UpdatePlatformWindows();
 				ImGui::RenderPlatformWindowsDefault();
 			}
-		}
-
-		void D3D11RendererAPI::ImGuiNewFrameUI()
-		{
+			
 		}
 
 		void D3D11RendererAPI::InitImGui()

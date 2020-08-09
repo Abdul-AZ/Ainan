@@ -671,37 +671,12 @@ namespace Ainan {
 
 	void Renderer::ImGuiNewFrame()
 	{
-		auto func = []()
-		{
-			Rdata->CurrentActiveAPI->ImGuiNewFrame();
-		};
-		PushCommand(func);
-		WaitUntilRendererIdle();
-		Rdata->CurrentActiveAPI->ImGuiNewFrameUI();
+		Rdata->CurrentActiveAPI->ImGuiNewFrame();
 	}
 
 	void Renderer::ImGuiEndFrame()
 	{
-		ImGui::Render();
-		auto func = []()
-		{
-			glfwMakeContextCurrent(nullptr);
-		};
-		PushCommand(func);
-		WaitUntilRendererIdle();
-
-		glfwMakeContextCurrent(Window::Ptr);
-		ImGui::UpdatePlatformWindows();
-		glfwMakeContextCurrent(nullptr);
-
-		ImGui::RenderPlatformWindowsDefault();
-		auto func2 = []()
-		{
-			glfwMakeContextCurrent(Window::Ptr);
-			Rdata->CurrentActiveAPI->DrawImGui(ImGui::GetDrawData());
-		};
-		PushCommand(func2);
-		WaitUntilRendererIdle();
+		Rdata->CurrentActiveAPI->ImGuiEndFrame();
 	}
 
 	void Renderer::DrawImGui(ImDrawData* drawData)

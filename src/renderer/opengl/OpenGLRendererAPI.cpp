@@ -272,7 +272,7 @@ namespace Ainan {
 			ImGui::DestroyContext();
 		}
 
-		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
+		void OpenGLRendererAPI::Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer)
 		{
 			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
 
@@ -281,7 +281,7 @@ namespace Ainan {
 			glUseProgram(0);
 		}
 
-		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
+		void OpenGLRendererAPI::Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer, uint32_t vertexCount)
 		{
 			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
 
@@ -315,8 +315,93 @@ namespace Ainan {
 				break;
 			}
 		}
-		void OpenGLRendererAPI::ImGuiNewFrameUI()
+
+		void OpenGLRendererAPI::ImGuiNewFrame()
 		{
+			auto func = [this]()
+			{
+				if (!FontTexture)
+				{
+					// Backup GL state
+					GLint last_texture, last_array_buffer;
+					glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
+					glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
+
+					const GLchar* vertexShaderSrc =
+						R"(
+			layout (location = 0) in vec2 Position;
+			layout (location = 1) in vec2 UV;
+			layout (location = 2) in vec4 Color;
+			uniform mat4 ProjMtx;
+			out vec2 Frag_UV;
+			out vec4 Frag_Color;
+
+			void main()
+			{
+			    Frag_UV = UV;
+			    Frag_Color = Color;
+			    gl_Position = ProjMtx * vec4(Position.xy,0,1);
+			})";
+
+					const GLchar* fragmentShaderSrc =
+						R"(
+			in vec2 Frag_UV;
+			in vec4 Frag_Color;
+			layout(binding = 0) uniform sampler2D Texture;
+			layout (location = 0) out vec4 Out_Color;
+
+			void main()
+			{
+			    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);
+			})";
+
+					std::string vertSrc = (std::string)"#version 420 core" + (std::string)vertexShaderSrc;
+					std::string fragSrc = (std::string)"#version 420 core" + (std::string)fragmentShaderSrc;
+
+					ImGuiShader = OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
+
+					AttribLocationVtxPos = glGetAttribLocation(ImGuiShader->GetRendererID(), "Position");
+					AttribLocationVtxUV = glGetAttribLocation(ImGuiShader->GetRendererID(), "UV");
+					AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->GetRendererID(), "Color");
+
+					// Create buffers
+					VertexLayout layout;
+					ImGuiVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(nullptr, 0, layout, false);
+					ImGuiIndexBuffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(nullptr, 0);
+
+					// Build texture atlas
+					ImGuiIO& io = ImGui::GetIO();
+					unsigned char* pixels;
+					int width, height;
+					io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bits (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
+
+					// Upload texture to graphics system
+					GLint last_font_texture;
+					glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_font_texture);
+					glGenTextures(1, &FontTexture);
+					glBindTexture(GL_TEXTURE_2D, FontTexture);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+
+					// Store our identifier
+					io.Fonts->TexID = (ImTextureID)(intptr_t)FontTexture;
+
+					// Restore state
+					glBindTexture(GL_TEXTURE_2D, last_font_texture);
+
+					// Restore modified GL state
+					glBindTexture(GL_TEXTURE_2D, last_texture);
+					glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
+
+				}
+			};
+
+			Renderer::PushCommand(func);
+			Renderer::WaitUntilRendererIdle();
+			
+
 			ImGuiIO& io = ImGui::GetIO();
 			IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end."
 				"Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
@@ -413,89 +498,29 @@ namespace Ainan {
 
 			ImGui::NewFrame();
 		}
-		void OpenGLRendererAPI::ImGuiNewFrame()
-		{
-			if (!FontTexture)
-			{
-				// Backup GL state
-				GLint last_texture, last_array_buffer;
-				glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-				glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
-
-				const GLchar* vertexShaderSrc =
-					R"(
-			layout (location = 0) in vec2 Position;
-			layout (location = 1) in vec2 UV;
-			layout (location = 2) in vec4 Color;
-			uniform mat4 ProjMtx;
-			out vec2 Frag_UV;
-			out vec4 Frag_Color;
-
-			void main()
-			{
-			    Frag_UV = UV;
-			    Frag_Color = Color;
-			    gl_Position = ProjMtx * vec4(Position.xy,0,1);
-			})";
-
-				const GLchar* fragmentShaderSrc =
-					R"(
-			in vec2 Frag_UV;
-			in vec4 Frag_Color;
-			layout(binding = 0) uniform sampler2D Texture;
-			layout (location = 0) out vec4 Out_Color;
-
-			void main()
-			{
-			    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);
-			})";
-
-				std::string vertSrc = (std::string)"#version 420 core" + (std::string)vertexShaderSrc;
-				std::string fragSrc = (std::string)"#version 420 core" + (std::string)fragmentShaderSrc;
-
-				ImGuiShader = OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
-
-				AttribLocationVtxPos = glGetAttribLocation(ImGuiShader->GetRendererID(), "Position");
-				AttribLocationVtxUV = glGetAttribLocation(ImGuiShader->GetRendererID(), "UV");
-				AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->GetRendererID(), "Color");
-
-				// Create buffers
-				VertexLayout layout;
-				ImGuiVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(nullptr, 0, layout, false);
-				ImGuiIndexBuffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(nullptr, 0);
-
-				// Build texture atlas
-				ImGuiIO& io = ImGui::GetIO();
-				unsigned char* pixels;
-				int width, height;
-				io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bits (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
-
-				// Upload texture to graphics system
-				GLint last_font_texture;
-				glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_font_texture);
-				glGenTextures(1, &FontTexture);
-				glBindTexture(GL_TEXTURE_2D, FontTexture);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-
-				// Store our identifier
-				io.Fonts->TexID = (ImTextureID)(intptr_t)FontTexture;
-
-				// Restore state
-				glBindTexture(GL_TEXTURE_2D, last_font_texture);
-
-				// Restore modified GL state
-				glBindTexture(GL_TEXTURE_2D, last_texture);
-				glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
-
-			}
-		}
 
 		void OpenGLRendererAPI::ImGuiEndFrame()
 		{
-			DrawImGui(ImGui::GetDrawData());
+			ImGui::Render();
+			auto func = []()
+			{
+				glfwMakeContextCurrent(nullptr);
+			};
+			Renderer::PushCommand(func);
+			Renderer::WaitUntilRendererIdle();
+
+			glfwMakeContextCurrent(Window::Ptr);
+			ImGui::UpdatePlatformWindows();
+			glfwMakeContextCurrent(nullptr);
+
+			ImGui::RenderPlatformWindowsDefault();
+			auto func2 = [this]()
+			{
+				glfwMakeContextCurrent(Window::Ptr);
+				DrawImGui(ImGui::GetDrawData());
+			};
+			Renderer::PushCommand(func2);
+			Renderer::WaitUntilRendererIdle();
 		}
 
 		void OpenGLRendererAPI::InitImGui()
@@ -753,7 +778,7 @@ namespace Ainan {
 			Window::WindowSizeChangedSinceLastFrame = false;
 		}
 
-		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount)
+		void OpenGLRendererAPI::Draw(ShaderProgram& shader, Primitive primitive, uint32_t vertexCount)
 		{
 			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
 

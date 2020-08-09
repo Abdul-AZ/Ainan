@@ -39,9 +39,9 @@ namespace Ainan {
 			virtual ~OpenGLRendererAPI();
 
 			// Inherited via RendererAPI
-			virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount) override;
-			virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer) override;
-			virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount) override;
+			virtual void Draw(ShaderProgram& shader, Primitive primitive, uint32_t vertexCount) override;
+			virtual void Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer) override;
+			virtual void Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer, uint32_t vertexCount) override;
 			virtual void InitImGui() override;
 			virtual void ImGuiNewFrame() override;
 			virtual void ImGuiEndFrame() override;
@@ -50,7 +50,6 @@ namespace Ainan {
 			virtual void Present() override;
 			virtual void RecreateSwapchain(const glm::vec2& newSwapchainSize) override;
 			virtual void SetRenderTargetApplicationWindow() override;
-			virtual void ImGuiNewFrameUI() override;
 
 			virtual void SetViewport(const Rectangle& viewport) override;
 

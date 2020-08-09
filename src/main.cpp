@@ -10,7 +10,7 @@ int main()
 	using namespace Ainan;
 
 	auto api = EditorPreferences::LoadFromDefaultPath().RenderingBackend;
-	api = RendererType::OpenGL;
+	api = RendererType::D3D11;
 	
 	Window::Init(api);
 	Renderer::Init(api);
