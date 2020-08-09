@@ -165,14 +165,13 @@ namespace Ainan {
 				assert(false);
 			}
 			Rdata->ReservedTextures.push_back(Rdata->QuadBatchTextures[0]);
-			Rdata->QuadBatchTextures[0]->SetDefaultTextureSettings();
-			Image img;
-			img.m_Width = 1;
-			img.m_Height = 1;
-			img.Format = TextureFormat::RGBA;
-			img.m_Data = new unsigned char[4];
-			memset(img.m_Data, (unsigned char)255, 4);
-			Rdata->QuadBatchTextures[0]->SetImage(img);
+			auto img = std::make_shared<Image>();
+			img->m_Width = 1;
+			img->m_Height = 1;
+			img->Format = TextureFormat::RGBA;
+			img->m_Data = new uint8_t[4];
+			memset(img->m_Data, (uint8_t)255, 4);
+			Rdata->QuadBatchTextures[0]->SetImageUnsafe(img);
 
 			//setup postprocessing
 			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())

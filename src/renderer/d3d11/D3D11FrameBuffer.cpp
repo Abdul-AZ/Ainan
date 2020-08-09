@@ -3,6 +3,8 @@
 #include "D3D11FrameBuffer.h"
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 	namespace D3D11 {
 
@@ -120,43 +122,52 @@ namespace Ainan {
 
 		void D3D11FrameBuffer::Bind() const
 		{
-			Context->DeviceContext->OMSetRenderTargets(1, &RenderTargetView, nullptr);
+			auto func = [this]()
+			{
+				Context->DeviceContext->OMSetRenderTargets(1, &RenderTargetView, nullptr);
+			};
+			Renderer::PushCommand(func);
 		}
 
 		void D3D11FrameBuffer::Resize(const glm::vec2& newSize)
 		{
-			RenderTargetView->Release();
-			RenderTargetTexture->Release();
-			RenderTargetTextureView->Release();
+			auto func = [this, newSize]()
+			{
+				RenderTargetView->Release();
+				RenderTargetTexture->Release();
+				RenderTargetTextureView->Release();
 
-			Size = newSize;
+				Size = newSize;
 
-			D3D11_TEXTURE2D_DESC desc{};
-			desc.Width = newSize.x;
-			desc.Height = newSize.y;
-			desc.SampleDesc.Count = 1;
-			desc.Usage = D3D11_USAGE_DEFAULT;
-			desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-			desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
-			desc.ArraySize = 1;
-			desc.MipLevels = 1;
-			desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				D3D11_TEXTURE2D_DESC desc{};
+				desc.Width = newSize.x;
+				desc.Height = newSize.y;
+				desc.SampleDesc.Count = 1;
+				desc.Usage = D3D11_USAGE_DEFAULT;
+				desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+				desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+				desc.ArraySize = 1;
+				desc.MipLevels = 1;
+				desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-			ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, nullptr, &RenderTargetTexture));
+				ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, nullptr, &RenderTargetTexture));
 
-			D3D11_SHADER_RESOURCE_VIEW_DESC textureViewDesc{};
-			textureViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			textureViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-			textureViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-			textureViewDesc.Texture2D.MipLevels = 1;
+				D3D11_SHADER_RESOURCE_VIEW_DESC textureViewDesc{};
+				textureViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				textureViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+				textureViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+				textureViewDesc.Texture2D.MipLevels = 1;
 
-			ASSERT_D3D_CALL(Context->Device->CreateShaderResourceView(RenderTargetTexture, &textureViewDesc, &RenderTargetTextureView));
+				ASSERT_D3D_CALL(Context->Device->CreateShaderResourceView(RenderTargetTexture, &textureViewDesc, &RenderTargetTextureView));
 
-			D3D11_RENDER_TARGET_VIEW_DESC viewDesc{};
-			viewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+				D3D11_RENDER_TARGET_VIEW_DESC viewDesc{};
+				viewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+				viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
-			ASSERT_D3D_CALL(Context->Device->CreateRenderTargetView(RenderTargetTexture, &viewDesc, &RenderTargetView));
+				ASSERT_D3D_CALL(Context->Device->CreateRenderTargetView(RenderTargetTexture, &viewDesc, &RenderTargetView));
+
+			};
+			Renderer::PushCommand(func);
 		}
 	}
 }

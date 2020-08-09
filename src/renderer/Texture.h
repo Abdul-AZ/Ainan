@@ -8,10 +8,8 @@ namespace Ainan {
 	class Texture {
 	public:
 		virtual ~Texture() {};
-		virtual void SetImage(const Image& image) = 0;
-
-		//TODO improve this with flags and stuff
-		virtual void SetDefaultTextureSettings() = 0;
+		virtual void SetImage(std::shared_ptr<Image> image) = 0;
+		virtual void SetImageUnsafe(std::shared_ptr<Image> image) = 0;
 
 		virtual glm::vec2 GetSize() const = 0;
 

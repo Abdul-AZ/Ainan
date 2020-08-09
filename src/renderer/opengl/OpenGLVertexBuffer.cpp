@@ -97,13 +97,13 @@ namespace Ainan {
 
 		void OpenGLVertexBuffer::UpdateData(int32_t offset, int32_t size, void* data)
 		{
-			Bind();
-			auto func = [offset, size, data]()
+			auto func = [this, offset, size, data]()
 			{
-				glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+				UpdateDataUnsafe(offset, size, data);
 			};
 
 			Renderer::PushCommand(func);
+			Renderer::WaitUntilRendererIdle();
 		}
 	}
 }

@@ -9,6 +9,8 @@
 #include "D3D11FrameBuffer.h"
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 	namespace D3D11 {
 		D3D11ShaderProgram::D3D11ShaderProgram(const std::string& vertPath, const std::string& fragPath, RendererContext* context)
@@ -66,11 +68,18 @@ namespace Ainan {
 			return 0;
 		}
 
-		void D3D11ShaderProgram::BindUniformBufferUnsafe(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
-		{
-		}
+		
 
 		void D3D11ShaderProgram::BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
+		{
+			auto func = [this, &buffer, slot, stage]()
+			{
+				BindUniformBufferUnsafe(buffer, slot, stage);
+			};
+			Renderer::PushCommand(func);
+		}
+
+		void D3D11ShaderProgram::BindUniformBufferUnsafe(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
 		{
 			std::shared_ptr<D3D11UniformBuffer> d3dBuffer = std::static_pointer_cast<D3D11UniformBuffer>(buffer);
 

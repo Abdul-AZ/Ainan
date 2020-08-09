@@ -13,9 +13,9 @@ namespace Ainan {
 			virtual ~OpenGLTexture();
 
 			// Inherited via Texture
-			virtual void SetImage(const Image& image) override;
-			virtual void SetDefaultTextureSettings() override;
-			
+			virtual void SetImage(std::shared_ptr<Image> image) override;
+			virtual void SetImageUnsafe(std::shared_ptr<Image> image) override;
+
 			virtual glm::vec2 GetSize() const override { return m_Size; }
 			virtual void* GetTextureID() override { return (void*)(uintptr_t)m_RendererID; };
 
@@ -25,6 +25,8 @@ namespace Ainan {
 		public:
 			unsigned int m_RendererID;
 			glm::vec2 m_Size = { 0.0f, 0.0f };
+
+			
 		};
 	}
 }

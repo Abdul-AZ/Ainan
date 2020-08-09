@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 
 #include "OpenGLTexture.h"
+#include "renderer/Renderer.h"
 
 namespace Ainan {
 	namespace OpenGL {
@@ -16,19 +17,6 @@ namespace Ainan {
 		OpenGLTexture::~OpenGLTexture()
 		{
 			glDeleteTextures(1, &m_RendererID);
-		}
-
-		void OpenGLTexture::SetImage(const Image& image)
-		{
-			AllocateTexture({ image.m_Width, image.m_Height }, image.Format, image.m_Data);
-		}
-
-		void OpenGLTexture::SetDefaultTextureSettings()
-		{
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		}
 
 		inline void OpenGLTexture::AllocateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data)
@@ -59,6 +47,25 @@ namespace Ainan {
 
 			glGenerateMipmap(GL_TEXTURE_2D);
 			m_Size = size;
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		}
+
+		void OpenGLTexture::SetImage(std::shared_ptr<Image> image)
+		{
+			auto func = [this, image]()
+			{
+				SetImageUnsafe(image);
+			};
+			Renderer::PushCommand(func);
+		}
+
+		void OpenGLTexture::SetImageUnsafe(std::shared_ptr<Image> image)
+		{
+			AllocateTexture({ image->m_Width, image->m_Height }, image->Format, image->m_Data);
 		}
 	}
 }

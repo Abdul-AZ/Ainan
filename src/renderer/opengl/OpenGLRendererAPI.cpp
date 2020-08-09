@@ -683,8 +683,7 @@ namespace Ainan {
 			glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 
 			VertexLayout layout;
-			std::shared_ptr<VertexBuffer> tempVA =// Renderer::CreateVertexBuffer(nullptr, 0, layout, ImGuiShader);
-			std::make_shared<OpenGLVertexBuffer>(nullptr, 0, layout, false);
+			std::shared_ptr<VertexBuffer> tempVA = std::make_shared<OpenGLVertexBuffer>(nullptr, 0, layout, false);
 			tempVA->Bind();
 
 			// Bind vertex/index buffers and setup attributes for ImDrawVert

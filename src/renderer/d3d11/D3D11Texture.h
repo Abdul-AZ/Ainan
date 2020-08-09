@@ -16,9 +16,8 @@ namespace Ainan {
 			D3D11Texture(const glm::vec2& size, TextureFormat format, uint8_t* data, RendererContext* context);
 			virtual ~D3D11Texture();
 
-			// Inherited via Texture
-			virtual void SetImage(const Image& image) override;
-			virtual void SetDefaultTextureSettings() override;
+			virtual void SetImage(std::shared_ptr<Image> image) override;
+			virtual void SetImageUnsafe(std::shared_ptr<Image> image) override;
 			virtual glm::vec2 GetSize() const override;
 			virtual void* GetTextureID() override { return D3DResourceView; };
 

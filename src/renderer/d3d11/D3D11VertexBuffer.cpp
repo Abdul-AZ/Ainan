@@ -3,6 +3,7 @@
 #include "D3D11VertexBuffer.h"
 
 #include "D3D11ShaderProgram.h"
+#include "renderer/Renderer.h"
 
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 
@@ -95,13 +96,13 @@ namespace Ainan {
 
 		void D3D11VertexBuffer::UpdateData(int32_t offset, int32_t size, void* data)
 		{
-			D3D11_MAPPED_SUBRESOURCE resource{};
+			auto func = [this, offset, size, data]()
+			{
+				UpdateDataUnsafe(offset, size, data);
+			};
 
-			ASSERT_D3D_CALL(Context->DeviceContext->Map(Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource));
-
-			memcpy((uint8_t*)resource.pData + offset, data, size);
-
-			Context->DeviceContext->Unmap(Buffer, 0);
+			Renderer::PushCommand(func);
+			Renderer::WaitUntilRendererIdle();
 		}
 
 		void D3D11VertexBuffer::Bind() const
@@ -119,6 +120,13 @@ namespace Ainan {
 
 		void D3D11VertexBuffer::UpdateDataUnsafe(int32_t offset, int32_t size, void* data)
 		{
+			D3D11_MAPPED_SUBRESOURCE resource{};
+
+			ASSERT_D3D_CALL(Context->DeviceContext->Map(Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource));
+
+			memcpy((uint8_t*)resource.pData + offset, data, size);
+
+			Context->DeviceContext->Unmap(Buffer, 0);
 		}
 	}
 }
