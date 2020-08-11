@@ -113,13 +113,13 @@ namespace Ainan {
 		{
 			//sync objects
 			std::thread Thread;
-			std::atomic_bool DestroyThread = false;
-			std::condition_variable WorkAvailable;
-			std::condition_variable RendererInitilized;
-			std::condition_variable WorkFinished;
+			bool DestroyThread = false;
 			std::mutex DataMutex;
-			std::mutex QueueMutex;
 			std::queue<std::function<void()>> CommandBuffer;
+			
+			std::mutex QueueMutex;
+			std::condition_variable cv;
+			std::atomic_bool payload = false;
 
 			//scene data
 			RendererAPI* CurrentActiveAPI = nullptr;

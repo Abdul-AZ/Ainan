@@ -360,9 +360,9 @@ namespace Ainan {
 
 					ImGuiShader = OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
 
-					AttribLocationVtxPos = glGetAttribLocation(ImGuiShader->GetRendererID(), "Position");
-					AttribLocationVtxUV = glGetAttribLocation(ImGuiShader->GetRendererID(), "UV");
-					AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->GetRendererID(), "Color");
+					AttribLocationVtxPos = glGetAttribLocation(ImGuiShader->m_RendererID, "Position");
+					AttribLocationVtxUV = glGetAttribLocation(ImGuiShader->m_RendererID, "UV");
+					AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->m_RendererID, "Color");
 
 					// Create buffers
 					VertexLayout layout;
@@ -678,8 +678,8 @@ namespace Ainan {
 				{ (R + L) / (L - R),  (T + B) / (B - T),  0.0f,   1.0f },
 			};
 
-			glUseProgram(ImGuiShader->GetRendererID());
-			glUniformMatrix4fv(glGetUniformLocation(ImGuiShader->GetRendererID(), "ProjMtx"), 1, GL_FALSE, (GLfloat*)&orthoProjection);
+			glUseProgram(ImGuiShader->m_RendererID);
+			glUniformMatrix4fv(glGetUniformLocation(ImGuiShader->m_RendererID, "ProjMtx"), 1, GL_FALSE, (GLfloat*)&orthoProjection);
 			glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 
 			VertexLayout layout;

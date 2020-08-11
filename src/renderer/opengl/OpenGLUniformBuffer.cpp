@@ -86,10 +86,11 @@ namespace Ainan {
 		OpenGLUniformBuffer::~OpenGLUniformBuffer()
 		{
 			auto rendererID = m_RendererID;
-			Renderer::PushCommand([rendererID]()
+			auto func = [rendererID]()
 			{
 				glDeleteBuffers(1, &rendererID);
-			});
+			};
+			Renderer::PushCommand(func);
 			delete[] m_BufferMemory;
 		}
 

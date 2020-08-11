@@ -17,9 +17,11 @@ namespace Ainan {
 
 			virtual glm::vec2 GetSize() const override { return m_Size; }
 			virtual void Resize(const glm::vec2& newSize) override;
+			virtual void ResizeUnsafe(const glm::vec2& newSize) override;
 			virtual void* GetTextureID() override { return (void*)(uintptr_t)m_TextureID; };
 
 			virtual void Bind() const override;
+			virtual void BindUnsafe() const override;
 		public:
 			uint32_t m_RendererID = 0;
 			uint32_t m_TextureID = 0;

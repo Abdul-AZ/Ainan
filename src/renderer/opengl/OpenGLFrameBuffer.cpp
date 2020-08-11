@@ -3,6 +3,8 @@
 
 #include "OpenGLFrameBuffer.h"
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 	namespace OpenGL {
 
@@ -33,10 +35,28 @@ namespace Ainan {
 
 		void OpenGLFrameBuffer::Bind() const
 		{
+			auto func = [this]()
+			{
+				BindUnsafe();
+			};
+			Renderer::PushCommand(func);
+		}
+
+		void OpenGLFrameBuffer::BindUnsafe() const
+		{
 			glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 		}
 
 		void OpenGLFrameBuffer::Resize(const glm::vec2& newSize)
+		{
+			auto func = [this, newSize]()
+			{
+				ResizeUnsafe(newSize);
+			};
+			Renderer::PushCommand(func);
+		}
+
+		void OpenGLFrameBuffer::ResizeUnsafe(const glm::vec2& newSize)
 		{
 			m_Size = newSize;
 			glBindTexture(GL_TEXTURE_2D, m_TextureID);
@@ -47,12 +67,12 @@ namespace Ainan {
 		Image OpenGLFrameBuffer::ReadPixels(glm::vec2 bottomLeftPixel, glm::vec2 topRightPixel)
 		{
 			Image image;
-			image.m_Width = (unsigned int)m_Size.x;
-			image.m_Height = (unsigned int)m_Size.y;
-			image.m_Data = new unsigned char[image.m_Width * image.m_Height * 4];
+			image.m_Width = (uint32_t)m_Size.x;
+			image.m_Height = (uint32_t)m_Size.y;
+			image.m_Data = new uint8_t[image.m_Width * image.m_Height * 4];
 			image.Format = TextureFormat::RGBA;
 
-			Bind();
+			BindUnsafe();
 			glReadPixels(bottomLeftPixel.x,
 				bottomLeftPixel.y,
 				topRightPixel.x == 0 ? m_Size.x : topRightPixel.x,

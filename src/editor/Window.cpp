@@ -4,16 +4,12 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 
-	class Renderer
-	{
-	public:
-		static void SetViewport(const Rectangle& viewport);
-		static void RecreateSwapchain(const glm::vec2& newSwapchainSize);
-	};
-
 	bool Window::ShouldClose = false;
+	bool Window::Minimized = false;
 	Rectangle Window::WindowViewport = { 0 };
 	bool Window::WindowSizeChangedSinceLastFrame = false;
 	glm::vec2 Window::FramebufferSize = { 0,0 };
@@ -21,7 +17,7 @@ namespace Ainan {
 	glm::vec2 Window::Position = { 0,0 };
 	GLFWwindow* Window::Ptr = nullptr;
 
-	void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+	static void framebuffer_size_callback(GLFWwindow* window, int32_t width, int32_t height)
 	{
 		Window::WindowSizeChangedSinceLastFrame = true;
 		Window::FramebufferSize = { width, height };
@@ -35,21 +31,50 @@ namespace Ainan {
 		viewport.Height = height;
 		Renderer::RecreateSwapchain(Window::FramebufferSize);
 		Renderer::SetViewport(viewport);
+
+		if (width == 0 || height == 0)
+		{
+			Window::Minimized = true;
+
+			std::lock_guard lock(Renderer::Rdata->QueueMutex);
+			//clear commands
+			decltype(Renderer::Rdata->CommandBuffer) empty;
+			std::swap(Renderer::Rdata->CommandBuffer, empty);
+		}
+		else
+			Window::Minimized = false;
 	}
 
-	void window_size_callback(GLFWwindow* window, int width, int height)
+	static void window_size_callback(GLFWwindow* window, int32_t width, int32_t height)
 	{
 		Window::Size.x = width;
 		Window::Size.y = height;
 	}
 
-	void pos_callback(GLFWwindow* window, int x, int y)
+	static void window_pos_callback(GLFWwindow* window, int32_t x, int32_t y)
 	{
 		Window::Position.x = x;
 		Window::Position.y = y;
 	}
 
-	void error_callback(int num, const char* message)
+	static void window_iconify_callback(GLFWwindow* window , int32_t state)
+	{
+		//if window iconified
+		if (state)
+		{
+			Window::Minimized = true;
+
+			std::lock_guard lock(Renderer::Rdata->QueueMutex);
+			//clear commands
+			decltype(Renderer::Rdata->CommandBuffer) empty;
+			std::swap(Renderer::Rdata->CommandBuffer, empty);
+		}
+		//if window restored
+		else
+			Window::Minimized = false;
+	}
+
+	static void window_error_callback(int32_t num, const char* message)
 	{
 		std::cout << message << std::endl;
 	}
@@ -57,7 +82,7 @@ namespace Ainan {
 	void Window::Init(RendererType api)
 	{
 #ifdef DEBUG
-		glfwSetErrorCallback(error_callback);
+		glfwSetErrorCallback(window_error_callback);
 #endif // !NDEBUG
 
 		glfwInit();
@@ -87,7 +112,8 @@ namespace Ainan {
 
 		glfwSetWindowSizeCallback(Ptr, window_size_callback);
 		glfwSetFramebufferSizeCallback(Ptr, framebuffer_size_callback);
-		glfwSetWindowPosCallback(Ptr, pos_callback);
+		glfwSetWindowPosCallback(Ptr, window_pos_callback);
+		glfwSetWindowIconifyCallback(Ptr, window_iconify_callback);
 	}
 
 	void Window::HandleWindowEvents()

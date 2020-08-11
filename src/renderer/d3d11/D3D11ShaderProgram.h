@@ -20,8 +20,6 @@ namespace Ainan {
 			virtual void BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage) override;
 			virtual void BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage) override;
 
-			virtual int GetRendererID() const override;
-
 		public:
 			D3D11RendererContext* Context;
 			ID3D11VertexShader* VertexShader;

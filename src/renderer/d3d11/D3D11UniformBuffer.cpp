@@ -4,6 +4,8 @@
 #include "D3D11RendererContext.h"
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 	namespace D3D11 {
 
@@ -66,6 +68,17 @@ namespace Ainan {
 
 		void D3D11UniformBuffer::UpdateData(void* data)
 		{
+			auto func = [this, data]()
+			{
+				UpdateDataUnsafe(data);
+			};
+
+			Renderer::PushCommand(func);
+			Renderer::WaitUntilRendererIdle();
+		}
+
+		void D3D11UniformBuffer::UpdateDataUnsafe(void* data)
+		{
 			D3D11_MAPPED_SUBRESOURCE subresource{};
 			ASSERT_D3D_CALL(Context->DeviceContext->Map(Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &subresource));
 
@@ -73,7 +86,7 @@ namespace Ainan {
 			uint32_t unalignedDataIndex = 0;
 			uint8_t* unalignedData = (uint8_t*)data;
 			uint8_t* alignedData = (uint8_t*)subresource.pData;
-			for (auto& layoutPart : Layout) 
+			for (auto& layoutPart : Layout)
 			{
 				if (layoutPart.Count == 1)
 				{
@@ -101,13 +114,10 @@ namespace Ainan {
 						unalignedDataIndex += elementSize;
 					}
 				}
-			
+
 			}
 
 			Context->DeviceContext->Unmap(Buffer, 0);
-		}
-		void D3D11UniformBuffer::UpdateDataUnsafe(void* data)
-		{
 		}
 	}
 }

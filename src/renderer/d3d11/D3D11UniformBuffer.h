@@ -18,6 +18,7 @@ namespace Ainan {
 			virtual ~D3D11UniformBuffer();
 
 			virtual void UpdateData(void* data) override;
+			virtual void UpdateDataUnsafe(void* data) override;
 
 			//TODO
 			virtual std::string GetName() const override { return ""; };
@@ -29,9 +30,6 @@ namespace Ainan {
 			uint32_t BufferSize = 0;
 			VertexLayout Layout;
 			D3D11RendererContext* Context;
-
-			// Inherited via UniformBuffer
-			virtual void UpdateDataUnsafe(void* data) override;
 		};
 	}
 }

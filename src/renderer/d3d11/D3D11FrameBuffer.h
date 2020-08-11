@@ -17,7 +17,9 @@ namespace Ainan {
 			virtual void Blit(FrameBuffer* otherBuffer, const glm::vec2& sourceSize, const glm::vec2& targetSize) override;
 			virtual Image ReadPixels(glm::vec2 bottomLeftPixel = { 0,0 }, glm::vec2 topRightPixel = { 0,0 }) override;
 			virtual void Bind() const override;
+			virtual void BindUnsafe() const override;
 			virtual void Resize(const glm::vec2& newSize) override;
+			virtual void ResizeUnsafe(const glm::vec2& newSize) override;
 
 			virtual glm::vec2 GetSize() const override { return Size; };
 			virtual void* GetTextureID() override { return RenderTargetTextureView; };

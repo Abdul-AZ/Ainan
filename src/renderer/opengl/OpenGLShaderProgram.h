@@ -1,3 +1,5 @@
+#pragma once
+
 #include "renderer/ShaderProgram.h"
 #include "renderer/UniformBuffer.h"
 
@@ -13,16 +15,12 @@ namespace Ainan {
 			~OpenGLShaderProgram();
 
 			virtual void BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage) override;
+			virtual void BindUniformBufferUnsafe(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage) override;
 			virtual void BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage) override;
 			virtual void BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage) override;
 
-			virtual int GetRendererID() const override;
-
 		public:
-			unsigned int m_RendererID;
-
-			// Inherited via ShaderProgram
-			virtual void BindUniformBufferUnsafe(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage) override;
+			uint32_t m_RendererID;
 		};
 	}
 }

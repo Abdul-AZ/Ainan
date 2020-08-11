@@ -72,6 +72,9 @@ namespace Ainan
 
 	void Editor::Draw()
 	{
+		if (Window::Minimized)
+			return;
+
 		switch (m_State)
 		{
 		case State_NoEnvLoaded:

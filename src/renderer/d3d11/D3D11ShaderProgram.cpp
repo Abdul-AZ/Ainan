@@ -63,13 +63,6 @@ namespace Ainan {
 			FragmentShader->Release();
 		}
 
-		int D3D11ShaderProgram::GetRendererID() const
-		{
-			return 0;
-		}
-
-		
-
 		void D3D11ShaderProgram::BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
 		{
 			auto func = [this, &buffer, slot, stage]()

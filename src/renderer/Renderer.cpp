@@ -54,16 +54,13 @@ namespace Ainan {
 		Rdata = new RendererData();
 		Rdata->Thread = std::thread(&Renderer::RendererThreadLoop, api);
 
-		//this will effectively wait for the renderer to finish initilizing
-		std::mutex mutex;
-		std::unique_lock lock(mutex);
-		Rdata->WorkFinished.wait(lock);
+		WaitUntilRendererIdle();
 	}
 
 	void Renderer::Terminate()
 	{
 		Rdata->DestroyThread = true;
-		Rdata->WorkAvailable.notify_all();
+		Rdata->cv.notify_all();
 		Rdata->Thread.join();
 		delete Rdata;
 	}
@@ -301,32 +298,27 @@ namespace Ainan {
 			Rdata->CurrentActiveAPI->InitImGui();
 		}
 
-		std::mutex mutex;
 		while (true)
 		{
 			if (Rdata->DestroyThread)
 				break;
 
 			{
-				std::unique_lock<std::mutex> lock(mutex);
-				Rdata->WorkFinished.notify_all();
-				Rdata->WorkAvailable.wait(lock);
-			}
-			
-			while (true)
-			{
-				std::function<void()> func = nullptr;
 				{
-					std::lock_guard lock(Rdata->QueueMutex);
-					if (Rdata->CommandBuffer.size() == 0)
-					{
-						Rdata->WorkFinished.notify_all();
-						break;
-					}
-					func = Rdata->CommandBuffer.front();
-					Rdata->CommandBuffer.pop();
+					std::unique_lock<std::mutex> lock(Rdata->QueueMutex);
+					Rdata->cv.wait(lock, []() { return Rdata->payload == true || Rdata->DestroyThread; });
 				}
-				func();
+				std::function<void()> func = nullptr;
+				while (Rdata->CommandBuffer.size() > 0)
+				{
+					{
+						std::unique_lock lock(Rdata->QueueMutex);
+						func = Rdata->CommandBuffer.front();
+						Rdata->CommandBuffer.pop();
+					}
+					func();
+				}
+				Rdata->payload = false;
 			}
 		}
 
@@ -345,9 +337,13 @@ namespace Ainan {
 
 	void Renderer::PushCommand(std::function<void()> func)
 	{
-		std::lock_guard lock(Rdata->QueueMutex);
+		if (Window::Minimized)
+			return;
+
+		std::unique_lock lock(Rdata->QueueMutex);
 		Rdata->CommandBuffer.push(func);
-		Rdata->WorkAvailable.notify_all();
+		Rdata->payload = true;
+		Rdata->cv.notify_one();
 	}
 
 	void Renderer::BeginScene(const SceneDescription& desc)
@@ -360,7 +356,7 @@ namespace Ainan {
 			Rdata->CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
 			Rdata->CurrentNumberOfDrawCalls = 0;
 
-			(*Rdata->CurrentSceneDescription.SceneDrawTarget)->Bind();
+			(*Rdata->CurrentSceneDescription.SceneDrawTarget)->BindUnsafe();
 			ClearScreenUnsafe();
 
 			//update the per-frame uniform buffer
@@ -427,11 +423,8 @@ namespace Ainan {
 
 	void Renderer::WaitUntilRendererIdle()
 	{
-		if (Rdata->CommandBuffer.size() == 0)
-			return;
-		std::mutex mutex;
-		std::unique_lock<std::mutex> lock(mutex);
-		Rdata->WorkFinished.wait(lock);
+		using namespace std::chrono;
+		while (Rdata->payload == true) std::this_thread::sleep_for(1ms);
 	}
 
 	void Ainan::Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture)
@@ -750,9 +743,9 @@ namespace Ainan {
 		Rdata->BlurUniformBuffer->UpdateDataUnsafe(bufferData);
 
 		//Horizontal blur
-		Rdata->BlurFrameBuffer->Resize(target->GetSize());
+		Rdata->BlurFrameBuffer->ResizeUnsafe(target->GetSize());
 
-		Rdata->BlurFrameBuffer->Bind();
+		Rdata->BlurFrameBuffer->BindUnsafe();
 		Rdata->CurrentActiveAPI->ClearScreen();
 
 		//do the horizontal blur to the surface we revieved and put the result in tempSurface
@@ -768,7 +761,7 @@ namespace Ainan {
 		Rdata->BlurUniformBuffer->UpdateDataUnsafe(bufferData);
 
 		//clear the buffer we recieved
-		target->Bind();
+		target->BindUnsafe();
 		Rdata->CurrentActiveAPI->ClearScreen();
 
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved

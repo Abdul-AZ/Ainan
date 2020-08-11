@@ -7,6 +7,7 @@
 #include "renderer/Rectangle.h"
 
 #include "OpenGLRendererContext.h"
+#include "OpenGLShaderProgram.h"
 
 #include <glad/glad.h>
 
@@ -68,7 +69,7 @@ namespace Ainan {
 			int32_t AttribLocationVtxPos;
 			int32_t AttribLocationVtxUV;
 			int32_t AttribLocationVtxColor;
-			std::shared_ptr<ShaderProgram> ImGuiShader;
+			std::shared_ptr<OpenGLShaderProgram> ImGuiShader;
 			std::shared_ptr<IndexBuffer> ImGuiIndexBuffer;
 			std::shared_ptr<VertexBuffer> ImGuiVertexBuffer;
 			uint32_t FontTexture = 0;
