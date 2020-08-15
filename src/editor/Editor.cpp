@@ -592,10 +592,8 @@ namespace Ainan
 				if (obj->Type == EnvironmentObjectType::ParticleSystemType)
 				{
 					ParticleSystem* ps = (ParticleSystem*)obj.get();
-					if (ps->Customizer.Mode == SpawnMode::SpawnOnLine)
-						ps->Customizer.m_Line.Draw();
-					else if (ps->Customizer.Mode == SpawnMode::SpawnOnCircle || ps->Customizer.Mode == SpawnMode::SpawnInsideCircle && ps->Selected)
-						ps->Customizer.m_CircleOutline.Draw();
+					ps->Customizer.DrawWorldSpaceUI();
+					
 				}
 		}
 
@@ -1588,9 +1586,6 @@ namespace Ainan
 
 	void Editor::Duplicate(EnvironmentObjectInterface& obj)
 	{
-		auto mutexPtr = obj.GetMutex();
-		std::lock_guard lock(*mutexPtr);
-
 		//if this object is a particle system
 		if (obj.Type == EnvironmentObjectType::ParticleSystemType)
 		{

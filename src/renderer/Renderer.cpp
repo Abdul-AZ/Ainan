@@ -319,6 +319,7 @@ namespace Ainan {
 					func();
 				}
 				Rdata->payload = false;
+				Rdata->WorkDoneCV.notify_all();
 			}
 		}
 
@@ -424,7 +425,8 @@ namespace Ainan {
 	void Renderer::WaitUntilRendererIdle()
 	{
 		using namespace std::chrono;
-		while (Rdata->payload == true) std::this_thread::sleep_for(1ms);
+		std::unique_lock lock(Rdata->WorkDoneMutex);
+		while (Rdata->payload == true) Rdata->WorkDoneCV.wait(lock, []() { return Rdata->payload == false; });
 	}
 
 	void Ainan::Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture)

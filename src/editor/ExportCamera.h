@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Line.h"
 #include "Background.h"
 #include "editor/Camera.h"
 #include "file/SaveItemBrowser.h"
@@ -11,6 +10,8 @@
 #include "renderer/Image.h"
 
 namespace Ainan {
+
+	const glm::vec4 c_OutlineColor = { 0.8f, 0.0, 0.0f, 0.8f };
 
 	class ExportCamera {
 	public:
@@ -44,8 +45,9 @@ namespace Ainan {
 
 	private:
 		bool m_DrawExportCamera = false;
-		glm::vec2 m_Edges[4];
-		Line m_Outline;
+		std::array<glm::vec2, 4> m_OutlineVertices;
+		std::shared_ptr<VertexBuffer> m_OutlineVertexBuffer = nullptr;
+		std::shared_ptr<UniformBuffer> m_OutlineUniformBuffer = nullptr;
 		SaveItemBrowser m_ImageLocationBrowser;
 		bool m_FinalizeExportWindowOpen = false;
 	};

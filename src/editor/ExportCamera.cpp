@@ -9,9 +9,17 @@ namespace Ainan {
 		m_ImageLocationBrowser(STARTING_BROWSER_DIRECTORY, "Save Image"), 
 		RealCamera(CameraMode::CentreIsMidPoint)
 	{
-		memset(m_Edges, 0, sizeof(m_Edges));
+		memset(m_OutlineVertices.data(), 0, m_OutlineVertices.size() * sizeof(glm::vec2));
 
 		ImageSavePath = STARTING_BROWSER_DIRECTORY;
+
+		VertexLayout layout(1);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		m_OutlineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 8, layout, Renderer::ShaderLibrary()["LineShader"], true);
+
+		layout[0] = { "u_Color", ShaderVariableType::Vec4 };
+		m_OutlineUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout, (void*)&c_OutlineColor);
+
 		SetSize();
 	}
 
@@ -20,25 +28,32 @@ namespace Ainan {
 		if (!m_DrawExportCamera)
 			return;
 
-		m_Outline.Draw();
+		std::array<glm::vec2, 8> vertices =
+		{
+			m_OutlineVertices[0], m_OutlineVertices[1], //bottom left to top left
+			m_OutlineVertices[1], m_OutlineVertices[2], //top left to top right
+			m_OutlineVertices[2], m_OutlineVertices[3], //top right to bottom right
+			m_OutlineVertices[3], m_OutlineVertices[0]  //bottom right to bottom left
+		};
+
+		m_OutlineVertexBuffer->UpdateData(0, sizeof(glm::vec2) * 8, vertices.data());
+
+		auto& shader = Renderer::ShaderLibrary()["LineShader"];
+		shader->BindUniformBuffer(m_OutlineUniformBuffer, 1, RenderingStage::FragmentShader);
+
+		Renderer::Draw(*m_OutlineVertexBuffer, *shader, Primitive::Lines,  8);
 	}
 
 	void ExportCamera::SetSize()
 	{
 		glm::vec2 size = glm::vec2(RealCamera.ZoomFactor * m_AspectRatio, RealCamera.ZoomFactor) / c_GlobalScaleFactor;
-		m_Edges[0] = m_ExportCameraPosition - (size / 2.0f); //bottom left
-		m_Edges[1] = m_ExportCameraPosition + glm::vec2(-size.x, size.y) / 2.0f; //top left
-		m_Edges[2] = m_ExportCameraPosition + (size / 2.0f);     //top right
-		m_Edges[3] = m_ExportCameraPosition + glm::vec2(size.x, -size.y) / 2.0f; //bottom right
+		m_OutlineVertices[0] = m_ExportCameraPosition - (size / 2.0f); //bottom left
+		m_OutlineVertices[1] = m_ExportCameraPosition + glm::vec2(-size.x, size.y) / 2.0f; //top left
+		m_OutlineVertices[2] = m_ExportCameraPosition + (size / 2.0f);     //top right
+		m_OutlineVertices[3] = m_ExportCameraPosition + glm::vec2(size.x, -size.y) / 2.0f; //bottom right
 
-		std::array<glm::vec2, 8> vertices =
-		{
-			m_Edges[0], m_Edges[1], //bottom left to top left
-			m_Edges[1], m_Edges[2], //top left to top right
-			m_Edges[2], m_Edges[3], //top right to bottom right
-			m_Edges[3], m_Edges[0]  //bottom right to bottom left
-		};
-		m_Outline.SetVertices(std::vector<glm::vec2>(vertices.begin(), vertices.end()));
+		for (glm::vec2& vertex : m_OutlineVertices)
+			vertex *= c_GlobalScaleFactor;
 
 		RealCamera.Update(0.0f, Renderer::GetCurrentViewport());
 		glm::vec2 reversedPos = glm::vec2(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y);

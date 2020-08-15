@@ -120,6 +120,8 @@ namespace Ainan {
 			std::mutex QueueMutex;
 			std::condition_variable cv;
 			std::atomic_bool payload = false;
+			std::condition_variable WorkDoneCV;
+			std::mutex WorkDoneMutex;
 
 			//scene data
 			RendererAPI* CurrentActiveAPI = nullptr;

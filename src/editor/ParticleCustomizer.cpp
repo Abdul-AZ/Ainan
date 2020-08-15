@@ -6,30 +6,15 @@ namespace Ainan {
 	ParticleCustomizer::ParticleCustomizer() :
 		mt(std::random_device{}())
 	{
-		m_Line.Color = glm::vec4(0.0f, 0.7f, 0.0f, 0.85f);
 		m_CircleOutline.Color = glm::vec4(0.0f, 0.7f, 0.0f, 0.85f);
 		m_CircleOutline.Position = { 0.5f, 0.5f };
-	}
 
-	ParticleCustomizer::ParticleCustomizer(const ParticleCustomizer& customizer) :
-		m_TextureCustomizer(customizer.m_TextureCustomizer)
-	{
-		m_VelocityCustomizer = customizer.m_VelocityCustomizer;
-		m_NoiseCustomizer = customizer.m_NoiseCustomizer;
-		m_LifetimeCustomizer = customizer.m_LifetimeCustomizer;
-		m_ColorCustomizer = customizer.m_ColorCustomizer;
-		m_ScaleCustomizer = customizer.m_ScaleCustomizer;
-		m_ForceCustomizer = customizer.m_ForceCustomizer;
-		m_Line = customizer.m_Line;
-		m_LineAngle = customizer.m_LineAngle;
-		m_LinePosition = customizer.m_LinePosition;
-		m_CircleOutline = customizer.m_CircleOutline;
-		mt = customizer.mt;
-	}
+		VertexLayout layout(1);
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		m_LineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibrary()["LineShader"], true);
 
-	ParticleCustomizer ParticleCustomizer::operator=(const ParticleCustomizer& customizer)
-	{
-		return ParticleCustomizer(customizer);
+		layout[0] = { "u_Color", ShaderVariableType::Vec4 };
+		m_LineUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout, (void*)&c_LineParticleSpawnSourceColor);
 	}
 
 	std::string GetModeAsText(const SpawnMode& mode)
@@ -207,8 +192,13 @@ namespace Ainan {
 		}
 
 		case SpawnMode::SpawnOnLine: {
-			std::uniform_real_distribution<float> dest(0.0f, 1.0f);
-			particleDesc.Position = m_Line.GetPointInLine(dest(mt));
+			std::uniform_real_distribution<float> dest(-1.0f, 1.0f);
+
+			float t = dest(mt);
+			float x = m_LinePosition.x + t * m_LineLength * cos(glm::radians(m_LineAngle));
+			float y = m_LinePosition.x + t * m_LineLength * sin(glm::radians(m_LineAngle));
+
+			particleDesc.Position = glm::vec2(x, y) * c_GlobalScaleFactor;
 			break;
 		}
 
@@ -244,5 +234,26 @@ namespace Ainan {
 		particleDesc.EndScale = m_ScaleCustomizer.m_EndScale;
 
 		return particleDesc;
+	}
+
+	void ParticleCustomizer::DrawWorldSpaceUI()
+	{
+		if (Mode == SpawnMode::SpawnOnLine)
+		{
+			glm::vec2 offset = m_LineLength * glm::vec2(cos(glm::radians(m_LineAngle)), sin(glm::radians(m_LineAngle)));
+
+			std::array<glm::vec2, 2> vertices;
+			vertices[0] = (m_LinePosition + offset) * c_GlobalScaleFactor;
+			vertices[1] = (m_LinePosition - offset) * c_GlobalScaleFactor;
+
+			m_LineVertexBuffer->UpdateData(0, sizeof(glm::vec2) * 2, vertices.data());
+
+			auto& shader = Renderer::ShaderLibrary()["LineShader"];
+			shader->BindUniformBuffer(m_LineUniformBuffer, 1, RenderingStage::FragmentShader);
+
+			Renderer::Draw(*m_LineVertexBuffer, *shader, Primitive::Lines, 2);
+		}
+		else if (Mode == SpawnMode::SpawnOnCircle || Mode == SpawnMode::SpawnInsideCircle)
+			m_CircleOutline.Draw();
 	}
 }
