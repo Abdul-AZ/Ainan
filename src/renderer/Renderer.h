@@ -48,48 +48,48 @@ namespace Ainan {
 		static void BeginScene(const SceneDescription& desc);
 		static void EndScene();
 
+		static void WaitUntilRendererIdle();
+
 		//position is in world coordinates
 		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture = nullptr);
 		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, std::shared_ptr<Texture> texture = nullptr);
 		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, std::shared_ptr<Texture> texture = nullptr);
 
 		//these overloads DO NOT use an index buffer
-		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& mode,
+		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive mode,
 						 const unsigned int& vertexCount);
 
 		//these overloads DO use an index buffer
-		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive,
+		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive primitive,
 						 const IndexBuffer& indexBuffer);
-		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, const Primitive& primitive,
+		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive primitive,
 						 const IndexBuffer& indexBuffer, int vertexCount);
 
 		static void ImGuiNewFrame();
 		static void ImGuiEndFrame();
 
 		static void ClearScreen();
+		static void ClearScreenUnsafe();
 
 		static void Present();
 
 		static void RecreateSwapchain(const glm::vec2& newSwapchainSize);
 
-		static void Blur(std::shared_ptr<FrameBuffer>& target, float radius);
+		static void PushCommand(std::function<void()> func);
 
 		static void SetBlendMode(RenderingBlendMode blendMode);
 
 		static void SetViewport(const Rectangle& viewport);
 		static Rectangle GetCurrentViewport();
 
-		static void SetScissor(const Rectangle& scissor);
-		static Rectangle GetCurrentScissor();
-
 		static void SetRenderTargetApplicationWindow();
 
-		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, unsigned int size,
+		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, uint32_t size,
 			const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
 			bool dynamic = false);
 
-		//data should ALWAYS an UNSIGNED INT array
-		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(unsigned int* data, const int& count);
+		//data should ALWAYS a uint32_t array
+		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(uint32_t* data, uint32_t count);
 
 		//manually create a shader program (mostly used for testing new shaders)
 		//to properly add shaders add them to the CompileOnInit list in the cpp file and access them from the ShaderLibrary member
@@ -111,6 +111,18 @@ namespace Ainan {
 
 		struct RendererData
 		{
+			//sync objects
+			std::thread Thread;
+			bool DestroyThread = false;
+			std::mutex DataMutex;
+			std::queue<std::function<void()>> CommandBuffer;
+			
+			std::mutex QueueMutex;
+			std::condition_variable cv;
+			std::atomic_bool payload = false;
+			std::condition_variable WorkDoneCV;
+			std::mutex WorkDoneMutex;
+
 			//scene data
 			RendererAPI* CurrentActiveAPI = nullptr;
 			SceneDescription CurrentSceneDescription = {};
@@ -118,6 +130,7 @@ namespace Ainan {
 			glm::mat4 CurrentViewProjection = glm::mat4(1.0f);
 			std::shared_ptr<UniformBuffer> SceneUniformbuffer = nullptr;
 			RenderingBlendMode m_CurrentBlendMode = RenderingBlendMode::Additive;
+			Rectangle CurrentViewport = { 0, 0, 0, 0 };
 
 			//batch renderer data
 			std::shared_ptr<VertexBuffer> QuadBatchVertexBuffer = nullptr;
@@ -146,9 +159,11 @@ namespace Ainan {
 
 		static decltype(Rdata->ShaderLibrary)& ShaderLibrary() { return Rdata->ShaderLibrary; }
 
-		static void DrawImGui(ImDrawData* drawData);
-	private:
+	protected:
 		static void FlushQuadBatch();
+		static void RendererThreadLoop(RendererType api);
+		static void DrawImGui(ImDrawData* drawData);
+		static void Blur(std::shared_ptr<FrameBuffer>& target, float radius);
 	};
 
 }

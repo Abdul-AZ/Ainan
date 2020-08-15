@@ -157,7 +157,7 @@ namespace Ainan {
 		model = glm::scale(model, glm::vec3(5000.0f));
 
 		shader->BindUniformBuffer(TransformUniformBuffer, 1, RenderingStage::VertexShader);
-		TransformUniformBuffer->UpdateData(&model);
+		TransformUniformBuffer->UpdateData((void*)&model);
 
 		shader->BindUniformBuffer(LightingUniformBuffer, 2, RenderingStage::FragmentShader);
 		LightingUniformBuffer->UpdateData(LightDataPackingBuffer);

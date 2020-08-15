@@ -85,11 +85,26 @@ namespace Ainan {
 
 		OpenGLUniformBuffer::~OpenGLUniformBuffer()
 		{
-			glDeleteBuffers(1, &m_RendererID);
+			auto rendererID = m_RendererID;
+			auto func = [rendererID]()
+			{
+				glDeleteBuffers(1, &rendererID);
+			};
+			Renderer::PushCommand(func);
 			delete[] m_BufferMemory;
 		}
 
 		void OpenGLUniformBuffer::UpdateData(void* data)
+		{
+			auto func = [this, data]()
+			{
+				UpdateDataUnsafe(data);
+			};
+			Renderer::PushCommand(func);
+			Renderer::WaitUntilRendererIdle(); //TODO reference count the data instead of waiting
+		}
+
+		void OpenGLUniformBuffer::UpdateDataUnsafe(void* data)
 		{
 			//align data with std140 uniform layouts and put the result in m_BufferMemory
 			uint32_t unalignedDataIndex = 0;

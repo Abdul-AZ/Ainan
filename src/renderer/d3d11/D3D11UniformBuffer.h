@@ -18,6 +18,7 @@ namespace Ainan {
 			virtual ~D3D11UniformBuffer();
 
 			virtual void UpdateData(void* data) override;
+			virtual void UpdateDataUnsafe(void* data) override;
 
 			//TODO
 			virtual std::string GetName() const override { return ""; };

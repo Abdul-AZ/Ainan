@@ -7,6 +7,7 @@
 #include "renderer/Rectangle.h"
 
 #include "OpenGLRendererContext.h"
+#include "OpenGLShaderProgram.h"
 
 #include <glad/glad.h>
 
@@ -39,9 +40,9 @@ namespace Ainan {
 			virtual ~OpenGLRendererAPI();
 
 			// Inherited via RendererAPI
-			virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount) override;
-			virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer) override;
-			virtual void Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount) override;
+			virtual void Draw(ShaderProgram& shader, Primitive primitive, uint32_t vertexCount) override;
+			virtual void Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer) override;
+			virtual void Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer, uint32_t vertexCount) override;
 			virtual void InitImGui() override;
 			virtual void ImGuiNewFrame() override;
 			virtual void ImGuiEndFrame() override;
@@ -52,10 +53,6 @@ namespace Ainan {
 			virtual void SetRenderTargetApplicationWindow() override;
 
 			virtual void SetViewport(const Rectangle& viewport) override;
-			virtual Rectangle GetCurrentViewport() override;
-
-			virtual void SetScissor(const Rectangle& scissor) override;
-			virtual Rectangle GetCurrentScissor() override;
 
 			virtual RendererContext* GetContext() override { return &Context; };
 
@@ -72,7 +69,7 @@ namespace Ainan {
 			int32_t AttribLocationVtxPos;
 			int32_t AttribLocationVtxUV;
 			int32_t AttribLocationVtxColor;
-			std::shared_ptr<ShaderProgram> ImGuiShader;
+			std::shared_ptr<OpenGLShaderProgram> ImGuiShader;
 			std::shared_ptr<IndexBuffer> ImGuiIndexBuffer;
 			std::shared_ptr<VertexBuffer> ImGuiVertexBuffer;
 			uint32_t FontTexture = 0;

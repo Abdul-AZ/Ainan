@@ -11,6 +11,9 @@
 #include <filesystem>
 #include <functional>
 #include <array>
+#include <mutex>
+#include <queue>
+#include <atomic>
 
 //dependencies
 #include <imgui.h>

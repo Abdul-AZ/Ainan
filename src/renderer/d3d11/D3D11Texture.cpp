@@ -6,6 +6,7 @@
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 
 #include "renderer/Image.h"
+#include "renderer/Renderer.h"
 
 namespace Ainan {
 	namespace D3D11 {
@@ -113,15 +114,29 @@ namespace Ainan {
 			D3DTexture->Release();
 		}
 
-		void D3D11Texture::SetImage(const Image& image)
+		glm::vec2 D3D11Texture::GetSize() const
+		{
+			return glm::vec2();
+		}
+
+		void D3D11Texture::SetImage(std::shared_ptr<Image> image)
+		{
+			auto func = [this, image]()
+			{
+				SetImageUnsafe(image);
+			};
+			Renderer::PushCommand(func);
+		}
+
+		void D3D11Texture::SetImageUnsafe(std::shared_ptr<Image> image)
 		{
 			D3DTexture->Release();
 			D3DResourceView->Release();
 
 			D3D11_TEXTURE2D_DESC desc{};
-			desc.Width = image.m_Width;
-			desc.Height = image.m_Height;
-			desc.Format = D3DFormat(image.Format);
+			desc.Width = image->m_Width;
+			desc.Height = image->m_Height;
+			desc.Format = D3DFormat(image->Format);
 			desc.SampleDesc.Count = 1;
 			desc.Usage = D3D11_USAGE_DYNAMIC;
 			desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
@@ -129,11 +144,11 @@ namespace Ainan {
 			desc.ArraySize = 1;
 			desc.MipLevels = 1;
 
-			if (image.m_Data)
+			if (image->m_Data)
 			{
 				D3D11_SUBRESOURCE_DATA subresource{};
-				subresource.pSysMem = image.m_Data;
-				subresource.SysMemPitch = image.m_Width * sizeof(uint8_t) * FormatBytesPerPixel(image.Format);
+				subresource.pSysMem = image->m_Data;
+				subresource.SysMemPitch = image->m_Width * sizeof(uint8_t) * FormatBytesPerPixel(image->Format);
 				ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, &subresource, &D3DTexture));
 			}
 			else
@@ -143,18 +158,9 @@ namespace Ainan {
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			viewDesc.Texture2D.MipLevels = 1;
-			viewDesc.Format = D3DFormat(image.Format);
+			viewDesc.Format = D3DFormat(image->Format);
 
 			ASSERT_D3D_CALL(Context->Device->CreateShaderResourceView(D3DTexture, &viewDesc, &D3DResourceView));
-		}
-
-		void D3D11Texture::SetDefaultTextureSettings()
-		{
-		}
-
-		glm::vec2 D3D11Texture::GetSize() const
-		{
-			return glm::vec2();
 		}
 	}
 }

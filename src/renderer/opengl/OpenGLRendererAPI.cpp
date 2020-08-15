@@ -241,10 +241,12 @@ namespace Ainan {
 
 		OpenGLRendererAPI::OpenGLRendererAPI()
 		{
+			glfwMakeContextCurrent(Window::Ptr);
+			gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+			glfwSwapInterval(1);
 #ifdef DEBUG
 			glDebugMessageCallback(&opengl_debug_message_callback, nullptr);
 #endif // DEBUG
-
 			glEnable(GL_BLEND);
 			SingletonInstance = this;
 		}
@@ -270,7 +272,7 @@ namespace Ainan {
 			ImGui::DestroyContext();
 		}
 
-		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer)
+		void OpenGLRendererAPI::Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer)
 		{
 			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
 
@@ -279,7 +281,7 @@ namespace Ainan {
 			glUseProgram(0);
 		}
 
-		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const IndexBuffer& indexBuffer, int vertexCount)
+		void OpenGLRendererAPI::Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer, uint32_t vertexCount)
 		{
 			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
 
@@ -298,28 +300,6 @@ namespace Ainan {
 			glViewport(viewport.X, viewport.Y, viewport.Width, viewport.Height);
 		}
 
-		Rectangle OpenGLRendererAPI::GetCurrentViewport()
-		{
-			Rectangle viewport;
-
-			glGetIntegerv(GL_VIEWPORT, &viewport.X);
-
-			return viewport;
-		}
-
-		void OpenGLRendererAPI::SetScissor(const Rectangle& scissor)
-		{
-			glScissor(scissor.X, scissor.Y, scissor.Width, scissor.Height);
-		}
-
-		Rectangle OpenGLRendererAPI::GetCurrentScissor()
-		{
-			Rectangle scissor;
-
-			glGetIntegerv(GL_SCISSOR_BOX, &scissor.X);
-
-			return scissor;
-		}
 
 		void OpenGLRendererAPI::SetBlendMode(RenderingBlendMode blendMode)
 		{
@@ -338,15 +318,17 @@ namespace Ainan {
 
 		void OpenGLRendererAPI::ImGuiNewFrame()
 		{
-			if (!FontTexture)
+			auto func = [this]()
 			{
-				// Backup GL state
-				GLint last_texture, last_array_buffer;
-				glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-				glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
+				if (!FontTexture)
+				{
+					// Backup GL state
+					GLint last_texture, last_array_buffer;
+					glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
+					glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
 
-				const GLchar* vertexShaderSrc =
-					R"(
+					const GLchar* vertexShaderSrc =
+						R"(
 			layout (location = 0) in vec2 Position;
 			layout (location = 1) in vec2 UV;
 			layout (location = 2) in vec4 Color;
@@ -361,8 +343,8 @@ namespace Ainan {
 			    gl_Position = ProjMtx * vec4(Position.xy,0,1);
 			})";
 
-				const GLchar* fragmentShaderSrc =
-					R"(
+					const GLchar* fragmentShaderSrc =
+						R"(
 			in vec2 Frag_UV;
 			in vec4 Frag_Color;
 			layout(binding = 0) uniform sampler2D Texture;
@@ -373,47 +355,52 @@ namespace Ainan {
 			    Out_Color = Frag_Color * texture(Texture, Frag_UV.st);
 			})";
 
-				std::string vertSrc = (std::string)"#version 420 core" + (std::string)vertexShaderSrc;
-				std::string fragSrc = (std::string)"#version 420 core" + (std::string)fragmentShaderSrc;
+					std::string vertSrc = (std::string)"#version 420 core" + (std::string)vertexShaderSrc;
+					std::string fragSrc = (std::string)"#version 420 core" + (std::string)fragmentShaderSrc;
 
-				ImGuiShader = OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
+					ImGuiShader = OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
 
-				AttribLocationVtxPos = glGetAttribLocation(ImGuiShader->GetRendererID(), "Position");
-				AttribLocationVtxUV = glGetAttribLocation(ImGuiShader->GetRendererID(), "UV");
-				AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->GetRendererID(), "Color");
+					AttribLocationVtxPos = glGetAttribLocation(ImGuiShader->m_RendererID, "Position");
+					AttribLocationVtxUV = glGetAttribLocation(ImGuiShader->m_RendererID, "UV");
+					AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->m_RendererID, "Color");
 
-				// Create buffers
-				VertexLayout layout;
-				ImGuiVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(nullptr, 0, layout, false);
-				ImGuiIndexBuffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(nullptr, 0);
+					// Create buffers
+					VertexLayout layout;
+					ImGuiVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(nullptr, 0, layout, false);
+					ImGuiIndexBuffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(nullptr, 0);
 
-				// Build texture atlas
-				ImGuiIO& io = ImGui::GetIO();
-				unsigned char* pixels;
-				int width, height;
-				io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bits (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
+					// Build texture atlas
+					ImGuiIO& io = ImGui::GetIO();
+					unsigned char* pixels;
+					int width, height;
+					io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bits (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
 
-				// Upload texture to graphics system
-				GLint last_font_texture;
-				glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_font_texture);
-				glGenTextures(1, &FontTexture);
-				glBindTexture(GL_TEXTURE_2D, FontTexture);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+					// Upload texture to graphics system
+					GLint last_font_texture;
+					glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_font_texture);
+					glGenTextures(1, &FontTexture);
+					glBindTexture(GL_TEXTURE_2D, FontTexture);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
-				// Store our identifier
-				io.Fonts->TexID = (ImTextureID)(intptr_t)FontTexture;
+					// Store our identifier
+					io.Fonts->TexID = (ImTextureID)(intptr_t)FontTexture;
 
-				// Restore state
-				glBindTexture(GL_TEXTURE_2D, last_font_texture);
+					// Restore state
+					glBindTexture(GL_TEXTURE_2D, last_font_texture);
 
-				// Restore modified GL state
-				glBindTexture(GL_TEXTURE_2D, last_texture);
-				glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
+					// Restore modified GL state
+					glBindTexture(GL_TEXTURE_2D, last_texture);
+					glBindBuffer(GL_ARRAY_BUFFER, last_array_buffer);
 
-			}
+				}
+			};
+
+			Renderer::PushCommand(func);
+			Renderer::WaitUntilRendererIdle();
+			
 
 			ImGuiIO& io = ImGui::GetIO();
 			IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end."
@@ -487,7 +474,7 @@ namespace Ainan {
 			{
 
 			}
-			else 
+			else
 			{
 				ImGuiMouseCursor imgui_cursor = ImGui::GetMouseCursor();
 				ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
@@ -515,15 +502,25 @@ namespace Ainan {
 		void OpenGLRendererAPI::ImGuiEndFrame()
 		{
 			ImGui::Render();
-			DrawImGui(ImGui::GetDrawData());
-			ImGuiIO& io = ImGui::GetIO(); (void)io;
-			if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			auto func = []()
 			{
-				GLFWwindow* backup_current_context = glfwGetCurrentContext();
-				ImGui::UpdatePlatformWindows();
-				ImGui::RenderPlatformWindowsDefault();
-				glfwMakeContextCurrent(backup_current_context);
-			}
+				glfwMakeContextCurrent(nullptr);
+			};
+			Renderer::PushCommand(func);
+			Renderer::WaitUntilRendererIdle();
+
+			glfwMakeContextCurrent(Window::Ptr);
+			ImGui::UpdatePlatformWindows();
+			glfwMakeContextCurrent(nullptr);
+
+			ImGui::RenderPlatformWindowsDefault();
+			auto func2 = [this]()
+			{
+				glfwMakeContextCurrent(Window::Ptr);
+				DrawImGui(ImGui::GetDrawData());
+			};
+			Renderer::PushCommand(func2);
+			Renderer::WaitUntilRendererIdle();
 		}
 
 		void OpenGLRendererAPI::InitImGui()
@@ -639,8 +636,12 @@ namespace Ainan {
 			GLint last_sampler; glGetIntegerv(GL_SAMPLER_BINDING, &last_sampler);
 			GLint last_array_buffer; glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
 			GLint last_polygon_mode[2]; glGetIntegerv(GL_POLYGON_MODE, last_polygon_mode);
-			Rectangle lastViewport = GetCurrentViewport();
-			Rectangle lastScissor = GetCurrentScissor();
+			Rectangle lastViewport;
+			glGetIntegerv(GL_VIEWPORT, &lastViewport.X);
+			Rectangle lastScissor;
+			glGetIntegerv(GL_SCISSOR_BOX, &lastScissor.X);
+
+
 			GLenum last_blend_src_rgb; glGetIntegerv(GL_BLEND_SRC_RGB, (GLint*)&last_blend_src_rgb);
 			GLenum last_blend_dst_rgb; glGetIntegerv(GL_BLEND_DST_RGB, (GLint*)&last_blend_dst_rgb);
 			GLenum last_blend_src_alpha; glGetIntegerv(GL_BLEND_SRC_ALPHA, (GLint*)&last_blend_src_alpha);
@@ -677,14 +678,12 @@ namespace Ainan {
 				{ (R + L) / (L - R),  (T + B) / (B - T),  0.0f,   1.0f },
 			};
 
-			glUseProgram(ImGuiShader->GetRendererID());
-			//ImGuiShader->SetUniformMat4("ProjMtx", orthoProjection);
-			glUniformMatrix4fv(glGetUniformLocation(ImGuiShader->GetRendererID(), "ProjMtx"), 1, GL_FALSE, (GLfloat*)&orthoProjection);
+			glUseProgram(ImGuiShader->m_RendererID);
+			glUniformMatrix4fv(glGetUniformLocation(ImGuiShader->m_RendererID, "ProjMtx"), 1, GL_FALSE, (GLfloat*)&orthoProjection);
 			glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 
 			VertexLayout layout;
-			std::shared_ptr<VertexBuffer> tempVA =// Renderer::CreateVertexBuffer(nullptr, 0, layout, ImGuiShader);
-			std::make_shared<OpenGLVertexBuffer>(nullptr, 0, layout, false);
+			std::shared_ptr<VertexBuffer> tempVA = std::make_shared<OpenGLVertexBuffer>(nullptr, 0, layout, false);
 			tempVA->Bind();
 
 			// Bind vertex/index buffers and setup attributes for ImDrawVert
@@ -760,7 +759,7 @@ namespace Ainan {
 			glPolygonMode(GL_FRONT_AND_BACK, (GLenum)last_polygon_mode[0]);
 
 			SetViewport(lastViewport);
-			SetScissor(lastScissor);
+			glScissor(lastScissor.X, lastScissor.Y, lastScissor.Width, lastScissor.Height);
 		}
 
 		void OpenGLRendererAPI::SetRenderTargetApplicationWindow()
@@ -778,7 +777,7 @@ namespace Ainan {
 			Window::WindowSizeChangedSinceLastFrame = false;
 		}
 
-		void OpenGLRendererAPI::Draw(ShaderProgram& shader, const Primitive& primitive, const unsigned int& vertexCount)
+		void OpenGLRendererAPI::Draw(ShaderProgram& shader, Primitive primitive, uint32_t vertexCount)
 		{
 			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
 

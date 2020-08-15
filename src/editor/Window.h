@@ -31,6 +31,7 @@ namespace Ainan {
 		//do NOT modify these ever, use Setxxx functions for that
 		//they are only updated from functions inside Window.cpp
 		static bool ShouldClose;
+		static bool Minimized;
 		static glm::vec2 FramebufferSize;
 		static glm::vec2 Size;
 		static glm::vec2 Position;

@@ -2,6 +2,7 @@
 
 #include "renderer/UniformBuffer.h"
 #include "renderer/VertexBuffer.h"//for VertexLayout
+#include "renderer/Renderer.h"
 
 namespace Ainan {
 	namespace OpenGL {
@@ -13,6 +14,7 @@ namespace Ainan {
 			virtual ~OpenGLUniformBuffer();
 
 			virtual void UpdateData(void* data) override;
+			virtual void UpdateDataUnsafe(void* data) override;
 
 			virtual std::string GetName() const override { return m_Name; };
 			virtual uint32_t GetPackedSize() const override { return m_PackedSize; };

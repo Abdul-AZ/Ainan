@@ -15,6 +15,7 @@ namespace Ainan {
 		//basically this function copies the buffer to another buffer
 		virtual void Blit(FrameBuffer* otherBuffer, const glm::vec2& sourceSize, const glm::vec2& targetSize) = 0;
 		virtual void Resize(const glm::vec2& newSize) = 0;
+		virtual void ResizeUnsafe(const glm::vec2& newSize) = 0;
 
 		virtual void* GetTextureID() = 0;
 		virtual glm::vec2 GetSize() const = 0;
@@ -23,5 +24,6 @@ namespace Ainan {
 		virtual Image ReadPixels(glm::vec2 bottomLeftPixel = { 0,0 }, glm::vec2 topRightPixel = { 0,0 }) = 0;
 
 		virtual void Bind() const = 0;
+		virtual void BindUnsafe() const = 0;
 	};
 }

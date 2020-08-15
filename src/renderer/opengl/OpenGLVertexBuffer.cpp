@@ -68,7 +68,13 @@ namespace Ainan {
 
 		OpenGLVertexBuffer::~OpenGLVertexBuffer()
 		{
-			glDeleteBuffers(1, &m_RendererID);
+			uint32_t rendererID = m_RendererID;
+			auto func = [rendererID]()
+			{
+				glDeleteBuffers(1, &rendererID);
+			};
+
+			Renderer::PushCommand(func);
 		}
 
 		void OpenGLVertexBuffer::Bind() const
@@ -83,10 +89,21 @@ namespace Ainan {
 			glBindVertexArray(0);
 		}
 
-		void OpenGLVertexBuffer::UpdateData(const int& offset, const int& size, void* data)
+		void OpenGLVertexBuffer::UpdateDataUnsafe(int32_t offset, int32_t size, void* data)
 		{
 			Bind();
 			glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+		}
+
+		void OpenGLVertexBuffer::UpdateData(int32_t offset, int32_t size, void* data)
+		{
+			auto func = [this, offset, size, data]()
+			{
+				UpdateDataUnsafe(offset, size, data);
+			};
+
+			Renderer::PushCommand(func);
+			Renderer::WaitUntilRendererIdle();
 		}
 	}
 }

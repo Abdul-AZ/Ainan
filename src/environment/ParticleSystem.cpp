@@ -236,19 +236,6 @@ namespace Ainan {
 		if (EditorOpen)
 			Customizer.DisplayGUI(m_Name, EditorOpen);
 		ImGui::PopID();
-
-		//update editor line
-		if (Customizer.Mode == SpawnMode::SpawnOnLine)
-		{
-			glm::vec2 pointOffset = Customizer.m_LineLength * glm::vec2(cos(glm::radians(Customizer.m_LineAngle)), sin(glm::radians(Customizer.m_LineAngle)));
-
-			std::vector<glm::vec2> lineVertices;
-			lineVertices.reserve(2);
-			lineVertices.push_back(Customizer.m_LinePosition + pointOffset);
-			lineVertices.push_back(Customizer.m_LinePosition - pointOffset);
-
-			Customizer.m_Line.SetVertices(lineVertices);
-		}
 	}
 
 	void ParticleSystem::SpawnAllParticlesOnQue(const float& deltaTime)

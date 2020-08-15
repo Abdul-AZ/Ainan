@@ -88,7 +88,6 @@ namespace Ainan {
 		std::string m_AddObjectWindowObjectName = "Example Name";
 		EnvironmentObjectType m_AddObjectWindowObjectType = SpriteType;
 		std::clock_t m_TimeStart = 0, m_TimeEnd = 0;
-		float m_DeltaTime = 0.0f;
 		std::array<float, 120> m_DeltaTimeHistory;
 		Profiler m_ActiveProfiler = Profiler::RenderingProfiler;
 
@@ -100,7 +99,17 @@ namespace Ainan {
 		bool m_IncludeStarterAssets = false;
 		bool m_ShouldDeleteEnv = false;
 
+		std::array<std::thread, 4> WorkerThreads;
+		std::queue<EnvironmentObjectInterface*> UpdateQueue;
+		std::mutex UpdateMutex;
+		std::condition_variable StartUpdating;
+		std::condition_variable FinishedUpdating;
+		std::atomic_bool DestroyThreads = false;
+		float m_DeltaTime = 0.0f;
+
 	private:
+		void WorkerThreadLoop();
+
 		//methods based on editor state
 		void Update_EditorMode();
 		void Update_PlayMode();

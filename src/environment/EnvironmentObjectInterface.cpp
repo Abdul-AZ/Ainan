@@ -4,6 +4,11 @@
 
 namespace Ainan {
 
+	EnvironmentObjectInterface::EnvironmentObjectInterface() :
+		ObjectMutex(std::make_shared<std::mutex>())
+	{
+	}
+
 	EnvironmentObjectType StringToEnvironmentObjectType(const std::string& type)
 	{
 		if (type == "Particle System")

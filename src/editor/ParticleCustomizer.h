@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Line.h"
 #include "CircleOutline.h"
 #include "editor/Window.h"
 #include "customizers/TextureCustomizer.h"
@@ -12,6 +11,8 @@
 #include "customizers/ForceCustomizer.h"
 
 namespace Ainan {
+
+	const glm::vec4 c_LineParticleSpawnSourceColor = glm::vec4(0.0f, 0.7f, 0.0f, 0.85f);
 
 	enum class SpawnMode 
 	{
@@ -39,11 +40,10 @@ namespace Ainan {
 	public:
 		ParticleCustomizer();
 
-		ParticleCustomizer(const ParticleCustomizer& customizer);
-		ParticleCustomizer operator=(const ParticleCustomizer& customizer);
-
 		void DisplayGUI(const std::string& windowName, bool& windowOpen);
 		ParticleDescription GetParticleDescription();
+
+		void DrawWorldSpaceUI();
 
 		float GetTimeBetweenParticles() { return 1 / m_ParticlesPerSecond; }
 
@@ -68,7 +68,8 @@ namespace Ainan {
 		glm::vec2 m_LinePosition = { 0.5f, 0.5f };
 		float m_LineLength = 0.2f;
 		float m_LineAngle = 0.0f; //in degrees
-		Line m_Line;
+		std::shared_ptr<VertexBuffer> m_LineVertexBuffer = nullptr;
+		std::shared_ptr<UniformBuffer> m_LineUniformBuffer = nullptr;
 
 		//spawn particle on/in circle option
 		CircleOutline m_CircleOutline;

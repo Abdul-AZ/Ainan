@@ -1,5 +1,8 @@
+#pragma once
+
 #include "renderer/VertexBuffer.h"
 #include "renderer/ShaderProgram.h"
+#include "renderer/Renderer.h"
 
 namespace Ainan
 {
@@ -11,8 +14,8 @@ namespace Ainan
 			OpenGLVertexBuffer(void* data, unsigned int size, const VertexLayout& layout, bool dynamic);
 			~OpenGLVertexBuffer();
 
-			// Inherited via VertexBuffer
-			virtual void UpdateData(const int& offset, const int& size, void* data) override;
+			virtual void UpdateData(int32_t offset, int32_t size, void* data) override;
+			virtual void UpdateDataUnsafe(int32_t offset, int32_t size, void* data) override;
 			virtual void Bind() const override;
 			virtual void Unbind() const override;
 

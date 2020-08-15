@@ -12,7 +12,7 @@ namespace Ainan {
 
 		OpenGLShaderProgram::OpenGLShaderProgram(const std::string& vertPath, const std::string& fragPath)
 		{
-			unsigned int vertex, fragment;
+			uint32_t vertex, fragment;
 
 			vertex = glCreateShader(GL_VERTEX_SHADER);
 			std::string vShaderCode = AssetManager::ReadEntireTextFile(vertPath + ".vert");
@@ -20,13 +20,11 @@ namespace Ainan {
 			glShaderSource(vertex, 1, &c_vShaderCode, NULL);
 			glCompileShader(vertex);
 
-
 			fragment = glCreateShader(GL_FRAGMENT_SHADER);
 			std::string fShaderCode = AssetManager::ReadEntireTextFile(fragPath + ".frag");
 			const char* c_fShaderCode = fShaderCode.c_str();
 			glShaderSource(fragment, 1, &c_fShaderCode, NULL);
 			glCompileShader(fragment);
-
 
 			// shader Program
 			m_RendererID = glCreateProgram();
@@ -75,9 +73,19 @@ namespace Ainan {
 			glDeleteProgram(m_RendererID);
 		}
 
-		int OpenGLShaderProgram::GetRendererID() const
+		void OpenGLShaderProgram::BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
 		{
-			return m_RendererID;
+			auto func = [this, slot, stage, &buffer]()
+			{
+				BindUniformBufferUnsafe(buffer, slot, stage);
+			};
+			Renderer::PushCommand(func);
+		}
+
+		void OpenGLShaderProgram::BindUniformBufferUnsafe(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
+		{
+			std::shared_ptr<OpenGLUniformBuffer> openglBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(buffer);
+			glBindBufferRange(GL_UNIFORM_BUFFER, slot, openglBuffer->m_RendererID, 0, buffer->GetAlignedSize());
 		}
 
 		void OpenGLShaderProgram::BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage)
@@ -92,12 +100,6 @@ namespace Ainan {
 			std::shared_ptr<OpenGLTexture> openglTexture = std::static_pointer_cast<OpenGLTexture>(texture);
 			glActiveTexture(GL_TEXTURE0 + slot);
 			glBindTexture(GL_TEXTURE_2D, openglTexture->m_RendererID);
-		}
-
-		void OpenGLShaderProgram::BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage)
-		{
-			std::shared_ptr<OpenGLUniformBuffer> openglBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(buffer);
-			glBindBufferRange(GL_UNIFORM_BUFFER, slot, openglBuffer->m_RendererID, 0, buffer->GetAlignedSize());
 		}
 	}
 }
