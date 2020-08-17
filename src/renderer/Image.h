@@ -49,9 +49,6 @@ namespace Ainan {
 		}
 	}
 
-
-	class RenderSurface;
-
 	class Image
 	{
 	public:

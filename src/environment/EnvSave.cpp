@@ -90,11 +90,9 @@ namespace Ainan {
 		j[id + "Mode"] = GetModeAsText(ps.Customizer.Mode);
 		j[id + "ParticlesPerSecond"] = ps.Customizer.m_ParticlesPerSecond;
 		j[id + "SpawnPosition"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_SpawnPosition);
-		j[id + "LinePosition"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_LinePosition);
 		j[id + "LineLength"] = ps.Customizer.m_LineLength;
 		j[id + "LineAngle"] = ps.Customizer.m_LineAngle;
-		j[id + "CirclePosition"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_CircleOutline.Position);
-		j[id + "CircleRadius"] = ps.Customizer.m_CircleOutline.Radius;
+		j[id + "CircleRadius"] = ps.Customizer.m_CircleRadius;
 
 		//Scale data
 		j[id + "MinScale"] = ps.Customizer.m_ScaleCustomizer.m_MinScale;

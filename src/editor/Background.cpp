@@ -162,7 +162,7 @@ namespace Ainan {
 		shader->BindUniformBuffer(LightingUniformBuffer, 2, RenderingStage::FragmentShader);
 		LightingUniformBuffer->UpdateData(LightDataPackingBuffer);
 
-		Renderer::Draw(*VBO, *shader, Primitive::Triangles, 6);
+		Renderer::Draw(VBO, shader, Primitive::Triangles, 6);
 
 		m_RadialLightSubmissionCount = 0;
 		m_SpotLightSubmissionCount = 0;

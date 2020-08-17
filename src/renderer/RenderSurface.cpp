@@ -31,13 +31,13 @@ namespace Ainan {
 	{
 		auto& shader = Renderer::ShaderLibrary()["ImageShader"];
 		shader->BindTexture(SurfaceFrameBuffer, 0, RenderingStage::FragmentShader);
-		Renderer::Draw(*m_VertexBuffer, *shader, Primitive::Triangles, 6);
+		Renderer::Draw(m_VertexBuffer, shader, Primitive::Triangles, 6);
 	}
 
-	void RenderSurface::Render(ShaderProgram& shader)
+	void RenderSurface::Render(std::shared_ptr<ShaderProgram>& shader)
 	{
-		shader.BindTexture(SurfaceFrameBuffer, 0, RenderingStage::FragmentShader);
-		Renderer::Draw(*m_VertexBuffer, shader, Primitive::Triangles, 6);
+		shader->BindTexture(SurfaceFrameBuffer, 0, RenderingStage::FragmentShader);
+		Renderer::Draw(m_VertexBuffer, shader, Primitive::Triangles, 6);
 	}
 
 	void RenderSurface::RenderToScreen(const Rectangle& viewport)

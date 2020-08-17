@@ -18,14 +18,15 @@ namespace Ainan {
 
 			virtual void SetImage(std::shared_ptr<Image> image) override;
 			virtual void SetImageUnsafe(std::shared_ptr<Image> image) override;
-			virtual glm::vec2 GetSize() const override;
-			virtual void* GetTextureID() override { return D3DResourceView; };
+			virtual uint32_t GetMemorySize() const override { return m_AllocatedGPUMem; };
+			virtual void* GetTextureID() override           { return D3DResourceView; };
 
 		public:
 			ID3D11Texture2D* D3DTexture;
 			ID3D11ShaderResourceView* D3DResourceView;
 			ID3D11SamplerState* D3DSampler;
 			D3D11RendererContext* Context;
+			uint32_t m_AllocatedGPUMem = 0;
 		};
 	}
 }

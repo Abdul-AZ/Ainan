@@ -191,22 +191,7 @@ namespace Ainan {
 
 	glm::vec2& ParticleSystem::GetPositionRef()
 	{
-		switch (Customizer.Mode)
-		{
-		case SpawnMode::SpawnOnPoint:
-			return Customizer.m_SpawnPosition;
-
-		case SpawnMode::SpawnOnLine:
-			return Customizer.m_LinePosition;
-
-		case SpawnMode::SpawnOnCircle:
-		case SpawnMode::SpawnInsideCircle:
-			return Customizer.m_CircleOutline.Position;
-
-		}
-
-		assert(false);
-		return glm::vec2(0.0f);
+		return Customizer.m_SpawnPosition;
 	}
 
 	ParticleSystem::ParticleSystem(const ParticleSystem& Psystem) :

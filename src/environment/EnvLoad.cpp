@@ -104,11 +104,9 @@ namespace Ainan {
 		ps->Customizer.Mode = GetTextAsMode(data[id + "Mode"].get<std::string>());
 		ps->Customizer.m_ParticlesPerSecond = data[id + "ParticlesPerSecond"].get<float>();
 		ps->Customizer.m_SpawnPosition = JSON_ARRAY_TO_VEC2(data[id + "SpawnPosition"].get<std::vector<float>>());
-		ps->Customizer.m_LinePosition = JSON_ARRAY_TO_VEC2(data[id + "LinePosition"].get<std::vector<float>>());
 		ps->Customizer.m_LineLength = data[id + "LineLength"].get<float>();
 		ps->Customizer.m_LineAngle = data[id + "LineAngle"].get<float>();
-		ps->Customizer.m_CircleOutline.Position = JSON_ARRAY_TO_VEC2(data[id + "CirclePosition"].get<std::vector<float>>());
-		ps->Customizer.m_CircleOutline.Radius = data[id + "CircleRadius"].get<float>();
+		ps->Customizer.m_CircleRadius = data[id + "CircleRadius"].get<float>();
 
 		//Scale data
 		ps->Customizer.m_ScaleCustomizer.m_MinScale = data[id + "MinScale"].get<float>();

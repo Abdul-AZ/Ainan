@@ -66,6 +66,6 @@ namespace Ainan {
 		Renderer::WaitUntilRendererIdle();
 
 		shader->BindUniformBuffer(m_TransformUniformBuffer, 1, RenderingStage::VertexShader);
-		Renderer::Draw(*m_VertexBuffer, *shader, Primitive::Lines, *m_IndexBuffer);
+		Renderer::Draw(m_VertexBuffer, shader, Primitive::Lines, m_IndexBuffer);
 	}
 }

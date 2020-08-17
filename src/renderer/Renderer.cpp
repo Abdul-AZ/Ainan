@@ -387,15 +387,15 @@ namespace Ainan {
 		PushCommand(func);
 	}
 
-	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive mode, const unsigned int& vertexCount)
+	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive mode, const uint32_t vertexCount)
 	{
-		auto func = [&vertexBuffer, &shader, mode, vertexCount]()
+		auto func = [vertexBuffer, shader, mode, vertexCount]()
 		{
-			vertexBuffer.Bind();
+			vertexBuffer->Bind();
 
-			Rdata->CurrentActiveAPI->Draw(shader, mode, vertexCount);
+			Rdata->CurrentActiveAPI->Draw(*shader, mode, vertexCount);
 
-			vertexBuffer.Unbind();
+			vertexBuffer->Unbind();
 
 			Rdata->CurrentNumberOfDrawCalls++;
 		};
@@ -626,17 +626,17 @@ namespace Ainan {
 		PushCommand(func);
 	}
 
-	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer)
+	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive, const std::shared_ptr<IndexBuffer>& indexBuffer)
 	{
-		auto func = [&vertexBuffer, &indexBuffer, &shader, primitive]()
+		auto func = [vertexBuffer, indexBuffer, shader, primitive]()
 		{
-			vertexBuffer.Bind();
-			indexBuffer.Bind();
+			vertexBuffer->Bind();
+			indexBuffer->Bind();
 
-			Rdata->CurrentActiveAPI->Draw(shader, primitive, indexBuffer);
+			Rdata->CurrentActiveAPI->Draw(*shader, primitive, *indexBuffer);
 
-			vertexBuffer.Unbind();
-			indexBuffer.Unbind();
+			vertexBuffer->Unbind();
+			indexBuffer->Unbind();
 
 			Rdata->CurrentNumberOfDrawCalls++;
 		};
@@ -645,17 +645,17 @@ namespace Ainan {
 		WaitUntilRendererIdle();
 	}
 
-	void Renderer::Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer, int vertexCount)
+	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive, const std::shared_ptr<IndexBuffer>& indexBuffer, int32_t vertexCount)
 	{
-		auto func = [&vertexBuffer, &shader, &indexBuffer, primitive, vertexCount]()
+		auto func = [vertexBuffer, shader, indexBuffer, primitive, vertexCount]()
 		{
-			vertexBuffer.Bind();
-			indexBuffer.Bind();
+			vertexBuffer->Bind();
+			indexBuffer->Bind();
 
-			Rdata->CurrentActiveAPI->Draw(shader, primitive, indexBuffer, vertexCount);
+			Rdata->CurrentActiveAPI->Draw(*shader, primitive, *indexBuffer, vertexCount);
 
-			vertexBuffer.Unbind();
-			indexBuffer.Unbind();
+			vertexBuffer->Unbind();
+			indexBuffer->Unbind();
 
 			Rdata->CurrentNumberOfDrawCalls++;
 		};

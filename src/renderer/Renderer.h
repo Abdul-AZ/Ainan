@@ -53,17 +53,17 @@ namespace Ainan {
 		//position is in world coordinates
 		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture = nullptr);
 		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, std::shared_ptr<Texture> texture = nullptr);
-		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, std::shared_ptr<Texture> texture = nullptr);
+		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int32_t count, std::shared_ptr<Texture> texture = nullptr);
 
 		//these overloads DO NOT use an index buffer
-		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive mode,
-						 const unsigned int& vertexCount);
+		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive mode,
+						 const uint32_t vertexCount);
 
 		//these overloads DO use an index buffer
-		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive primitive,
-						 const IndexBuffer& indexBuffer);
-		static void Draw(const VertexBuffer& vertexBuffer, ShaderProgram& shader, Primitive primitive,
-						 const IndexBuffer& indexBuffer, int vertexCount);
+		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive,
+						 const std::shared_ptr<IndexBuffer>& indexBuffer);
+		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive,
+						 const std::shared_ptr<IndexBuffer>& indexBuffer, int32_t vertexCount);
 
 		static void ImGuiNewFrame();
 		static void ImGuiEndFrame();

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CircleOutline.h"
 #include "editor/Window.h"
 #include "customizers/TextureCustomizer.h"
 #include "customizers/VelocityCustomizer.h"
@@ -12,7 +11,8 @@
 
 namespace Ainan {
 
-	const glm::vec4 c_LineParticleSpawnSourceColor = glm::vec4(0.0f, 0.7f, 0.0f, 0.85f);
+	const glm::vec4 c_ParticleSpawnAreaColor = glm::vec4(0.0f, 0.7f, 0.0f, 0.85f);
+	const int32_t   c_CircleVertexCount = 60;
 
 	enum class SpawnMode 
 	{
@@ -61,18 +61,17 @@ namespace Ainan {
 		TextureCustomizer m_TextureCustomizer;
 		ForceCustomizer m_ForceCustomizer;
 
-		//this is on a scale from 0 to 1
 		glm::vec2 m_SpawnPosition = { 0.5f, 0.5f };
 
 		//spawn particle on line option
-		glm::vec2 m_LinePosition = { 0.5f, 0.5f };
 		float m_LineLength = 0.2f;
 		float m_LineAngle = 0.0f; //in degrees
+		float m_CircleRadius = 0.25f;
 		std::shared_ptr<VertexBuffer> m_LineVertexBuffer = nullptr;
-		std::shared_ptr<UniformBuffer> m_LineUniformBuffer = nullptr;
-
-		//spawn particle on/in circle option
-		CircleOutline m_CircleOutline;
+		std::shared_ptr<VertexBuffer> m_CircleVertexBuffer = nullptr;
+		std::shared_ptr<IndexBuffer> m_CircleIndexBuffer = nullptr;
+		std::shared_ptr<UniformBuffer> m_SpawnAreaColorUniformBuffer = nullptr;
+		std::shared_ptr<UniformBuffer> m_CircleTransformUniformBuffer = nullptr;
 
 		//random number generator
 		std::mt19937 mt;

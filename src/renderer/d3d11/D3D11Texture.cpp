@@ -35,31 +35,6 @@ namespace Ainan {
 			}
 		}
 
-		int32_t FormatBytesPerPixel(TextureFormat format)
-		{
-			switch (format)
-			{
-			case Ainan::TextureFormat::RGBA:
-				return 4;
-
-			case Ainan::TextureFormat::RGB:
-				assert(false, "Format not supported");
-
-			case Ainan::TextureFormat::RG:
-				return 2;
-
-			case Ainan::TextureFormat::R:
-				return 1;
-
-			case Ainan::TextureFormat::Unspecified:
-				return 0;
-
-			default:
-				assert(false);
-				return 0;
-			}
-		}
-
 		D3D11Texture::D3D11Texture(const glm::vec2& size, TextureFormat format, uint8_t* data, RendererContext* context)
 		{
 			Context = (D3D11RendererContext*)context;
@@ -80,11 +55,13 @@ namespace Ainan {
 			{
 				D3D11_SUBRESOURCE_DATA subresource{};
 				subresource.pSysMem = data;
-				subresource.SysMemPitch = size.x * sizeof(uint8_t) * FormatBytesPerPixel(format);
+				subresource.SysMemPitch = size.x * sizeof(uint8_t) * GetBytesPerPixel(format);
 				ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, &subresource, &D3DTexture));
 			}
 			else
 				ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, nullptr, &D3DTexture));
+
+			m_AllocatedGPUMem = size.x * size.y * GetBytesPerPixel(format);
 
 			D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc{};
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
@@ -112,11 +89,6 @@ namespace Ainan {
 			D3DSampler->Release();
 			D3DResourceView->Release();
 			D3DTexture->Release();
-		}
-
-		glm::vec2 D3D11Texture::GetSize() const
-		{
-			return glm::vec2();
 		}
 
 		void D3D11Texture::SetImage(std::shared_ptr<Image> image)
@@ -148,11 +120,13 @@ namespace Ainan {
 			{
 				D3D11_SUBRESOURCE_DATA subresource{};
 				subresource.pSysMem = image->m_Data;
-				subresource.SysMemPitch = image->m_Width * sizeof(uint8_t) * FormatBytesPerPixel(image->Format);
+				subresource.SysMemPitch = image->m_Width * sizeof(uint8_t) * GetBytesPerPixel(image->Format);
 				ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, &subresource, &D3DTexture));
 			}
 			else
 				ASSERT_D3D_CALL(Context->Device->CreateTexture2D(&desc, nullptr, &D3DTexture));
+
+			m_AllocatedGPUMem = image->m_Width * image->m_Height * GetBytesPerPixel(image->Format);
 
 			D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc{};
 			viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;

@@ -6,15 +6,38 @@ namespace Ainan {
 	ParticleCustomizer::ParticleCustomizer() :
 		mt(std::random_device{}())
 	{
-		m_CircleOutline.Color = glm::vec4(0.0f, 0.7f, 0.0f, 0.85f);
-		m_CircleOutline.Position = { 0.5f, 0.5f };
-
 		VertexLayout layout(1);
 		layout[0] = { "aPos", ShaderVariableType::Vec2 };
 		m_LineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibrary()["LineShader"], true);
 
+		glm::vec2 vertices[c_CircleVertexCount];
+		uint32_t indecies[c_CircleVertexCount * 2 - 2];
+
+		float degreesBetweenVertices = 360.0f / c_CircleVertexCount;
+
+		for (int32_t i = 0; i < c_CircleVertexCount; i++)
+		{
+			float angle = i * degreesBetweenVertices;
+			vertices[i].x = (float)cos(angle * (PI / 180.0));
+			vertices[i].y = (float)sin(angle * (PI / 180.0));
+
+			if (i == c_CircleVertexCount - 1)
+				continue;
+
+			indecies[i * 2] = i;
+			indecies[i * 2 + 1] = i + 1;
+		}
+		vertices[c_CircleVertexCount - 1] = vertices[0];
+
+		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		m_CircleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * c_CircleVertexCount, layout, Renderer::ShaderLibrary()["CircleOutlineShader"]);
+
+		m_CircleIndexBuffer = Renderer::CreateIndexBuffer(indecies, c_CircleVertexCount * 2 - 2);
+
+		m_CircleTransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { {"u_Model", ShaderVariableType::Mat4} }, nullptr);
+
 		layout[0] = { "u_Color", ShaderVariableType::Vec4 };
-		m_LineUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout, (void*)&c_LineParticleSpawnSourceColor);
+		m_SpawnAreaColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout, (void*)&c_ParticleSpawnAreaColor);
 	}
 
 	std::string GetModeAsText(const SpawnMode& mode)
@@ -61,8 +84,8 @@ namespace Ainan {
 
 		ImGui::Text("Spawn\n Mode");
 		ImGui::SameLine();
-		if (ImGui::BeginCombo("##Spawn Mode", GetModeAsText(Mode).c_str())) {
-
+		if (ImGui::BeginCombo("##Spawn Mode", GetModeAsText(Mode).c_str())) 
+		{
 			{
 				bool is_active = Mode == SpawnMode::SpawnOnPoint;
 				if (ImGui::Selectable(GetModeAsText(SpawnMode::SpawnOnPoint).c_str(), &is_active)) {
@@ -133,7 +156,7 @@ namespace Ainan {
 				ImGui::Text("Line Position: ");
 				ImGui::SameLine();
 				float xPos = ImGui::GetCursorPosX();
-				ImGui::DragFloat2("##Line Position: ", &m_LinePosition.x, 0.001f);
+				ImGui::DragFloat2("##Line Position: ", &m_SpawnPosition.x, 0.001f);
 
 				ImGui::Text("Line Length: ");
 				ImGui::SameLine();
@@ -156,14 +179,14 @@ namespace Ainan {
 				ImGui::Text("Circle Position: ");
 				ImGui::SameLine();
 				float xPos = ImGui::GetCursorPosX();
-				ImGui::DragFloat2("##Circle Position: ", &m_CircleOutline.Position.x, 0.001f);
+				ImGui::DragFloat2("##Circle Position: ", &m_SpawnPosition.x, 0.001f);
 
 				ImGui::Text("Circle Radius: ");
 				ImGui::SameLine();
 				ImGui::SetCursorPosX(xPos);
-				ImGui::DragFloat("##Circle Radius: ", &m_CircleOutline.Radius, 0.001f);
+				ImGui::DragFloat("##Circle Radius: ", &m_CircleRadius, 0.001f);
 
-				m_CircleOutline.Radius = std::clamp(m_CircleOutline.Radius, 0.001f, 10000.0f);
+				m_CircleRadius = std::clamp(m_CircleRadius, 0.001f, 10000.0f);
 
 				ImGui::TreePop();
 			}
@@ -185,35 +208,44 @@ namespace Ainan {
 
 		switch (Mode)
 		{
-		case SpawnMode::SpawnOnPoint: {
+		case SpawnMode::SpawnOnPoint: 
+		{
 			glm::vec2 spawnPosition = { m_SpawnPosition.x * c_GlobalScaleFactor, m_SpawnPosition.y * c_GlobalScaleFactor };
 			particleDesc.Position = spawnPosition;
 			break;
 		}
 
-		case SpawnMode::SpawnOnLine: {
+		case SpawnMode::SpawnOnLine: 
+		{
 			std::uniform_real_distribution<float> dest(-1.0f, 1.0f);
 
 			float t = dest(mt);
-			float x = m_LinePosition.x + t * m_LineLength * cos(glm::radians(m_LineAngle));
-			float y = m_LinePosition.x + t * m_LineLength * sin(glm::radians(m_LineAngle));
+			float x = m_SpawnPosition.x + t * m_LineLength * cos(glm::radians(m_LineAngle));
+			float y = m_SpawnPosition.x + t * m_LineLength * sin(glm::radians(m_LineAngle));
 
 			particleDesc.Position = glm::vec2(x, y) * c_GlobalScaleFactor;
 			break;
 		}
 
-		case SpawnMode::SpawnOnCircle: {
+		case SpawnMode::SpawnOnCircle: 
+		{
 			//random angle between 0 and 2pi (360 degrees)
 			std::uniform_real_distribution<float> dest(0.0f, 2.0f * 3.14159f);
-			particleDesc.Position = m_CircleOutline.GetPointByAngle(dest(mt));
+			float angle = dest(mt);
+
+			float x = m_SpawnPosition.x * c_GlobalScaleFactor + m_CircleRadius * cos(angle) * c_GlobalScaleFactor;
+			float y = m_SpawnPosition.y * c_GlobalScaleFactor + m_CircleRadius * sin(angle) * c_GlobalScaleFactor;
+
+			particleDesc.Position = glm::vec2(x, y);
 			break;
 		}
 
-		case SpawnMode::SpawnInsideCircle: {
+		case SpawnMode::SpawnInsideCircle: 
+		{
 			std::uniform_real_distribution<float> dest(0.0f, 1.0f);
-			float r = m_CircleOutline.Radius * sqrt(dest(mt));
+			float r = m_CircleRadius * sqrt(dest(mt));
 			float theta = dest(mt) * 2 * PI; //in radians
-			particleDesc.Position = glm::vec2(m_CircleOutline.Position.x + r * cos(theta), m_CircleOutline.Position.y + r * sin(theta));
+			particleDesc.Position = glm::vec2(m_SpawnPosition.x + r * cos(theta), m_SpawnPosition.y + r * sin(theta));
 			particleDesc.Position *= c_GlobalScaleFactor;
 			break;
 		}
@@ -243,17 +275,31 @@ namespace Ainan {
 			glm::vec2 offset = m_LineLength * glm::vec2(cos(glm::radians(m_LineAngle)), sin(glm::radians(m_LineAngle)));
 
 			std::array<glm::vec2, 2> vertices;
-			vertices[0] = (m_LinePosition + offset) * c_GlobalScaleFactor;
-			vertices[1] = (m_LinePosition - offset) * c_GlobalScaleFactor;
+			vertices[0] = (m_SpawnPosition + offset) * c_GlobalScaleFactor;
+			vertices[1] = (m_SpawnPosition - offset) * c_GlobalScaleFactor;
 
 			m_LineVertexBuffer->UpdateData(0, sizeof(glm::vec2) * 2, vertices.data());
 
 			auto& shader = Renderer::ShaderLibrary()["LineShader"];
-			shader->BindUniformBuffer(m_LineUniformBuffer, 1, RenderingStage::FragmentShader);
+			shader->BindUniformBuffer(m_SpawnAreaColorUniformBuffer, 1, RenderingStage::FragmentShader);
 
-			Renderer::Draw(*m_LineVertexBuffer, *shader, Primitive::Lines, 2);
+			Renderer::Draw(m_LineVertexBuffer, shader, Primitive::Lines, 2);
 		}
 		else if (Mode == SpawnMode::SpawnOnCircle || Mode == SpawnMode::SpawnInsideCircle)
-			m_CircleOutline.Draw();
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(m_SpawnPosition.x * c_GlobalScaleFactor, m_SpawnPosition.y * c_GlobalScaleFactor, 0.0f));
+			model = glm::scale(model, glm::vec3(m_CircleRadius * c_GlobalScaleFactor, m_CircleRadius * c_GlobalScaleFactor, m_CircleRadius * c_GlobalScaleFactor));
+
+			auto& shader = Renderer::ShaderLibrary()["CircleOutlineShader"];
+
+			shader->BindUniformBuffer(m_CircleTransformUniformBuffer, 1, RenderingStage::VertexShader);
+			m_CircleTransformUniformBuffer->UpdateData(&model);
+
+			shader->BindUniformBuffer(m_SpawnAreaColorUniformBuffer, 2, RenderingStage::FragmentShader);
+
+			Renderer::Draw(m_CircleVertexBuffer, shader, Primitive::Lines, m_CircleIndexBuffer);
+		}
+
 	}
 }

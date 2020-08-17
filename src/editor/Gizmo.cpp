@@ -179,7 +179,7 @@ namespace Ainan {
 		shader->BindUniformBuffer(ColorUniformBuffer, 2, RenderingStage::FragmentShader);
 		ColorUniformBuffer->UpdateData(&color);
 
-		Renderer::Draw(*VBO, *shader, Primitive::Triangles, *EBO);
+		Renderer::Draw(VBO, shader, Primitive::Triangles, EBO);
 
 		model = glm::rotate(model, -PI / 2, glm::vec3(0.0f, 0.0f, -1.0f));
 
@@ -194,7 +194,7 @@ namespace Ainan {
 		glm::vec2 mousePosWS = Renderer::Rdata->CurrentSceneDescription.SceneCamera.Position + realMousePositionNDC * c_GlobalScaleFactor;
 		glm::vec2 objectPosWS = objectPositionWS * c_GlobalScaleFactor;
 
-		Renderer::Draw(*VBO, *shader, Primitive::Triangles, *EBO);
+		Renderer::Draw(VBO, shader, Primitive::Triangles, EBO);
 	}
 
 	bool Gizmo::CheckIfInsideArrow(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point)

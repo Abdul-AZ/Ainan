@@ -41,7 +41,7 @@ namespace Ainan {
 		auto& shader = Renderer::ShaderLibrary()["LineShader"];
 		shader->BindUniformBuffer(m_OutlineUniformBuffer, 1, RenderingStage::FragmentShader);
 
-		Renderer::Draw(*m_OutlineVertexBuffer, *shader, Primitive::Lines,  8);
+		Renderer::Draw(m_OutlineVertexBuffer, shader, Primitive::Lines,  8);
 	}
 
 	void ExportCamera::SetSize()

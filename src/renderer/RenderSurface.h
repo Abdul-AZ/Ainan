@@ -12,7 +12,7 @@ namespace Ainan {
 		RenderSurface operator=(const RenderSurface&) = delete;
 
 		void Render();
-		void Render(ShaderProgram& shader);
+		void Render(std::shared_ptr<ShaderProgram>& shader);
 		void RenderToScreen(const Rectangle& viewport);
 
 		void SetSize(const glm::vec2& size);
