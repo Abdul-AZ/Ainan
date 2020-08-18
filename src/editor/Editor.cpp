@@ -75,32 +75,42 @@ namespace Ainan
 		if (Window::Minimized)
 			return;
 
+		Renderer::ClearScreen();
+
 		switch (m_State)
 		{
 		case State_NoEnvLoaded:
-			Draw_NoEnvLoaded();
+			DrawHomeWindow();
+			return;
 			break;
 		
 		case State_CreateEnv:
-			Draw_CreateEnv();
+			DrawEnvironmentCreationWindow();
+			return;
 			break;
 
 		case State_EditorMode:
-			Draw_EditorMode();
+		case State_PauseMode:
+			DrawEnvironment(true);
 			break;
 
 		case State_PlayMode:
-			Draw_PlayMode();
+			DrawEnvironment(false);
 			break;
 
-		case State_PauseMode:
-			Draw_PauseMode();
-			break;
 
 		case State_ExportMode:
-			Draw_ExportMode();
+			DrawEnvironment(false);
+			if (m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted)
+			{
+				m_ExportCamera.ExportFrame(*m_Env);
+				m_ExportedFrame = true;
+			}
 			break;
 		}
+
+		Renderer::SetRenderTargetApplicationWindow();
+		DrawUI();
 	}
 
 	void Editor::WorkerThreadLoop()
@@ -307,9 +317,9 @@ namespace Ainan
 		InputManager::HandleInput();
 	}
 
-	void Editor::Draw_NoEnvLoaded()
+	void Editor::DrawHomeWindow()
 	{
-		if (m_LoadEnvironmentBrowser.OnCloseWindow == nullptr) 
+		if (m_LoadEnvironmentBrowser.OnCloseWindow == nullptr)
 		{
 			m_LoadEnvironmentBrowser.OnCloseWindow = []() 
 			{
@@ -387,7 +397,7 @@ namespace Ainan
 		Renderer::ImGuiEndFrame();
 	}
 
-	void Editor::Draw_CreateEnv()
+	void Editor::DrawEnvironmentCreationWindow()
 	{
 		Renderer::ImGuiNewFrame();
 
@@ -528,7 +538,7 @@ namespace Ainan
 		Renderer::ImGuiEndFrame();
 	}
 
-	void Editor::Draw_EditorMode()
+	void Editor::DrawEnvironment(bool drawWorldSpaceUI)
 	{
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
@@ -558,52 +568,61 @@ namespace Ainan
 		{
 			auto mutexPtr = obj->GetMutex();
 			std::lock_guard lock(*mutexPtr);
-			if (obj->Type == SpriteType)
-				obj->Draw();
+			obj->Draw();
 		}
 
-		for (pEnvironmentObject& obj : m_Env->Objects)
-			if (obj->Selected) {
-				//draw object position gizmo
-				m_Gizmo.Draw(obj->GetPositionRef(),
-					m_ViewportWindow.WindowPosition,
-					m_ViewportWindow.WindowSize,
-					m_ViewportWindow.WindowContentRegionSize);
-
-				//if particle system needs to edit a force target (a world point), use a gimzo for it
-				if (obj->Type == EnvironmentObjectType::ParticleSystemType)
-				{
-					auto ps = static_cast<ParticleSystem*>(obj.get());
-					if (ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "")
-						if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce)
-							m_Gizmo.Draw(ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target,
-								m_ViewportWindow.WindowSize,
-								m_ViewportWindow.WindowPosition,
-								m_ViewportWindow.WindowContentRegionSize);
-				}
-			}
-
-		//Render world space gui here because we need camera information for that
-		for (pEnvironmentObject& obj : m_Env->Objects)
+		if (drawWorldSpaceUI)
 		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			if (obj->Selected)
-				if (obj->Type == EnvironmentObjectType::ParticleSystemType)
+			for (pEnvironmentObject& obj : m_Env->Objects)
+				if (obj->Selected)
 				{
-					ParticleSystem* ps = (ParticleSystem*)obj.get();
-					ps->Customizer.DrawWorldSpaceUI();
-					
+					//draw object position gizmo
+					m_Gizmo.Draw(obj->GetPositionRef(),
+						m_ViewportWindow.WindowPosition,
+						m_ViewportWindow.WindowSize,
+						m_ViewportWindow.WindowContentRegionSize);
+
+					//if particle system needs to edit a force target (a world point), use a gimzo for it
+					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
+					{
+						auto ps = static_cast<ParticleSystem*>(obj.get());
+						if (ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "")
+							if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce)
+								m_Gizmo.Draw(ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target,
+									m_ViewportWindow.WindowSize,
+									m_ViewportWindow.WindowPosition,
+									m_ViewportWindow.WindowContentRegionSize);
+					}
 				}
+
+			//Render world space gui here because we need camera information for that
+			for (pEnvironmentObject& obj : m_Env->Objects)
+			{
+				auto mutexPtr = obj->GetMutex();
+				std::lock_guard lock(*mutexPtr);
+				if (obj->Selected)
+					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
+					{
+						ParticleSystem* ps = (ParticleSystem*)obj.get();
+						ps->Customizer.DrawWorldSpaceUI();
+
+					}
+			}
 		}
 
 		Renderer::EndScene();
 		m_RenderSurface.SurfaceFrameBuffer->Bind();
-		if (m_ShowGrid)
-			m_Grid.Draw(m_Camera);
-		m_ExportCamera.DrawOutline();
-		Renderer::SetRenderTargetApplicationWindow();
 
+		if (drawWorldSpaceUI)
+		{
+			if (m_ShowGrid)
+				m_Grid.Draw(m_Camera);
+			m_ExportCamera.DrawOutline();
+		}
+	}
+
+	void Editor::DrawUI()
+	{
 		//GUI
 		Renderer::ImGuiNewFrame();
 		ImGuiWrapper::BeginGlobalDocking(true);
@@ -678,294 +697,6 @@ namespace Ainan
 		m_ExportCamera.DisplayGUI();
 		m_Background.DisplayGUI(*m_Env);
 
-		for (pEnvironmentObject& obj : m_Env->Objects) 
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			obj->DisplayGUI();
-		}
-
-		InputManager::DisplayGUI();
-		
-		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
-
-		ImGuiWrapper::EndGlobalDocking();
-		Renderer::ImGuiEndFrame();
-	}
-
-	void Editor::Draw_PlayMode()
-	{
-		SceneDescription desc;
-		desc.SceneCamera = m_Camera;
-		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
-		desc.Blur = m_Env->BlurEnabled;
-		desc.BlurRadius = m_Env->BlurRadius;
-		Renderer::BeginScene(desc);
-
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			if (obj->Type == RadialLightType)
-			{
-				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				m_Background.SubmitLight(*light);
-			}
-			else if (obj->Type == SpotLightType) 
-			{
-				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				m_Background.SubmitLight(*light);
-			}
-		}
-
-		m_Background.Draw(*m_Env);
-
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			if (obj->Type == SpriteType)
-				obj->Draw();
-		}
-
-		//stuff to only render in play mode and export mode
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			//because we already drawed all the sprites
-			if (obj->Type == SpriteType)
-				continue;
-			obj->Draw();
-		}
-
-		Renderer::EndScene();
-
-		//draw this after the scene is drawn so that post processing effects do not apply to it
-		m_ExportCamera.DrawOutline();
-
-		Renderer::SetRenderTargetApplicationWindow();
-
-		//GUI
-		Renderer::ImGuiNewFrame();
-		ImGuiWrapper::BeginGlobalDocking(true);
-
-		DisplayMainMenuBarGUI();
-
-		ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetStyle().Colors[ImGuiCol_WindowBg]);
-
-		AssetManager::DisplayGUI();
-		DisplayEnvironmentControlsGUI();
-		DisplayObjectInspecterGUI();
-		DisplayProfilerGUI();
-		m_AppStatusWindow.DisplayGUI();
-
-		//Settings window
-		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
-
-		if (ImGui::TreeNode("Blend Settings:"))
-		{
-			ImGui::Text("Mode");
-			ImGui::SameLine();
-			if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
-			{
-				{
-					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
-					if (ImGui::Selectable("Additive", &is_Active)) {
-
-						ImGui::SetItemDefaultFocus();
-						m_Env->BlendMode = RenderingBlendMode::Additive;
-
-						Renderer::SetBlendMode(m_Env->BlendMode);
-					}
-				}
-
-				{
-					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
-					if (ImGui::Selectable("Screen", &is_Active)) {
-
-						ImGui::SetItemDefaultFocus();
-						m_Env->BlendMode = RenderingBlendMode::Screen;
-
-						Renderer::SetBlendMode(m_Env->BlendMode);
-					}
-				}
-
-				ImGui::EndCombo();
-			}
-
-			ImGui::TreePop();
-		}
-		ImGui::Text("Show Grid");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(100.0f);
-		ImGui::Checkbox("##Show Grid", &m_ShowGrid);
-
-		ImGui::Text("Blur");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(100.0f);
-		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
-
-		if (m_Env->BlurEnabled) 
-		{
-			if (ImGui::TreeNode("Blur Settings: ")) 
-			{
-				ImGui::Text("Blur Radius: ");
-				ImGui::SameLine();
-				ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
-
-				ImGui::TreePop();
-			}
-		}
-
-		ImGui::End();
-
-		m_ExportCamera.DisplayGUI();
-		m_Background.DisplayGUI(*m_Env);
-
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			obj->DisplayGUI();
-		}
-
-		InputManager::DisplayGUI();
-		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
-		ImGui::PopStyleColor();
-
-		ImGuiWrapper::EndGlobalDocking();
-		Renderer::ImGuiEndFrame();
-	}
-
-	void Editor::Draw_PauseMode()
-	{
-		SceneDescription desc;
-		desc.SceneCamera = m_Camera;
-		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
-		desc.Blur = m_Env->BlurEnabled;
-		desc.BlurRadius = m_Env->BlurRadius;
-		Renderer::BeginScene(desc);
-
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			if (obj->Type == RadialLightType)
-			{
-				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				m_Background.SubmitLight(*light);
-			}
-			else if (obj->Type == SpotLightType) 
-			{
-				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				m_Background.SubmitLight(*light);
-			}
-		}
-
-		m_Background.Draw(*m_Env);
-
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			if (obj->Type == SpriteType)
-				obj->Draw();
-		}
-
-		//stuff to only render in play mode and export mode
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			//because we already drawed all the sprites
-			if (obj->Type == SpriteType)
-				continue;
-			obj->Draw();
-		}
-
-		Renderer::EndScene();
-
-		//draw this after the scene is drawn so that post processing effects do not apply to it
-		m_ExportCamera.DrawOutline();
-
-		Renderer::SetRenderTargetApplicationWindow();
-
-		//GUI
-		Renderer::ImGuiNewFrame();
-		ImGuiWrapper::BeginGlobalDocking(true);
-
-		DisplayMainMenuBarGUI();
-
-		AssetManager::DisplayGUI();
-		DisplayEnvironmentControlsGUI();
-		DisplayObjectInspecterGUI();
-		DisplayProfilerGUI();
-		m_AppStatusWindow.DisplayGUI();
-
-		//Settings window
-		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
-
-		if (ImGui::TreeNode("Blend Settings:"))
-		{
-			ImGui::Text("Mode");
-			ImGui::SameLine();
-			if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
-			{
-				{
-					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
-					if (ImGui::Selectable("Additive", &is_Active)) {
-
-						ImGui::SetItemDefaultFocus();
-						m_Env->BlendMode = RenderingBlendMode::Additive;
-
-						Renderer::SetBlendMode(m_Env->BlendMode);
-					}
-				}
-
-				{
-					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
-					if (ImGui::Selectable("Screen", &is_Active)) {
-
-						ImGui::SetItemDefaultFocus();
-						m_Env->BlendMode = RenderingBlendMode::Screen;
-
-						Renderer::SetBlendMode(m_Env->BlendMode);
-					}
-				}
-
-				ImGui::EndCombo();
-			}
-
-			ImGui::TreePop();
-		}
-		ImGui::Text("Show Grid");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(100.0f);
-		ImGui::Checkbox("##Show Grid", &m_ShowGrid);
-
-		ImGui::Text("Blur");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(100.0f);
-		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
-
-		if (m_Env->BlurEnabled) 
-		{
-			if (ImGui::TreeNode("Blur Settings: ")) 
-			{
-				ImGui::Text("Blur Radius: ");
-				ImGui::SameLine();
-				ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
-
-				ImGui::TreePop();
-			}
-		}
-
-		ImGui::End();
-
-		m_ExportCamera.DisplayGUI();
-		m_Background.DisplayGUI(*m_Env);
-
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
 			auto mutexPtr = obj->GetMutex();
@@ -975,154 +706,6 @@ namespace Ainan
 
 		InputManager::DisplayGUI();
 
-		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
-
-		ImGuiWrapper::EndGlobalDocking();
-		Renderer::ImGuiEndFrame();
-	}
-
-	void Editor::Draw_ExportMode()
-	{
-		SceneDescription desc;
-		desc.SceneCamera = m_Camera;
-		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
-		desc.Blur = m_Env->BlurEnabled;
-		desc.BlurRadius = m_Env->BlurRadius;
-		Renderer::BeginScene(desc);
-
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			if (obj->Type == RadialLightType)
-			{
-				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				m_Background.SubmitLight(*light);
-			}
-			else if (obj->Type == SpotLightType) 
-			{
-				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				m_Background.SubmitLight(*light);
-			}
-		}
-
-		m_Background.Draw(*m_Env);
-
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			if (obj->Type == SpriteType)
-				obj->Draw();
-		}
-
-		//stuff to only render in play mode and export mode
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			//because we already drawed all the sprites
-			if (obj->Type == SpriteType)
-				continue;
-			obj->Draw();
-		}
-
-		Renderer::EndScene();
-
-		//draw this after the scene is drawn so that post processing effects do not apply to it
-		m_ExportCamera.DrawOutline();
-
-		if (m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted)
-		{
-			m_ExportCamera.ExportFrame(*m_Env);
-			m_ExportedFrame = true;
-		}
-
-		Renderer::SetRenderTargetApplicationWindow();
-
-		//GUI
-		Renderer::ImGuiNewFrame();
-		ImGuiWrapper::BeginGlobalDocking(true);
-
-		DisplayMainMenuBarGUI();
-		AssetManager::DisplayGUI();
-		DisplayEnvironmentControlsGUI();
-		DisplayObjectInspecterGUI();
-		DisplayProfilerGUI();
-		m_AppStatusWindow.DisplayGUI();
-
-		//Settings window
-		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
-
-		if (ImGui::TreeNode("Blend Settings:"))
-		{
-			ImGui::Text("Mode");
-			ImGui::SameLine();
-			if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
-			{
-				{
-					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
-					if (ImGui::Selectable("Additive", &is_Active)) {
-
-						ImGui::SetItemDefaultFocus();
-						m_Env->BlendMode = RenderingBlendMode::Additive;
-
-						Renderer::SetBlendMode(m_Env->BlendMode);
-					}
-				}
-
-				{
-					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
-					if (ImGui::Selectable("Screen", &is_Active)) {
-
-						ImGui::SetItemDefaultFocus();
-						m_Env->BlendMode = RenderingBlendMode::Screen;
-
-						Renderer::SetBlendMode(m_Env->BlendMode);
-					}
-				}
-
-				ImGui::EndCombo();
-			}
-
-			ImGui::TreePop();
-		}
-		ImGui::Text("Show Grid");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(100.0f);
-		ImGui::Checkbox("##Show Grid", &m_ShowGrid);
-
-		ImGui::Text("Blur");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(100.0f);
-		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
-
-		if (m_Env->BlurEnabled) 
-		{
-			if (ImGui::TreeNode("Blur Settings: ")) 
-			{
-
-				ImGui::Text("Blur Radius: ");
-				ImGui::SameLine();
-				ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
-
-				ImGui::TreePop();
-			}
-		}
-
-		ImGui::End();
-
-		m_ExportCamera.DisplayGUI();
-		m_Background.DisplayGUI(*m_Env);
-
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			obj->DisplayGUI();
-		}
-
-		InputManager::DisplayGUI();
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
 
 		ImGuiWrapper::EndGlobalDocking();

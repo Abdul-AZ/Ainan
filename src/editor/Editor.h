@@ -116,12 +116,11 @@ namespace Ainan {
 		void Update_PauseMode();
 		void Update_ExportMode();
 
-		void Draw_NoEnvLoaded();
-		void Draw_CreateEnv();
-		void Draw_EditorMode();
-		void Draw_PlayMode();
-		void Draw_PauseMode();
-		void Draw_ExportMode();
+		void DrawHomeWindow();
+		void DrawEnvironmentCreationWindow();
+
+		void DrawEnvironment(bool drawWorldSpaceUI);
+		void DrawUI();
 
 		//general functions for reusing code
 		void OnEnvironmentLoad();

@@ -18,8 +18,6 @@ int main()
 	
 	while (Window::ShouldClose == false)
 	{
-		Renderer::ClearScreen();
-	
 		editor->StartFrame();
 		
 		Window::HandleWindowEvents();
