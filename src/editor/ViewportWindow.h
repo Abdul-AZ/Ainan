@@ -13,7 +13,7 @@ namespace Ainan {
 
 	public:
 		Rectangle RenderViewport = {0, 0, 0, 0};
-		bool IsFocused = false;
+		bool IsHovered = false;
 
 		//these are needed for rendering gizoms
 		glm::vec2 WindowPosition = glm::vec2(0.0f, 0.0f);

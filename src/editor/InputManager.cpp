@@ -9,19 +9,28 @@ namespace Ainan {
 	std::vector<RegisteredKey> InputManager::m_Keys;
 	std::vector<RegisteredKey> InputManager::m_MouseKeys;
 	std::unordered_map<int, int> InputManager::m_KeyStates;
-	std::vector<std::function<void(int)>> InputManager::m_ScrollFunctions;
+	std::vector<std::function<void(double, double)>> InputManager::m_ScrollFunctions;
 
 	static void scroll_callback(GLFWwindow* window, double x, double y) 
 	{
 		for (auto& fun : InputManager::m_ScrollFunctions)
 		{
-			fun(y);
+			fun(x, y);
 		}
 	}
 
 	void InputManager::Init()
 	{
 		glfwSetScrollCallback(Window::Ptr, scroll_callback);
+
+		auto imguiScrollFunc = [](double xoffset, double yoffset)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			io.MouseWheelH += (float)xoffset;
+			io.MouseWheel += (float)yoffset;
+		};
+
+		m_ScrollFunctions.push_back(imguiScrollFunc);
 	}
 
 	void InputManager::Terminate()
@@ -30,13 +39,13 @@ namespace Ainan {
 		ClearKeys();
 	}
 
-	void InputManager::RegisterKey(int glfwKeyCode, std::string description, std::function<void()> func, int eventTrigger)
+	void InputManager::RegisterKey(int glfwKeyCode, std::string description, std::function<void()> func, int32_t eventTrigger)
 	{
 		m_Keys.push_back({ glfwKeyCode, description, func, eventTrigger });
 		m_KeyStates[glfwKeyCode] = 0;
 	}
 
-	void InputManager::RegisterMouseKey(int glfwMouseKeyCode, std::string description, std::function<void()> func, int eventTrigger)
+	void InputManager::RegisterMouseKey(int glfwMouseKeyCode, std::string description, std::function<void()> func, int32_t eventTrigger)
 	{
 		m_MouseKeys.push_back({ glfwMouseKeyCode, description, func, eventTrigger });
 	}
@@ -120,7 +129,7 @@ namespace Ainan {
 		double xpos, ypos;
 		glfwGetCursorPos(Window::Ptr, &xpos, &ypos);
 
-		int width, height;
+		int32_t width, height;
 		glfwGetWindowSize(Window::Ptr, &width, &height);
 
 		//change from being relative to top left to being relative to bottom left
@@ -132,7 +141,7 @@ namespace Ainan {
 		return glm::vec2(NDC_xpos, NDC_ypos);
 	}
 
-	int InputManager::GetKey(int glfwKey)
+	int32_t InputManager::GetKey(int glfwKey)
 	{
 		return glfwGetKey(Window::Ptr, glfwKey);
 	}

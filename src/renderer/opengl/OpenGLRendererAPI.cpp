@@ -15,7 +15,6 @@ namespace Ainan {
 		GLFWcursor* MouseCursors[ImGuiMouseCursor_COUNT] = { 0 };
 		bool                 WantUpdateMonitors = true;
 		GLFWmousebuttonfun   PrevUserCallbackMousebutton = NULL;
-		GLFWscrollfun        PrevUserCallbackScroll = NULL;
 		GLFWkeyfun           PrevUserCallbackKey = NULL;
 		GLFWcharfun          PrevUserCallbackChar = NULL;
 
@@ -35,16 +34,6 @@ namespace Ainan {
 
 			if (action == GLFW_PRESS && button >= 0 && button < IM_ARRAYSIZE(MouseJustPressed))
 				MouseJustPressed[button] = true;
-		}
-
-		void Glfw_ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
-		{
-			if (PrevUserCallbackScroll != NULL && window == Window::Ptr)
-				PrevUserCallbackScroll(window, xoffset, yoffset);
-
-			ImGuiIO& io = ImGui::GetIO();
-			io.MouseWheelH += (float)xoffset;
-			io.MouseWheel += (float)yoffset;
 		}
 
 		void Glfw_KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -118,7 +107,6 @@ namespace Ainan {
 
 				// Install callbacks for secondary viewports
 				glfwSetMouseButtonCallback(data->Window, MouseButtonCallback);
-				glfwSetScrollCallback(data->Window, Glfw_ScrollCallback);
 				glfwSetKeyCallback(data->Window, Glfw_KeyCallback);
 				glfwSetCharCallback(data->Window, CharCallback);
 				glfwSetWindowCloseCallback(data->Window, [](GLFWwindow* window)
@@ -585,11 +573,9 @@ namespace Ainan {
 
 			// Chain GLFW callbacks: our callbacks will call the user's previously installed callbacks, if any.
 			PrevUserCallbackMousebutton = NULL;
-			PrevUserCallbackScroll = NULL;
 			PrevUserCallbackKey = NULL;
 			PrevUserCallbackChar = NULL;
 			PrevUserCallbackMousebutton = glfwSetMouseButtonCallback(Window::Ptr, MouseButtonCallback);
-			PrevUserCallbackScroll = glfwSetScrollCallback(Window::Ptr, Glfw_ScrollCallback);
 			PrevUserCallbackKey = glfwSetKeyCallback(Window::Ptr, Glfw_KeyCallback);
 			PrevUserCallbackChar = glfwSetCharCallback(Window::Ptr, CharCallback);
 

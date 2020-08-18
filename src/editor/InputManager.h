@@ -30,7 +30,7 @@ namespace Ainan {
 
 	public:
 		static bool ControlsWindowOpen;
-		static std::vector<std::function<void(int)>> m_ScrollFunctions;
+		static std::vector<std::function<void(double, double)>> m_ScrollFunctions;
 
 	private:
 		static std::vector<RegisteredKey> m_Keys;

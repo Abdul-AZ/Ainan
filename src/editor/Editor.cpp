@@ -715,7 +715,6 @@ namespace Ainan
 	void Editor::OnEnvironmentLoad()
 	{
 		AssetManager::Init(m_EnvironmentFolderPath.u8string());
-		InputManager::Init();
 
 		if (m_Preferences.WindowMaximized)
 			Window::Maximize();
@@ -734,7 +733,6 @@ namespace Ainan
 	void Editor::OnEnvironmentDestroy()
 	{
 		AssetManager::Terminate();
-		InputManager::Terminate();
 		Window::Restore();
 		Window::SetSize(c_StartMenuWidth, c_StartMenuHeight);
 		Window::CenterWindow();
@@ -1355,7 +1353,7 @@ namespace Ainan
 		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera Up", [this, displayCameraPosFunc]()
 			{
 				//we don't want to zoom if the focus is not set on the viewport
-				if (m_ViewportWindow.IsFocused == false)
+				if (m_ViewportWindow.IsHovered == false)
 					return;
 
 				//move the camera's position
@@ -1370,7 +1368,7 @@ namespace Ainan
 		//the rest are the same with only a diffrent move direction, that is why they arent commented
 		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this, displayCameraPosFunc]()
 			{
-				if (m_ViewportWindow.IsFocused == false)
+				if (m_ViewportWindow.IsHovered == false)
 					return;
 				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, m_Camera.ZoomFactor / 100.0f));
 				displayCameraPosFunc();
@@ -1379,7 +1377,7 @@ namespace Ainan
 
 		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this, displayCameraPosFunc]()
 			{
-				if (m_ViewportWindow.IsFocused == false)
+				if (m_ViewportWindow.IsHovered == false)
 					return;
 				m_Camera.SetPosition(m_Camera.Position + glm::vec2(-m_Camera.ZoomFactor / 100.0f, 0.0f));
 				displayCameraPosFunc();
@@ -1388,7 +1386,7 @@ namespace Ainan
 
 		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this, displayCameraPosFunc]()
 			{
-				if (m_ViewportWindow.IsFocused == false)
+				if (m_ViewportWindow.IsHovered == false)
 					return;
 				m_Camera.SetPosition(m_Camera.Position + glm::vec2(m_Camera.ZoomFactor / 100.0f, 0.0f));
 				displayCameraPosFunc();
@@ -1411,14 +1409,14 @@ namespace Ainan
 			});
 
 		//zoom in and out with mouse scroll wheel
-		InputManager::m_ScrollFunctions.push_back([this](int scroll)
+		InputManager::m_ScrollFunctions.push_back([this](double xoffset, double yoffset)
 			{
 				//we don't want to zoom if the focus is not set on the viewport
-				if (m_ViewportWindow.IsFocused == false)
+				if (m_ViewportWindow.IsHovered == false)
 					return;
 
 				//change zoom factor
-				m_Camera.ZoomFactor -= scroll * 30;
+				m_Camera.ZoomFactor -= yoffset * 30;
 				//clamp zoom factor
 				m_Camera.ZoomFactor = std::clamp(m_Camera.ZoomFactor, c_CameraZoomFactorMin, c_CameraZoomFactorMax);
 
@@ -1436,7 +1434,7 @@ namespace Ainan
 		InputManager::RegisterMouseKey(GLFW_MOUSE_BUTTON_MIDDLE, "Change Camera Zoom to Default", [this]()
 			{
 				//we don't want to zoom if the focus is not set on the viewport
-				if (m_ViewportWindow.IsFocused == false)
+				if (m_ViewportWindow.IsHovered == false)
 					return;
 
 				m_Camera.ZoomFactor = c_CameraZoomFactorDefault;

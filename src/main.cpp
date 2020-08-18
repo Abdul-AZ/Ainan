@@ -13,6 +13,7 @@ int main()
 
 	Window::Init(api);
 	Renderer::Init(api);
+	InputManager::Init();
 	
 	Editor* editor = new Editor;
 	
@@ -31,6 +32,7 @@ int main()
 	
 	delete editor;
 	
+	InputManager::Terminate();
 	Renderer::Terminate();
 	Window::Terminate();
 }
