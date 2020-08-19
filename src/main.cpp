@@ -13,16 +13,17 @@ int main()
 
 	Window::Init(api);
 	Renderer::Init(api);
-	InputManager::Init();
 	
 	Editor* editor = new Editor;
-	
+	InputManager::Init();
+
 	while (Window::ShouldClose == false)
 	{
 		editor->StartFrame();
 		
 		Window::HandleWindowEvents();
 		editor->Update();
+		InputManager::HandleInput();
 		editor->Draw();
 		
 		editor->EndFrame();
@@ -30,9 +31,8 @@ int main()
 		Renderer::Present();
 	}
 	
-	delete editor;
-	
 	InputManager::Terminate();
+	delete editor;
 	Renderer::Terminate();
 	Window::Terminate();
 }

@@ -65,7 +65,6 @@ namespace Ainan {
 		private:
 			static OpenGLRendererAPI* SingletonInstance;
 			//imgui data
-			double Time = 0.0;
 			int32_t AttribLocationVtxPos;
 			int32_t AttribLocationVtxUV;
 			int32_t AttribLocationVtxColor;

@@ -179,8 +179,6 @@ namespace Ainan
 
 		if (Window::WindowSizeChangedSinceLastFrame)
 			m_RenderSurface.SetSize(Window::FramebufferSize);
-
-		InputManager::HandleInput();
 	}
 
 	void Editor::Update_PlayMode()
@@ -237,7 +235,6 @@ namespace Ainan
 
 		if (m_State == State_ExportMode && m_ExportedFrame)
 			Stop();
-		InputManager::HandleInput();
 	}
 
 	void Editor::Update_PauseMode()
@@ -268,8 +265,6 @@ namespace Ainan
 
 		if (Window::WindowSizeChangedSinceLastFrame)
 			m_RenderSurface.SetSize(Window::FramebufferSize);
-
-		InputManager::HandleInput();
 	}
 
 	void Editor::Update_ExportMode()
@@ -313,8 +308,6 @@ namespace Ainan
 
 		if (m_ExportedFrame)
 			Stop();
-
-		InputManager::HandleInput();
 	}
 
 	void Editor::DrawHomeWindow()

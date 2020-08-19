@@ -153,6 +153,7 @@ namespace Ainan {
 			std::vector<std::weak_ptr<Texture>> ReservedTextures;
 			std::vector<std::weak_ptr<VertexBuffer>> ReservedVertexBuffers;
 			std::vector<std::weak_ptr<IndexBuffer>> ReservedIndexBuffers;
+			double Time = 0.0;
 		};
 
 		static RendererData* Rdata;
@@ -166,4 +167,12 @@ namespace Ainan {
 		static void Blur(std::shared_ptr<FrameBuffer>& target, float radius);
 	};
 
+	struct ImGuiViewportDataGlfw
+	{
+		GLFWwindow* Window;
+		bool        WindowOwned;
+
+		ImGuiViewportDataGlfw() { Window = NULL; WindowOwned = false; }
+		~ImGuiViewportDataGlfw() { IM_ASSERT(Window == NULL); }
+	};
 }

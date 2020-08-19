@@ -220,8 +220,6 @@ namespace Ainan {
 			};
 			Renderer::PushCommand(func);
 			Renderer::WaitUntilRendererIdle();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
 		}
 
 		void D3D11RendererAPI::ImGuiEndFrame()
@@ -253,7 +251,11 @@ namespace Ainan {
 
 			//TEMPORARY
 			ImGui_ImplDX11_Init(Context.Device, Context.DeviceContext);
-			ImGui_ImplGlfw_Init(Window::Ptr, true, GlfwClientApi_Unknown);
+			ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+			main_viewport->PlatformHandle = (void*)Window::Ptr;
+#ifdef _WIN32
+			main_viewport->PlatformHandleRaw = glfwGetWin32Window(Window::Ptr);
+#endif
 		}
 
 		//TODO

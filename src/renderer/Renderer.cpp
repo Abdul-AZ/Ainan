@@ -2,6 +2,8 @@
 
 #include "Renderer.h"
 
+
+
 #include "opengl/OpenGLRendererAPI.h"
 #include "opengl/OpenGLShaderProgram.h"
 #include "opengl/OpenGLVertexBuffer.h"
@@ -23,6 +25,10 @@
 #endif // PLATFORM_WINDOWS
 
 #include <GLFW/glfw3.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+
+bool WantUpdateMonitors = true;
 
 namespace Ainan {
 
@@ -220,7 +226,6 @@ namespace Ainan {
 				}
 			}
 
-
 			{
 				VertexLayout layout(2);
 				layout[0] = { "aPos", ShaderVariableType::Vec2 };
@@ -294,9 +299,184 @@ namespace Ainan {
 					shaderTuple.second->BindUniformBufferUnsafe(Rdata->SceneUniformbuffer, 0, RenderingStage::VertexShader);
 				}
 			}
-
-			Rdata->CurrentActiveAPI->InitImGui();
 		}
+
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable viewports
+
+		// Setup back-end capabilities flags
+		io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;         // We can honor GetMouseCursor() values (optional)
+		io.BackendFlags |= ImGuiBackendFlags_HasSetMousePos;          // We can honor io.WantSetMousePos requests (optional, rarely used)
+		io.BackendFlags |= ImGuiBackendFlags_PlatformHasViewports;    // We can create multi-viewports on the Platform side (optional)
+		io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;    // We can create multi-viewports on the Platform side (optional)
+		io.BackendPlatformName = "glfw backend";
+
+		// Our mouse update function expect PlatformHandle to be filled for the main viewport
+		ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+		main_viewport->PlatformHandle = (void*)Window::Ptr;
+		
+		{
+
+			//for cleaner code
+#define GET_WINDOW(x) GLFWwindow* x = ((ImGuiViewportDataGlfw*)viewport->PlatformUserData)->Window;
+
+			// Register platform interface (will be coupled with a renderer interface)
+			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+			platform_io.Platform_CreateWindow = [](ImGuiViewport* viewport)
+			{
+				ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
+				viewport->PlatformUserData = data;
+
+				// GLFW 3.2 unfortunately always set focus on glfwCreateWindow() if GLFW_VISIBLE is set, regardless of GLFW_FOCUSED
+				glfwWindowHint(GLFW_VISIBLE, false);
+				glfwWindowHint(GLFW_FOCUSED, false);
+				glfwWindowHint(GLFW_DECORATED, (viewport->Flags & ImGuiViewportFlags_NoDecoration) ? false : true);
+				GLFWwindow* share_window = nullptr;
+				if(Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+				{ 
+					share_window = Window::Ptr;
+				}
+				else
+				{
+					glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+				}
+				data->Window = glfwCreateWindow((int)viewport->Size.x, (int)viewport->Size.y, "No Title Yet", NULL, share_window);
+				data->WindowOwned = true;
+				viewport->PlatformHandle = (void*)data->Window;
+				viewport->PlatformHandleRaw = glfwGetWin32Window(data->Window);
+				glfwSetWindowPos(data->Window, (int)viewport->Pos.x, (int)viewport->Pos.y);
+
+				// Install callbacks
+				glfwSetWindowCloseCallback(data->Window, [](GLFWwindow* window)
+					{
+						if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
+							viewport->PlatformRequestClose = true;
+					});
+				glfwSetWindowPosCallback(data->Window, [](GLFWwindow* window, int, int)
+					{
+						if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
+							viewport->PlatformRequestMove = true;
+					});
+				glfwSetWindowSizeCallback(data->Window, [](GLFWwindow* window, int, int)
+					{
+						if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
+							viewport->PlatformRequestResize = true;
+					}
+				);
+				if (Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+					glfwMakeContextCurrent(data->Window);
+			};
+			platform_io.Platform_DestroyWindow = [](ImGuiViewport* viewport)
+			{
+				if (ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData)
+				{
+					if (data->WindowOwned)
+					{
+						glfwDestroyWindow(data->Window);
+					}
+					data->Window = NULL;
+					IM_DELETE(data);
+				}
+				viewport->PlatformUserData = viewport->PlatformHandle = NULL;
+			};
+			platform_io.Platform_ShowWindow = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				glfwShowWindow(window);
+			};
+			platform_io.Platform_SetWindowPos = [](ImGuiViewport* viewport, ImVec2 pos)
+			{
+				GET_WINDOW(window);
+				glfwSetWindowPos(window, (int)pos.x, (int)pos.y);
+			};
+			platform_io.Platform_GetWindowPos = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				int x = 0, y = 0;
+				glfwGetWindowPos(window, &x, &y);
+				return ImVec2((float)x, (float)y);
+			};
+			platform_io.Platform_SetWindowSize = [](ImGuiViewport* viewport, ImVec2 size)
+			{
+				GET_WINDOW(window);
+				glfwSetWindowSize(window, (int)size.x, (int)size.y);
+			};
+			platform_io.Platform_GetWindowSize = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				int w = 0, h = 0;
+				glfwGetWindowSize(window, &w, &h);
+				return ImVec2((float)w, (float)h);
+			};
+			platform_io.Platform_SetWindowFocus = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				glfwFocusWindow(window);
+			};
+			platform_io.Platform_GetWindowFocus = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				return glfwGetWindowAttrib(window, GLFW_FOCUSED) != 0;
+			};
+			platform_io.Platform_GetWindowMinimized = [](ImGuiViewport* viewport)
+			{
+				GET_WINDOW(window);
+				return glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0;
+			};
+			platform_io.Platform_SetWindowTitle = [](ImGuiViewport* viewport, const char* title)
+			{
+				GET_WINDOW(window);
+				glfwSetWindowTitle(window, title);
+			};
+			platform_io.Platform_RenderWindow = [](ImGuiViewport* viewport, void*)
+			{
+				GET_WINDOW(window);
+				if (Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+					glfwMakeContextCurrent(window);
+			};
+			platform_io.Platform_SwapBuffers = [](ImGuiViewport* viewport, void*)
+			{
+				GET_WINDOW(window);
+				if (Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+				{
+					glfwMakeContextCurrent(window);
+					glfwSwapBuffers(window);
+				}
+			};
+#undef GET_WINDOW(x)
+
+			// Note: monitor callback are broken GLFW 3.2 and earlier (see github.com/glfw/glfw/issues/784)
+			int monitors_count = 0;
+			GLFWmonitor** glfw_monitors = glfwGetMonitors(&monitors_count);
+			platform_io.Monitors.resize(0);
+			for (int n = 0; n < monitors_count; n++)
+			{
+				ImGuiPlatformMonitor monitor;
+				int x, y;
+				glfwGetMonitorPos(glfw_monitors[n], &x, &y);
+				const GLFWvidmode* vid_mode = glfwGetVideoMode(glfw_monitors[n]);
+				monitor.MainPos = monitor.WorkPos = ImVec2((float)x, (float)y);
+				monitor.MainSize = monitor.WorkSize = ImVec2((float)vid_mode->width, (float)vid_mode->height);
+				platform_io.Monitors.push_back(monitor);
+			}
+			WantUpdateMonitors = false;
+			glfwSetMonitorCallback([](GLFWmonitor*, int)
+				{
+					WantUpdateMonitors = true;
+				});
+
+			// Register main window handle (which is owned by the main application, not by us)
+			ImGuiViewport* main_viewport = ImGui::GetMainViewport();
+			ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
+			data->Window = Window::Ptr;
+			data->WindowOwned = false;
+			main_viewport->PlatformUserData = data;
+			main_viewport->PlatformHandle = (void*)Window::Ptr;
+		}
+
+		Rdata->CurrentActiveAPI->InitImGui();
 
 		while (true)
 		{
@@ -666,6 +846,44 @@ namespace Ainan {
 	void Renderer::ImGuiNewFrame()
 	{
 		Rdata->CurrentActiveAPI->ImGuiNewFrame();
+
+		ImGuiIO& io = ImGui::GetIO();
+		IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end."
+			"Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
+
+		// Setup display size (every frame to accommodate for window resizing)
+		int w, h;
+		int display_w, display_h;
+		glfwGetWindowSize(Window::Ptr, &w, &h);
+		glfwGetFramebufferSize(Window::Ptr, &display_w, &display_h);
+		io.DisplaySize = ImVec2((float)w, (float)h);
+		if (w > 0 && h > 0)
+			io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
+		if (WantUpdateMonitors)
+		{
+			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+			int monitors_count = 0;
+			GLFWmonitor** glfw_monitors = glfwGetMonitors(&monitors_count);
+			platform_io.Monitors.resize(0);
+			for (int n = 0; n < monitors_count; n++)
+			{
+				ImGuiPlatformMonitor monitor;
+				int x, y;
+				glfwGetMonitorPos(glfw_monitors[n], &x, &y);
+				const GLFWvidmode* vid_mode = glfwGetVideoMode(glfw_monitors[n]);
+				monitor.MainPos = monitor.WorkPos = ImVec2((float)x, (float)y);
+				monitor.MainSize = monitor.WorkSize = ImVec2((float)vid_mode->width, (float)vid_mode->height);
+				platform_io.Monitors.push_back(monitor);
+			}
+			WantUpdateMonitors = false;
+		}
+
+		// Setup time step
+		double current_time = glfwGetTime();
+		io.DeltaTime = Rdata->Time > 0.0 ? (float)(current_time - Rdata->Time) : (float)(1.0f / 60.0f);
+		Rdata->Time = current_time;
+
+		ImGui::NewFrame();
 	}
 
 	void Renderer::ImGuiEndFrame()
