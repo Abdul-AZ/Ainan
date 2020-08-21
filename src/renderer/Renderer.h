@@ -38,10 +38,10 @@ namespace Ainan {
 	class Renderer 
 	{
 	public:
-		//this will initilize all the shaders and put them in the shader library member
+		//this initilizes the renderer and starts the rendering thread
 		static void Init(RendererType api);
 
-		//this will destroy all the shaders in the shader library member
+		//this terminates the renderer and stops the rendering thread
 		static void Terminate();
 
 		//This will be changed to only render in end scene by putting draw commands to a command buffer 
@@ -160,9 +160,11 @@ namespace Ainan {
 
 		static decltype(Rdata->ShaderLibrary)& ShaderLibrary() { return Rdata->ShaderLibrary; }
 
-	protected:
+	private:
+		static void InternalInit(RendererType api);
+		static void RendererThreadLoop();
+		static void InternalTerminate();
 		static void FlushQuadBatch();
-		static void RendererThreadLoop(RendererType api);
 		static void DrawImGui(ImDrawData* drawData);
 		static void Blur(std::shared_ptr<FrameBuffer>& target, float radius);
 	};

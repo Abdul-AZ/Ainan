@@ -10,7 +10,6 @@
 
 namespace Ainan {
 	namespace OpenGL {
-		//TODO these stuff really belong to the window class and not here
 		bool                 WantUpdateMonitors = true;
 
 		struct ImGuiViewportDataGlfw

@@ -34,7 +34,7 @@ project "Core"
 
   filter "system:Windows"
     systemversion ("latest")
-    links { "d3d11.lib" }
+    links { "d3d11.lib", "d3dcompiler.lib" }
     defines { "PLATFORM_WINDOWS" }
     files { "../shaders/**.hlsl", "../shaders/**.hlsl" }
 

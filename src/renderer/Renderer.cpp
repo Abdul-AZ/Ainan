@@ -57,247 +57,258 @@ namespace Ainan {
 
 	void Renderer::Init(RendererType api)
 	{
+		//allocate renderer memory
 		Rdata = new RendererData();
-		Rdata->Thread = std::thread(&Renderer::RendererThreadLoop, api);
 
+		auto initFunc = [api]()
+		{
+			Renderer::InternalInit(api);
+			Renderer::RendererThreadLoop();
+			Renderer::InternalTerminate();
+		};
+
+		Rdata->Thread = std::thread(initFunc);
+
+		//wait until the renderer thread finished initializing
 		WaitUntilRendererIdle();
 	}
 
 	void Renderer::Terminate()
 	{
+		//signal and wait for the renderer thread to stop
 		Rdata->DestroyThread = true;
 		Rdata->cv.notify_all();
 		Rdata->Thread.join();
+
+		//free renderer memory
 		delete Rdata;
 	}
 
-	void Renderer::RendererThreadLoop(RendererType api)
+	void Renderer::InternalInit(RendererType api)
 	{
-		{
-			std::lock_guard lock(Rdata->DataMutex);
+		std::lock_guard lock(Rdata->DataMutex);
 
-			//initilize the renderer api
+		//initilize the renderer api
+		switch (api)
+		{
+		case RendererType::D3D11:
+			Rdata->CurrentActiveAPI = new D3D11::D3D11RendererAPI();
+			break;
+
+		case RendererType::OpenGL:
+			Rdata->CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
+			break;
+		}
+
+		//load shaders
+		for (auto& shaderInfo : CompileOnInit)
+		{
+			Rdata->ShaderLibrary[shaderInfo.Name] = Renderer::CreateShaderProgram(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
+		}
+
+		//setup batch renderer
+		{
+			VertexLayout layout(4);
+			layout[0] = { "aPos", ShaderVariableType::Vec2 };
+			layout[1] = { "aColor", ShaderVariableType::Vec4 };
+			layout[2] = { "aTexture", ShaderVariableType::Float };
+			layout[3] = { "aTexCoords", ShaderVariableType::Vec2 };
+
+			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+			{
+			case RendererType::OpenGL:
+				Rdata->QuadBatchVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, true);
+				break;
+
+#ifdef PLATFORM_WINDOWS
+			case RendererType::D3D11:
+				Rdata->QuadBatchVertexBuffer = std::make_shared<D3D11::D3D11VertexBuffer>(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, Rdata->ShaderLibrary["QuadBatchShader"], true, Rdata->CurrentActiveAPI->GetContext());
+				break;
+#endif // PLATFORM_WINDOWS
+
+			default:
+				assert(false);
+			}
+			Rdata->ReservedVertexBuffers.push_back(Rdata->QuadBatchVertexBuffer);
+		}
+
+		uint32_t* indicies = new uint32_t[c_MaxQuadsPerBatch * 6];
+		int u = 0;
+		for (size_t i = 0; i < c_MaxQuadsPerBatch * 6; i += 6)
+		{
+			indicies[i + 0] = 0 + u;
+			indicies[i + 1] = 1 + u;
+			indicies[i + 2] = 2 + u;
+
+			indicies[i + 3] = 0 + u;
+			indicies[i + 4] = 2 + u;
+			indicies[i + 5] = 3 + u;
+			u += 4;
+		}
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+		{
+		case RendererType::OpenGL:
+			Rdata->QuadBatchIndexBuffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(indicies, c_MaxQuadsPerBatch * 6);
+			break;
+
+		case RendererType::D3D11:
+			Rdata->QuadBatchIndexBuffer = std::make_shared<D3D11::D3D11IndexBuffer>(indicies, c_MaxQuadsPerBatch * 6, Rdata->CurrentActiveAPI->GetContext());
+			break;
+
+		default:
+			assert(false);
+		}
+		Rdata->ReservedIndexBuffers.push_back(Rdata->QuadBatchIndexBuffer);
+		delete[] indicies;
+
+		Rdata->QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
+		Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
+
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+		{
+		case RendererType::OpenGL:
+			Rdata->QuadBatchTextures[0] = std::make_shared<OpenGL::OpenGLTexture>(glm::vec2(1, 1), TextureFormat::RGBA, nullptr);
+			break;
+
+#ifdef PLATFORM_WINDOWS
+		case RendererType::D3D11:
+			Rdata->QuadBatchTextures[0] = std::make_shared<D3D11::D3D11Texture>(glm::vec2(1, 1), TextureFormat::RGBA, nullptr, Rdata->CurrentActiveAPI->GetContext());
+			break;
+#endif // PLATFORM_WINDOWS
+
+		default:
+			assert(false);
+		}
+		Rdata->ReservedTextures.push_back(Rdata->QuadBatchTextures[0]);
+		auto img = std::make_shared<Image>();
+		img->m_Width = 1;
+		img->m_Height = 1;
+		img->Format = TextureFormat::RGBA;
+		img->m_Data = new uint8_t[4];
+		memset(img->m_Data, (uint8_t)255, 4);
+		Rdata->QuadBatchTextures[0]->SetImageUnsafe(img);
+
+		//setup postprocessing
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+		{
+		case RendererType::OpenGL:
+			Rdata->BlurFrameBuffer = std::make_shared<OpenGL::OpenGLFrameBuffer>(Window::FramebufferSize);
+			break;
+#ifdef PLATFORM_WINDOWS
+
+		case RendererType::D3D11:
+			Rdata->BlurFrameBuffer = std::make_shared<D3D11::D3D11FrameBuffer>(Window::FramebufferSize, Rdata->CurrentActiveAPI->GetContext());
+#endif
+		}
+
+		float quadVertices[24];
+		{
 			switch (api)
 			{
-			case RendererType::D3D11:
-				Rdata->CurrentActiveAPI = new D3D11::D3D11RendererAPI();
+			case Ainan::RendererType::OpenGL:
+			{
+				float openglVertices[] = {
+					-1.0f, -1.0f, 0.0f, 0.0f,
+					-1.0f, 1.0f, 0.0f, 1.0f,
+					1.0f, -1.0f, 1.0f, 0.0f,
+
+					-1.0f, 1.0f, 0.0f, 1.0f,
+					1.0f, 1.0f, 1.0f, 1.0f,
+					1.0f, -1.0f, 1.0f, 0.0f
+				};
+				memcpy(quadVertices, openglVertices, sizeof(quadVertices));
 				break;
+			}
 
-			case RendererType::OpenGL:
-				Rdata->CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
+			case Ainan::RendererType::D3D11:
+			{
+				float d3dVertices[] = {
+					// positions   // texCoords
+					-1.0f,  1.0f,  0.0f, 0.0f,
+					 1.0f, -1.0f,  1.0f, 1.0f,
+					-1.0f, -1.0f,  0.0f, 1.0f,
+
+					-1.0f,  1.0f,  0.0f, 0.0f,
+					 1.0f,  1.0f,  1.0f, 0.0f,
+					 1.0f, -1.0f,  1.0f, 1.0f
+				};
+				memcpy(quadVertices, d3dVertices, sizeof(quadVertices));
 				break;
 			}
-
-			//load shaders
-			for (auto& shaderInfo : CompileOnInit)
-			{
-				Rdata->ShaderLibrary[shaderInfo.Name] = Renderer::CreateShaderProgram(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
 			}
+		}
 
-			//setup batch renderer
-			{
-				VertexLayout layout(4);
-				layout[0] = { "aPos", ShaderVariableType::Vec2 };
-				layout[1] = { "aColor", ShaderVariableType::Vec4 };
-				layout[2] = { "aTexture", ShaderVariableType::Float };
-				layout[3] = { "aTexCoords", ShaderVariableType::Vec2 };
-
-				switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-				{
-				case RendererType::OpenGL:
-					Rdata->QuadBatchVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, true);
-					break;
-
-#ifdef PLATFORM_WINDOWS
-				case RendererType::D3D11:
-					Rdata->QuadBatchVertexBuffer = std::make_shared<D3D11::D3D11VertexBuffer>(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, Rdata->ShaderLibrary["QuadBatchShader"], true, Rdata->CurrentActiveAPI->GetContext());
-					break;
-#endif // PLATFORM_WINDOWS
-
-				default:
-					assert(false);
-				}
-				Rdata->ReservedVertexBuffers.push_back(Rdata->QuadBatchVertexBuffer);
-			}
-
-			uint32_t* indicies = new uint32_t[c_MaxQuadsPerBatch * 6];
-			int u = 0;
-			for (size_t i = 0; i < c_MaxQuadsPerBatch * 6; i += 6)
-			{
-				indicies[i + 0] = 0 + u;
-				indicies[i + 1] = 1 + u;
-				indicies[i + 2] = 2 + u;
-
-				indicies[i + 3] = 0 + u;
-				indicies[i + 4] = 2 + u;
-				indicies[i + 5] = 3 + u;
-				u += 4;
-			}
+		{
+			VertexLayout layout(2);
+			layout[0] = { "aPos", ShaderVariableType::Vec2 };
+			layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
 			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 			{
 			case RendererType::OpenGL:
-				Rdata->QuadBatchIndexBuffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(indicies, c_MaxQuadsPerBatch * 6);
-				break;
-
-			case RendererType::D3D11:
-				Rdata->QuadBatchIndexBuffer = std::make_shared<D3D11::D3D11IndexBuffer>(indicies, c_MaxQuadsPerBatch * 6, Rdata->CurrentActiveAPI->GetContext());
-				break;
-
-			default:
-				assert(false);
-			}
-			Rdata->ReservedIndexBuffers.push_back(Rdata->QuadBatchIndexBuffer);
-			delete[] indicies;
-
-			Rdata->QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
-			Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
-
-			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-			{
-			case RendererType::OpenGL:
-				Rdata->QuadBatchTextures[0] = std::make_shared<OpenGL::OpenGLTexture>(glm::vec2(1, 1), TextureFormat::RGBA, nullptr);
+				Rdata->BlurVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(quadVertices, sizeof(quadVertices), layout, false);
 				break;
 
 #ifdef PLATFORM_WINDOWS
 			case RendererType::D3D11:
-				Rdata->QuadBatchTextures[0] = std::make_shared<D3D11::D3D11Texture>(glm::vec2(1, 1), TextureFormat::RGBA, nullptr, Rdata->CurrentActiveAPI->GetContext());
+				Rdata->BlurVertexBuffer = std::make_shared<D3D11::D3D11VertexBuffer>(quadVertices, sizeof(quadVertices), layout, Rdata->ShaderLibrary["BlurShader"], false, Rdata->CurrentActiveAPI->GetContext());
 				break;
 #endif // PLATFORM_WINDOWS
 
 			default:
 				assert(false);
 			}
-			Rdata->ReservedTextures.push_back(Rdata->QuadBatchTextures[0]);
-			auto img = std::make_shared<Image>();
-			img->m_Width = 1;
-			img->m_Height = 1;
-			img->Format = TextureFormat::RGBA;
-			img->m_Data = new uint8_t[4];
-			memset(img->m_Data, (uint8_t)255, 4);
-			Rdata->QuadBatchTextures[0]->SetImageUnsafe(img);
-
-			//setup postprocessing
+			Rdata->ReservedVertexBuffers.push_back(Rdata->BlurVertexBuffer);
+		}
+		{
+			VertexLayout bufferLayout =
+			{
+				{ "u_Resolution", ShaderVariableType::Vec2 },
+				{ "u_BlurDirection", ShaderVariableType::Vec2 },
+				{ "u_Radius", ShaderVariableType::Float }
+			};
 			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
 			{
 			case RendererType::OpenGL:
-				Rdata->BlurFrameBuffer = std::make_shared<OpenGL::OpenGLFrameBuffer>(Window::FramebufferSize);
+				Rdata->BlurUniformBuffer = std::make_shared<OpenGL::OpenGLUniformBuffer>("BlurData", bufferLayout, nullptr);
 				break;
-#ifdef PLATFORM_WINDOWS
 
+#ifdef PLATFORM_WINDOWS
 			case RendererType::D3D11:
-				Rdata->BlurFrameBuffer = std::make_shared<D3D11::D3D11FrameBuffer>(Window::FramebufferSize, Rdata->CurrentActiveAPI->GetContext());
-#endif
-			}
-
-			float quadVertices[24];
-			{
-				switch (api)
-				{
-				case Ainan::RendererType::OpenGL:
-				{
-					float openglVertices[] = {
-						-1.0f, -1.0f, 0.0f, 0.0f,
-						-1.0f, 1.0f, 0.0f, 1.0f,
-						1.0f, -1.0f, 1.0f, 0.0f,
-
-						-1.0f, 1.0f, 0.0f, 1.0f,
-						1.0f, 1.0f, 1.0f, 1.0f,
-						1.0f, -1.0f, 1.0f, 0.0f
-					};
-					memcpy(quadVertices, openglVertices, sizeof(quadVertices));
-					break;
-				}
-
-				case Ainan::RendererType::D3D11:
-				{
-					float d3dVertices[] = {
-						// positions   // texCoords
-						-1.0f,  1.0f,  0.0f, 0.0f,
-						 1.0f, -1.0f,  1.0f, 1.0f,
-						-1.0f, -1.0f,  0.0f, 1.0f,
-
-						-1.0f,  1.0f,  0.0f, 0.0f,
-						 1.0f,  1.0f,  1.0f, 0.0f,
-						 1.0f, -1.0f,  1.0f, 1.0f
-					};
-					memcpy(quadVertices, d3dVertices, sizeof(quadVertices));
-					break;
-				}
-				}
-			}
-
-			{
-				VertexLayout layout(2);
-				layout[0] = { "aPos", ShaderVariableType::Vec2 };
-				layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
-				switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-				{
-				case RendererType::OpenGL:
-					Rdata->BlurVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(quadVertices, sizeof(quadVertices), layout, false);
-					break;
-
-#ifdef PLATFORM_WINDOWS
-				case RendererType::D3D11:
-					Rdata->BlurVertexBuffer = std::make_shared<D3D11::D3D11VertexBuffer>(quadVertices, sizeof(quadVertices), layout, Rdata->ShaderLibrary["BlurShader"], false, Rdata->CurrentActiveAPI->GetContext());
-					break;
+				Rdata->BlurUniformBuffer = std::make_shared<D3D11::D3D11UniformBuffer>("BlurData", 1, bufferLayout, nullptr, Rdata->CurrentActiveAPI->GetContext());
+				break;
 #endif // PLATFORM_WINDOWS
 
-				default:
-					assert(false);
-				}
-				Rdata->ReservedVertexBuffers.push_back(Rdata->BlurVertexBuffer);
+			default:
+				assert(false);
 			}
+			Rdata->ShaderLibrary["BlurShader"]->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+		}
+
+		Rdata->CurrentActiveAPI->SetBlendMode(Rdata->m_CurrentBlendMode);
+
+		{
+			VertexLayout bufferLayout =
 			{
-				VertexLayout bufferLayout =
-				{
-					{ "u_Resolution", ShaderVariableType::Vec2 },
-					{ "u_BlurDirection", ShaderVariableType::Vec2 },
-					{ "u_Radius", ShaderVariableType::Float }
-				};
-				switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-				{
-				case RendererType::OpenGL:
-					Rdata->BlurUniformBuffer = std::make_shared<OpenGL::OpenGLUniformBuffer>("BlurData", bufferLayout, nullptr);
-					break;
+				{ "u_ViewProjection", ShaderVariableType::Mat4 }
+			};
+			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+			{
+			case RendererType::OpenGL:
+				Rdata->SceneUniformbuffer = std::make_shared<OpenGL::OpenGLUniformBuffer>("FrameData", bufferLayout, nullptr);
+				break;
 
 #ifdef PLATFORM_WINDOWS
-				case RendererType::D3D11:
-					Rdata->BlurUniformBuffer = std::make_shared<D3D11::D3D11UniformBuffer>("BlurData", 1, bufferLayout, nullptr, Rdata->CurrentActiveAPI->GetContext());
-					break;
+			case RendererType::D3D11:
+				Rdata->SceneUniformbuffer = std::make_shared<D3D11::D3D11UniformBuffer>("FrameData", 0, bufferLayout, nullptr, Rdata->CurrentActiveAPI->GetContext());
+				break;
 #endif // PLATFORM_WINDOWS
 
-				default:
-					assert(false);
-				}
-				Rdata->ShaderLibrary["BlurShader"]->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+			default:
+				assert(false);
 			}
-
-			Rdata->CurrentActiveAPI->SetBlendMode(Rdata->m_CurrentBlendMode);
-
+			for (auto& shaderTuple : Rdata->ShaderLibrary)
 			{
-				VertexLayout bufferLayout =
-				{
-					{ "u_ViewProjection", ShaderVariableType::Mat4 }
-				};
-				switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-				{
-				case RendererType::OpenGL:
-					Rdata->SceneUniformbuffer = std::make_shared<OpenGL::OpenGLUniformBuffer>("FrameData", bufferLayout, nullptr);
-					break;
-
-#ifdef PLATFORM_WINDOWS
-				case RendererType::D3D11:
-					Rdata->SceneUniformbuffer = std::make_shared<D3D11::D3D11UniformBuffer>("FrameData", 0, bufferLayout, nullptr, Rdata->CurrentActiveAPI->GetContext());
-					break;
-#endif // PLATFORM_WINDOWS
-
-				default:
-					assert(false);
-				}
-				for (auto& shaderTuple : Rdata->ShaderLibrary)
-				{
-					shaderTuple.second->BindUniformBufferUnsafe(Rdata->SceneUniformbuffer, 0, RenderingStage::VertexShader);
-				}
+				shaderTuple.second->BindUniformBufferUnsafe(Rdata->SceneUniformbuffer, 0, RenderingStage::VertexShader);
 			}
 		}
 
@@ -316,173 +327,171 @@ namespace Ainan {
 		// Our mouse update function expect PlatformHandle to be filled for the main viewport
 		ImGuiViewport* main_viewport = ImGui::GetMainViewport();
 		main_viewport->PlatformHandle = (void*)Window::Ptr;
-		
-		{
 
-			//for cleaner code
+		//for cleaner code
 #define GET_WINDOW(x) GLFWwindow* x = ((ImGuiViewportDataGlfw*)viewport->PlatformUserData)->Window;
 
 			// Register platform interface (will be coupled with a renderer interface)
-			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-			platform_io.Platform_CreateWindow = [](ImGuiViewport* viewport)
-			{
-				ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
-				viewport->PlatformUserData = data;
+		ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+		platform_io.Platform_CreateWindow = [](ImGuiViewport* viewport)
+		{
+			ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
+			viewport->PlatformUserData = data;
 
-				// GLFW 3.2 unfortunately always set focus on glfwCreateWindow() if GLFW_VISIBLE is set, regardless of GLFW_FOCUSED
-				glfwWindowHint(GLFW_VISIBLE, false);
-				glfwWindowHint(GLFW_FOCUSED, false);
-				glfwWindowHint(GLFW_DECORATED, (viewport->Flags & ImGuiViewportFlags_NoDecoration) ? false : true);
-				GLFWwindow* share_window = nullptr;
-				if(Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
-				{ 
-					share_window = Window::Ptr;
-				}
-				else
-				{
-					glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-				}
-				data->Window = glfwCreateWindow((int)viewport->Size.x, (int)viewport->Size.y, "No Title Yet", NULL, share_window);
-				data->WindowOwned = true;
-				viewport->PlatformHandle = (void*)data->Window;
-				viewport->PlatformHandleRaw = glfwGetWin32Window(data->Window);
-				glfwSetWindowPos(data->Window, (int)viewport->Pos.x, (int)viewport->Pos.y);
+			// GLFW 3.2 unfortunately always set focus on glfwCreateWindow() if GLFW_VISIBLE is set, regardless of GLFW_FOCUSED
+			glfwWindowHint(GLFW_VISIBLE, false);
+			glfwWindowHint(GLFW_FOCUSED, false);
+			glfwWindowHint(GLFW_DECORATED, (viewport->Flags & ImGuiViewportFlags_NoDecoration) ? false : true);
+			GLFWwindow* share_window = nullptr;
+			if (Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+			{
+				share_window = Window::Ptr;
+			}
+			else
+			{
+				glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			}
+			data->Window = glfwCreateWindow((int)viewport->Size.x, (int)viewport->Size.y, "No Title Yet", NULL, share_window);
+			data->WindowOwned = true;
+			viewport->PlatformHandle = (void*)data->Window;
+			viewport->PlatformHandleRaw = glfwGetWin32Window(data->Window);
+			glfwSetWindowPos(data->Window, (int)viewport->Pos.x, (int)viewport->Pos.y);
 
-				// Install callbacks
-				glfwSetWindowCloseCallback(data->Window, [](GLFWwindow* window)
-					{
-						if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
-							viewport->PlatformRequestClose = true;
-					});
-				glfwSetWindowPosCallback(data->Window, [](GLFWwindow* window, int, int)
-					{
-						if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
-							viewport->PlatformRequestMove = true;
-					});
-				glfwSetWindowSizeCallback(data->Window, [](GLFWwindow* window, int, int)
-					{
-						if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
-							viewport->PlatformRequestResize = true;
-					}
-				);
-				if (Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
-					glfwMakeContextCurrent(data->Window);
-			};
-			platform_io.Platform_DestroyWindow = [](ImGuiViewport* viewport)
-			{
-				if (ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData)
+			// Install callbacks
+			glfwSetWindowCloseCallback(data->Window, [](GLFWwindow* window)
 				{
-					if (data->WindowOwned)
-					{
-						glfwDestroyWindow(data->Window);
-					}
-					data->Window = NULL;
-					IM_DELETE(data);
-				}
-				viewport->PlatformUserData = viewport->PlatformHandle = NULL;
-			};
-			platform_io.Platform_ShowWindow = [](ImGuiViewport* viewport)
-			{
-				GET_WINDOW(window);
-				glfwShowWindow(window);
-			};
-			platform_io.Platform_SetWindowPos = [](ImGuiViewport* viewport, ImVec2 pos)
-			{
-				GET_WINDOW(window);
-				glfwSetWindowPos(window, (int)pos.x, (int)pos.y);
-			};
-			platform_io.Platform_GetWindowPos = [](ImGuiViewport* viewport)
-			{
-				GET_WINDOW(window);
-				int x = 0, y = 0;
-				glfwGetWindowPos(window, &x, &y);
-				return ImVec2((float)x, (float)y);
-			};
-			platform_io.Platform_SetWindowSize = [](ImGuiViewport* viewport, ImVec2 size)
-			{
-				GET_WINDOW(window);
-				glfwSetWindowSize(window, (int)size.x, (int)size.y);
-			};
-			platform_io.Platform_GetWindowSize = [](ImGuiViewport* viewport)
-			{
-				GET_WINDOW(window);
-				int w = 0, h = 0;
-				glfwGetWindowSize(window, &w, &h);
-				return ImVec2((float)w, (float)h);
-			};
-			platform_io.Platform_SetWindowFocus = [](ImGuiViewport* viewport)
-			{
-				GET_WINDOW(window);
-				glfwFocusWindow(window);
-			};
-			platform_io.Platform_GetWindowFocus = [](ImGuiViewport* viewport)
-			{
-				GET_WINDOW(window);
-				return glfwGetWindowAttrib(window, GLFW_FOCUSED) != 0;
-			};
-			platform_io.Platform_GetWindowMinimized = [](ImGuiViewport* viewport)
-			{
-				GET_WINDOW(window);
-				return glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0;
-			};
-			platform_io.Platform_SetWindowTitle = [](ImGuiViewport* viewport, const char* title)
-			{
-				GET_WINDOW(window);
-				glfwSetWindowTitle(window, title);
-			};
-			platform_io.Platform_RenderWindow = [](ImGuiViewport* viewport, void*)
-			{
-				GET_WINDOW(window);
-				if (Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
-					glfwMakeContextCurrent(window);
-			};
-			platform_io.Platform_SwapBuffers = [](ImGuiViewport* viewport, void*)
-			{
-				GET_WINDOW(window);
-				if (Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+					if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
+						viewport->PlatformRequestClose = true;
+				});
+			glfwSetWindowPosCallback(data->Window, [](GLFWwindow* window, int, int)
 				{
-					glfwMakeContextCurrent(window);
-					glfwSwapBuffers(window);
+					if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
+						viewport->PlatformRequestMove = true;
+				});
+			glfwSetWindowSizeCallback(data->Window, [](GLFWwindow* window, int, int)
+				{
+					if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
+						viewport->PlatformRequestResize = true;
 				}
-			};
+			);
+			if (Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+				glfwMakeContextCurrent(data->Window);
+		};
+		platform_io.Platform_DestroyWindow = [](ImGuiViewport* viewport)
+		{
+			if (ImGuiViewportDataGlfw* data = (ImGuiViewportDataGlfw*)viewport->PlatformUserData)
+			{
+				if (data->WindowOwned)
+				{
+					glfwDestroyWindow(data->Window);
+				}
+				data->Window = NULL;
+				IM_DELETE(data);
+			}
+			viewport->PlatformUserData = viewport->PlatformHandle = NULL;
+		};
+		platform_io.Platform_ShowWindow = [](ImGuiViewport* viewport)
+		{
+			GET_WINDOW(window);
+			glfwShowWindow(window);
+		};
+		platform_io.Platform_SetWindowPos = [](ImGuiViewport* viewport, ImVec2 pos)
+		{
+			GET_WINDOW(window);
+			glfwSetWindowPos(window, (int)pos.x, (int)pos.y);
+		};
+		platform_io.Platform_GetWindowPos = [](ImGuiViewport* viewport)
+		{
+			GET_WINDOW(window);
+			int x = 0, y = 0;
+			glfwGetWindowPos(window, &x, &y);
+			return ImVec2((float)x, (float)y);
+		};
+		platform_io.Platform_SetWindowSize = [](ImGuiViewport* viewport, ImVec2 size)
+		{
+			GET_WINDOW(window);
+			glfwSetWindowSize(window, (int)size.x, (int)size.y);
+		};
+		platform_io.Platform_GetWindowSize = [](ImGuiViewport* viewport)
+		{
+			GET_WINDOW(window);
+			int w = 0, h = 0;
+			glfwGetWindowSize(window, &w, &h);
+			return ImVec2((float)w, (float)h);
+		};
+		platform_io.Platform_SetWindowFocus = [](ImGuiViewport* viewport)
+		{
+			GET_WINDOW(window);
+			glfwFocusWindow(window);
+		};
+		platform_io.Platform_GetWindowFocus = [](ImGuiViewport* viewport)
+		{
+			GET_WINDOW(window);
+			return glfwGetWindowAttrib(window, GLFW_FOCUSED) != 0;
+		};
+		platform_io.Platform_GetWindowMinimized = [](ImGuiViewport* viewport)
+		{
+			GET_WINDOW(window);
+			return glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0;
+		};
+		platform_io.Platform_SetWindowTitle = [](ImGuiViewport* viewport, const char* title)
+		{
+			GET_WINDOW(window);
+			glfwSetWindowTitle(window, title);
+		};
+		platform_io.Platform_RenderWindow = [](ImGuiViewport* viewport, void*)
+		{
+			GET_WINDOW(window);
+			if (Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+				glfwMakeContextCurrent(window);
+		};
+		platform_io.Platform_SwapBuffers = [](ImGuiViewport* viewport, void*)
+		{
+			GET_WINDOW(window);
+			if (Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+			{
+				glfwMakeContextCurrent(window);
+				glfwSwapBuffers(window);
+			}
+		};
 #undef GET_WINDOW(x)
 
-			// Note: monitor callback are broken GLFW 3.2 and earlier (see github.com/glfw/glfw/issues/784)
-			int monitors_count = 0;
-			GLFWmonitor** glfw_monitors = glfwGetMonitors(&monitors_count);
-			platform_io.Monitors.resize(0);
-			for (int n = 0; n < monitors_count; n++)
-			{
-				ImGuiPlatformMonitor monitor;
-				int x, y;
-				glfwGetMonitorPos(glfw_monitors[n], &x, &y);
-				const GLFWvidmode* vid_mode = glfwGetVideoMode(glfw_monitors[n]);
-				monitor.MainPos = monitor.WorkPos = ImVec2((float)x, (float)y);
-				monitor.MainSize = monitor.WorkSize = ImVec2((float)vid_mode->width, (float)vid_mode->height);
-				platform_io.Monitors.push_back(monitor);
-			}
-			WantUpdateMonitors = false;
-			glfwSetMonitorCallback([](GLFWmonitor*, int)
-				{
-					WantUpdateMonitors = true;
-				});
-
-			// Register main window handle (which is owned by the main application, not by us)
-			ImGuiViewport* main_viewport = ImGui::GetMainViewport();
-			ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
-			data->Window = Window::Ptr;
-			data->WindowOwned = false;
-			main_viewport->PlatformUserData = data;
-			main_viewport->PlatformHandle = (void*)Window::Ptr;
+		// Note: monitor callback are broken GLFW 3.2 and earlier (see github.com/glfw/glfw/issues/784)
+		int monitors_count = 0;
+		GLFWmonitor** glfw_monitors = glfwGetMonitors(&monitors_count);
+		platform_io.Monitors.resize(0);
+		for (int n = 0; n < monitors_count; n++)
+		{
+			ImGuiPlatformMonitor monitor;
+			int x, y;
+			glfwGetMonitorPos(glfw_monitors[n], &x, &y);
+			const GLFWvidmode* vid_mode = glfwGetVideoMode(glfw_monitors[n]);
+			monitor.MainPos = monitor.WorkPos = ImVec2((float)x, (float)y);
+			monitor.MainSize = monitor.WorkSize = ImVec2((float)vid_mode->width, (float)vid_mode->height);
+			platform_io.Monitors.push_back(monitor);
 		}
+		WantUpdateMonitors = false;
+		glfwSetMonitorCallback([](GLFWmonitor*, int)
+			{
+				WantUpdateMonitors = true;
+			});
+
+		// Register main window handle (which is owned by the main application, not by us)
+		ImGuiViewportDataGlfw* data = IM_NEW(ImGuiViewportDataGlfw)();
+		data->Window = Window::Ptr;
+		data->WindowOwned = false;
+		main_viewport->PlatformUserData = data;
+		main_viewport->PlatformHandle = (void*)Window::Ptr;
 
 		Rdata->CurrentActiveAPI->InitImGui();
+	}
 
+	void Renderer::RendererThreadLoop()
+	{
 		while (true)
 		{
 			if (Rdata->DestroyThread)
 				break;
-
 			{
 				{
 					std::unique_lock<std::mutex> lock(Rdata->QueueMutex);
@@ -502,10 +511,11 @@ namespace Ainan {
 				Rdata->WorkDoneCV.notify_all();
 			}
 		}
+	}
 
+	void Renderer::InternalTerminate()
+	{
 		Rdata->ShaderLibrary.erase(Rdata->ShaderLibrary.begin(), Rdata->ShaderLibrary.end());
-
-		auto type = Rdata->CurrentActiveAPI->GetContext()->GetType();
 
 		delete Rdata->CurrentActiveAPI;
 
