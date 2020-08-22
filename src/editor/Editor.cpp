@@ -50,22 +50,27 @@ namespace Ainan
 
 	void Editor::Update()
 	{
+		//if time passed is less than a frame time, we use the time of a single frame
+		//because we are not going to start the next frame until the time of a single frame finishes
+		float frameTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
+		m_SimulationDeltaTime = frameTime * m_SimulationSpeedFactor;
+
 		switch (m_State)
 		{
 		case State_EditorMode:
-			Update_EditorMode();
+			Update_EditorMode(frameTime);
 			break;
 
 		case State_PlayMode:
-			Update_PlayMode();
+			Update_PlayMode(frameTime);
 			break;
 
 		case State_PauseMode:
-			Update_PauseMode();
+			Update_PauseMode(frameTime);
 			break;
 
 		case State_ExportMode:
-			Update_ExportMode();
+			Update_ExportMode(frameTime);
 			break;
 		}
 	}
@@ -130,7 +135,6 @@ namespace Ainan
 			{
 				EnvironmentObjectInterface* obj = nullptr;
 
-				float deltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
 				{
 					std::lock_guard lock(UpdateMutex);
 					if (UpdateQueue.size() > 0)
@@ -146,19 +150,15 @@ namespace Ainan
 				}
 				auto mutexPtr = obj->GetMutex();
 				std::lock_guard lock(*mutexPtr);
-				obj->Update(deltaTime);
+				obj->Update(m_SimulationDeltaTime);
 			}
 		}
 	}
 
-	void Editor::Update_EditorMode()
+	void Editor::Update_EditorMode(float deltaTime)
 	{
-		//if time passed is less than a frame time, we use the time of a single frame
-		//because we are not going to start the next frame until the time of a single frame finishes
-		float realDeltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
-
-		m_Camera.Update(realDeltaTime, m_ViewportWindow.RenderViewport);
-		m_AppStatusWindow.Update(realDeltaTime);
+		m_Camera.Update(deltaTime, m_ViewportWindow.RenderViewport);
+		m_AppStatusWindow.Update(deltaTime);
 
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
 		for (int i = 0; i < m_Env->Objects.size(); i++) 
@@ -181,14 +181,10 @@ namespace Ainan
 			m_RenderSurface.SetSize(Window::FramebufferSize);
 	}
 
-	void Editor::Update_PlayMode()
+	void Editor::Update_PlayMode(float deltaTime)
 	{
-		//if time passed is less than a frame time, we use the time of a single frame
-		//because we are not going to start the next frame until the time of a single frame finishes
-		float realDeltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
-
-		m_Camera.Update(realDeltaTime, m_ViewportWindow.RenderViewport);
-		m_AppStatusWindow.Update(realDeltaTime);
+		m_Camera.Update(deltaTime, m_ViewportWindow.RenderViewport);
+		m_AppStatusWindow.Update(deltaTime);
 
 		{
 			{
@@ -224,7 +220,7 @@ namespace Ainan
 			m_RenderSurface.SetSize(Window::FramebufferSize);
 
 		//this stuff is used for the profiler
-		m_TimeSincePlayModeStarted += realDeltaTime;
+		m_TimeSincePlayModeStarted += deltaTime;
 
 		//save delta time for the profiler
 
@@ -237,14 +233,10 @@ namespace Ainan
 			Stop();
 	}
 
-	void Editor::Update_PauseMode()
+	void Editor::Update_PauseMode(float deltaTime)
 	{
-		//if time passed is less than a frame time, we use the time of a single frame
-		//because we are not going to start the next frame until the time of a single frame finishes
-		float realDeltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
-
-		m_Camera.Update(realDeltaTime, m_ViewportWindow.RenderViewport);
-		m_AppStatusWindow.Update(realDeltaTime);
+		m_Camera.Update(deltaTime, m_ViewportWindow.RenderViewport);
+		m_AppStatusWindow.Update(deltaTime);
 
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
 		for (int i = 0; i < m_Env->Objects.size(); i++) 
@@ -267,14 +259,10 @@ namespace Ainan
 			m_RenderSurface.SetSize(Window::FramebufferSize);
 	}
 
-	void Editor::Update_ExportMode()
+	void Editor::Update_ExportMode(float deltaTime)
 	{
-		//if time passed is less than a frame time, we use the time of a single frame
-		//because we are not going to start the next frame until the time of a single frame finishes
-		float realDeltaTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
-
-		m_Camera.Update(realDeltaTime, m_ViewportWindow.RenderViewport);
-		m_AppStatusWindow.Update(realDeltaTime);
+		m_Camera.Update(deltaTime, m_ViewportWindow.RenderViewport);
+		m_AppStatusWindow.Update(deltaTime);
 
 		//update all objects
 		{
@@ -297,7 +285,7 @@ namespace Ainan
 			m_RenderSurface.SetSize(Window::FramebufferSize);
 
 		//this stuff is used for the profiler
-		m_TimeSincePlayModeStarted += realDeltaTime;
+		m_TimeSincePlayModeStarted += deltaTime;
 
 		//save delta time for the profiler
 
@@ -922,6 +910,16 @@ namespace Ainan
 			break;
 		}
 
+		ImGui::Text("Simulation Speed: ");
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("Determines how fast time moves in the environment\n1 means 1x realtime and so on");
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(75.0f);
+		ImGui::DragFloat("##Simulation Speed", &m_SimulationSpeedFactor, 0.1f, 0.1f, 10.0f, "%.1fx");
+		m_SimulationSpeedFactor = std::clamp(m_SimulationSpeedFactor, 0.1f, 10.0f);
+		
+		ImGui::SameLine();
+
 		if (ImGui::Button("Export"))
 			ExportMode();
 
@@ -1504,10 +1502,22 @@ namespace Ainan
 			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(Renderer::Rdata->NumberOfDrawCallsLastScene).c_str());
 			ImGui::SameLine();
 
+			//update framerate every 30 frames
+			static int32_t frameCounter = 1;
+			if (frameCounter % 30 == 0)
+			{
+				//calculate fps when we dont have uninitilized values
+				if (std::find(m_DeltaTimeHistory.begin(), m_DeltaTimeHistory.end(), 0.0f) == m_DeltaTimeHistory.end())
+					m_AverageFPS = 1.0f / (std::accumulate(m_DeltaTimeHistory.begin(), m_DeltaTimeHistory.end(), 0.0f) / m_DeltaTimeHistory.size());
+				else
+					m_AverageFPS = 0;
+				frameCounter = 1;
+			}
+			frameCounter++;
 
 			ImGui::Text("        FPS: ");
 			ImGui::SameLine();
-			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(static_cast<int>(1.0f / m_DeltaTime)).c_str());
+			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(m_AverageFPS).c_str());
 
 			if (ImGui::IsItemHovered()) {
 				ImGui::BeginTooltip();
@@ -1516,7 +1526,7 @@ namespace Ainan
 			}
 
 			ImGui::PlotLines("Frame Time(s)", m_DeltaTimeHistory.data(), m_DeltaTimeHistory.size(),
-				0, 0, 0.0f, 0.025f, ImVec2(0, 75));
+				0, 0, 0.0f, 0.025f, ImVec2(0, 50));
 
 			ImGui::Text("Textures: ");
 			ImGui::SameLine();

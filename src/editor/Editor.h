@@ -91,6 +91,7 @@ namespace Ainan {
 		std::array<float, 120> m_DeltaTimeHistory;
 		Profiler m_ActiveProfiler = Profiler::RenderingProfiler;
 
+		float m_SimulationSpeedFactor = 1.0f;
 		std::string m_EnvironmentCreateFolderPath;
 		std::string m_EnvironmentCreateName;
 		bool m_CreateEvironmentDirectory = false;
@@ -105,16 +106,18 @@ namespace Ainan {
 		std::condition_variable StartUpdating;
 		std::condition_variable FinishedUpdating;
 		std::atomic_bool DestroyThreads = false;
-		float m_DeltaTime = 0.0f;
+		float m_DeltaTime = 0.0f;			//change in realtime
+		float m_SimulationDeltaTime = 0.0f; //change in simulation time
+		int32_t m_AverageFPS = 0;
 
 	private:
 		void WorkerThreadLoop();
 
 		//methods based on editor state
-		void Update_EditorMode();
-		void Update_PlayMode();
-		void Update_PauseMode();
-		void Update_ExportMode();
+		void Update_EditorMode(float deltaTime);
+		void Update_PlayMode(float deltaTime);
+		void Update_PauseMode(float deltaTime);
+		void Update_ExportMode(float deltaTime);
 
 		void DrawHomeWindow();
 		void DrawEnvironmentCreationWindow();

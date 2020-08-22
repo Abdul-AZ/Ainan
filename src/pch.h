@@ -14,6 +14,7 @@
 #include <mutex>
 #include <queue>
 #include <atomic>
+#include <numeric>
 
 //dependencies
 #include <imgui.h>
