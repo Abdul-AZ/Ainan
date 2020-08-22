@@ -8,17 +8,19 @@ namespace Ainan {
 		class OpenGLIndexBuffer : public IndexBuffer
 		{
 		public:
-			OpenGLIndexBuffer(unsigned int* data, const int& count);
+			OpenGLIndexBuffer(uint32_t* data, uint32_t count);
 			~OpenGLIndexBuffer();
 
 			// Inherited via IndexBuffer
 			virtual uint32_t GetCount() const override { return m_Count; };
+			virtual uint32_t GetUsedMemory() const override { return Memory; };
 			virtual void Bind() const override;
 			virtual void Unbind() const override;
 
 		private:
-			unsigned int m_RendererID;
-			unsigned int m_Count;
+			uint32_t m_RendererID;
+			uint32_t m_Count;
+			uint32_t Memory;
 		};
 	}
 }

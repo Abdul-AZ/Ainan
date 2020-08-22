@@ -9,11 +9,11 @@
 namespace Ainan {
 	namespace D3D11 {
 
-		D3D11UniformBuffer::D3D11UniformBuffer(const std::string name, uint32_t reg, const VertexLayout& layout, void* data, RendererContext* context)
+		D3D11UniformBuffer::D3D11UniformBuffer(const std::string name, uint32_t reg, const VertexLayout& layout, void* data, RendererContext* context) :
+			Name(name),
+			Layout(layout),
+			Context((D3D11RendererContext*)context)
 		{
-			Context = (D3D11RendererContext*)context;
-			Layout = layout;
-
 			//calculate buffer size with alignment
 			{
 				for (auto& layoutPart : layout)
@@ -40,10 +40,16 @@ namespace Ainan {
 			if (BufferSize % 16 != 0)
 				BufferSize += 16 - (BufferSize % 16);
 
+			AlignedSize = BufferSize;
+			PackedSize = std::accumulate(layout.begin(), layout.end(), 0,
+				[](uint32_t a, const VertexLayoutPart& b) -> uint32_t
+				{
+					return a + b.GetSize();
+				});
 			//create buffer
 			{
 				D3D11_BUFFER_DESC desc{};
-				desc.ByteWidth = BufferSize;
+				desc.ByteWidth = AlignedSize;
 				desc.Usage = D3D11_USAGE_DYNAMIC;
 				desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 				desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;

@@ -29,7 +29,8 @@ namespace Ainan {
 			}
 		}
 
-		OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, unsigned int size, const VertexLayout& layout, bool dynamic)
+		OpenGLVertexBuffer::OpenGLVertexBuffer(void* data, uint32_t size, const VertexLayout& layout, bool dynamic) :
+			Memory(size)
 		{
 			glGenVertexArrays(1, &m_VertexArray);
 			glBindVertexArray(m_VertexArray);
@@ -38,14 +39,14 @@ namespace Ainan {
 			glGenBuffers(1, &m_RendererID);
 			Bind();
 			if(dynamic)
-				glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER, Memory, data, GL_DYNAMIC_DRAW);
 			else
-				glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER, Memory, data, GL_STATIC_DRAW);
 
 			//set layout
-			int index = 0;
-			int offset = 0;
-			int stride = 0;
+			int32_t index = 0;
+			int32_t offset = 0;
+			int32_t stride = 0;
 
 			for (auto& layoutPart : layout)
 			{
@@ -54,8 +55,8 @@ namespace Ainan {
 
 			for (auto& layoutPart : layout)
 			{
-				int size = layoutPart.GetSize();
-				int componentCount = GetShaderVariableComponentCount(layoutPart.Type);
+				int32_t size = layoutPart.GetSize();
+				int32_t componentCount = GetShaderVariableComponentCount(layoutPart.Type);
 				GLenum openglType = GetOpenglTypeFromShaderType(layoutPart.Type);
 
 				glVertexAttribPointer(index, componentCount, openglType, false, stride, (void*)(uintptr_t)offset);
@@ -89,12 +90,6 @@ namespace Ainan {
 			glBindVertexArray(0);
 		}
 
-		void OpenGLVertexBuffer::UpdateDataUnsafe(int32_t offset, int32_t size, void* data)
-		{
-			Bind();
-			glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
-		}
-
 		void OpenGLVertexBuffer::UpdateData(int32_t offset, int32_t size, void* data)
 		{
 			auto func = [this, offset, size, data]()
@@ -104,6 +99,12 @@ namespace Ainan {
 
 			Renderer::PushCommand(func);
 			Renderer::WaitUntilRendererIdle();
+		}
+
+		void OpenGLVertexBuffer::UpdateDataUnsafe(int32_t offset, int32_t size, void* data)
+		{
+			Bind();
+			glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 		}
 	}
 }

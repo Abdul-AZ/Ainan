@@ -6,12 +6,13 @@
 namespace Ainan {
 	namespace OpenGL {
 
-		OpenGLIndexBuffer::OpenGLIndexBuffer(unsigned int* data, const int& count) :
-			m_Count(count)
+		OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* data, uint32_t count) :
+			m_Count(count),
+			Memory(count * sizeof(uint32_t))
 		{
 			glGenBuffers(1, &m_RendererID);
 			Bind();
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_DYNAMIC_DRAW);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, Memory, data, GL_DYNAMIC_DRAW);
 		}
 
 		OpenGLIndexBuffer::~OpenGLIndexBuffer()

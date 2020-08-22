@@ -10,7 +10,6 @@ namespace Ainan {
 	namespace D3D11 {
 		class D3D11RendererContext;
 		
-		//TODO support arrays in layout
 		class D3D11UniformBuffer : public UniformBuffer
 		{
 		public:
@@ -20,16 +19,18 @@ namespace Ainan {
 			virtual void UpdateData(void* data) override;
 			virtual void UpdateDataUnsafe(void* data) override;
 
-			//TODO
-			virtual std::string GetName() const override { return ""; };
-			virtual uint32_t GetPackedSize() const override { return 0; };
-			virtual uint32_t GetAlignedSize() const override { return 0; };
+			virtual std::string GetName() const override { return Name; };
+			virtual uint32_t GetPackedSize() const override { return PackedSize; };
+			virtual uint32_t GetAlignedSize() const override { return AlignedSize; };
 
 		public:
 			ID3D11Buffer* Buffer = nullptr;
 			uint32_t BufferSize = 0;
 			VertexLayout Layout;
 			D3D11RendererContext* Context;
+			uint32_t PackedSize = 0;
+			uint32_t AlignedSize = 0;
+			std::string Name;
 		};
 	}
 }

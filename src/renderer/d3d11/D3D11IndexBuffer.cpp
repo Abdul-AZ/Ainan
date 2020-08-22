@@ -7,13 +7,14 @@
 
 namespace Ainan {
 	namespace D3D11 {
-		D3D11IndexBuffer::D3D11IndexBuffer(unsigned int* data, int count, RendererContext* context)
+		D3D11IndexBuffer::D3D11IndexBuffer(uint32_t* data, int32_t count, RendererContext* context)
 		{
 			Context = (D3D11RendererContext*)context;
 			IndexCount = count;
+			Memory = count * sizeof(uint32_t);
 
 			D3D11_BUFFER_DESC desc{};
-			desc.ByteWidth = count * sizeof(uint32_t);
+			desc.ByteWidth = Memory;
 			desc.Usage = D3D11_USAGE_DEFAULT;
 			desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 			if (data)

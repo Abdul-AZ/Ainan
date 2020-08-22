@@ -109,6 +109,7 @@ namespace Ainan {
 		float m_DeltaTime = 0.0f;			//change in realtime
 		float m_SimulationDeltaTime = 0.0f; //change in simulation time
 		int32_t m_AverageFPS = 0;
+		uint32_t m_GPUMemAllocated = 0;
 
 	private:
 		void WorkerThreadLoop();

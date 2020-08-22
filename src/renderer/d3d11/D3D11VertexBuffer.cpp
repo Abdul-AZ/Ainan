@@ -45,6 +45,7 @@ namespace Ainan {
 		{
 			Context = (D3D11RendererContext*)context;
 			Stride = 0;
+			Memory = size;
 
 			//create buffer
 			{

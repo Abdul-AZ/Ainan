@@ -32,6 +32,8 @@ namespace Ainan
 		{
 			thread = std::thread([this]() { WorkerThreadLoop(); });
 		}
+
+		m_GPUMemAllocated = Renderer::GetUsedGPUMemory();
 	}
 
 	Editor::~Editor()
@@ -80,19 +82,15 @@ namespace Ainan
 		if (Window::Minimized)
 			return;
 
-		Renderer::ClearScreen();
-
 		switch (m_State)
 		{
 		case State_NoEnvLoaded:
 			DrawHomeWindow();
 			return;
-			break;
 		
 		case State_CreateEnv:
 			DrawEnvironmentCreationWindow();
 			return;
-			break;
 
 		case State_EditorMode:
 		case State_PauseMode:
@@ -1249,7 +1247,6 @@ namespace Ainan
 
 	void Editor::AddEnvironmentObject(EnvironmentObjectType type, const std::string& name)
 	{
-
 		//interface for the object to be added
 		pEnvironmentObject obj;
 
@@ -1299,6 +1296,7 @@ namespace Ainan
 		m_Env->Objects.push_back(std::move(obj));
 
 		RefreshObjectOrdering();
+		m_GPUMemAllocated = Renderer::GetUsedGPUMemory();
 	}
 
 	void Editor::RegisterEnvironmentInputKeys()
@@ -1541,6 +1539,18 @@ namespace Ainan
 			ImGui::Text("   EBO(s): ");
 			ImGui::SameLine();
 			ImGui::Text(std::to_string(Renderer::Rdata->ReservedIndexBuffers.size()).c_str());
+
+			ImGui::SameLine();
+			ImGui::Text("   UBO(s): ");
+			ImGui::SameLine();
+			ImGui::Text(std::to_string(Renderer::Rdata->ReservedUniformBuffers.size()).c_str());
+
+			ImGui::SameLine();
+			ImGui::Text("   Used GPU Memory: ");
+			ImGui::SameLine();
+			ImGui::Text(std::to_string(m_GPUMemAllocated / (1024 * 1024)).c_str());
+			ImGui::SameLine();
+			ImGui::Text("Mb");
 		}
 		break;
 
@@ -1549,7 +1559,7 @@ namespace Ainan
 			ImGui::Text("Global Particle Count :");
 			ImGui::SameLine();
 
-			unsigned int activeParticleCount = 0;
+			uint32_t activeParticleCount = 0;
 			for (pEnvironmentObject& obj : m_Env->Objects)
 			{
 				auto mutexPtr = obj->GetMutex();

@@ -30,7 +30,7 @@ namespace Ainan {
 		float BlurRadius = 0.0f;								   //Required if Blur == true
 	};
 
-	const int c_MaxQuadsPerBatch = 10000;
+	const int c_MaxQuadsPerBatch = 5000;
 	const int c_MaxQuadVerticesPerBatch = c_MaxQuadsPerBatch * 4;
 	const int c_MaxQuadTexturesPerBatch = 16;
 
@@ -68,6 +68,8 @@ namespace Ainan {
 		static void ImGuiNewFrame();
 		static void ImGuiEndFrame();
 
+		static uint32_t GetUsedGPUMemory();
+
 		static void ClearScreen();
 		static void ClearScreenUnsafe();
 
@@ -91,6 +93,9 @@ namespace Ainan {
 		//data should ALWAYS a uint32_t array
 		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(uint32_t* data, uint32_t count);
 
+		static std::shared_ptr<UniformBuffer> CreateUniformBuffer(const std::string& name, uint32_t reg,
+			const VertexLayout& layout, void* data);
+
 		//manually create a shader program (mostly used for testing new shaders)
 		//to properly add shaders add them to the CompileOnInit list in the cpp file and access them from the ShaderLibrary member
 		static std::shared_ptr<ShaderProgram> CreateShaderProgram(const std::string& vertPath, const std::string& fragPath);
@@ -101,9 +106,6 @@ namespace Ainan {
 
 		static std::shared_ptr<Texture> CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
 		static std::shared_ptr<Texture> CreateTexture(Image& img);
-
-		static std::shared_ptr<UniformBuffer> CreateUniformBuffer(const std::string& name, uint32_t reg,
-			const VertexLayout& layout, void* data);
 
 		//because quad vertices are different in each API depending on if the y axis is pointing up or down
 		//this returns 6 quad vertices that are used to draw a quad WITHOUT using an index buffer
@@ -153,6 +155,7 @@ namespace Ainan {
 			std::vector<std::weak_ptr<Texture>> ReservedTextures;
 			std::vector<std::weak_ptr<VertexBuffer>> ReservedVertexBuffers;
 			std::vector<std::weak_ptr<IndexBuffer>> ReservedIndexBuffers;
+			std::vector<std::weak_ptr<UniformBuffer>> ReservedUniformBuffers;
 			double Time = 0.0;
 		};
 
@@ -161,6 +164,15 @@ namespace Ainan {
 		static decltype(Rdata->ShaderLibrary)& ShaderLibrary() { return Rdata->ShaderLibrary; }
 
 	private:
+		static std::shared_ptr<VertexBuffer> CreateVertexBufferUnsafe(void* data, uint32_t size,
+			const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
+			bool dynamic = false);
+
+		static std::shared_ptr<IndexBuffer> CreateIndexBufferUnsafe(uint32_t* data, uint32_t count);
+
+		static std::shared_ptr<UniformBuffer> CreateUniformBufferUnsafe(const std::string& name, uint32_t reg,
+			const VertexLayout& layout, void* data);
+
 		static void InternalInit(RendererType api);
 		static void RendererThreadLoop();
 		static void InternalTerminate();

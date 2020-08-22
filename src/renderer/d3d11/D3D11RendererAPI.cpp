@@ -266,7 +266,10 @@ namespace Ainan {
 		void D3D11RendererAPI::ClearScreen()
 		{
 			float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-			Context.DeviceContext->ClearRenderTargetView(Context.BackbufferView, clearColor);
+			ID3D11RenderTargetView* view;
+			Context.DeviceContext->OMGetRenderTargets(1, &view, nullptr);
+			Context.DeviceContext->ClearRenderTargetView(view, clearColor);
+			view->Release();
 		}
 
 		void D3D11RendererAPI::SetViewport(const Rectangle& viewport)

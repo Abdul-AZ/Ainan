@@ -9,6 +9,7 @@
 
 namespace Ainan {
 	namespace D3D11 {
+
 		class D3D11VertexBuffer : public VertexBuffer
 		{
 		public:
@@ -19,6 +20,7 @@ namespace Ainan {
 
 			virtual void UpdateData(int32_t offset, int32_t size, void* data) override;
 			virtual void UpdateDataUnsafe(int32_t offset, int32_t size, void* data) override;
+			virtual uint32_t GetUsedMemory() const override { return Memory; };
 			virtual void Bind() const override;
 			virtual void Unbind() const override;
 
@@ -27,6 +29,7 @@ namespace Ainan {
 			ID3D11Buffer* Buffer;
 			ID3D11InputLayout* Layout;
 			uint32_t Stride;
+			uint32_t Memory;
 		};
 	}
 }
