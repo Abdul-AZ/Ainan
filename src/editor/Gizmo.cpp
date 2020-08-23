@@ -43,7 +43,7 @@ namespace Ainan {
 
 	};
 
-	static const unsigned int c_OpenGLArrowIndecies[] =
+	static const uint32_t c_OpenGLArrowIndecies[] =
 	{
 		0,1,2,
 		2,3,4,
@@ -52,7 +52,7 @@ namespace Ainan {
 		0,2,6
 	};
 
-	static const unsigned int c_DirectXArrowIndecies[] =
+	static const uint32_t c_DirectXArrowIndecies[] =
 	{
 		0,1,2,
 		2,3,4,
@@ -68,9 +68,9 @@ namespace Ainan {
 		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibrary()["GizmoShader"]);
 
 		if(Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
-			EBO = Renderer::CreateIndexBuffer((unsigned int*)c_OpenGLArrowIndecies, sizeof(c_OpenGLArrowIndecies) / sizeof(unsigned int));
+			EBO = Renderer::CreateIndexBuffer((uint32_t*)c_OpenGLArrowIndecies, sizeof(c_OpenGLArrowIndecies) / sizeof(uint32_t));
 		else
-			EBO = Renderer::CreateIndexBuffer((unsigned int*)c_DirectXArrowIndecies, sizeof(c_DirectXArrowIndecies) / sizeof(unsigned int));
+			EBO = Renderer::CreateIndexBuffer((uint32_t*)c_DirectXArrowIndecies, sizeof(c_DirectXArrowIndecies) / sizeof(uint32_t));
 
 		EBO->Bind();
 
@@ -81,7 +81,8 @@ namespace Ainan {
 	void Gizmo::Draw(glm::vec2& objectPosition,
 		const glm::vec2& viewportWindowPos,
 		const glm::vec2& viewportWindowSize,
-		const glm::vec2& viewportWindowContentRegionSize)
+		const glm::vec2& viewportWindowContentRegionSize,
+		const Camera& camera)
 	{
 		double xpos, ypos;
 		glfwGetCursorPos(Window::Ptr, &xpos, &ypos);
@@ -115,8 +116,8 @@ namespace Ainan {
 		glm::vec2 objectPositionWS = objectPosition * c_GlobalScaleFactor;
 		glm::vec2 realMousePositionNDC = glm::vec2(NDC_xpos, NDC_ypos);
 
-		glm::mat4 invView = glm::inverse(Renderer::Rdata->CurrentSceneDescription.SceneCamera.ViewMatrix);
-		glm::mat4 invProj = glm::inverse(Renderer::Rdata->CurrentSceneDescription.SceneCamera.ProjectionMatrix);
+		glm::mat4 invView = glm::inverse(camera.ViewMatrix);
+		glm::mat4 invProj = glm::inverse(camera.ProjectionMatrix);
 
 		glm::vec4 result = invView * invProj * glm::vec4(realMousePositionNDC.x, realMousePositionNDC.y, 0.0f, 1.0f);
 
@@ -199,7 +200,6 @@ namespace Ainan {
 
 	bool Gizmo::CheckIfInsideArrow(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point)
 	{
-
 		//check if inside arrow rectangle, that is the shape (v0, v1, v2, v6) in the arrow in the start of this file
 		if (arrow == Horizontal)
 		{
@@ -294,5 +294,4 @@ namespace Ainan {
 
 		return false;
 	}
-
 }

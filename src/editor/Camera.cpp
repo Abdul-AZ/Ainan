@@ -35,8 +35,7 @@ namespace Ainan {
 
 	void Camera::SetPosition(const glm::vec2& newPos)
 	{
-		ViewMatrix = glm::mat4(1.0f);
 		Position = newPos;
-		ViewMatrix = glm::translate(ViewMatrix, glm::vec3(Position.x, Position.y, 0.0f));
+		ViewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(Position.x, Position.y, 0.0f));
 	}
 }

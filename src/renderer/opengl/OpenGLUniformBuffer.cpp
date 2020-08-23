@@ -96,12 +96,15 @@ namespace Ainan {
 
 		void OpenGLUniformBuffer::UpdateData(void* data)
 		{
-			auto func = [this, data]()
+			void* dataCpy = new uint8_t[m_PackedSize];
+			memcpy(dataCpy, data, m_PackedSize);
+
+			auto func = [this, dataCpy]()
 			{
-				UpdateDataUnsafe(data);
+				UpdateDataUnsafe(dataCpy);
+				delete[](uint8_t*)dataCpy;
 			};
 			Renderer::PushCommand(func);
-			Renderer::WaitUntilRendererIdle(); //TODO reference count the data instead of waiting
 		}
 
 		void OpenGLUniformBuffer::UpdateDataUnsafe(void* data)

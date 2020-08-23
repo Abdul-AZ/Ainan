@@ -189,11 +189,6 @@ namespace Ainan {
 		m_Particles.IsActive.assign(m_Particles.IsActive.size(), false);
 	}
 
-	glm::vec2& ParticleSystem::GetPositionRef()
-	{
-		return Customizer.m_SpawnPosition;
-	}
-
 	ParticleSystem::ParticleSystem(const ParticleSystem& Psystem) :
 		Customizer(Psystem.Customizer)
 	{

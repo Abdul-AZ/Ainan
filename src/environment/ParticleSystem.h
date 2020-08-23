@@ -25,7 +25,7 @@ namespace Ainan {
 		void ClearParticles();
 		void DisplayGUI() override;
 
-		glm::vec2& GetPositionRef() override;
+		glm::vec2* GetPositionRef() override { return &Customizer.m_SpawnPosition; };
 		ParticleSystem(const ParticleSystem& Psystem);
 		ParticleSystem operator=(const ParticleSystem& Psystem);
 
@@ -34,7 +34,7 @@ namespace Ainan {
 		//only for spawning on mouse press
 		bool ShouldSpawnParticles;
 		float TimeTillNextParticleSpawn = 0.0f;
-		unsigned int ActiveParticleCount = 0;
+		uint32_t ActiveParticleCount = 0;
 
 	private:
 		//data for each particles

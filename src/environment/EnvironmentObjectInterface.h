@@ -23,7 +23,7 @@ namespace Ainan {
 		virtual void Update(const float deltaTime) {};
 		virtual void Draw() {};
 		virtual void DisplayGUI() {};
-		virtual glm::vec2& GetPositionRef() { return glm::vec2(0.0f, 0.0f); };
+		virtual glm::vec2* GetPositionRef() { return nullptr; };
 		virtual std::shared_ptr<std::mutex> GetMutex() { return ObjectMutex; };
 
 		virtual ~EnvironmentObjectInterface() {};

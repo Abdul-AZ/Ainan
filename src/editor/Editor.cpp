@@ -556,10 +556,11 @@ namespace Ainan
 				if (obj->Selected)
 				{
 					//draw object position gizmo
-					m_Gizmo.Draw(obj->GetPositionRef(),
+					m_Gizmo.Draw(*obj->GetPositionRef(),
 						m_ViewportWindow.WindowPosition,
 						m_ViewportWindow.WindowSize,
-						m_ViewportWindow.WindowContentRegionSize);
+						m_ViewportWindow.WindowContentRegionSize,
+						m_Camera);
 
 					//if particle system needs to edit a force target (a world point), use a gimzo for it
 					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
@@ -570,7 +571,8 @@ namespace Ainan
 								m_Gizmo.Draw(ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target,
 									m_ViewportWindow.WindowSize,
 									m_ViewportWindow.WindowPosition,
-									m_ViewportWindow.WindowContentRegionSize);
+									m_ViewportWindow.WindowContentRegionSize,
+									m_Camera);
 					}
 				}
 
@@ -1206,43 +1208,10 @@ namespace Ainan
 	}
 	void Editor::FocusCameraOnObject(EnvironmentObjectInterface& object)
 	{
-		EnvironmentObjectType type = object.Type;
+		glm::vec2 pos = *object.GetPositionRef();
+		pos *= -c_GlobalScaleFactor;
 
-		if (type == Ainan::ParticleSystemType) {
-			ParticleSystem& ps = *static_cast<ParticleSystem*>(&object);
-
-			m_Camera.SetPosition(glm::vec3(ps.Customizer.m_SpawnPosition.x * -c_GlobalScaleFactor, ps.Customizer.m_SpawnPosition.y * -c_GlobalScaleFactor, 0.0f)
-				+ glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
-
-			//switch (ps.Customizer.Mode)
-			//{
-			//case SpawnMode::SpawnOnPoint:
-			//
-			//	m_Camera.SetPosition(glm::vec3(ps.Customizer.m_SpawnPosition.x * -c_GlobalScaleFactor, ps.Customizer.m_SpawnPosition.y * -c_GlobalScaleFactor, 0.0f)
-			//		+ glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
-			//	break;
-			//
-			//case SpawnMode::SpawnOnCircle:
-			//	m_Camera.SetPosition(glm::vec3(ps.Customizer.m_CircleOutline.Position.x, ps.Customizer.m_CircleOutline.Position.y, 0.0f)
-			//		+ glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
-			//	break;
-			//
-			//case SpawnMode::SpawnInsideCircle:
-			//	m_Camera.SetPosition(glm::vec3(ps.Customizer.m_CircleOutline.Position.x, ps.Customizer.m_CircleOutline.Position.y, 0.0f)
-			//		+ glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
-			//	break;
-			//
-			//case SpawnMode::SpawnOnLine:
-			//
-			//	m_Camera.SetPosition(glm::vec3(ps.Customizer.m_LinePosition.x * -c_GlobalScaleFactor, ps.Customizer.m_LinePosition.y * -c_GlobalScaleFactor, 0.0f)
-			//		+ glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
-			//	break;
-			//}
-		}
-		else {
-			m_Camera.SetPosition(glm::vec3(object.GetPositionRef().x, object.GetPositionRef().y, 0.0f) * -c_GlobalScaleFactor
-				+ glm::vec3(m_ViewportWindow.RenderViewport.Width / 2, m_ViewportWindow.RenderViewport.Height / 2, 0.0f));
-		}
+		m_Camera.SetPosition(pos);
 	}
 
 	void Editor::AddEnvironmentObject(EnvironmentObjectType type, const std::string& name)

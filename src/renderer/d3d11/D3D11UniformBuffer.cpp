@@ -15,25 +15,23 @@ namespace Ainan {
 			Context((D3D11RendererContext*)context)
 		{
 			//calculate buffer size with alignment
+			for (auto& layoutPart : layout)
 			{
-				for (auto& layoutPart : layout)
+				if (layoutPart.Count == 1) 
 				{
-					if (layoutPart.Count == 1) 
+					if (BufferSize % sizeof(glm::vec4) != 0 && (sizeof(glm::vec4) - (BufferSize % sizeof(glm::vec4)) < layoutPart.GetSize()))
 					{
-						if (BufferSize % sizeof(glm::vec4) != 0 && (sizeof(glm::vec4) - (BufferSize % sizeof(glm::vec4)) < layoutPart.GetSize()))
-						{
-							BufferSize += sizeof(glm::vec4) - BufferSize % sizeof(glm::vec4);
-						}
-						BufferSize += layoutPart.GetSize();
+						BufferSize += sizeof(glm::vec4) - BufferSize % sizeof(glm::vec4);
 					}
-					else
+					BufferSize += layoutPart.GetSize();
+				}
+				else
+				{
+					if (BufferSize % sizeof(glm::vec4) != 0)
 					{
-						if (BufferSize % sizeof(glm::vec4) != 0)
-						{
-							BufferSize += sizeof(glm::vec4) - BufferSize % sizeof(glm::vec4);
-						}
-						BufferSize += layoutPart.Count * sizeof(glm::vec4);
+						BufferSize += sizeof(glm::vec4) - BufferSize % sizeof(glm::vec4);
 					}
+					BufferSize += layoutPart.Count * sizeof(glm::vec4);
 				}
 			}
 
@@ -46,24 +44,23 @@ namespace Ainan {
 				{
 					return a + b.GetSize();
 				});
-			//create buffer
-			{
-				D3D11_BUFFER_DESC desc{};
-				desc.ByteWidth = AlignedSize;
-				desc.Usage = D3D11_USAGE_DYNAMIC;
-				desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-				desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-				if (data)
-				{
-					D3D11_SUBRESOURCE_DATA initialData{};
-					initialData.pSysMem = data;
 
-					ASSERT_D3D_CALL(Context->Device->CreateBuffer(&desc, &initialData, &Buffer));
-				}
-				else
-				{
-					ASSERT_D3D_CALL(Context->Device->CreateBuffer(&desc, 0, &Buffer));
-				}
+			//create buffer
+			D3D11_BUFFER_DESC desc{};
+			desc.ByteWidth = AlignedSize;
+			desc.Usage = D3D11_USAGE_DYNAMIC;
+			desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+			desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+			if (data)
+			{
+				D3D11_SUBRESOURCE_DATA initialData{};
+				initialData.pSysMem = data;
+
+				ASSERT_D3D_CALL(Context->Device->CreateBuffer(&desc, &initialData, &Buffer));
+			}
+			else
+			{
+				ASSERT_D3D_CALL(Context->Device->CreateBuffer(&desc, 0, &Buffer));
 			}
 		}
 
@@ -74,13 +71,16 @@ namespace Ainan {
 
 		void D3D11UniformBuffer::UpdateData(void* data)
 		{
-			auto func = [this, data]()
+			void* dataCpy = new uint8_t[PackedSize];
+			memcpy(dataCpy, data, PackedSize);
+
+			auto func = [this, dataCpy]()
 			{
-				UpdateDataUnsafe(data);
+				UpdateDataUnsafe(dataCpy);
+				delete[](uint8_t*)dataCpy;
 			};
 
 			Renderer::PushCommand(func);
-			Renderer::WaitUntilRendererIdle();
 		}
 
 		void D3D11UniformBuffer::UpdateDataUnsafe(void* data)
