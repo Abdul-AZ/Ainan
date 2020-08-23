@@ -1,32 +1,29 @@
 # Ainan
-Ainan is an app developed in c++ that is used for making graphical effects easily.
-This app is meant to be used by game artists and hobbyists.
+Ainan is a visual effects and motion graphics making application mainly targeting game developers.
+
+# Supported Platforms
 
 At the moment it only runs on windows.
-
-There are plans for linux and mac support through OpenGL (that is why I'm looking for contributers with linux/mac see contribute).
+There are plans for linux and mac support.
 
 # Building the Project
-The project is built using Premake5 (see [Premake](https://github.com/premake/premake-core)). Only guaranteed to work on VS2019 for now.
+The project is built using Premake5 (see [Premake](https://github.com/premake/premake-core)). Tested on Visual Studio 2019 but should work on other IDE's.
 
-Steps on building in windows:
+Steps on building in Visual Studio:
 
-1. Open commandline window on project directory.
-2. Type "premake5 vsYOUR_VISUAL_STUDIO_VERSION", so for me it was "premake5 vs2017".
-3. Open the newly generated sln file from the build folder.
-4. Build and run the executable in Visual Studio.
+1. `premake5 vs2019` in your project directory.
+2. Open visual studio solution file and build.
 
-Similar steps can be made to build for systems other than windows (other than that you have to get a version of premake that is specific for your platform, basically grab the latest release of [Premake](https://github.com/premake/premake-core) for your OS) but I do not guarantee they will work for now. 
+Similar steps can be made to build for systems other than windows (other than that you have to get a version of premake that is specific for your platform, basically grab the latest release of [Premake](https://github.com/premake/premake-core) for your OS). 
 
-# Documentation
-Still to be made, I'm planning to slowly build it through time. It will be available through the wiki page of this repository.
+# Contribute
+There are no strict rules for contributing, feel free to open an issue for anything! I will be sure to respond to issues and pull requests quickly.
+
+Also, feel free to contact me through Email.
 
 # Examples
 ![](github/appGIF.gif)
 ![](github/appScreenshot.PNG)
-
-# Contribute
-Every contribution is welcome, don't be afraid to open an issue regarding anything from bug fixes to questions.
 
 # Libraries used
 * GLFW
