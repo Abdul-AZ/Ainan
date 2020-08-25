@@ -519,6 +519,9 @@ namespace Ainan
 
 	void Editor::DrawEnvironment(bool drawWorldSpaceUI)
 	{
+		m_RenderSurface.SurfaceFrameBuffer->Bind();
+		Renderer::ClearScreen();
+
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
 		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
@@ -550,8 +553,67 @@ namespace Ainan
 			obj->Draw();
 		}
 
+		Renderer::EndScene();
+		Renderer::WaitUntilRendererIdle();
+		m_DrawCalls = Renderer::Rdata->NumberOfDrawCallsLastScene;
+
+		//draw the UI as a different scene on top of the environment scene
+		SceneDescription descUI;
+		descUI.SceneCamera = m_Camera;
+		descUI.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
+		descUI.Blur = false;
+		descUI.BlurRadius = 0;
+		Renderer::SetBlendMode(RenderingBlendMode::Screen);
+
+		Renderer::BeginScene(descUI);
+
+		m_RenderSurface.SurfaceFrameBuffer->Bind();
+
 		if (drawWorldSpaceUI)
 		{
+			if (m_ShowGrid)
+				m_Grid.Draw(m_Camera);
+
+			//Render world space gui here because we need camera information for that
+			for (pEnvironmentObject& obj : m_Env->Objects)
+			{
+				auto mutexPtr = obj->GetMutex();
+				std::lock_guard lock(*mutexPtr);
+
+				const float scale = 50.0f;
+				const glm::vec2 position = *obj->GetPositionRef() * c_GlobalScaleFactor - glm::vec2(scale, scale) / 2.0f;
+				const glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+				switch (obj->Type)
+				{
+				case ParticleSystemType:
+					Renderer::DrawQuad(position, color, scale, m_ParticleSystemIconTexture);
+					if (obj->Selected)
+					{
+						ParticleSystem* ps = (ParticleSystem*)obj.get();
+						ps->Customizer.DrawWorldSpaceUI();
+					}
+					break;
+
+				case RadialLightType:
+					Renderer::DrawQuad(position, color, scale, m_RadialLightIconTexture);
+					break;
+
+				case SpotLightType:
+					Renderer::DrawQuad(position, color, scale, m_SpotLightIconTexture);
+					break;
+
+				case SpriteType:
+					Renderer::DrawQuad(position, color, scale, m_SpriteIconTexture);
+					break;
+				}
+			}
+
+			Renderer::PushCommand([]()
+				{
+					Renderer::FlushQuadBatch();
+				});
+
 			for (pEnvironmentObject& obj : m_Env->Objects)
 				if (obj->Selected)
 				{
@@ -576,35 +638,15 @@ namespace Ainan
 					}
 				}
 
-			//Render world space gui here because we need camera information for that
-			for (pEnvironmentObject& obj : m_Env->Objects)
-			{
-				auto mutexPtr = obj->GetMutex();
-				std::lock_guard lock(*mutexPtr);
-				if (obj->Selected)
-					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
-					{
-						ParticleSystem* ps = (ParticleSystem*)obj.get();
-						ps->Customizer.DrawWorldSpaceUI();
-
-					}
-			}
-		}
-
-		Renderer::EndScene();
-		m_RenderSurface.SurfaceFrameBuffer->Bind();
-
-		if (drawWorldSpaceUI)
-		{
-			if (m_ShowGrid)
-				m_Grid.Draw(m_Camera);
 			m_ExportCamera.DrawOutline();
 		}
+		Renderer::EndScene();
+		//revert to the scene rendering mode
+		Renderer::SetBlendMode(m_Env->BlendMode);
 	}
 
 	void Editor::DrawUI()
 	{
-		//GUI
 		Renderer::ImGuiNewFrame();
 		ImGuiWrapper::BeginGlobalDocking(true);
 
@@ -1047,7 +1089,7 @@ namespace Ainan
 				}
 				//display the image in the same line
 				ImGui::SameLine();
-				ImGui::Image(icon, ImVec2(25, elementSize));
+				ImGui::Image(icon, ImVec2(25, elementSize), { 0, 1 }, { 1, 0 });
 				//add tooltip for the image
 				if (ImGui::IsItemHovered())
 					ImGui::SetTooltip(EnvironmentObjectTypeToString(m_Env->Objects[i]->Type).c_str());
@@ -1466,7 +1508,7 @@ namespace Ainan
 		{
 			ImGui::Text("Draw Calls: ");
 			ImGui::SameLine();
-			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(Renderer::Rdata->NumberOfDrawCallsLastScene).c_str());
+			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(m_DrawCalls).c_str());
 			ImGui::SameLine();
 
 			//update framerate every 30 frames

@@ -45,6 +45,8 @@ namespace Ainan {
 
 		int comp = 0;
 
+		stbi_set_flip_vertically_on_load(true);
+
 		if(desiredFormat == TextureFormat::RGBA)
 			image.m_Data = stbi_load(pathAndName.c_str(), &image.m_Width, &image.m_Height, &comp, 4);
 		else if(desiredFormat == TextureFormat::RGB)

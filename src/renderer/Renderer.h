@@ -107,6 +107,8 @@ namespace Ainan {
 		static std::shared_ptr<Texture> CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
 		static std::shared_ptr<Texture> CreateTexture(Image& img);
 
+		static void FlushQuadBatch();
+
 		//because quad vertices are different in each API depending on if the y axis is pointing up or down
 		//this returns 6 quad vertices that are used to draw a quad WITHOUT using an index buffer
 		static std::array<glm::vec2, 6> GetQuadVertices();
@@ -176,7 +178,6 @@ namespace Ainan {
 		static void InternalInit(RendererType api);
 		static void RendererThreadLoop();
 		static void InternalTerminate();
-		static void FlushQuadBatch();
 		static void DrawImGui(ImDrawData* drawData);
 		static void Blur(std::shared_ptr<FrameBuffer>& target, float radius);
 	};

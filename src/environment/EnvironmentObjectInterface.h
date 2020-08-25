@@ -4,7 +4,8 @@
 
 namespace Ainan {
 
-	enum EnvironmentObjectType {
+	enum EnvironmentObjectType 
+	{
 		ParticleSystemType,
 		RadialLightType,
 		SpotLightType,

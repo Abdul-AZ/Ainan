@@ -548,7 +548,6 @@ namespace Ainan {
 			Rdata->CurrentNumberOfDrawCalls = 0;
 
 			(*Rdata->CurrentSceneDescription.SceneDrawTarget)->BindUnsafe();
-			ClearScreenUnsafe();
 
 			//update the per-frame uniform buffer
 			Rdata->SceneUniformbuffer->UpdateDataUnsafe(&Rdata->CurrentViewProjection);
@@ -622,7 +621,7 @@ namespace Ainan {
 	{
 		using namespace std::chrono;
 		std::unique_lock lock(Rdata->WorkDoneMutex);
-		while (Rdata->payload == true) Rdata->WorkDoneCV.wait(lock, []() { return Rdata->payload == false; });
+		while (Rdata->payload == true) Rdata->WorkDoneCV.wait_for(lock, 1ms, []() { return Rdata->payload == false; });
 	}
 
 	void Ainan::Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture)
@@ -1368,7 +1367,7 @@ namespace Ainan {
 		}
 	}
 
-	void Ainan::Renderer::FlushQuadBatch()
+	void Renderer::FlushQuadBatch()
 	{
 		for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			Rdata->ShaderLibrary["QuadBatchShader"]->BindTexture(Rdata->QuadBatchTextures[i], i, RenderingStage::FragmentShader);
