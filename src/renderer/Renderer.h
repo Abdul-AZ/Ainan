@@ -25,7 +25,7 @@ namespace Ainan {
 	struct SceneDescription
 	{
 		Camera SceneCamera = {};								   //Required
-		std::shared_ptr<FrameBuffer>* SceneDrawTarget = nullptr;    //Required
+		std::shared_ptr<FrameBuffer>* SceneDrawTarget = nullptr;   //Required
 		bool Blur = false;										   //Required
 		float BlurRadius = 0.0f;								   //Required if Blur == true
 	};
@@ -111,7 +111,8 @@ namespace Ainan {
 
 		//because quad vertices are different in each API depending on if the y axis is pointing up or down
 		//this returns 6 quad vertices that are used to draw a quad WITHOUT using an index buffer
-		static std::array<glm::vec2, 6> GetQuadVertices();
+		static std::array<glm::vec2, 6> GetQuadVertices();								//layout: vec2 position
+		static std::array<std::pair<glm::vec2, glm::vec2>, 6> GetTexturedQuadVertices();//layout: vec2 position vec2 texture_coordinates
 
 		struct RendererData
 		{
@@ -174,6 +175,10 @@ namespace Ainan {
 
 		static std::shared_ptr<UniformBuffer> CreateUniformBufferUnsafe(const std::string& name, uint32_t reg,
 			const VertexLayout& layout, void* data);
+
+		static std::shared_ptr<FrameBuffer> CreateFrameBufferUnsafe(const glm::vec2& size);
+
+		static std::shared_ptr<Texture> CreateTextureUnsafe(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
 
 		static void InternalInit(RendererType api);
 		static void RendererThreadLoop();

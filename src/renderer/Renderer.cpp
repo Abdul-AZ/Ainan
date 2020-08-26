@@ -91,9 +91,11 @@ namespace Ainan {
 		//initilize the renderer api
 		switch (api)
 		{
+#ifdef PLATFORM_WINDOWS
 		case RendererType::D3D11:
 			Rdata->CurrentActiveAPI = new D3D11::D3D11RendererAPI();
 			break;
+#endif
 
 		case RendererType::OpenGL:
 			Rdata->CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
@@ -114,27 +116,13 @@ namespace Ainan {
 			layout[2] = { "aTexture", ShaderVariableType::Float };
 			layout[3] = { "aTexCoords", ShaderVariableType::Vec2 };
 
-			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-			{
-			case RendererType::OpenGL:
-				Rdata->QuadBatchVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, true);
-				break;
-
-#ifdef PLATFORM_WINDOWS
-			case RendererType::D3D11:
-				Rdata->QuadBatchVertexBuffer = std::make_shared<D3D11::D3D11VertexBuffer>(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, Rdata->ShaderLibrary["QuadBatchShader"], true, Rdata->CurrentActiveAPI->GetContext());
-				break;
-#endif // PLATFORM_WINDOWS
-
-			default:
-				assert(false);
-			}
-			Rdata->ReservedVertexBuffers.push_back(Rdata->QuadBatchVertexBuffer);
+			Rdata->QuadBatchVertexBuffer = CreateVertexBufferUnsafe(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, Rdata->ShaderLibrary["QuadBatchShader"], true);
 		}
 
-		uint32_t* indicies = new uint32_t[c_MaxQuadsPerBatch * 6];
-		int u = 0;
-		for (size_t i = 0; i < c_MaxQuadsPerBatch * 6; i += 6)
+		const int32_t indexCount = c_MaxQuadsPerBatch * 6;
+		uint32_t* indicies = new uint32_t[indexCount];
+		size_t u = 0;
+		for (size_t i = 0; i < indexCount; i += 6)
 		{
 			indicies[i + 0] = 0 + u;
 			indicies[i + 1] = 1 + u;
@@ -145,41 +133,15 @@ namespace Ainan {
 			indicies[i + 5] = 3 + u;
 			u += 4;
 		}
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-		{
-		case RendererType::OpenGL:
-			Rdata->QuadBatchIndexBuffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(indicies, c_MaxQuadsPerBatch * 6);
-			break;
 
-		case RendererType::D3D11:
-			Rdata->QuadBatchIndexBuffer = std::make_shared<D3D11::D3D11IndexBuffer>(indicies, c_MaxQuadsPerBatch * 6, Rdata->CurrentActiveAPI->GetContext());
-			break;
-
-		default:
-			assert(false);
-		}
-		Rdata->ReservedIndexBuffers.push_back(Rdata->QuadBatchIndexBuffer);
+		Rdata->QuadBatchIndexBuffer = CreateIndexBufferUnsafe(indicies, indexCount);
 		delete[] indicies;
 
 		Rdata->QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
 		Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
 
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-		{
-		case RendererType::OpenGL:
-			Rdata->QuadBatchTextures[0] = std::make_shared<OpenGL::OpenGLTexture>(glm::vec2(1, 1), TextureFormat::RGBA, nullptr);
-			break;
+		Rdata->QuadBatchTextures[0] = CreateTextureUnsafe(glm::vec2(1, 1), TextureFormat::RGBA, nullptr);
 
-#ifdef PLATFORM_WINDOWS
-		case RendererType::D3D11:
-			Rdata->QuadBatchTextures[0] = std::make_shared<D3D11::D3D11Texture>(glm::vec2(1, 1), TextureFormat::RGBA, nullptr, Rdata->CurrentActiveAPI->GetContext());
-			break;
-#endif // PLATFORM_WINDOWS
-
-		default:
-			assert(false);
-		}
-		Rdata->ReservedTextures.push_back(Rdata->QuadBatchTextures[0]);
 		auto img = std::make_shared<Image>();
 		img->m_Width = 1;
 		img->m_Height = 1;
@@ -189,123 +151,36 @@ namespace Ainan {
 		Rdata->QuadBatchTextures[0]->SetImageUnsafe(img);
 
 		//setup postprocessing
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-		{
-		case RendererType::OpenGL:
-			Rdata->BlurFrameBuffer = std::make_shared<OpenGL::OpenGLFrameBuffer>(Window::FramebufferSize);
-			break;
-#ifdef PLATFORM_WINDOWS
-
-		case RendererType::D3D11:
-			Rdata->BlurFrameBuffer = std::make_shared<D3D11::D3D11FrameBuffer>(Window::FramebufferSize, Rdata->CurrentActiveAPI->GetContext());
-#endif
-		}
-
-		float quadVertices[24];
-		{
-			switch (api)
-			{
-			case Ainan::RendererType::OpenGL:
-			{
-				float openglVertices[] = {
-					-1.0f, -1.0f, 0.0f, 0.0f,
-					-1.0f, 1.0f, 0.0f, 1.0f,
-					1.0f, -1.0f, 1.0f, 0.0f,
-
-					-1.0f, 1.0f, 0.0f, 1.0f,
-					1.0f, 1.0f, 1.0f, 1.0f,
-					1.0f, -1.0f, 1.0f, 0.0f
-				};
-				memcpy(quadVertices, openglVertices, sizeof(quadVertices));
-				break;
-			}
-
-			case Ainan::RendererType::D3D11:
-			{
-				float d3dVertices[] = {
-					// positions   // texCoords
-					-1.0f,  1.0f,  0.0f, 0.0f,
-					 1.0f, -1.0f,  1.0f, 1.0f,
-					-1.0f, -1.0f,  0.0f, 1.0f,
-
-					-1.0f,  1.0f,  0.0f, 0.0f,
-					 1.0f,  1.0f,  1.0f, 0.0f,
-					 1.0f, -1.0f,  1.0f, 1.0f
-				};
-				memcpy(quadVertices, d3dVertices, sizeof(quadVertices));
-				break;
-			}
-			}
-		}
+		Rdata->BlurFrameBuffer = CreateFrameBufferUnsafe(Window::FramebufferSize);
 
 		{
+			auto vertices = GetTexturedQuadVertices();
 			VertexLayout layout(2);
 			layout[0] = { "aPos", ShaderVariableType::Vec2 };
 			layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
-			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-			{
-			case RendererType::OpenGL:
-				Rdata->BlurVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(quadVertices, sizeof(quadVertices), layout, false);
-				break;
-
-#ifdef PLATFORM_WINDOWS
-			case RendererType::D3D11:
-				Rdata->BlurVertexBuffer = std::make_shared<D3D11::D3D11VertexBuffer>(quadVertices, sizeof(quadVertices), layout, Rdata->ShaderLibrary["BlurShader"], false, Rdata->CurrentActiveAPI->GetContext());
-				break;
-#endif // PLATFORM_WINDOWS
-
-			default:
-				assert(false);
-			}
-			Rdata->ReservedVertexBuffers.push_back(Rdata->BlurVertexBuffer);
+			Rdata->BlurVertexBuffer = CreateVertexBufferUnsafe(vertices.data(), sizeof(vertices), layout, Rdata->ShaderLibrary["BlurShader"]);
 		}
+
 		{
-			VertexLayout bufferLayout =
+			VertexLayout layout =
 			{
 				{ "u_Resolution", ShaderVariableType::Vec2 },
 				{ "u_BlurDirection", ShaderVariableType::Vec2 },
 				{ "u_Radius", ShaderVariableType::Float }
 			};
-			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-			{
-			case RendererType::OpenGL:
-				Rdata->BlurUniformBuffer = std::make_shared<OpenGL::OpenGLUniformBuffer>("BlurData", bufferLayout, nullptr);
-				break;
-
-#ifdef PLATFORM_WINDOWS
-			case RendererType::D3D11:
-				Rdata->BlurUniformBuffer = std::make_shared<D3D11::D3D11UniformBuffer>("BlurData", 1, bufferLayout, nullptr, Rdata->CurrentActiveAPI->GetContext());
-				break;
-#endif // PLATFORM_WINDOWS
-
-			default:
-				assert(false);
-			}
+			Rdata->BlurUniformBuffer = CreateUniformBufferUnsafe("BlurData", 1, layout, nullptr);
 			Rdata->ShaderLibrary["BlurShader"]->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 		}
 
 		Rdata->CurrentActiveAPI->SetBlendMode(Rdata->m_CurrentBlendMode);
 
 		{
-			VertexLayout bufferLayout =
+			VertexLayout layout =
 			{
 				{ "u_ViewProjection", ShaderVariableType::Mat4 }
 			};
-			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-			{
-			case RendererType::OpenGL:
-				Rdata->SceneUniformbuffer = std::make_shared<OpenGL::OpenGLUniformBuffer>("FrameData", bufferLayout, nullptr);
-				break;
+			Rdata->SceneUniformbuffer = CreateUniformBufferUnsafe("FrameData", 0, layout, nullptr);
 
-#ifdef PLATFORM_WINDOWS
-			case RendererType::D3D11:
-				Rdata->SceneUniformbuffer = std::make_shared<D3D11::D3D11UniformBuffer>("FrameData", 0, bufferLayout, nullptr, Rdata->CurrentActiveAPI->GetContext());
-				break;
-#endif // PLATFORM_WINDOWS
-
-			default:
-				assert(false);
-			}
 			for (auto& shaderTuple : Rdata->ShaderLibrary)
 			{
 				shaderTuple.second->BindUniformBufferUnsafe(Rdata->SceneUniformbuffer, 0, RenderingStage::VertexShader);
@@ -1239,26 +1114,35 @@ namespace Ainan {
 
 		auto func = [&buffer, size]()
 		{
-			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-			{
-			case RendererType::OpenGL:
-				buffer = std::make_shared<OpenGL::OpenGLFrameBuffer>(size);
-				break;
-#ifdef PLATFORM_WINDOWS
-
-			case RendererType::D3D11:
-				buffer = std::make_shared<D3D11::D3D11FrameBuffer>(size, Rdata->CurrentActiveAPI->GetContext());
-				break;
-#endif
-
-			default:
-				assert(false);
-				buffer = nullptr;
-			}
+			buffer = CreateFrameBufferUnsafe(size);
 		};
 
 		PushCommand(func);
 		WaitUntilRendererIdle();
+		return buffer;
+	}
+
+	std::shared_ptr<FrameBuffer> Renderer::CreateFrameBufferUnsafe(const glm::vec2& size)
+	{
+		std::shared_ptr<FrameBuffer> buffer;
+
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+		{
+		case RendererType::OpenGL:
+			buffer = std::make_shared<OpenGL::OpenGLFrameBuffer>(size);
+			break;
+#ifdef PLATFORM_WINDOWS
+
+		case RendererType::D3D11:
+			buffer = std::make_shared<D3D11::D3D11FrameBuffer>(size, Rdata->CurrentActiveAPI->GetContext());
+			break;
+#endif
+
+		default:
+			assert(false);
+			buffer = nullptr;
+		}
+
 		return buffer;
 	}
 
@@ -1268,23 +1152,7 @@ namespace Ainan {
 
 		auto func = [&texture, size, format, data]
 		{
-			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-			{
-			case RendererType::OpenGL:
-				texture = std::make_shared<OpenGL::OpenGLTexture>(size, format, data);
-				break;
-
-#ifdef PLATFORM_WINDOWS
-			case RendererType::D3D11:
-				texture = std::make_shared<D3D11::D3D11Texture>(size, format, data, Rdata->CurrentActiveAPI->GetContext());
-				break;
-#endif // PLATFORM_WINDOWS
-
-			default:
-				assert(false);
-			}
-
-			Rdata->ReservedTextures.push_back(texture);
+			texture = CreateTextureUnsafe(size, format, data);
 		};
 
 		PushCommand(func);
@@ -1297,26 +1165,35 @@ namespace Ainan {
 		std::shared_ptr<Texture> texture;
 		auto func = [&texture, img]()
 		{
-			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-			{
-			case RendererType::OpenGL:
-				texture = std::make_shared<OpenGL::OpenGLTexture>(glm::vec2(img.m_Width, img.m_Height), img.Format, img.m_Data);
-				break;
-
-#ifdef PLATFORM_WINDOWS
-			case RendererType::D3D11:
-				texture = std::make_shared<D3D11::D3D11Texture>(glm::vec2(img.m_Width, img.m_Height), img.Format, img.m_Data, Rdata->CurrentActiveAPI->GetContext());
-				break;
-#endif // PLATFORM_WINDOWS
-
-			default:
-				assert(false);
-			}
-			Rdata->ReservedTextures.push_back(texture);
+			texture = CreateTextureUnsafe(glm::vec2(img.m_Width, img.m_Height), img.Format, img.m_Data);
 		};
 
 		PushCommand(func);
 		WaitUntilRendererIdle();
+		return texture;
+	}
+
+	std::shared_ptr<Texture> Renderer::CreateTextureUnsafe(const glm::vec2& size, TextureFormat format, uint8_t* data)
+	{
+		std::shared_ptr<Texture> texture;
+
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+		{
+		case RendererType::OpenGL:
+			texture = std::make_shared<OpenGL::OpenGLTexture>(size, format, data);
+			break;
+
+#ifdef PLATFORM_WINDOWS
+		case RendererType::D3D11:
+			texture = std::make_shared<D3D11::D3D11Texture>(size, format, data, Rdata->CurrentActiveAPI->GetContext());
+			break;
+#endif // PLATFORM_WINDOWS
+
+		default:
+			assert(false);
+		}
+
+		Rdata->ReservedTextures.push_back(texture);
 		return texture;
 	}
 
@@ -1365,6 +1242,46 @@ namespace Ainan {
 			return fallback;
 		}
 		}
+	}
+
+	std::array<std::pair<glm::vec2, glm::vec2>, 6> Renderer::GetTexturedQuadVertices()
+	{
+		std::array<std::pair<glm::vec2, glm::vec2>, 6> quadVertices;
+
+		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+		{
+		case RendererType::OpenGL:
+		{
+			quadVertices =
+			{
+				std::pair(glm::vec2(-1.0f, -1.0f),  glm::vec2(0.0f, 0.0f)),
+				std::pair(glm::vec2(-1.0f,  1.0f),  glm::vec2(0.0f, 1.0f)),
+				std::pair(glm::vec2( 1.0f, -1.0f),  glm::vec2(1.0f, 0.0f)),
+
+				std::pair(glm::vec2(-1.0f,  1.0f),  glm::vec2(0.0f, 1.0f)),
+				std::pair(glm::vec2( 1.0f,  1.0f),  glm::vec2(1.0f, 1.0f)),
+				std::pair(glm::vec2( 1.0f, -1.0f),  glm::vec2(1.0f, 0.0f))
+			};
+			break;
+		}
+
+		case RendererType::D3D11:
+		{
+			quadVertices =
+			{
+				std::pair(glm::vec2(-1.0f,  1.0f),  glm::vec2(0.0f, 0.0f)),
+				std::pair(glm::vec2( 1.0f, -1.0f),  glm::vec2(1.0f, 1.0f)),
+				std::pair(glm::vec2(-1.0f, -1.0f),  glm::vec2(0.0f, 1.0f)),
+
+				std::pair(glm::vec2(-1.0f,  1.0f),  glm::vec2(0.0f, 0.0f)),
+				std::pair(glm::vec2( 1.0f,  1.0f),  glm::vec2(1.0f, 0.0f)),
+				std::pair(glm::vec2( 1.0f, -1.0f),  glm::vec2(1.0f, 1.0f))
+			};
+			break;
+		}
+		}
+
+		return quadVertices;
 	}
 
 	void Renderer::FlushQuadBatch()
