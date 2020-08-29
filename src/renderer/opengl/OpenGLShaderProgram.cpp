@@ -10,18 +10,51 @@
 namespace Ainan {
 	namespace OpenGL {
 
+		std::string LoadAndParseShader(std::string path)
+		{
+			std::string shader = AssetManager::ReadEntireTextFile(path);
+
+			//parse include statements
+			size_t includeLocation = 0;
+			includeLocation = shader.find("#include ");
+			while (includeLocation != std::string::npos)
+			{
+				std::filesystem::path shaderFolder = path;
+				shaderFolder = shaderFolder.parent_path();
+
+				std::string includeStatement = shader.substr(includeLocation, shader.find('\n', includeLocation) - includeLocation);
+				size_t subPathBeginLocation = includeStatement.find('<');
+				size_t subPathEndLocation = includeStatement.find('>');
+				std::string includePath = includeStatement.substr(subPathBeginLocation + 1, subPathEndLocation - subPathBeginLocation - 1);
+
+				std::filesystem::path fullPath = shaderFolder.string() + "/" + includePath;
+				if (std::filesystem::exists(fullPath))
+				{
+					std::string includeFileContents = AssetManager::ReadEntireTextFile(fullPath.string());
+
+					shader.erase(includeLocation, includeStatement.size());
+					shader.insert(includeLocation, includeFileContents.c_str());
+				}
+				else
+					assert(false);
+				includeLocation = shader.find("#include ");
+			}
+
+			return shader;
+		}
+
 		OpenGLShaderProgram::OpenGLShaderProgram(const std::string& vertPath, const std::string& fragPath)
 		{
 			uint32_t vertex, fragment;
 
 			vertex = glCreateShader(GL_VERTEX_SHADER);
-			std::string vShaderCode = AssetManager::ReadEntireTextFile(vertPath + ".vert");
+			std::string vShaderCode = LoadAndParseShader(vertPath + ".vert");
 			const char* c_vShaderCode = vShaderCode.c_str();
 			glShaderSource(vertex, 1, &c_vShaderCode, NULL);
 			glCompileShader(vertex);
 
 			fragment = glCreateShader(GL_FRAGMENT_SHADER);
-			std::string fShaderCode = AssetManager::ReadEntireTextFile(fragPath + ".frag");
+			std::string fShaderCode = LoadAndParseShader(fragPath + ".frag");
 			const char* c_fShaderCode = fShaderCode.c_str();
 			glShaderSource(fragment, 1, &c_fShaderCode, NULL);
 			glCompileShader(fragment);

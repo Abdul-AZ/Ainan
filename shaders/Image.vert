@@ -2,10 +2,7 @@
 layout (location = 0) in vec2 aPos;
 layout (location = 1) in vec2 aTexCoords;
 
-layout (std140, binding = 0) uniform FrameData
-{
-	mat4 u_ViewProjection;
-};
+#include <common/SceneData.glsli>
 
 out vec2 TexCoords;
 

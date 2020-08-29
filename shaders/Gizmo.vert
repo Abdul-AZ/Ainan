@@ -1,10 +1,7 @@
 #version 420 core
 layout(location = 0) in vec2 aPos;
 
-layout (std140, binding = 0) uniform FrameData
-{
-	mat4 u_ViewProjection;
-};
+#include <common/SceneData.glsli>
 
 layout (std140, binding = 1) uniform ObjectTransform
 {

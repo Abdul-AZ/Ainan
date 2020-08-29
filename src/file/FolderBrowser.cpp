@@ -49,15 +49,6 @@ namespace Ainan {
 				}
 			}
 
-			//for (const auto & entry : fs::directory_iterator(m_CurrentFolder)) {
-			//	if (entry.status().type() == fs::file_type::directory && entry.path().filename() != "System Volume Information" && entry.path().filename() != "$RECYCLE.BIN") {
-			//		if (ImGui::Button(entry.path().filename().u8string().c_str())) {
-			//			m_CurrentFolder += "\\" + entry.path().filename().u8string();
-			//			m_InputFolder = m_CurrentFolder;
-			//		}
-			//	}
-			//}
-
 			for (const auto& entry : fs::directory_iterator(SelectedFolder)) {
 				if (entry.status().type() == fs::file_type::directory) {
 

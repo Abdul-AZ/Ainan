@@ -4,10 +4,7 @@ layout(location = 1) in vec4 aColor;
 layout(location = 2) in float aTexture;
 layout(location = 3) in vec2 aTexCoords;
 
-layout (std140, binding = 0) uniform FrameData
-{
-	mat4 u_ViewProjection;
-};
+#include <common/SceneData.glsli>
 
 out vec2 TextureCoordinates;
 out vec4 Color;

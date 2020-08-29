@@ -1,3 +1,4 @@
+#include <common/SceneData.hlsli>
 
 struct vsInput
 {
@@ -8,11 +9,6 @@ struct vsOut
 {
     float4 tPos : SV_POSITION;
     float2 tFragPos : VPOS;
-};
-
-cbuffer FrameData : register(b0)
-{
-    matrix<float, 4, 4> u_ViewProjection;
 };
 
 cbuffer ObjectTransform : register(b1)

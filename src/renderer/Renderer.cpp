@@ -105,7 +105,7 @@ namespace Ainan {
 		//load shaders
 		for (auto& shaderInfo : CompileOnInit)
 		{
-			Rdata->ShaderLibrary[shaderInfo.Name] = Renderer::CreateShaderProgram(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
+			Rdata->ShaderLibrary[shaderInfo.Name] = CreateShaderProgram(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
 		}
 
 		//setup batch renderer

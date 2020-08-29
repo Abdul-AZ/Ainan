@@ -1,8 +1,4 @@
-
-cbuffer FrameData : register(b0)
-{
-    matrix<float, 4, 4> u_ViewProjection;
-}
+#include <common/SceneData.hlsli>
 
 cbuffer ObjectData : register(b1)
 {
