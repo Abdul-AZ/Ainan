@@ -13,7 +13,7 @@ namespace Ainan {
 		glm::vec2* GetPositionRef() override { return &Position; }
 
 		glm::vec2 Position = glm::vec2(0.0f, 0.0f);
-		glm::vec3 Color = glm::vec3(1.0f, 1.0f, 1.0f);
+		glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		float Intensity = 50.0f;
 		float Angle = 0.0f; //in degrees

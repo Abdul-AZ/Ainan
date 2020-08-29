@@ -14,25 +14,15 @@ layout (std140, binding = 2) uniform LightingData
 	float u_Constant;
 	float u_Linear;
 	float u_Quadratic;
-
-	vec2 RadialLightPosition[MAX_NUM_RADIAL_LIGHTS];
-	vec3 RadialLightColor[MAX_NUM_RADIAL_LIGHTS];
-	float RadialLightIntensity[MAX_NUM_RADIAL_LIGHTS];
-
-	vec2  SpotLightPosition[MAX_NUM_SPOT_LIGHTS];
-	vec3  SpotLightColor[MAX_NUM_SPOT_LIGHTS];
-	float SpotLightAngle[MAX_NUM_SPOT_LIGHTS];
-	float SpotLightInnerCutoff[MAX_NUM_SPOT_LIGHTS];
-	float SpotLightOuterCutoff[MAX_NUM_SPOT_LIGHTS];
-	float SpotLightIntensity[MAX_NUM_SPOT_LIGHTS];
 };
 
 void main()
 {
 	FragColor = vec4(u_BaseColor * u_BaseLight, 1.0);
 
-	for(int i = 0; i < MAX_NUM_RADIAL_LIGHTS; i++) {
-		vec3 color = RadialLightColor[i];
+	for(int i = 0; i < MAX_NUM_RADIAL_LIGHTS; i++) 
+	{
+		vec3 color = vec3(RadialLightColor[i]);
 		
 		float distance    = length(RadialLightPosition[i] - FragPos);
 		float attenuation = 1.0 / (u_Constant + u_Linear * distance + u_Quadratic * (distance * distance)); 
@@ -44,8 +34,9 @@ void main()
 		FragColor += vec4(color.xyz, 1.0);
 	}
 	
-	for(int i = 0; i < MAX_NUM_SPOT_LIGHTS; i++) {
-		vec3 color = SpotLightColor[i];
+	for(int i = 0; i < MAX_NUM_SPOT_LIGHTS; i++) 
+	{
+		vec3 color = vec3(SpotLightColor[i]);
 	
 		float distance = length(SpotLightPosition[i] - FragPos);
 		float attenuation = 1.0 / (u_Constant + u_Linear * distance + u_Quadratic * (distance * distance)); 

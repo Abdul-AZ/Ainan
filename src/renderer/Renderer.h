@@ -72,6 +72,8 @@ namespace Ainan {
 
 		//This will be changed to only render in end scene by putting draw commands to a command buffer 
 		static void BeginScene(const SceneDescription& desc);
+		static void AddRadialLight(const glm::vec2& pos, const glm::vec4& color, float intensity);
+		static void AddSpotLight(const glm::vec2& pos, const glm::vec4 color, float angle, float innerCutoff, float outerCutoff, float intensity);
 		static void EndScene();
 
 		static void WaitUntilRendererIdle();
@@ -158,10 +160,32 @@ namespace Ainan {
 			RendererAPI* CurrentActiveAPI = nullptr;
 			SceneDescription CurrentSceneDescription = {};
 			std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary;
-			glm::mat4 CurrentViewProjection = glm::mat4(1.0f);
 			std::shared_ptr<UniformBuffer> SceneUniformbuffer = nullptr;
 			RenderingBlendMode m_CurrentBlendMode = RenderingBlendMode::Additive;
 			Rectangle CurrentViewport = { 0, 0, 0, 0 };
+
+			//SceneUniformBuffer
+			struct SceneUniformBuffer
+			{
+				glm::mat4 CurrentViewProjection = glm::mat4(1.0f);
+
+
+				//point lights
+				std::array<glm::vec2, c_MaxRadialLightCount> RadialLightPositions;
+				std::array<glm::vec4, c_MaxRadialLightCount> RadialLightColors;
+				std::array<float, c_MaxRadialLightCount> RadialLightIntensities;
+
+				//spot lights
+				std::array<glm::vec2, c_MaxSpotLightCount>  SpotLightPositions;
+				std::array<glm::vec4, c_MaxSpotLightCount>  SpotLightColors;
+				std::array<float, c_MaxSpotLightCount> SpotLightAngles;
+				std::array<float, c_MaxSpotLightCount> SpotLightInnerCutoffs;
+				std::array<float, c_MaxSpotLightCount> SpotLightOuterCutoffs;
+				std::array<float, c_MaxSpotLightCount> SpotLightIntensities;
+			};
+			SceneUniformBuffer SceneBuffer;
+			int32_t RadialLightSubmissionCount = 0;
+			int32_t SpotLightSubmissionCount = 0;
 
 			//batch renderer data
 			std::shared_ptr<VertexBuffer> QuadBatchVertexBuffer = nullptr;

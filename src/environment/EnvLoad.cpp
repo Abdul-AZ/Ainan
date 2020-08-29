@@ -185,7 +185,7 @@ namespace Ainan {
 		//populate with data
 		light->m_Name = data[id + "Name"].get <std::string>();
 		light->Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
-		light->Color = JSON_ARRAY_TO_VEC3(data[id + "Color"].get<std::vector<float>>());
+		light->Color = JSON_ARRAY_TO_VEC4(data[id + "Color"].get<std::vector<float>>());
 		light->Intensity = data[id + "Intensity"].get<float>();
 
 		//add radial light to environment
@@ -201,7 +201,7 @@ namespace Ainan {
 		//populate with data
 		light->m_Name = data[id + "Name"].get <std::string>();
 		light->Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
-		light->Color = JSON_ARRAY_TO_VEC3(data[id + "Color"].get<std::vector<float>>());
+		light->Color = JSON_ARRAY_TO_VEC4(data[id + "Color"].get<std::vector<float>>());
 		light->OuterCutoff = data[id + "OuterCutoff"].get<float>();
 		light->InnerCutoff = data[id + "InnerCutoff"].get<float>();
 		light->Intensity = data[id + "Intensity"].get<float>();

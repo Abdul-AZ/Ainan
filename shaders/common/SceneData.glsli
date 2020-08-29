@@ -1,4 +1,15 @@
 layout (std140, binding = 0) uniform FrameData
 {
 	mat4 u_ViewProjection;
+	
+	vec2  RadialLightPosition[10];
+	vec4  RadialLightColor[10];
+	float RadialLightIntensity[10];
+
+	vec2  SpotLightPosition[10];
+	vec4  SpotLightColor[10];
+	float SpotLightAngle[10];
+	float SpotLightInnerCutoff[10];
+	float SpotLightOuterCutoff[10];
+	float SpotLightIntensity[10];
 };

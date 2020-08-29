@@ -1,4 +1,3 @@
-
 struct vsOut
 {
     float4 tPos : SV_POSITION;
@@ -8,6 +7,8 @@ struct vsOut
 #define MAX_NUM_RADIAL_LIGHTS 10
 #define MAX_NUM_SPOT_LIGHTS 10
 
+#include <common/SceneData.hlsli>
+
 cbuffer LightingData : register(b2)
 {
 	float3 u_BaseColor;
@@ -15,25 +16,15 @@ cbuffer LightingData : register(b2)
 	float u_Constant;
 	float u_Linear;
 	float u_Quadratic;
-
-	float2 RadialLightPosition[MAX_NUM_RADIAL_LIGHTS];
-	float3 RadialLightColor[MAX_NUM_RADIAL_LIGHTS];
-	float RadialLightIntensity[MAX_NUM_RADIAL_LIGHTS];
-
-	float2  SpotLightPosition[MAX_NUM_SPOT_LIGHTS];
-	float3  SpotLightColor[MAX_NUM_SPOT_LIGHTS];
-	float SpotLightAngle[MAX_NUM_SPOT_LIGHTS];
-	float SpotLightInnerCutoff[MAX_NUM_SPOT_LIGHTS];
-	float SpotLightOuterCutoff[MAX_NUM_SPOT_LIGHTS];
-	float SpotLightIntensity[MAX_NUM_SPOT_LIGHTS];
 };
 
 float4 main(vsOut fsIn) : SV_TARGET
 {
     float4 FragColor = float4(u_BaseColor * u_BaseLight, 1.0);
 {
-	for(int i = 0; i < MAX_NUM_RADIAL_LIGHTS; i++) {
-		float3 color = RadialLightColor[i];
+	for(int i = 0; i < MAX_NUM_RADIAL_LIGHTS; i++) 
+	{
+		float3 color = float3(RadialLightColor[i].xyz);
 		
 		float distance    = length(RadialLightPosition[i] - fsIn.tFragPos);
 		float attenuation = 1.0 / (u_Constant + u_Linear * distance + u_Quadratic * (distance * distance)); 
@@ -46,8 +37,9 @@ float4 main(vsOut fsIn) : SV_TARGET
 	}
 }
 {
-	for(int i = 0; i < MAX_NUM_SPOT_LIGHTS; i++) {
-		float3 color = SpotLightColor[i];
+	for(int i = 0; i < MAX_NUM_SPOT_LIGHTS; i++) 
+	{
+		float3 color = float3(SpotLightColor[i].xyz);
 
 		float distance = length(SpotLightPosition[i] - fsIn.tFragPos);
 		float attenuation = 1.0 / (u_Constant + u_Linear * distance + u_Quadratic * (distance * distance)); 

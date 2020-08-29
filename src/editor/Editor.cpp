@@ -532,15 +532,16 @@ namespace Ainan
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
 			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
+			std::lock_guard lock(Renderer::Rdata->DataMutex);
 			if (obj->Type == RadialLightType)
 			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				m_Background.SubmitLight(*light);
+				Renderer::AddRadialLight(light->Position, light->Color, light->Intensity);
 			}
-			else if (obj->Type == SpotLightType) {
+			else if (obj->Type == SpotLightType) 
+			{
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				m_Background.SubmitLight(*light);
+				Renderer::AddSpotLight(light->Position, light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
 			}
 		}
 

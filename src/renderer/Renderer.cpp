@@ -2,8 +2,6 @@
 
 #include "Renderer.h"
 
-
-
 #include "opengl/OpenGLRendererAPI.h"
 #include "opengl/OpenGLShaderProgram.h"
 #include "opengl/OpenGLVertexBuffer.h"
@@ -177,8 +175,20 @@ namespace Ainan {
 		{
 			VertexLayout layout =
 			{
-				{ "u_ViewProjection", ShaderVariableType::Mat4 }
+				{ "u_ViewProjection",     ShaderVariableType::Mat4 },
+
+				{ "RadialLightPosition",  ShaderVariableType::Vec2Array,  c_MaxRadialLightCount},
+				{ "RadialLightColor",     ShaderVariableType::Vec4Array,  c_MaxRadialLightCount},
+				{ "RadialLightIntensity", ShaderVariableType::FloatArray, c_MaxRadialLightCount},
+
+				{ "SpotLightPosition",    ShaderVariableType::Vec2Array,  c_MaxSpotLightCount},
+				{ "SpotLightColor",       ShaderVariableType::Vec4Array,  c_MaxSpotLightCount},
+				{ "SpotLightAngle",       ShaderVariableType::FloatArray, c_MaxSpotLightCount},
+				{ "SpotLightInnerCutoff", ShaderVariableType::FloatArray, c_MaxSpotLightCount},
+				{ "SpotLightOuterCutoff", ShaderVariableType::FloatArray, c_MaxSpotLightCount},
+				{ "SpotLightIntensity",   ShaderVariableType::FloatArray, c_MaxSpotLightCount}
 			};
+
 			Rdata->SceneUniformbuffer = CreateUniformBufferUnsafe("FrameData", 0, layout, nullptr);
 
 			for (auto& shaderTuple : Rdata->ShaderLibrary)
@@ -419,13 +429,15 @@ namespace Ainan {
 			assert(desc.SceneDrawTarget);
 
 			Rdata->CurrentSceneDescription = desc;
-			Rdata->CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
+			Rdata->SceneBuffer.CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
 			Rdata->CurrentNumberOfDrawCalls = 0;
+			Rdata->RadialLightSubmissionCount = 0;
+			Rdata->SpotLightSubmissionCount = 0;
 
 			(*Rdata->CurrentSceneDescription.SceneDrawTarget)->BindUnsafe();
 
 			//update the per-frame uniform buffer
-			Rdata->SceneUniformbuffer->UpdateDataUnsafe(&Rdata->CurrentViewProjection);
+			Rdata->SceneUniformbuffer->UpdateDataUnsafe(&Rdata->SceneBuffer);
 
 			//update diagnostics stuff
 			for (size_t i = 0; i < Rdata->ReservedTextures.size(); i++)
@@ -455,6 +467,31 @@ namespace Ainan {
 		};
 
 		PushCommand(func);
+	}
+
+	void Renderer::AddRadialLight(const glm::vec2& pos, const glm::vec4& color, float intensity)
+	{
+		auto& i = Rdata->RadialLightSubmissionCount;
+		auto& buffer = Rdata->SceneBuffer;
+
+		buffer.RadialLightPositions[i] = c_GlobalScaleFactor * pos;
+		buffer.RadialLightColors[i] = color;
+		buffer.RadialLightIntensities[i] = intensity;
+		i++;
+	}
+
+	void Renderer::AddSpotLight(const glm::vec2& pos, const glm::vec4 color, float angle, float innerCutoff, float outerCutoff, float intensity)
+	{
+		auto& i = Rdata->SpotLightSubmissionCount;
+		auto& buffer = Rdata->SceneBuffer;
+
+		buffer.SpotLightPositions[i] = c_GlobalScaleFactor * pos;
+		buffer.SpotLightColors[i] = color;
+		buffer.SpotLightIntensities[i] = intensity;
+		buffer.SpotLightAngles[i] =	      glm::radians(angle);
+		buffer.SpotLightInnerCutoffs[i] = glm::radians(innerCutoff);
+		buffer.SpotLightOuterCutoffs[i] = glm::radians(outerCutoff);
+		i++;
 	}
 
 	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive mode, const uint32_t vertexCount)

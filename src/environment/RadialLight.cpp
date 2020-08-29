@@ -29,7 +29,7 @@ namespace Ainan {
 		ImGui::Text("Color: ");
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(xPos);
-		ImGui::ColorEdit3("##Color: ", &Color.r);
+		ImGui::ColorEdit4("##Color: ", &Color.r);
 
 		ImGui::Spacing();
 
