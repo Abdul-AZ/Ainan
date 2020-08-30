@@ -9,7 +9,8 @@ namespace Ainan {
 		ParticleSystemType,
 		RadialLightType,
 		SpotLightType,
-		SpriteType
+		SpriteType,
+		LitSpriteType
 	};
 
 	EnvironmentObjectType StringToEnvironmentObjectType(const std::string& type);

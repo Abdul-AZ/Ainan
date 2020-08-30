@@ -19,6 +19,8 @@ namespace Ainan {
 			return SpotLightType;
 		else if (type == "Sprite")
 			return SpriteType;
+		else if (type == "Lit Sprite")
+			return LitSpriteType;
 
 		//we should never reach here
 		assert(false);
@@ -40,6 +42,9 @@ namespace Ainan {
 
 		case SpriteType:
 			return "Sprite";
+
+		case LitSpriteType:
+			return "Lit Sprite";
 		}
 
 		//we should never reach here

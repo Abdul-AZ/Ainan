@@ -20,6 +20,7 @@ namespace Ainan
 		m_PauseButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PauseButton.png"));
 		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png"));
 		m_SpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Sprite.png", TextureFormat::RGBA));
+		m_LitSpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/LitSprite.png", TextureFormat::RGBA));
 		m_ParticleSystemIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/ParticleSystem.png", TextureFormat::RGBA));
 		m_RadialLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/RadialLight.png", TextureFormat::RGBA));
 		m_SpotLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
@@ -607,6 +608,10 @@ namespace Ainan
 				case SpriteType:
 					Renderer::DrawQuad(position, color, scale, m_SpriteIconTexture);
 					break;
+
+				case LitSpriteType:
+					Renderer::DrawQuad(position, color, scale, m_LitSpriteIconTexture);
+					break;
 				}
 			}
 
@@ -1072,19 +1077,23 @@ namespace Ainan
 				//choose icon that displays the object type
 				switch (m_Env->Objects[i]->Type)
 				{
-				case EnvironmentObjectType::SpriteType:
+				case SpriteType:
 					icon = m_SpriteIconTexture->GetTextureID();
 					break;
 
-				case EnvironmentObjectType::ParticleSystemType:
+				case LitSpriteType:
+					icon = m_LitSpriteIconTexture->GetTextureID();
+					break;
+
+				case ParticleSystemType:
 					icon = m_ParticleSystemIconTexture->GetTextureID();
 					break;
 
-				case EnvironmentObjectType::RadialLightType:
+				case RadialLightType:
 					icon = m_RadialLightIconTexture->GetTextureID();
 					break;
 
-				case EnvironmentObjectType::SpotLightType:
+				case SpotLightType:
 					icon = m_SpotLightIconTexture->GetTextureID();
 					break;
 				}
@@ -1161,6 +1170,12 @@ namespace Ainan
 				bool selected = m_AddObjectWindowObjectType == SpriteType;
 				if (ImGui::Selectable(EnvironmentObjectTypeToString(SpriteType).c_str(), &selected))
 					m_AddObjectWindowObjectType = SpriteType;
+			}
+
+			{
+				bool selected = m_AddObjectWindowObjectType == LitSpriteType;
+				if (ImGui::Selectable(EnvironmentObjectTypeToString(LitSpriteType).c_str(), &selected))
+					m_AddObjectWindowObjectType = LitSpriteType;
 			}
 
 			{
@@ -1289,6 +1304,13 @@ namespace Ainan
 		case SpriteType:
 		{
 			auto sprite = std::make_unique<Sprite>();
+			obj.reset(((EnvironmentObjectInterface*)(sprite.release())));
+		}
+		break;
+
+		case LitSpriteType:
+		{
+			auto sprite = std::make_unique<LitSprite>();
 			obj.reset(((EnvironmentObjectInterface*)(sprite.release())));
 		}
 		break;

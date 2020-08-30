@@ -7,6 +7,8 @@ in vec2 FragPos;
 #define MAX_NUM_RADIAL_LIGHTS 10
 #define MAX_NUM_SPOT_LIGHTS 10
 
+#include <common/SceneData.glsli>
+
 layout (std140, binding = 2) uniform LightingData
 {
 	vec3 u_BaseColor;

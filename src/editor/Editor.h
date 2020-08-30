@@ -9,6 +9,7 @@
 #include "environment/Environment.h"
 #include "environment/ParticleSystem.h"
 #include "environment/Sprite.h"
+#include "environment/LitSprite.h"
 #include "ExportCamera.h"
 #include "file/FolderBrowser.h"
 #include "EditorPreferences.h"
@@ -79,6 +80,7 @@ namespace Ainan {
 		std::shared_ptr<Texture> m_PauseButtonTexture;
 		std::shared_ptr<Texture> m_StopButtonTexture;
 		std::shared_ptr<Texture> m_SpriteIconTexture;
+		std::shared_ptr<Texture> m_LitSpriteIconTexture;
 		std::shared_ptr<Texture> m_ParticleSystemIconTexture;
 		std::shared_ptr<Texture> m_SpotLightIconTexture;
 		std::shared_ptr<Texture> m_RadialLightIconTexture;
