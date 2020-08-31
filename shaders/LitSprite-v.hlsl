@@ -11,9 +11,14 @@ struct vsOut
     float2 tFragPos : VPOS;
 };
 
-cbuffer ObjectTransform : register(b1)
+cbuffer ObjectData : register(b1)
 {
     matrix<float, 4, 4> u_Model;
+    float4  u_Tint;
+    float u_BaseLight;
+    float u_MaterialConstantCoefficient;
+    float u_MaterialLinearCoefficient;
+    float u_MaterialQuadraticCoefficient;
 }
 
 vsOut main(vsInput vsIn)

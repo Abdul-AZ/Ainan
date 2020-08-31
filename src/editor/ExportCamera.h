@@ -1,10 +1,13 @@
 #pragma once
 
-#include "Background.h"
 #include "editor/Camera.h"
 #include "file/SaveItemBrowser.h"
 #include "renderer/Renderer.h"
 #include "environment/ParticleSystem.h"
+#include "environment/LitSprite.h"
+#include "environment/RadialLight.h"
+#include "environment/SpotLight.h"
+#include "environment/Environment.h"
 #include "environment/EnvironmentObjectInterface.h"
 #include "renderer/RenderSurface.h"
 #include "renderer/Image.h"
@@ -28,7 +31,6 @@ namespace Ainan {
 
 		Camera RealCamera;
 		RenderSurface m_RenderSurface;
-		Background m_Background;
 
 		std::string   ImageSavePath;
 		ImageFormat   SaveImageFormat = ImageFormat::png;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Background.h"
 #include "ViewportWindow.h"
 #include "AppStatusWindow.h"
 #include "Grid.h"
@@ -10,9 +9,12 @@
 #include "environment/ParticleSystem.h"
 #include "environment/Sprite.h"
 #include "environment/LitSprite.h"
+#include "environment/RadialLight.h"
+#include "environment/SpotLight.h"
 #include "ExportCamera.h"
 #include "file/FolderBrowser.h"
 #include "EditorPreferences.h"
+#include "environment/RadialLight.h"
 
 namespace Ainan {
 	bool SaveEnvironment(const Environment& env, std::string path);
@@ -65,7 +67,6 @@ namespace Ainan {
 		RenderSurface m_RenderSurface;
 		Gizmo m_Gizmo;
 		Grid m_Grid;
-		Background m_Background;
 
 		bool m_EnvironmentControlsWindowOpen = true;
 		bool m_ObjectInspectorWindowOpen = true;

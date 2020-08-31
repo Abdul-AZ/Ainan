@@ -5,7 +5,9 @@
 #include "json/json.hpp"
 #include "Sprite.h"
 #include "ParticleSystem.h"
-#include "editor/Background.h"
+#include "RadialLight.h"
+#include "SpotLight.h"
+#include "LitSprite.h"
 
 using json = nlohmann::json;
 
@@ -20,6 +22,7 @@ namespace Ainan {
 	static void toJson(json& j, const RadialLight& light, size_t objectOrder);
 	static void toJson(json& j, const SpotLight& light, size_t objectOrder);
 	static void toJson(json& j, const Sprite& sprite, size_t objectOrder);
+	static void toJson(json& j, const LitSprite& sprite, size_t objectOrder);
 
 	bool SaveEnvironment(const Environment& env, std::string path)
 	{
@@ -29,7 +32,7 @@ namespace Ainan {
 
 		//serialize inspector objects count int
 		data["objectCount"] = env.Objects.size();
-		
+
 		//serialize inspector objects
 		for (size_t i = 0; i < env.Objects.size(); i++)
 		{
@@ -52,6 +55,10 @@ namespace Ainan {
 				toJson(data, *(Sprite*)env.Objects[i].get(), i);
 				break;
 
+			case LitSpriteType:
+				toJson(data, *(LitSprite*)env.Objects[i].get(), i);
+				break;
+
 			default: //this means we have a type that we haven't implemented how to save it
 				assert(false);
 				break;
@@ -60,12 +67,6 @@ namespace Ainan {
 
 		data["BlurEnabled"] = env.BlurEnabled;
 		data["BlurRadius"] = env.BlurRadius;
-
-		data["BackgroundColor"] = VEC3_TO_JSON_ARRAY(env.BackgroundColor);
-		data["BackgroundBaseLight"] = env.BackgroundBaseLight;
-		data["BackgroundConstant"] = env.BackgroundConstant;
-		data["BackgroundLinear"] = env.BackgroundLinear;
-		data["BackgroundQuadratic"] = env.BackgroundQuadratic;
 
 		std::string jsonString = data.dump(4);
 
@@ -77,7 +78,7 @@ namespace Ainan {
 		}
 		else
 			assert(false, "Error while trying to save environment");
-		
+
 		return true;
 	}
 
@@ -159,7 +160,7 @@ namespace Ainan {
 		j[id + "Type"] = EnvironmentObjectTypeToString(RadialLightType);
 		j[id + "Name"] = light.m_Name;
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
-		j[id + "Color"] = VEC3_TO_JSON_ARRAY(light.Color);
+		j[id + "Color"] = VEC4_TO_JSON_ARRAY(light.Color);
 		j[id + "Intensity"] = light.Intensity;
 	}
 
@@ -170,7 +171,7 @@ namespace Ainan {
 		j[id + "Type"] = EnvironmentObjectTypeToString(SpotLightType);
 		j[id + "Name"] = light.m_Name;
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
-		j[id + "Color"] = VEC3_TO_JSON_ARRAY(light.Color);
+		j[id + "Color"] = VEC4_TO_JSON_ARRAY(light.Color);
 		j[id + "OuterCutoff"] = light.OuterCutoff;
 		j[id + "InnerCutoff"] = light.InnerCutoff;
 		j[id + "Intensity"] = light.Intensity;
@@ -187,6 +188,22 @@ namespace Ainan {
 		j[id + "Rotation"] = sprite.Rotation;
 		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.Tint);
 		j[id + "TexturePath"] = sprite.m_TexturePath;
+	}
+
+	void toJson(json& j, const LitSprite& sprite, size_t objectOrder)
+	{
+		std::string id = "obj" + std::to_string(objectOrder) + "_";
+
+		j[id + "Type"] = EnvironmentObjectTypeToString(LitSpriteType);
+		j[id + "Name"] = sprite.m_Name;
+		j[id + "Position"] = VEC2_TO_JSON_ARRAY(sprite.m_Position);
+		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.m_UniformBufferData.Tint);
+		j[id + "Scale"] = sprite.m_Scale;
+		j[id + "Rotation"] = sprite.m_Rotation;
+		j[id + "BaseLight"] = sprite.m_UniformBufferData.BaseLight;
+		j[id + "MaterialConstantCoefficient"] = sprite.m_UniformBufferData.MaterialConstantCoefficient;
+		j[id + "MaterialLinearCoefficient"] = sprite.m_UniformBufferData.MaterialLinearCoefficient;
+		j[id + "MaterialQuadraticCoefficient"] = sprite.m_UniformBufferData.MaterialQuadraticCoefficient;
 	}
 
 }

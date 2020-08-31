@@ -4,9 +4,11 @@
 
 #include "environment/Environment.h"
 #include "environment/ParticleSystem.h"
-#include "editor/Background.h"
+#include "environment/RadialLight.h"
+#include "environment/SpotLight.h"
 #include "json/json.hpp"
 #include "Sprite.h"
+#include "LitSprite.h"
 
 using json = nlohmann::json;
 
@@ -34,6 +36,7 @@ namespace Ainan {
 	static void RadialLightFromJson(Environment* env, json& data, std::string id);
 	static void SpotLightFromJson(Environment* env, json& data, std::string id);
 	static void SpriteFromJson(Environment* env,json& data, std::string id);
+	static void LitSpriteFromJson(Environment* env,json& data, std::string id);
 	static void SettingsFromJson(Environment* env, json& data);
 
 	Environment* LoadEnvironment(const std::string& path)
@@ -46,13 +49,7 @@ namespace Ainan {
 
 		SettingsFromJson(env, data);
 
-		env->BackgroundColor = JSON_ARRAY_TO_VEC3(data["BackgroundColor"].get<std::vector<float>>());
-		env->BackgroundBaseLight = data["BackgroundBaseLight"].get<float>();
-		env->BackgroundConstant = data["BackgroundConstant"].get<float>();
-		env->BackgroundLinear = data["BackgroundLinear"].get<float>();
-		env->BackgroundQuadratic = data["BackgroundQuadratic"].get<float>();
-
-		int objectCount = data["objectCount"].get<int>();
+		int32_t objectCount = data["objectCount"].get<int>();
 
 		for (size_t i = 0; i < objectCount; i++)
 		{
@@ -77,6 +74,10 @@ namespace Ainan {
 
 			case SpriteType:
 				SpriteFromJson(env, data, id);
+				break;
+
+			case LitSpriteType:
+				LitSpriteFromJson(env, data, id);
 				break;
 
 			default:
@@ -225,6 +226,26 @@ namespace Ainan {
 		sprite->m_TexturePath = data[id + "TexturePath"].get<std::string>();
 		if(sprite->m_TexturePath != "")
 			sprite->LoadTextureFromFile(AssetManager::s_EnvironmentDirectory.u8string() + sprite->m_TexturePath);
+
+		pEnvironmentObject obj((EnvironmentObjectInterface*)(sprite.release()));
+		env->Objects.push_back(std::move(obj));
+	}
+
+	void LitSpriteFromJson(Environment* env, json& data, std::string id)
+	{
+		//create sprite
+		std::unique_ptr<LitSprite> sprite = std::make_unique<LitSprite>();
+
+		//populate with data
+		sprite->m_Name = data[id + "Name"].get<std::string>();
+		sprite->m_Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
+		sprite->m_UniformBufferData.Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
+		sprite->m_Scale = data[id + "Scale"].get<float>();
+		sprite->m_Rotation = data[id + "Rotation"].get<float>();
+		sprite->m_UniformBufferData.BaseLight = data[id + "BaseLight"].get<float>();
+		sprite->m_UniformBufferData.MaterialConstantCoefficient = data[id + "MaterialConstantCoefficient"].get<float>();
+		sprite->m_UniformBufferData.MaterialLinearCoefficient = data[id + "MaterialLinearCoefficient"].get<float>();
+		sprite->m_UniformBufferData.MaterialQuadraticCoefficient = data[id + "MaterialQuadraticCoefficient"].get<float>();
 
 		pEnvironmentObject obj((EnvironmentObjectInterface*)(sprite.release()));
 		env->Objects.push_back(std::move(obj));

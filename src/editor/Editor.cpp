@@ -546,7 +546,7 @@ namespace Ainan
 			}
 		}
 
-		m_Background.Draw(*m_Env);
+		//m_Background.Draw(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
@@ -724,7 +724,6 @@ namespace Ainan
 		ImGui::End();
 
 		m_ExportCamera.DisplayGUI();
-		m_Background.DisplayGUI(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
@@ -808,7 +807,6 @@ namespace Ainan
 				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
 				ImGui::MenuItem("General Settings", nullptr, &m_EnvironmentSettingsWindowOpen);
 				ImGui::MenuItem("Profiler", nullptr, &m_ProfilerWindowOpen);
-				ImGui::MenuItem("Background Settings", nullptr, &m_Background.SettingsWindowOpen);
 				ImGui::MenuItem("ExportMode Settings", nullptr, &m_ExportCamera.SettingsWindowOpen);
 
 				ImGui::EndMenu();

@@ -230,8 +230,6 @@ namespace Ainan {
 			}
 		}
 
-		m_Background.Draw(env);
-
 		for (pEnvironmentObject& obj : env.Objects)
 			obj->Draw();
 

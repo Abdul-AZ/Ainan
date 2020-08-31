@@ -3,9 +3,14 @@ layout(location = 0) in vec2 aPos;
 
 #include <common/SceneData.glsli>
 
-layout (std140, binding = 1) uniform ObjectTransform
+layout (std140, binding = 1) uniform ObjectData
 {
-	uniform mat4 u_Model;
+	mat4  u_Model;
+	vec4  u_Tint;
+	float u_BaseLight;
+	float u_MaterialConstantCoefficient;
+	float u_MaterialLinearCoefficient;
+	float u_MaterialQuadraticCoefficient;
 };
 
 out vec2 FragPos;

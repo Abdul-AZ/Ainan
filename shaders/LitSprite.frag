@@ -9,29 +9,30 @@ in vec2 FragPos;
 
 #include <common/SceneData.glsli>
 
-layout (std140, binding = 2) uniform LightingData
+layout (std140, binding = 1) uniform ObjectData
 {
-	vec3 u_BaseColor;
+	mat4  u_Model;
+	vec4  u_Tint;
 	float u_BaseLight;
-	float u_Constant;
-	float u_Linear;
-	float u_Quadratic;
+	float u_MaterialConstantCoefficient;
+	float u_MaterialLinearCoefficient;
+	float u_MaterialQuadraticCoefficient;
 };
 
 void main()
 {
-	FragColor = vec4(u_BaseColor * u_BaseLight, 1.0);
+	FragColor = vec4(u_Tint.xyz * u_BaseLight, 1.0f);
 
 	for(int i = 0; i < MAX_NUM_RADIAL_LIGHTS; i++) 
 	{
 		vec3 color = vec3(RadialLightColor[i]);
 		
 		float distance    = length(RadialLightPosition[i] - FragPos);
-		float attenuation = 1.0 / (u_Constant + u_Linear * distance + u_Quadratic * (distance * distance)); 
+		float attenuation = 1.0 / (u_MaterialConstantCoefficient + u_MaterialLinearCoefficient * distance + u_MaterialQuadraticCoefficient * (distance * distance)); 
 		
 		color *= RadialLightIntensity[i];
 		color *= attenuation;
-		color *= u_BaseColor;
+		color *= u_Tint.xyz;
 	
 		FragColor += vec4(color.xyz, 1.0);
 	}
@@ -41,7 +42,7 @@ void main()
 		vec3 color = vec3(SpotLightColor[i]);
 	
 		float distance = length(SpotLightPosition[i] - FragPos);
-		float attenuation = 1.0 / (u_Constant + u_Linear * distance + u_Quadratic * (distance * distance)); 
+		float attenuation = 1.0 / (u_MaterialConstantCoefficient + u_MaterialLinearCoefficient * distance + u_MaterialQuadraticCoefficient * (distance * distance)); 
 	
 		vec2 lightDir  = normalize(SpotLightPosition[i] - FragPos);
 	

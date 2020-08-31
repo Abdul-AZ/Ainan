@@ -43,14 +43,14 @@ namespace Ainan {
 	std::vector<ShaderLoadInfo> CompileOnInit =
 	{
 		//name                  //vertex shader                //fragment shader
-		{ "BackgroundShader"    , "shaders/Background"    , "shaders/Background"     },
 		{ "CircleOutlineShader" , "shaders/CircleOutline" , "shaders/CircleOutline"  },
 		{ "LineShader"          , "shaders/Line"          , "shaders/FlatColor"      },
 		{ "BlurShader"          , "shaders/Image"         , "shaders/Blur"           },
 		{ "GizmoShader"         , "shaders/Gizmo"         , "shaders/Gizmo"          },
 		{ "GridShader"          , "shaders/Grid"          , "shaders/Grid"           },
 		{ "ImageShader"         , "shaders/Image"         , "shaders/Image"          },
-		{ "QuadBatchShader"     , "shaders/QuadBatch"     , "shaders/QuadBatch"      }
+		{ "QuadBatchShader"     , "shaders/QuadBatch"     , "shaders/QuadBatch"      },
+		{ "LitSpriteShader"     , "shaders/LitSprite"     , "shaders/LitSprite"      }
 	};
 
 	void Renderer::Init(RendererType api)
@@ -194,6 +194,7 @@ namespace Ainan {
 			for (auto& shaderTuple : Rdata->ShaderLibrary)
 			{
 				shaderTuple.second->BindUniformBufferUnsafe(Rdata->SceneUniformbuffer, 0, RenderingStage::VertexShader);
+				shaderTuple.second->BindUniformBufferUnsafe(Rdata->SceneUniformbuffer, 0, RenderingStage::FragmentShader);
 			}
 		}
 

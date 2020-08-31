@@ -19,12 +19,5 @@ namespace Ainan
 		RenderingBlendMode BlendMode = RenderingBlendMode::Additive;
 		bool BlurEnabled = false;
 		float BlurRadius = 1.0f;
-
-		//background data
-		glm::vec3 BackgroundColor = glm::vec3(0.1f, 0.1f, 0.1f);
-		float BackgroundBaseLight = 0.1f;
-		float BackgroundConstant = 1.0f;
-		float BackgroundLinear = 0.15f;
-		float BackgroundQuadratic = 0.02f;
 	};
 }
