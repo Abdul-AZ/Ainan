@@ -74,7 +74,7 @@ namespace Ainan {
 		{
 			auto shader = std::make_shared<OpenGLShaderProgram>();
 
-			unsigned int vertex, fragment;
+			uint32_t vertex, fragment;
 
 			vertex = glCreateShader(GL_VERTEX_SHADER);
 			const char* c_vShaderCode = vertSrc.c_str();
@@ -121,18 +121,36 @@ namespace Ainan {
 			glBindBufferRange(GL_UNIFORM_BUFFER, slot, openglBuffer->m_RendererID, 0, buffer->GetAlignedSize());
 		}
 
-		void OpenGLShaderProgram::BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage)
+		void OpenGLShaderProgram::BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage)
 		{
-			std::shared_ptr<OpenGLFrameBuffer> openglTexture = std::static_pointer_cast<OpenGLFrameBuffer>(framebuffer);
-			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D, openglTexture->m_TextureID);
+			auto func = [this, slot, stage, &texture]()
+			{
+				BindTextureUnsafe(texture, slot, stage);
+			};
+			Renderer::PushCommand(func);
 		}
 
-		void OpenGLShaderProgram::BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage)
+		void OpenGLShaderProgram::BindTextureUnsafe(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage)
 		{
 			std::shared_ptr<OpenGLTexture> openglTexture = std::static_pointer_cast<OpenGLTexture>(texture);
 			glActiveTexture(GL_TEXTURE0 + slot);
 			glBindTexture(GL_TEXTURE_2D, openglTexture->m_RendererID);
+		}
+
+		void OpenGLShaderProgram::BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage)
+		{
+			auto func = [this, slot, stage, &framebuffer]()
+			{
+				BindTextureUnsafe(framebuffer, slot, stage);
+			};
+			Renderer::PushCommand(func);
+		}
+
+		void OpenGLShaderProgram::BindTextureUnsafe(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage)
+		{
+			std::shared_ptr<OpenGLFrameBuffer> openglTexture = std::static_pointer_cast<OpenGLFrameBuffer>(framebuffer);
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_2D, openglTexture->m_TextureID);
 		}
 	}
 }

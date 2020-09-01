@@ -928,7 +928,7 @@ namespace Ainan {
 		Rdata->CurrentActiveAPI->ClearScreen();
 
 		//do the horizontal blur to the surface we revieved and put the result in tempSurface
-		shader->BindTexture(target, 0, RenderingStage::FragmentShader);
+		shader->BindTextureUnsafe(target, 0, RenderingStage::FragmentShader);
 		
 		{
 			Rdata->BlurVertexBuffer->Bind();
@@ -944,7 +944,7 @@ namespace Ainan {
 		Rdata->CurrentActiveAPI->ClearScreen();
 
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
-		shader->BindTexture(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
+		shader->BindTextureUnsafe(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
 		{
 			Rdata->BlurVertexBuffer->Bind();
 			Rdata->CurrentActiveAPI->Draw(*shader, Primitive::Triangles, 6);
@@ -1325,9 +1325,9 @@ namespace Ainan {
 	void Renderer::FlushQuadBatch()
 	{
 		for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
-			Rdata->ShaderLibrary["QuadBatchShader"]->BindTexture(Rdata->QuadBatchTextures[i], i, RenderingStage::FragmentShader);
+			Rdata->ShaderLibrary["QuadBatchShader"]->BindTextureUnsafe(Rdata->QuadBatchTextures[i], i, RenderingStage::FragmentShader);
 
-		int numVertices = (Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin);
+		int32_t numVertices = (Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin);
 
 		Rdata->QuadBatchVertexBuffer->UpdateDataUnsafe(0,
 			numVertices * sizeof(QuadVertex),

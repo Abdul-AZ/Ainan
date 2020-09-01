@@ -90,6 +90,15 @@ namespace Ainan {
 
 		void D3D11ShaderProgram::BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage)
 		{
+			auto func = [this, &texture, slot, stage]()
+			{
+				BindTextureUnsafe(texture, slot, stage);
+			};
+			Renderer::PushCommand(func);
+		}
+
+		void D3D11ShaderProgram::BindTextureUnsafe(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage)
+		{
 			auto d3dTexture = std::static_pointer_cast<D3D11Texture>(texture);
 
 			switch (stage)
@@ -104,11 +113,18 @@ namespace Ainan {
 				Context->DeviceContext->PSSetSamplers(slot, 1, &d3dTexture->D3DSampler);
 				break;
 			}
-
-			
 		}
 
 		void D3D11ShaderProgram::BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage)
+		{
+			auto func = [this, &framebuffer, slot, stage]()
+			{
+				BindTextureUnsafe(framebuffer, slot, stage);
+			};
+			Renderer::PushCommand(func);
+		}
+
+		void D3D11ShaderProgram::BindTextureUnsafe(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage)
 		{
 			auto d3dframebuffer = std::static_pointer_cast<D3D11FrameBuffer>(framebuffer);
 

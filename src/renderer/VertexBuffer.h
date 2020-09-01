@@ -86,11 +86,15 @@ namespace Ainan {
 		//NOTE: offset and size are in bytes
 		//offset is the start of the memory location you want to update
 		virtual void UpdateData(int32_t offset, int32_t size, void* data) = 0;
-		virtual void UpdateDataUnsafe(int32_t offset, int32_t size, void* data) = 0;
 		virtual uint32_t GetUsedMemory() const = 0;
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
+
+	private:
+		virtual void UpdateDataUnsafe(int32_t offset, int32_t size, void* data) = 0;
+
+		friend class Renderer;
 	};
 
 	//returns size in bytes
