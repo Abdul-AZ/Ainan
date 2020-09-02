@@ -55,3 +55,7 @@ filter { "files:../shaders/**-f.hlsl" }
 
   filter "platforms:32bit"
     architecture "x32"
+
+  --this is to hide the console window on release builds
+  filter { "system:windows", "configurations:Release" }
+    linkoptions { "/SUBSYSTEM:windows", "/ENTRY:mainCRTStartup" }
