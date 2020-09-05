@@ -1,6 +1,3 @@
-#pragma once
-
-#include <pch.h>
 #include "D3D11ShaderProgram.h"
 
 #include "D3D11RendererContext.h"

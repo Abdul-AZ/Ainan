@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "Renderer.h"
 
 #include "opengl/OpenGLRendererAPI.h"

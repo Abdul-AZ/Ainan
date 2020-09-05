@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "ImGuiWrapper.h"
 
 namespace Ainan {

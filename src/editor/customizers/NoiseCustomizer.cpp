@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "NoiseCustomizer.h"
 
 namespace Ainan {

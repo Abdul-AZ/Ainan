@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "Environment.h"
 #include "EnvironmentObjectInterface.h"
 #include "json/json.hpp"

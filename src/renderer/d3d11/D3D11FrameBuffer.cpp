@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "D3D11FrameBuffer.h"
 #define ASSERT_D3D_CALL(func) { auto result = func; if (result != S_OK) assert(false); }
 

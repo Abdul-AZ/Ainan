@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "Gizmo.h"
 
 #include <GLFW/glfw3.h>

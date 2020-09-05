@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "EditorPreferences.h"
 #include <json/json.hpp>
 

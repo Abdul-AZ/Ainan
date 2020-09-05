@@ -8,3 +8,4 @@ output
 *.sln
 *.cso
 *.info
+build

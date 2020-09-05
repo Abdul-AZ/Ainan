@@ -1,4 +1,3 @@
-#include <pch.h>
 #include "ParticleSystem.h"
 
 namespace Ainan {

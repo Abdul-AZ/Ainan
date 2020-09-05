@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "editor/Window.h"
 #include "editor/Editor.h"
 #include "editor/EditorPreferences.h"

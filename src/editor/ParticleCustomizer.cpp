@@ -1,4 +1,3 @@
-#include <pch.h>
 #include "ParticleCustomizer.h"
 
 namespace Ainan {

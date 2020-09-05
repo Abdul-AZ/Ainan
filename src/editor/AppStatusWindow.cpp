@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "AppStatusWindow.h"
 
 void Ainan::AppStatusWindow::DisplayGUI()

@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "LitSprite.h"
 
 namespace Ainan {

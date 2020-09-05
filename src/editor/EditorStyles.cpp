@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "EditorStyles.h"
 
 namespace Ainan {
