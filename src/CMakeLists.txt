@@ -85,6 +85,7 @@ if(WIN32)
         "renderer/d3d11/D3D11Texture.cpp"
         "renderer/d3d11/D3D11UniformBuffer.cpp"
         "renderer/d3d11/D3D11VertexBuffer.cpp"
+        "windows/WinMain.cpp"
         )
 
     
@@ -105,7 +106,7 @@ set(INCLUDE_LIST
     )
 
 
-add_executable(Core ${SOURCES_LIST} ${IMGUI_SOURCE_FILES})
+add_executable(Core WIN32 ${SOURCES_LIST} ${IMGUI_SOURCE_FILES})
 target_precompile_headers(Core PRIVATE "pch.h")
 target_include_directories(Core PRIVATE ${INCLUDE_LIST})
 target_compile_definitions(Core PRIVATE ${DEFINITIONS_LIST})
