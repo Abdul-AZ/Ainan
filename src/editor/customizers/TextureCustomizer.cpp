@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "TextureCustomizer.h"
 
 namespace Ainan {

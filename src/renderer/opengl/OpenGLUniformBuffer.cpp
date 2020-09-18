@@ -1,4 +1,3 @@
-#include <pch.h>
 #include <glad/glad.h>
 
 #include "OpenGLUniformBuffer.h"
@@ -48,7 +47,7 @@ namespace Ainan {
 			m_Layout(layout)
 		{
 			m_PackedSize = std::accumulate(layout.begin(), layout.end(), 0,
-				[](const uint32_t& a, const VertexLayoutPart& b)
+				[](const uint32_t& a, const VertexLayoutElement& b)
 				{
 					return a + b.GetSize();
 				});

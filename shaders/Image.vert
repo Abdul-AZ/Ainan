@@ -4,7 +4,7 @@ layout (location = 1) in vec2 aTexCoords;
 
 #include <common/SceneData.glsli>
 
-out vec2 TexCoords;
+layout(location = 0) out vec2 TexCoords;
 
 void main()
 {

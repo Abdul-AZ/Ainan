@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "CurveEditor.h"
 
 #include <GLFW/glfw3.h>

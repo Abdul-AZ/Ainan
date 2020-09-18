@@ -2,9 +2,11 @@ bin
 obj
 output
 .vs
+.vscode
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
 *.sln
 *.cso
 *.info
+build

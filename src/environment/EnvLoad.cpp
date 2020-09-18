@@ -1,7 +1,3 @@
-#pragma once
-
-#include <pch.h>
-
 #include "environment/Environment.h"
 #include "environment/ParticleSystem.h"
 #include "environment/RadialLight.h"

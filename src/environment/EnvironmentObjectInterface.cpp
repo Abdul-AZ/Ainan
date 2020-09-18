@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "EnvironmentObjectInterface.h"
 
 namespace Ainan {

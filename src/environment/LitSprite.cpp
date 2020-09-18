@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "LitSprite.h"
 
 namespace Ainan {
@@ -11,18 +9,18 @@ namespace Ainan {
 
 		VertexLayout vertexBufferlayout = 
 		{
-			{ "aPos", ShaderVariableType::Vec2 } 
+			VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2)
 		};
 		m_VertexBuffer = Renderer::CreateVertexBuffer(vertices.data(), vertices.size() * sizeof(glm::vec2), vertexBufferlayout, Renderer::ShaderLibrary()["LitSpriteShader"]);
 
 		VertexLayout uniformBufferLayout =
 		{
-			{ "u_Model"    , ShaderVariableType::Mat4  },
-			{ "u_BaseColor", ShaderVariableType::Vec4  },
-			{ "u_BaseLight", ShaderVariableType::Float },
-			{ "u_Constant" , ShaderVariableType::Float },
-			{ "u_Linear"   , ShaderVariableType::Float },
-			{ "u_Quadratic", ShaderVariableType::Float }
+			VertexLayoutElement( "u_Model"    ,0, ShaderVariableType::Mat4 ),
+			VertexLayoutElement( "u_BaseColor",0, ShaderVariableType::Vec4 ),
+			VertexLayoutElement( "u_BaseLight",0, ShaderVariableType::Float),
+			VertexLayoutElement( "u_Constant" ,0, ShaderVariableType::Float),
+			VertexLayoutElement( "u_Linear"   ,0, ShaderVariableType::Float),
+			VertexLayoutElement( "u_Quadratic",0, ShaderVariableType::Float)
 		};
 
 		m_UniformBuffer = Renderer::CreateUniformBuffer("ObjectData", 1, uniformBufferLayout, nullptr);

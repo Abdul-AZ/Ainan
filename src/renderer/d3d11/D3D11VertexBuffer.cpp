@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "D3D11VertexBuffer.h"
 
 #include "D3D11ShaderProgram.h"
@@ -73,8 +71,8 @@ namespace Ainan {
 
 				for (size_t i = 0; i < layout.size(); i++)
 				{
-					desc[i].SemanticName = layout[i].Name.c_str();
-					desc[i].SemanticIndex = 0;
+					desc[i].SemanticName = layout[i].SemanticName.c_str();
+					desc[i].SemanticIndex = layout[i].SemanticIndex;
 					desc[i].Format = GetD3D11FormatFromShaderType(layout[i].Type);
 					desc[i].InputSlot = 0;
 					desc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;

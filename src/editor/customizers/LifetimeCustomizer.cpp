@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "LifetimeCustomizer.h"
 
 namespace Ainan {

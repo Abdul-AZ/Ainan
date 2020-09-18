@@ -13,7 +13,7 @@ layout (std140, binding = 1) uniform ObjectData
 	float u_MaterialQuadraticCoefficient;
 };
 
-out vec2 FragPos;
+layout(location = 0) out vec2 FragPos;
 
 void main() 
 {

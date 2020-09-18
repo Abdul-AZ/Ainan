@@ -1,4 +1,3 @@
-#include <pch.h>
 #include "ParticleCustomizer.h"
 
 namespace Ainan {
@@ -7,7 +6,7 @@ namespace Ainan {
 		mt(std::random_device{}())
 	{
 		VertexLayout layout(1);
-		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 		m_LineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibrary()["LineShader"], true);
 
 		glm::vec2 vertices[c_CircleVertexCount];
@@ -29,14 +28,14 @@ namespace Ainan {
 		}
 		vertices[c_CircleVertexCount - 1] = vertices[0];
 
-		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 		m_CircleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * c_CircleVertexCount, layout, Renderer::ShaderLibrary()["CircleOutlineShader"]);
 
 		m_CircleIndexBuffer = Renderer::CreateIndexBuffer(indecies, c_CircleVertexCount * 2 - 2);
 
-		m_CircleTransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { {"u_Model", ShaderVariableType::Mat4} }, nullptr);
+		m_CircleTransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { VertexLayoutElement("u_Model", 0, ShaderVariableType::Mat4) }, nullptr);
 
-		layout[0] = { "u_Color", ShaderVariableType::Vec4 };
+		layout[0] = VertexLayoutElement("COLOR", 0, ShaderVariableType::Vec4);
 		m_SpawnAreaColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout, (void*)&c_ParticleSpawnAreaColor);
 	}
 

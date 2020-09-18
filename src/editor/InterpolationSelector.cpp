@@ -1,5 +1,3 @@
-#include <pch.h>
-
 #include "InterpolationSelector.h"
 
 namespace Ainan {
