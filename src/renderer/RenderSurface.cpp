@@ -18,8 +18,8 @@ namespace Ainan {
 		};
 
 		VertexLayout layout(2);
-		layout[0] = { "aPos", ShaderVariableType::Vec2 };
-		layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
+		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
+		layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec2);
 		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, Renderer::ShaderLibrary()["ImageShader"]);
 
 		Renderer::SetRenderTargetApplicationWindow();

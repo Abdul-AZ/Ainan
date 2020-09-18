@@ -13,3 +13,6 @@
 [submodule "submodules/FastNoise"]
 	path = submodules/FastNoise
 	url = https://github.com/Auburns/FastNoise.git
+[submodule "submodules/glslcc"]
+	path = submodules/glslcc
+	url = https://github.com/septag/glslcc.git

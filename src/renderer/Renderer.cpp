@@ -107,10 +107,10 @@ namespace Ainan {
 		//setup batch renderer
 		{
 			VertexLayout layout(4);
-			layout[0] = { "aPos", ShaderVariableType::Vec2 };
-			layout[1] = { "aColor", ShaderVariableType::Vec4 };
-			layout[2] = { "aTexture", ShaderVariableType::Float };
-			layout[3] = { "aTexCoords", ShaderVariableType::Vec2 };
+			layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
+			layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec4);
+			layout[2] = VertexLayoutElement("TEXCOORD", 0, ShaderVariableType::Float);
+			layout[3] = VertexLayoutElement("TEXCOORD", 1, ShaderVariableType::Vec2);
 
 			Rdata->QuadBatchVertexBuffer = CreateVertexBufferUnsafe(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, Rdata->ShaderLibrary["QuadBatchShader"], true);
 		}
@@ -152,17 +152,17 @@ namespace Ainan {
 		{
 			auto vertices = GetTexturedQuadVertices();
 			VertexLayout layout(2);
-			layout[0] = { "aPos", ShaderVariableType::Vec2 };
-			layout[1] = { "aTexCoords", ShaderVariableType::Vec2 };
+			layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
+			layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec2);
 			Rdata->BlurVertexBuffer = CreateVertexBufferUnsafe(vertices.data(), sizeof(vertices), layout, Rdata->ShaderLibrary["BlurShader"]);
 		}
 
 		{
 			VertexLayout layout =
 			{
-				{ "u_Resolution", ShaderVariableType::Vec2 },
-				{ "u_BlurDirection", ShaderVariableType::Vec2 },
-				{ "u_Radius", ShaderVariableType::Float }
+				VertexLayoutElement("u_Resolution",0, ShaderVariableType::Vec2),
+				VertexLayoutElement("u_BlurDirection",0, ShaderVariableType::Vec2),
+				VertexLayoutElement("u_Radius",0, ShaderVariableType::Float)
 			};
 			Rdata->BlurUniformBuffer = CreateUniformBufferUnsafe("BlurData", 1, layout, nullptr);
 			Rdata->ShaderLibrary["BlurShader"]->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
@@ -173,18 +173,18 @@ namespace Ainan {
 		{
 			VertexLayout layout =
 			{
-				{ "u_ViewProjection",     ShaderVariableType::Mat4 },
+				VertexLayoutElement("u_ViewProjection",    0, ShaderVariableType::Mat4),
 
-				{ "RadialLightPosition",  ShaderVariableType::Vec2Array,  c_MaxRadialLightCount},
-				{ "RadialLightColor",     ShaderVariableType::Vec4Array,  c_MaxRadialLightCount},
-				{ "RadialLightIntensity", ShaderVariableType::FloatArray, c_MaxRadialLightCount},
+				VertexLayoutElement("RadialLightPosition", 0, ShaderVariableType::Vec2Array,  c_MaxRadialLightCount),
+				VertexLayoutElement("RadialLightColor",    0, ShaderVariableType::Vec4Array,  c_MaxRadialLightCount),
+				VertexLayoutElement("RadialLightIntensity",0, ShaderVariableType::FloatArray, c_MaxRadialLightCount),
 
-				{ "SpotLightPosition",    ShaderVariableType::Vec2Array,  c_MaxSpotLightCount},
-				{ "SpotLightColor",       ShaderVariableType::Vec4Array,  c_MaxSpotLightCount},
-				{ "SpotLightAngle",       ShaderVariableType::FloatArray, c_MaxSpotLightCount},
-				{ "SpotLightInnerCutoff", ShaderVariableType::FloatArray, c_MaxSpotLightCount},
-				{ "SpotLightOuterCutoff", ShaderVariableType::FloatArray, c_MaxSpotLightCount},
-				{ "SpotLightIntensity",   ShaderVariableType::FloatArray, c_MaxSpotLightCount}
+				VertexLayoutElement("SpotLightPosition",   0, ShaderVariableType::Vec2Array,  c_MaxSpotLightCount),
+				VertexLayoutElement("SpotLightColor",      0, ShaderVariableType::Vec4Array,  c_MaxSpotLightCount),
+				VertexLayoutElement("SpotLightAngle",      0, ShaderVariableType::FloatArray, c_MaxSpotLightCount),
+				VertexLayoutElement("SpotLightInnerCutoff",0, ShaderVariableType::FloatArray, c_MaxSpotLightCount),
+				VertexLayoutElement("SpotLightOuterCutoff",0, ShaderVariableType::FloatArray, c_MaxSpotLightCount),
+				VertexLayoutElement("SpotLightIntensity",  0, ShaderVariableType::FloatArray, c_MaxSpotLightCount)
 			};
 
 			Rdata->SceneUniformbuffer = CreateUniformBufferUnsafe("FrameData", 0, layout, nullptr);

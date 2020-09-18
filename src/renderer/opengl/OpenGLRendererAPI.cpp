@@ -33,7 +33,7 @@ namespace Ainan {
 			glfwMakeContextCurrent(Window::Ptr);
 			gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 			glfwSwapInterval(1);
-#ifdef DEBUG
+#ifndef NDEBUG
 			glDebugMessageCallback(&opengl_debug_message_callback, nullptr);
 #endif // DEBUG
 			glEnable(GL_BLEND);

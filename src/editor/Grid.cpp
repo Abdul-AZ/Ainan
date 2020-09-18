@@ -42,14 +42,14 @@ namespace Ainan {
 
 		m_VertexBuffer = Renderer::CreateVertexBuffer(vertices.data(),
 			(uint32_t)sizeof(glm::vec2) * vertices.size(),
-			{ { "aPos", ShaderVariableType::Vec2 } },
+			{ VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2) },
 			Renderer::ShaderLibrary()["LineShader"]);
 
 		m_IndexBuffer = Renderer::CreateIndexBuffer(indecies.data(), (uint32_t)indecies.size());
 
 		m_TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform",
 			1,
-			{ {"u_Model", ShaderVariableType::Mat4} },
+			{ VertexLayoutElement("u_Model",0, ShaderVariableType::Mat4) },
 			nullptr);
 	}
 

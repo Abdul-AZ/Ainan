@@ -8,11 +8,22 @@ namespace Ainan {
 		IntArray, UnsignedIntArray, FloatArray, Vec2Array, Vec3Array, Vec4Array, Mat3Array, Mat4Array
 	};
 
-	struct VertexLayoutPart
+	struct VertexLayoutElement
 	{
-		std::string Name;
+		VertexLayoutElement(const std::string& semanticName, uint32_t semanticIndex, ShaderVariableType type, int32_t elementCount = 1)
+			:
+			SemanticName(semanticName),
+			SemanticIndex(semanticIndex),
+			Type(type),
+			Count(elementCount)
+		{}
+		VertexLayoutElement()
+		{};
+
+		std::string SemanticName;
+		uint32_t SemanticIndex;
 		ShaderVariableType Type;
-		uint32_t Count = 1; //this is the number of elements if Type is an array
+		uint32_t Count; //this is the number of elements if Type is an array
 
 		uint32_t GetSize() const
 		{
@@ -73,7 +84,7 @@ namespace Ainan {
 		}
 	};
 
-	using VertexLayout = std::vector<VertexLayoutPart>;
+	using VertexLayout = std::vector<VertexLayoutElement>;
 	class ShaderProgram;
 
 	class VertexBuffer

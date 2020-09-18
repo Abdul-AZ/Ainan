@@ -39,7 +39,7 @@ namespace Ainan {
 
 			AlignedSize = BufferSize;
 			PackedSize = std::accumulate(layout.begin(), layout.end(), 0,
-				[](uint32_t a, const VertexLayoutPart& b) -> uint32_t
+				[](uint32_t a, const VertexLayoutElement& b) -> uint32_t
 				{
 					return a + b.GetSize();
 				});

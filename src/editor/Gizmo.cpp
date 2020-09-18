@@ -62,7 +62,7 @@ namespace Ainan {
 	Gizmo::Gizmo()
 	{
 		VertexLayout layout(1);
-		layout[0] = { "aPos", ShaderVariableType::Vec2 };
+		layout[0] = VertexLayoutElement("POSITION",0, ShaderVariableType::Vec2);
 		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibrary()["GizmoShader"]);
 
 		if(Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
@@ -72,8 +72,8 @@ namespace Ainan {
 
 		EBO->Bind();
 
-		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { {"u_Model", ShaderVariableType::Mat4} }, nullptr);
-		ColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 2, { {"u_Color", ShaderVariableType::Vec4} }, nullptr);
+		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { VertexLayoutElement("u_Model",0, ShaderVariableType::Mat4) }, nullptr);
+		ColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 2, { VertexLayoutElement("u_Color",0, ShaderVariableType::Vec4) }, nullptr);
 	}
 
 	void Gizmo::Draw(glm::vec2& objectPosition,
