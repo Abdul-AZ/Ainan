@@ -7,14 +7,15 @@ At the moment it only runs on windows.
 There are plans for linux and mac support.
 
 # Building the Project
-The project is built using Premake5 (see [Premake](https://github.com/premake/premake-core)). Tested on Visual Studio 2019 but should work on other IDE's.
+The project is built using CMake with the usual CMake workflow.
 
-Steps on building in Visual Studio:
-
-1. `premake5 vs2019` in your project directory.
-2. Open visual studio solution file and build.
-
-Similar steps can be made to build for systems other than windows (other than that you have to get a version of premake that is specific for your platform, basically grab the latest release of [Premake](https://github.com/premake/premake-core) for your OS). 
+Example building steps on Windows with CMake installed using Visual Studio 2019 and the Command Line on the repository directory:
+1. `git clone https://github.com/AbdullrahmanAlzeidi/Ainan.git --recursive`
+2. `cd Ainan`
+3. `mkdir build`
+4. `cd build`
+5. `cmake "Visual Studio 16 2019" ..`
+6. open Ainan.sln and build
 
 # Contribute
 There are no strict rules for contributing, feel free to open an issue for anything! I will be sure to respond to issues and pull requests quickly.
@@ -26,11 +27,12 @@ Also, feel free to contact me through Email.
 ![](github/appScreenshot.PNG)
 
 # Libraries used
-* GLFW
-* Dear ImGui
-* glad
-* stb image
-* GLM
-* Premake5
-* nlohmann/json
-* FastNoise
+* [CMake](https://cmake.org/)
+* [GLFW](https://www.glfw.org/)
+* [Dear ImGui](https://github.com/ocornut/imgui)
+* [glad](https://github.com/Dav1dde/glad)
+* [stb](https://github.com/nothings/stb)
+* [GLM](https://github.com/g-truc/glm)
+* [nlohmann/json](https://github.com/nlohmann/json)
+* [FastNoise](https://github.com/Auburn/FastNoise)
+* [glslcc](https://github.com/septag/glslcc)
