@@ -1,7 +1,8 @@
 
 set(SOURCES_LIST
     "main.cpp"
-    "pch.cpp"
+    "pch.h"  "pch.cpp"
+    "Log.h"  "Log.cpp"
 
     "editor/AppStatusWindow.h"         "editor/AppStatusWindow.cpp"
     "editor/Camera.h"                  "editor/Camera.cpp"
@@ -104,6 +105,7 @@ if(WIN32)
     list(APPEND STATIC_LIBRARIES
         "d3d11.lib"
         "d3dcompiler.lib"
+        "DXGI.lib"
         )
 
 endif()
@@ -114,6 +116,7 @@ set(INCLUDE_LIST
     "../submodules/imgui/examples"
     "../submodules/imgui/misc/cpp" 
     "../submodules/glm" 
+    "../submodules/spdlog/include"
     "vendor"
     )
 
@@ -124,6 +127,7 @@ target_include_directories(Core PRIVATE ${INCLUDE_LIST})
 target_compile_definitions(Core PRIVATE ${DEFINITIONS_LIST})
 target_link_libraries(Core ${STATIC_LIBRARIES})
 set_target_properties(Core PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES_LIST})
 
 ##cross-compile shaders to hlsl on windows
 if(WIN32)

@@ -46,7 +46,7 @@ namespace Ainan {
 			case RelativeForce:
 				return "Relative Force";
 			default:
-				assert(false);
+				AINAN_LOG_ERROR("Invalid force enum");
 				return "";
 			}
 		}
@@ -59,8 +59,7 @@ namespace Ainan {
 				return RelativeForce;
 
 			//if we get here, that means there is an error
-
-			assert(false);
+			AINAN_LOG_ERROR("Invalid force type string");
 			return DirectionalForce;
 		}
 	};

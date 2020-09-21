@@ -6,5 +6,15 @@ namespace Ainan {
 		{
 			return RendererType::OpenGL;
 		}
+
+		std::string OpenGLRendererContext::GetVersionString()
+		{
+			return OpenGLVersion;
+		}
+
+		std::string OpenGLRendererContext::GetPhysicalDeviceName()
+		{
+			return PhysicalDeviceName;
+		}
 	}
 }

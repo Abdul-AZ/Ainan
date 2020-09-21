@@ -75,7 +75,7 @@ namespace Ainan {
 
 	static void window_error_callback(int32_t num, const char* message)
 	{
-		std::cout << message << std::endl;
+		AINAN_LOG_ERROR(message);
 	}
 
 	void Window::Init(RendererType api)

@@ -10,9 +10,12 @@
 	path = submodules/glfw
 	url = https://github.com/glfw/glfw.git
 	branch = 3.3-stable
-[submodule "submodules/FastNoise"]
+[submodule "FastNoise"]
 	path = submodules/FastNoise
 	url = https://github.com/Auburns/FastNoise.git
-[submodule "submodules/glslcc"]
+[submodule "glslcc"]
 	path = submodules/glslcc
 	url = https://github.com/septag/glslcc.git
+[submodule "spdlog"]
+	path = submodules/spdlog
+	url = https://github.com/gabime/spdlog.git

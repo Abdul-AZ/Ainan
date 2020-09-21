@@ -24,8 +24,7 @@ namespace Ainan {
 
 		static void opengl_debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 		{
-			if(type == GL_DEBUG_TYPE_ERROR || type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR || type == GL_DEBUG_TYPE_PERFORMANCE || type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR)
-				std::cout << message << std::endl;
+			AINAN_LOG_ERROR(message);
 		};
 
 		OpenGLRendererAPI::OpenGLRendererAPI()
@@ -38,6 +37,8 @@ namespace Ainan {
 #endif // DEBUG
 			glEnable(GL_BLEND);
 			SingletonInstance = this;
+			Context.OpenGLVersion = std::string((const char*)glGetString(GL_VERSION)).substr(0, 5);
+			Context.PhysicalDeviceName = (const char*)glGetString(GL_RENDERER);
 		}
 
 		OpenGLRendererAPI::~OpenGLRendererAPI()

@@ -19,5 +19,12 @@ namespace Ainan
 		RenderingBlendMode BlendMode = RenderingBlendMode::Additive;
 		bool BlurEnabled = false;
 		float BlurRadius = 1.0f;
+
+		static Environment Default()
+		{
+			Environment env;
+			env.Name = "New Environment";
+			return env;
+		}
 	};
 }

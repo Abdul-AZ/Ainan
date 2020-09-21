@@ -59,6 +59,9 @@ namespace Ainan {
 		auto initFunc = [api]()
 		{
 			Renderer::InternalInit(api);
+			AINAN_LOG_INFO("Renderer Initilized\nBackend: " + RendererTypeStr(Rdata->CurrentActiveAPI->GetContext()->GetType()) +
+						   "             Version: " + Rdata->CurrentActiveAPI->GetContext()->GetVersionString() +
+						   "             Physical Device: " + Rdata->CurrentActiveAPI->GetContext()->GetPhysicalDeviceName());
 			Renderer::RendererThreadLoop();
 			Renderer::InternalTerminate();
 		};

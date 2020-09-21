@@ -205,7 +205,7 @@ namespace Ainan {
 			return "Classic";
 
 		default:
-			assert(false);
+			AINAN_LOG_ERROR("Invalid style enum");
 			return "";
 		}
 	}
@@ -227,7 +227,7 @@ namespace Ainan {
 		else if (name == "Classic")
 			return EditorStyle::Classic;
 
-		assert(false);
+		AINAN_LOG_ERROR("Invalid style string");
 		return EditorStyle::Light;
 	}
 }

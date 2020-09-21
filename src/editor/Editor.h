@@ -18,7 +18,6 @@
 
 namespace Ainan {
 	bool SaveEnvironment(const Environment& env, std::string path);
-	std::string CheckEnvironmentFile(const std::string& path);
 	Environment* LoadEnvironment(const std::string& path);
 
 	const float c_StartMenuBtnWidth     = 300.0f;

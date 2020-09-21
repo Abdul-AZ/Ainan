@@ -36,3 +36,4 @@ Also, feel free to contact me through Email.
 * [nlohmann/json](https://github.com/nlohmann/json)
 * [FastNoise](https://github.com/Auburn/FastNoise)
 * [glslcc](https://github.com/septag/glslcc)
+* [spdlog](https://github.com/gabime/spdlog)

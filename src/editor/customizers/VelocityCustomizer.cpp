@@ -13,7 +13,7 @@ namespace Ainan {
 		case VelocityCustomizer::PerAxisLimit:
 			return "Per Axis Limit";
 		default:
-			assert(false);
+			AINAN_LOG_ERROR("Invalid limit enum");
 			return "";
 		}
 	}
@@ -28,7 +28,7 @@ namespace Ainan {
 		else if (type == "Per Axis Limit")
 			return VelocityCustomizer::PerAxisLimit;
 
-		assert(false);
+		AINAN_LOG_ERROR("Invalid limit string");
 		return VelocityCustomizer::NoLimit;
 	}
 

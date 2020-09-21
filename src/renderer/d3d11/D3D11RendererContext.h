@@ -9,7 +9,8 @@ namespace Ainan {
 		{
 		public:
 			virtual RendererType GetType() const override;
-
+			virtual std::string GetVersionString() override;
+			virtual std::string GetPhysicalDeviceName() override;
 
 			ID3D11Device* Device;
 			ID3D11DeviceContext* DeviceContext;

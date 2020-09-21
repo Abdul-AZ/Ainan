@@ -21,7 +21,7 @@ namespace Ainan {
 			return LitSpriteType;
 
 		//we should never reach here
-		assert(false);
+		AINAN_LOG_ERROR("Invalid object type enum");
 		return ParticleSystemType;
 	}
 
@@ -46,7 +46,7 @@ namespace Ainan {
 		}
 
 		//we should never reach here
-		assert(false);
+		AINAN_LOG_ERROR("Invalid object type string");
 		return "";
 	}
 }

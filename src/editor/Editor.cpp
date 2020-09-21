@@ -359,8 +359,6 @@ namespace Ainan
 				//check if file is selected
 				if (path.extension().u8string() == ".env") 
 				{
-					assert(CheckEnvironmentFile(path.u8string()) == "");
-
 					//remove minimizing event on file browser window close
 					m_LoadEnvironmentBrowser.OnCloseWindow = nullptr;
 
@@ -1310,11 +1308,6 @@ namespace Ainan
 			obj.reset(((EnvironmentObjectInterface*)(sprite.release())));
 		}
 		break;
-
-		default:
-			//we should never reach here
-			assert(false);
-			return;
 		}
 
 		obj->m_Name = name;

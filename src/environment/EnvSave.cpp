@@ -58,7 +58,7 @@ namespace Ainan {
 				break;
 
 			default: //this means we have a type that we haven't implemented how to save it
-				assert(false);
+				AINAN_LOG_FATAL("Invalid object type enum");
 				break;
 			}
 		}
@@ -75,7 +75,7 @@ namespace Ainan {
 			fclose(file);
 		}
 		else
-			assert(false, "Error while trying to save environment");
+			AINAN_LOG_FATAL("Cannot save environment.")
 
 		return true;
 	}

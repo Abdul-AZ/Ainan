@@ -71,7 +71,7 @@ namespace Ainan {
 		else if (mode == "Spawn Inside Circle")
 			return SpawnMode::SpawnInsideCircle;
 		else {
-			assert(false);
+			AINAN_LOG_ERROR("Invalid spawn mode string");
 			return SpawnMode::SpawnOnPoint;
 		}
 	}

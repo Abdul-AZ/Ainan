@@ -17,6 +17,7 @@
 #include <numeric>
 
 //dependencies
+#include "Log.h" //includes spdlog
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <imgui_stdlib.h>

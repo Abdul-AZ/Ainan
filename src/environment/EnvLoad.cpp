@@ -14,20 +14,6 @@ using json = nlohmann::json;
 
 namespace Ainan {
 
-	std::string CheckEnvironmentFile(const std::string& path) 
-	{
-		json data;
-		try
-		{
-			data = json::parse(AssetManager::ReadEntireTextFile(path));
-			return "";
-		}
-		catch (const std::exception& e)
-		{
-			return e.what();
-		}
-	}
-
 	static void ParticleSystemFromJson(Environment* env, json& data, std::string id);
 	static void RadialLightFromJson(Environment* env, json& data, std::string id);
 	static void SpotLightFromJson(Environment* env, json& data, std::string id);
@@ -37,7 +23,17 @@ namespace Ainan {
 
 	Environment* LoadEnvironment(const std::string& path)
 	{
-		json data = json::parse(AssetManager::ReadEntireTextFile(path));
+		json data;
+		
+		try 
+		{
+			data = json::parse(AssetManager::ReadEntireTextFile(path));
+		}
+		catch (std::exception)
+		{
+			AINAN_LOG_ERROR("Cannot load environemnt. Environment file is invalid, loaded empty project instead.");
+			return new Environment(Environment::Default());
+		}
 
 		Environment* env = new Environment;
 
@@ -77,7 +73,7 @@ namespace Ainan {
 				break;
 
 			default:
-				assert(false);
+				AINAN_LOG_FATAL("Invalid object enum");
 				break;
 			}
 		}

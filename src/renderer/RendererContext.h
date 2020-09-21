@@ -22,5 +22,7 @@ namespace Ainan {
 	{
 	public:
 		virtual RendererType GetType() const = 0;
+		virtual std::string GetVersionString() = 0;
+		virtual std::string GetPhysicalDeviceName() = 0;
 	};
 }

@@ -7,6 +7,10 @@ int main()
 {
 	using namespace Ainan;
 
+#ifndef NDEBUG
+	InitAinanLogger();;
+#endif // !NDEBUG
+
 	auto api = EditorPreferences::LoadFromDefaultPath().RenderingBackend;
 
 	Window::Init(api);
