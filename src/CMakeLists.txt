@@ -83,6 +83,9 @@ list(APPEND DEFINITIONS_LIST
     IMGUI_DEFINE_MATH_OPERATORS=1
     )
 
+set(SHADER_FILES)
+set(GENERATED_SHADER_FILES)
+
 if(WIN32)
 
     list(APPEND DEFINITIONS_LIST
@@ -108,7 +111,41 @@ if(WIN32)
         "DXGI.lib"
         )
 
+    ##add commands to cross-compile shaders to hlsl
+    while(GLSL_SHADERS)
+
+        list(SUBLIST GLSL_SHADERS 0 6 CURRENT_SHADERS)
+        list(REMOVE_AT GLSL_SHADERS 0 1 2 3 4 5)
+
+        list(GET CURRENT_SHADERS 1 CURRENT_VERTEX_SHADER_PATH)
+        list(GET CURRENT_SHADERS 3 CURRENT_FRAGMENT_SHADER_PATH)
+        list(GET CURRENT_SHADERS 5 CURRENT_SHADER_OUTPUT_PATH)
+
+        #set output extension correctly as specified in glslcc
+        string(REGEX REPLACE "[.]cso$" "_vs.cso" CURRENT_VERTEX_SHADER_OUTPUT ${CURRENT_SHADER_OUTPUT_PATH})
+        string(REGEX REPLACE "[.]cso$" "_fs.cso" CURRENT_FRAGMENT_SHADER_OUTPUT ${CURRENT_SHADER_OUTPUT_PATH})
+
+        list(APPEND SHADER_FILES ${CURRENT_VERTEX_SHADER_PATH} ${CURRENT_FRAGMENT_SHADER_PATH})
+        list(APPEND GENERATED_SHADER_FILES ${CURRENT_VERTEX_SHADER_OUTPUT} ${CURRENT_FRAGMENT_SHADER_OUTPUT})
+
+        set(GLSLCC_FLAGS
+            --include-dirs=${GLSL_SHADERS_DIR}
+            --bin #this means compile to d3d11 hlsl bytecode
+            --lang=hlsl
+            )
+
+        add_custom_command(OUTPUT ${CURRENT_VERTEX_SHADER_OUTPUT} ${CURRENT_FRAGMENT_SHADER_OUTPUT}
+                           DEPENDS ${CURRENT_VERTEX_SHADER_PATH} ${CURRENT_FRAGMENT_SHADER_PATH}
+                           COMMAND ${GLSLCC_BIN_PATH} ${CURRENT_SHADERS} ${GLSLCC_FLAGS}
+                           )
+    endwhile()
+
+    #generate visual studio filters
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES_LIST})
+    source_group("shaders" FILES ${SHADER_FILES})
+    source_group("compiled shaders" FILES ${GENERATED_SHADER_FILES})
 endif()
+
 
 set(INCLUDE_LIST
     "."
@@ -121,29 +158,10 @@ set(INCLUDE_LIST
     )
 
 
-add_executable(Core WIN32 ${SOURCES_LIST} ${IMGUI_SOURCE_FILES})
+add_executable(Core WIN32 ${SOURCES_LIST} ${IMGUI_SOURCE_FILES} ${SHADER_FILES} ${GENERATED_SHADER_FILES})
+set_source_files_properties(${GENERATED_SHADER_FILES} PROPERTIES GENERATED TRUE)
 target_precompile_headers(Core PRIVATE "pch.h")
 target_include_directories(Core PRIVATE ${INCLUDE_LIST})
 target_compile_definitions(Core PRIVATE ${DEFINITIONS_LIST})
 target_link_libraries(Core ${STATIC_LIBRARIES})
 set_target_properties(Core PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES_LIST})
-
-##cross-compile shaders to hlsl on windows
-if(WIN32)
-    while(GLSL_SHADERS)
-
-        list(SUBLIST GLSL_SHADERS 0 6 CURRENT_SHADERS)
-        list(REMOVE_AT GLSL_SHADERS 0 1 2 3 4 5)
-
-        set(GLSLCC_FLAGS
-            -I ${GLSL_SHADERS_DIR}
-            -b
-            -l hlsl
-            )
-
-        add_custom_command(TARGET Core PRE_BUILD
-                           COMMAND ${GLSLCC_BIN_PATH} ${CURRENT_SHADERS} ${GLSLCC_FLAGS}
-                           )
-    endwhile()
-endif()
