@@ -8,6 +8,8 @@
 #include "opengl/OpenGLFrameBuffer.h"
 #include "opengl/OpenGLUniformBuffer.h"
 
+#include <GLFW/glfw3.h>
+
 #ifdef PLATFORM_WINDOWS
 
 #include "d3d11/D3D11RendererAPI.h"
@@ -18,11 +20,10 @@
 #include "d3d11/D3D11Texture.h"
 #include "d3d11/D3D11FrameBuffer.h"
 
-#endif // PLATFORM_WINDOWS
-
-#include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+
+#endif // PLATFORM_WINDOWS
 
 bool WantUpdateMonitors = true;
 
@@ -42,7 +43,7 @@ namespace Ainan {
 	{
 		//name                  //vertex shader                //fragment shader
 		{ "CircleOutlineShader" , "shaders/CircleOutline" , "shaders/CircleOutline"  },
-		{ "LineShader"          , "shaders/Line"          , "shaders/FlatColor"      },
+		{ "LineShader"          , "shaders/FlatColor"     , "shaders/FlatColor"      },
 		{ "BlurShader"          , "shaders/Image"         , "shaders/Blur"           },
 		{ "GizmoShader"         , "shaders/Gizmo"         , "shaders/Gizmo"          },
 		{ "GridShader"          , "shaders/Grid"          , "shaders/Grid"           },
@@ -370,6 +371,7 @@ namespace Ainan {
 		main_viewport->PlatformUserData = data;
 		main_viewport->PlatformHandle = (void*)Window::Ptr;
 
+		io.Fonts->AddFontFromFileTTF("res/Roboto-Medium.ttf", 15);
 		Rdata->CurrentActiveAPI->InitImGui();
 	}
 
@@ -777,8 +779,6 @@ namespace Ainan {
 		Rdata->CurrentActiveAPI->ImGuiNewFrame();
 
 		ImGuiIO& io = ImGui::GetIO();
-		IM_ASSERT(io.Fonts->IsBuilt() && "Font atlas not built! It is generally built by the renderer back-end."
-			"Missing call to renderer _NewFrame() function? e.g. ImGui_ImplOpenGL3_NewFrame().");
 
 		// Setup display size (every frame to accommodate for window resizing)
 		int w, h;

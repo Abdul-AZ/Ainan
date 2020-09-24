@@ -21,7 +21,7 @@ namespace Ainan {
 			{
 				FILE* file = nullptr;
 				auto err = fopen_s(&file, (vertPath + "_vs.cso").c_str(), "rb");
-				if (err != 0)
+				if (err != 0 || !file)
 					assert(false);
 
 				fseek(file, 0, SEEK_END);
