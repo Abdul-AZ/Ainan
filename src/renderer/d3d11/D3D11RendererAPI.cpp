@@ -120,6 +120,16 @@ namespace Ainan {
 			screenBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_MAX;
 			screenBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
+			D3D11_RENDER_TARGET_BLEND_DESC overlayBlendDesc{};
+			overlayBlendDesc.BlendEnable = true;
+			overlayBlendDesc.SrcBlendAlpha = D3D11_BLEND_ONE;
+			overlayBlendDesc.SrcBlend = D3D11_BLEND_ONE;
+			overlayBlendDesc.DestBlendAlpha = D3D11_BLEND_ZERO;
+			overlayBlendDesc.DestBlend = D3D11_BLEND_ZERO;
+			overlayBlendDesc.BlendOp = D3D11_BLEND_OP_ADD;
+			overlayBlendDesc.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+			overlayBlendDesc.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
 			D3D11_BLEND_DESC blendDesc{};
 			blendDesc.RenderTarget[0] = additiveBlendDesc; 
 			blendDesc.AlphaToCoverageEnable = 0;
@@ -129,6 +139,9 @@ namespace Ainan {
 
 			blendDesc.RenderTarget[0] = screenBlendDesc;
 			ASSERT_D3D_CALL(Context.Device->CreateBlendState(&blendDesc, &ScreenBlendMode));
+
+			blendDesc.RenderTarget[0] = overlayBlendDesc;
+			ASSERT_D3D_CALL(Context.Device->CreateBlendState(&blendDesc, &OverlayBlendMode));
 		}
 
 		static void SetupRenderState(ImDrawData* draw_data, ID3D11DeviceContext* ctx)
@@ -218,6 +231,7 @@ namespace Ainan {
 			if (g_pd3dDeviceContext) { g_pd3dDeviceContext->Release(); g_pd3dDeviceContext = NULL; }
 			AdditiveBlendMode->Release();
 			ScreenBlendMode->Release();
+			OverlayBlendMode->Release();
 			Context.BackbufferView->Release();
 			Context.Backbuffer->Release();
 			Context.Swapchain->Release();
@@ -290,6 +304,10 @@ namespace Ainan {
 
 			case Ainan::RenderingBlendMode::Screen:
 				Context.DeviceContext->OMSetBlendState(ScreenBlendMode, 0, 0xffffffff);
+				break;
+
+			case Ainan::RenderingBlendMode::Overlay:
+				Context.DeviceContext->OMSetBlendState(OverlayBlendMode, 0, 0xffffffff);
 				break;
 
 			case Ainan::RenderingBlendMode::NotSpecified:

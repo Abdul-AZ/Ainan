@@ -15,7 +15,8 @@ namespace Ainan {
 		int EventTrigger;
 	};
 
-	class InputManager {
+	class InputManager 
+	{
 	public:
 		static void Init();
 		static void Terminate();

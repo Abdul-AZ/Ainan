@@ -97,6 +97,9 @@ namespace Ainan {
 			case RenderingBlendMode::Screen:
 					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 				break;
+			case RenderingBlendMode::Overlay:
+					glBlendFunc(GL_ONE, GL_ZERO);
+				break;
 			}
 		}
 

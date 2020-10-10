@@ -619,8 +619,9 @@ namespace Ainan
 			for (pEnvironmentObject& obj : m_Env->Objects)
 				if (obj->Selected)
 				{
+					Renderer::SetBlendMode(RenderingBlendMode::Overlay);
 					//draw object position gizmo
-					m_Gizmo.Draw(*obj->GetPositionRef(),
+					m_Gizmo.Draw(obj->GetPositionRef(),
 						m_ViewportWindow.WindowPosition,
 						m_ViewportWindow.WindowSize,
 						m_ViewportWindow.WindowContentRegionSize,
@@ -632,7 +633,7 @@ namespace Ainan
 						auto ps = static_cast<ParticleSystem*>(obj.get());
 						if (ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "")
 							if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce)
-								m_Gizmo.Draw(ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target,
+								m_Gizmo.Draw(&ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target,
 									m_ViewportWindow.WindowSize,
 									m_ViewportWindow.WindowPosition,
 									m_ViewportWindow.WindowContentRegionSize,

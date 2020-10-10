@@ -25,6 +25,10 @@ namespace Ainan {
 		void Update(float deltaTime, const Rectangle& viewport);
 		void SetPosition(const glm::vec2& newPos);
 
+		//returns the position in Normalized Dvice Coordinates relative to the viewport window and NOT the monitor
+		glm::vec2 WorldSpaceToViewportNDC(glm::vec2 pos) const;
+		glm::vec2 ViewportNDCToWorldSpace(glm::vec2 pos) const;
+
 	public:
 		glm::vec2 Position = glm::vec2(0.0f, 0.0f);
 		glm::mat4 ViewMatrix;

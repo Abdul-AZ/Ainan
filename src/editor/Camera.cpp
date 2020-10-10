@@ -37,4 +37,23 @@ namespace Ainan {
 		Position = newPos;
 		ViewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(Position.x, Position.y, 0.0f));
 	}
+
+	glm::vec2 Camera::WorldSpaceToViewportNDC(glm::vec2 pos) const
+	{
+		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(Position.x, Position.y, 0.0f) / c_GlobalScaleFactor);
+		glm::vec4 result = ProjectionMatrix * view * glm::vec4(pos.x, pos.y, 0.0f, 1.0f);
+
+		return glm::vec2(result.x, result.y) * c_GlobalScaleFactor;
+	}
+
+	glm::vec2 Camera::ViewportNDCToWorldSpace(glm::vec2 pos) const
+	{
+		glm::mat4 invView = glm::inverse(ViewMatrix);
+		glm::mat4 invProj = glm::inverse(ProjectionMatrix);
+
+		glm::vec4 result = invView * invProj * glm::vec4(pos.x, pos.y, 0.0f, 1.0f);
+
+
+		return glm::vec2(result.x, result.y) / c_GlobalScaleFactor;
+	}
 }

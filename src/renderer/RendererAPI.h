@@ -20,6 +20,7 @@ namespace Ainan {
 	{
 		Additive,
 		Screen,
+		Overlay,
 		NotSpecified //this will use the current mode it is set on
 	};
 

@@ -4,12 +4,12 @@
 
 namespace Ainan {
 
-#define GIZMO_LINE_LENGTH_TILL_TIP 1.5f
-#define GIZMO_LINE_LENGTH_TILL_WINGS 1.3f
-#define GIZMO_LINE_WIDTH 0.15f
-#define GIZMO_LINE_WINGS_HEIGHT 0.2f
-#define GIZMO_LINE_START_X 0
-#define GIZMO_LINE_START_Y 0
+#define GIZMO_LINE_LENGTH_TILL_TIP 0.25f
+#define GIZMO_LINE_LENGTH_TILL_WINGS 0.21f
+#define GIZMO_LINE_WIDTH 0.03f
+#define GIZMO_LINE_WINGS_HEIGHT 0.0425f
+#define GIZMO_LINE_START_X 0.0f
+#define GIZMO_LINE_START_Y 0.0f
 
 	//                                            v3
 	//                                            |\
@@ -29,16 +29,37 @@ namespace Ainan {
 	//
 
 	//in normalized device coordinates -> ranges from -1 to 1
-	static const glm::vec2 arrowVertices[] =
+	static const float arrowVertices[] =
 	{
-		glm::vec2(GIZMO_LINE_START_X, GIZMO_LINE_START_Y),  //v0
-		glm::vec2(GIZMO_LINE_START_X,  GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH),  //v1
-		glm::vec2(GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS,  GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH),  //v2
-		glm::vec2(GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS, GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH + GIZMO_LINE_WINGS_HEIGHT),  //v3
-		glm::vec2(GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_TIP,  GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH / 2),  //v4
-		glm::vec2(GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS, GIZMO_LINE_START_Y - GIZMO_LINE_WINGS_HEIGHT),  //v5
-		glm::vec2(GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS, GIZMO_LINE_START_Y),  //v6
+		GIZMO_LINE_START_X, GIZMO_LINE_START_Y,  //v0
+		0.75f, 0.0f, 0.0f, 1.0f,
+		GIZMO_LINE_START_X,  GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH,  //v1
+		0.75f, 0.0f, 0.0f, 1.0f,
+		GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS,  GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH,  //v2
+		0.75f, 0.0f, 0.0f, 1.0f,
+		GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS, GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH + GIZMO_LINE_WINGS_HEIGHT,  //v3
+		0.75f, 0.0f, 0.0f, 1.0f,
+		GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_TIP,  GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH / 2.0f,  //v4
+		0.75f, 0.0f, 0.0f, 1.0f,
+		GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS, GIZMO_LINE_START_Y - GIZMO_LINE_WINGS_HEIGHT,  //v5
+		0.75f, 0.0f, 0.0f, 1.0f,
+		GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS, GIZMO_LINE_START_Y,  //v6
+		0.75f, 0.0f, 0.0f, 1.0f,
 
+		GIZMO_LINE_START_Y, GIZMO_LINE_START_X,  //v0
+		0.0f, 0.75f, 0.0f, 1.0f,
+		GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH, GIZMO_LINE_START_X,  //v1
+		0.0f, 0.75f, 0.0f, 1.0f,
+		GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH, GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS,  //v2
+		0.0f, 0.75f, 0.0f, 1.0f,
+		GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH + GIZMO_LINE_WINGS_HEIGHT, GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS,  //v3
+		0.0f, 0.75f, 0.0f, 1.0f,
+		GIZMO_LINE_START_Y + GIZMO_LINE_WIDTH / 2.0f, GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_TIP,  //v4
+		0.0f, 0.75f, 0.0f, 1.0f,
+		GIZMO_LINE_START_Y - GIZMO_LINE_WINGS_HEIGHT,GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS,  //v5
+		0.0f, 0.75f, 0.0f, 1.0f,
+		GIZMO_LINE_START_Y, GIZMO_LINE_START_X + GIZMO_LINE_LENGTH_TILL_WINGS,   //v6
+		0.0f, 0.75f, 0.0f, 1.0f
 	};
 
 	static const uint32_t c_OpenGLArrowIndecies[] =
@@ -47,7 +68,13 @@ namespace Ainan {
 		2,3,4,
 		4,5,6,
 		6,4,2,
-		0,2,6
+		0,2,6,
+
+		7 ,8 ,9 ,
+		9 ,10,11,
+		11,12,13,
+		13,11,9 ,
+		7 ,9 ,13
 	};
 
 	static const uint32_t c_DirectXArrowIndecies[] =
@@ -56,240 +83,147 @@ namespace Ainan {
 		2,3,4,
 		4,5,6,
 		2,4,6,
-		0,2,6
+		0,2,6,
+
+		7 ,9 ,8 ,
+		9 ,11,10,
+		11,13,12,
+		9 ,13,11,
+		7 ,13,9
 	};
 
 	Gizmo::Gizmo()
 	{
-		VertexLayout layout(1);
-		layout[0] = VertexLayoutElement("POSITION",0, ShaderVariableType::Vec2);
-		VBO = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibrary()["GizmoShader"]);
+		VertexLayout layout(2);
+		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
+		layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec4);
+		m_VertexBuffer = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibrary()["GizmoShader"]);
 
 		if(Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
-			EBO = Renderer::CreateIndexBuffer((uint32_t*)c_OpenGLArrowIndecies, sizeof(c_OpenGLArrowIndecies) / sizeof(uint32_t));
+			m_IndexBuffer = Renderer::CreateIndexBuffer((uint32_t*)c_OpenGLArrowIndecies, sizeof(c_OpenGLArrowIndecies) / sizeof(uint32_t));
 		else
-			EBO = Renderer::CreateIndexBuffer((uint32_t*)c_DirectXArrowIndecies, sizeof(c_DirectXArrowIndecies) / sizeof(uint32_t));
+			m_IndexBuffer = Renderer::CreateIndexBuffer((uint32_t*)c_DirectXArrowIndecies, sizeof(c_DirectXArrowIndecies) / sizeof(uint32_t));
 
-		EBO->Bind();
+		m_IndexBuffer->Bind();
 
-		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { VertexLayoutElement("u_Model",0, ShaderVariableType::Mat4) }, nullptr);
-		ColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 2, { VertexLayoutElement("u_Color",0, ShaderVariableType::Vec4) }, nullptr);
+		m_UniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1,
+			{ 
+				VertexLayoutElement("u_Position", 0, ShaderVariableType::Vec2),
+				VertexLayoutElement("u_AspectRatio", 1, ShaderVariableType::Float),
+				VertexLayoutElement("u_OpacityR", 2, ShaderVariableType::Float),
+				VertexLayoutElement("u_OpacityG", 3, ShaderVariableType::Float) 
+			},
+			nullptr);
 	}
 
-	void Gizmo::Draw(glm::vec2& objectPosition,
+	void Gizmo::Draw(glm::vec2* objectPosition,
 		const glm::vec2& viewportWindowPos,
 		const glm::vec2& viewportWindowSize,
 		const glm::vec2& viewportWindowContentRegionSize,
 		const Camera& camera)
 	{
+		//later used for drawing
+		TransformationData data;
+		data.Position = camera.WorldSpaceToViewportNDC(*objectPosition);
+		data.AspectRatio = viewportWindowContentRegionSize.y / viewportWindowContentRegionSize.x;
+
+		//get mouse position
 		double xpos, ypos;
 		glfwGetCursorPos(Window::Ptr, &xpos, &ypos);
+		int32_t num = 0;
+		glfwGetMonitors(&num)[0];
+		auto videoInfo = glfwGetVideoMode(glfwGetMonitors(&num)[0]);
 
-		Rectangle viewport{};
-		viewport.X = viewportWindowPos.x - Window::Position.x;
-		viewport.Y = Window::FramebufferSize.y
-			- (viewportWindowPos.y + viewportWindowContentRegionSize.y + ImGui::GetFrameHeightWithSpacing() / 4.0f)
-			+ Window::Position.y;
-		viewport.Width = viewportWindowSize.x;
-		viewport.Height = viewportWindowSize.y;
+		//transform mouse coordinates to viewport NDC
+		float xposNDC = ((xpos - viewportWindowPos.x) / viewportWindowSize.x) * 2.0f - 1.0f;
+		float yposNDC = (((ypos - viewportWindowPos.y + ImGui::GetFrameHeightWithSpacing() - ImGui::GetFrameHeight()) / viewportWindowSize.y) );
+		
+		//change range to not include outside frame of the window
+		yposNDC *= (1.0f + ImGui::GetFrameHeightWithSpacing() / viewportWindowSize.y);
+		yposNDC = -(yposNDC * 2.0f - 1.0f);
 
-		//change from being relative to top left to being relative to bottom left
-		ypos = -ypos + Window::Size.y;
-
-		if (xpos < viewport.X || xpos > viewport.X + viewport.Width ||
-			ypos < viewport.Y || ypos > viewport.Y + viewport.Height)
-		{
-			xpos = -1000000;
-			ypos = -1000000;
-		}
-
-		//change from being relative to the bottom left of the screen
-		//to being relative to bottom left of the viewport
-		xpos -= viewport.X;
-		ypos -= viewport.Y;
-
-		float NDC_xpos = (float)xpos * 2 / viewport.Width - 1.0f;
-		float NDC_ypos = (float)ypos * 2 / viewport.Height - 1.0f;
-
-		glm::vec2 objectPositionWS = objectPosition * c_GlobalScaleFactor;
-		glm::vec2 realMousePositionNDC = glm::vec2(NDC_xpos, NDC_ypos);
-
-		glm::mat4 invView = glm::inverse(camera.ViewMatrix);
-		glm::mat4 invProj = glm::inverse(camera.ProjectionMatrix);
-
-		glm::vec4 result = invView * invProj * glm::vec4(realMousePositionNDC.x, realMousePositionNDC.y, 0.0f, 1.0f);
-
-		//check collision inside arrow rectangle(the part before the wings)
-
-		bool mouseButtonDown = glfwGetMouseButton(Window::Ptr, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
-
-		GizmoArrow mouseOver = None;
-
-		if (CheckIfInsideArrow(Horizontal, objectPositionWS, glm::vec2(result.x,result.y)) )
-		{
-			mouseOver = Horizontal;
-			if (mouseButtonDown && m_ArrowPressedMap[&objectPosition] != Vertical) {
-				m_ArrowPressedMap[&objectPosition] = Horizontal;
-
-				if (m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition] == 0.0f)
-					m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition] = result.x - objectPositionWS.x;
-			}
-		}
-
-		if (CheckIfInsideArrow(Vertical, objectPositionWS, glm::vec2(result.x, result.y)))
-		{
-			mouseOver = Vertical;
-			if (mouseButtonDown && m_ArrowPressedMap[&objectPosition] != Horizontal) {
-				m_ArrowPressedMap[&objectPosition] = Vertical;
-
-				if(m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition] == 0.0f)
-					m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition] = result.y - objectPositionWS.y;
-			}
-		}
-
-		if (m_ArrowPressedMap[&objectPosition] == Horizontal)
-			objectPosition.x = (result.x - m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition]) / c_GlobalScaleFactor;
-		else if(m_ArrowPressedMap[&objectPosition] == Vertical)
-			objectPosition.y = (result.y - m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition]) / c_GlobalScaleFactor;
-
-		if (!mouseButtonDown) {
-			m_ArrowPressedMap[&objectPosition] = None;
-			m_ArrowPressLocationDistanceFromArrowOriginMap[&objectPosition] = 0.0f;
-		}
+		//if mouse is hovering over the viewport, handle events
+		if (xposNDC > -1.0f && xposNDC < 1.0f &&
+			yposNDC > -1.0f && yposNDC < 1.0f)
+			HandleInteration(xposNDC, yposNDC, objectPosition, camera, data);
 
 		//Draw the triangles
-		glm::mat4 model(1.0f);
-		model = glm::translate(model, glm::vec3(objectPositionWS.x, objectPositionWS.y, 0.0f));
-		model = glm::scale(model, glm::vec3(100.0f, 100.0f, 100.0f));
-
-		glm::vec4 color;
-
-		//assign a brighter color if the mouse is over the arrow
-		if (m_ArrowPressedMap[&objectPosition] == Horizontal || mouseOver == Horizontal)
-			color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		else
-			color = glm::vec4(0.75f, 0.0f, 0.0f, 1.0f);
-
 		auto& shader = Renderer::ShaderLibrary()["GizmoShader"];
 
-		shader->BindUniformBuffer(TransformUniformBuffer, 1, RenderingStage::VertexShader);
-		TransformUniformBuffer->UpdateData(&model);
+		shader->BindUniformBuffer(m_UniformBuffer, 1, RenderingStage::VertexShader);
+		m_UniformBuffer->UpdateData(&data);
 
-		shader->BindUniformBuffer(ColorUniformBuffer, 2, RenderingStage::FragmentShader);
-		ColorUniformBuffer->UpdateData(&color);
-
-		Renderer::Draw(VBO, shader, Primitive::Triangles, EBO);
-
-		model = glm::rotate(model, -PI / 2, glm::vec3(0.0f, 0.0f, -1.0f));
-
-		//assign a brighter color if the mouse is over the arrow
-		if (m_ArrowPressedMap[&objectPosition] == Vertical || mouseOver == Vertical)
-			color = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-		else
-			color = glm::vec4(0.0f, 0.75f, 0.0f, 1.0f);
-
-		ColorUniformBuffer->UpdateData(&color);
-		TransformUniformBuffer->UpdateData(&model);
-		glm::vec2 mousePosWS = Renderer::Rdata->CurrentSceneDescription.SceneCamera.Position + realMousePositionNDC * c_GlobalScaleFactor;
-		glm::vec2 objectPosWS = objectPositionWS * c_GlobalScaleFactor;
-
-		Renderer::Draw(VBO, shader, Primitive::Triangles, EBO);
+		Renderer::Draw(m_VertexBuffer, shader, Primitive::Triangles, m_IndexBuffer);
 	}
 
-	bool Gizmo::CheckIfInsideArrow(const GizmoArrow& arrow, const glm::vec2& arrowCentre, const glm::vec2& point)
+	//we are treating arrow hitboxes as rectangles for now
+	void Gizmo::HandleInteration(float xposNDC, float yposNDC, glm::vec2* objectPosition, const Camera& camera, TransformationData& data)
 	{
-		//check if inside arrow rectangle, that is the shape (v0, v1, v2, v6) in the arrow in the start of this file
-		if (arrow == Horizontal)
+		static int32_t pressCount = 0;
+		if (glfwGetMouseButton(Window::Ptr, GLFW_MOUSE_BUTTON_LEFT))
+			pressCount++;
+		else
 		{
-			if(point.x > arrowCentre.x&& point.x < arrowCentre.x + GIZMO_LINE_LENGTH_TILL_WINGS * c_GlobalScaleFactor / 10.0f &&
-				   point.y > arrowCentre.y && point.y < arrowCentre.y + GIZMO_LINE_WIDTH * c_GlobalScaleFactor / 10.0f)
-				return true;
+			pressCount = 0;
+			m_CurrentlyPressedArrow = None;
 		}
-		else if (arrow == Vertical)
+
+		//check inside horizontal arrow
 		{
-			if(point.x > arrowCentre.x - GIZMO_LINE_WIDTH * c_GlobalScaleFactor / 10.0f && point.x < arrowCentre.x &&
-				   point.y > arrowCentre.y && point.y < arrowCentre.y + GIZMO_LINE_LENGTH_TILL_WINGS * c_GlobalScaleFactor / 10.0f)
-				return true;
-		}
-		//check if inside arrow triangle, that is the shape (v3, v4, v5) in the arrow in the start of this file
-		glm::vec2 v3 = arrowVertices[3] / 10.0f;
-		glm::vec2 v4 = arrowVertices[4] / 10.0f;
-		glm::vec2 v5 = arrowVertices[5] / 10.0f;
+			//get rectangle size
+			glm::vec2 rectangleSize = glm::vec2(0.0f);
+			rectangleSize.x = GIZMO_LINE_LENGTH_TILL_TIP * data.AspectRatio;
+			rectangleSize.y = GIZMO_LINE_WIDTH;
 
-		if (arrow == Horizontal)
-		{
-			//A,B,C represent the edges of the triangle
-			glm::vec2 A = arrowCentre / c_GlobalScaleFactor + v3;
-			glm::vec2 B = arrowCentre / c_GlobalScaleFactor + v4;
-			glm::vec2 C = arrowCentre / c_GlobalScaleFactor + v5;
-
-
-			glm::vec2 vector0 = C - A;
-			glm::vec2 vector1 = B - A;
-			glm::vec2 vector2 = point / c_GlobalScaleFactor - A;
-
-			// Compute dot products
-			float dot00 = glm::dot(vector0, vector0);
-			float dot01 = glm::dot(vector0, vector1);
-			float dot02 = glm::dot(vector0, vector2);
-			float dot11 = glm::dot(vector1, vector1);
-			float dot12 = glm::dot(vector1, vector2);
-
-			// Compute barycentric coordinates
-			float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-			float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-			float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-			// Check if point is in triangle
-			return (u >= 0.0f) && (v >= 0.0f) && (u + v < 1.0f);
-		}
-		else if (arrow == Vertical)
-		{
+			if (xposNDC > data.Position.x && xposNDC < data.Position.x + rectangleSize.x &&
+				yposNDC > data.Position.y && yposNDC < data.Position.y + rectangleSize.y)
 			{
-				//rotate the triangle 90 degrees (pi / 2 in radians) because we are checking the vertical arrow
-				glm::vec2 tempv3 = v3;
-				glm::vec2 tempv4 = v4;
-				glm::vec2 tempv5 = v5;
-
-				float angle = PI / 2.0f;
-
-				//rotate A
-				v3.x = tempv3.x * cos(angle) - tempv3.y * sin(angle);
-				v3.y = tempv3.x * sin(angle) + tempv3.y * cos(angle);
-				//rotate B
-				v4.x = tempv4.x * cos(angle) - tempv4.y * sin(angle);
-				v4.y = tempv4.x * sin(angle) + tempv4.y * cos(angle);
-				//rotate C
-				v5.x = tempv5.x * cos(angle) - tempv5.y * sin(angle);
-				v5.y = tempv5.x * sin(angle) + tempv5.y * cos(angle);
+				if (pressCount == 1)
+				{
+					m_CurrentlyPressedArrow = Horizontal;
+					m_DistanceBetweenMouseAndArrowNDC = xposNDC - data.Position.x;
+				}
+				data.OpacityR = 1.25f;
 			}
-
-			//A,B,C represent the edges of the triangle
-			glm::vec2 A = arrowCentre / c_GlobalScaleFactor + v3;
-			glm::vec2 B = arrowCentre / c_GlobalScaleFactor + v4;
-			glm::vec2 C = arrowCentre / c_GlobalScaleFactor + v5;
-
-
-			glm::vec2 vector0 = C - A;
-			glm::vec2 vector1 = B - A;
-			glm::vec2 vector2 = point / c_GlobalScaleFactor - A;
-
-			// Compute dot products
-			float dot00 = glm::dot(vector0, vector0);
-			float dot01 = glm::dot(vector0, vector1);
-			float dot02 = glm::dot(vector0, vector2);
-			float dot11 = glm::dot(vector1, vector1);
-			float dot12 = glm::dot(vector1, vector2);
-
-			// Compute barycentric coordinates
-			float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-			float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-			float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-			// Check if point is in triangle
-			return (u >= 0.0f) && (v >= 0.0f) && (u + v < 1.0f);
+			if (m_CurrentlyPressedArrow == Horizontal)
+				data.OpacityR = 2.0f;
 		}
 
-		return false;
+		//check inside vertical arrow
+		{
+			//get rectangle size
+			glm::vec2 rectangleSize = glm::vec2(0.0f);
+			rectangleSize.x = GIZMO_LINE_WIDTH * data.AspectRatio;
+			rectangleSize.y = GIZMO_LINE_LENGTH_TILL_TIP;
+
+			if (xposNDC > data.Position.x && xposNDC < data.Position.x + rectangleSize.x &&
+				yposNDC > data.Position.y && yposNDC < data.Position.y + rectangleSize.y)
+			{
+				if (pressCount == 1)
+				{
+					m_CurrentlyPressedArrow = Vertical;
+					m_DistanceBetweenMouseAndArrowNDC = yposNDC - data.Position.y;
+				}
+				data.OpacityG = 1.25f;
+			}
+			if (m_CurrentlyPressedArrow == Vertical)
+				data.OpacityG = 2.0f;
+		}
+
+		switch (m_CurrentlyPressedArrow)
+		{
+		case Horizontal:
+		{
+			glm::vec2 newPos = camera.ViewportNDCToWorldSpace(glm::vec2(xposNDC - m_DistanceBetweenMouseAndArrowNDC, yposNDC));
+			objectPosition->x = newPos.x;
+		}
+		break;
+		case Vertical:
+		{
+			glm::vec2 newPos = camera.ViewportNDCToWorldSpace(glm::vec2(xposNDC, yposNDC - m_DistanceBetweenMouseAndArrowNDC));
+			objectPosition->y = newPos.y;
+		}
+		break;
+		}
 	}
 }

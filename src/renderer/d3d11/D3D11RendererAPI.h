@@ -36,6 +36,7 @@ namespace Ainan {
 			D3D11RendererContext Context;
 			ID3D11BlendState* AdditiveBlendMode;
 			ID3D11BlendState* ScreenBlendMode;
+			ID3D11BlendState* OverlayBlendMode;
 		};
 
 	}

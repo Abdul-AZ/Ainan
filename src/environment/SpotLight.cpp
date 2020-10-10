@@ -1,6 +1,7 @@
 #include "SpotLight.h"
 
 namespace Ainan {
+
 	SpotLight::SpotLight()
 	{
 		Type = EnvironmentObjectType::SpotLightType;
