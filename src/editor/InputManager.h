@@ -26,7 +26,6 @@ namespace Ainan {
 		static void ClearKeys();
 		static void HandleInput();
 		static void DisplayGUI();
-		static glm::vec2 GetMousePositionNDC();
 
 		//returns either GLFW_PRESS or GLFW_REPEAT or GLFW_RELEASE
 		static int GetKey(int glfwKey);

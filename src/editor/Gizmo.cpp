@@ -117,29 +117,28 @@ namespace Ainan {
 	}
 
 	void Gizmo::Draw(glm::vec2* objectPosition,
-		const glm::vec2& viewportWindowPos,
-		const glm::vec2& viewportWindowSize,
-		const glm::vec2& viewportWindowContentRegionSize,
+		const ViewportWindow& window,
 		const Camera& camera)
 	{
 		//later used for drawing
 		TransformationData data;
 		data.Position = camera.WorldSpaceToViewportNDC(*objectPosition);
-		data.AspectRatio = viewportWindowContentRegionSize.y / viewportWindowContentRegionSize.x;
+		data.AspectRatio = window.WindowContentRegionSize.y / window.WindowContentRegionSize.x;
 
 		//get mouse position
 		double xpos, ypos;
 		glfwGetCursorPos(Window::Ptr, &xpos, &ypos);
-		int32_t num = 0;
-		glfwGetMonitors(&num)[0];
-		auto videoInfo = glfwGetVideoMode(glfwGetMonitors(&num)[0]);
+		//the GetFrameHeightWithSpacing on the next line is just an approximation for the top border if the window
+		//if someone knows a better way please tell me, glfwGetFrameSize doesnt work and I'm tired of banging my head with the WindowsAPI
+		//with all of its outdated functions and ones that give incorrect results
+		glm::vec2 windowPos = window.WindowPosition - glm::vec2{Window::Position.x, Window::Position.y - ImGui::GetFrameHeightWithSpacing() };
 
 		//transform mouse coordinates to viewport NDC
-		float xposNDC = ((xpos - viewportWindowPos.x) / viewportWindowSize.x) * 2.0f - 1.0f;
-		float yposNDC = (((ypos - viewportWindowPos.y + ImGui::GetFrameHeightWithSpacing() - ImGui::GetFrameHeight()) / viewportWindowSize.y) );
-		
+		float xposNDC = ((xpos - windowPos.x) / window.WindowSize.x) * 2.0f - 1.0f;
+		float yposNDC = (((ypos - windowPos.y + ImGui::GetFrameHeightWithSpacing() - ImGui::GetFrameHeight()) / window.WindowSize.y) );
+
 		//change range to not include outside frame of the window
-		yposNDC *= (1.0f + ImGui::GetFrameHeightWithSpacing() / viewportWindowSize.y);
+		yposNDC *= (1.0f + ImGui::GetFrameHeightWithSpacing() / window.WindowSize.y);
 		yposNDC = -(yposNDC * 2.0f - 1.0f);
 
 		//if mouse is hovering over the viewport, handle events

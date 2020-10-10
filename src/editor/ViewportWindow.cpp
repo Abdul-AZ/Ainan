@@ -42,6 +42,7 @@ namespace Ainan {
 		ImGui::Image(fb->GetTextureID(), ImVec2(RenderViewport.Width, RenderViewport.Height), uv0, uv1);
 
 		IsHovered = ImGui::IsWindowHovered();
+		IsFocused = ImGui::IsWindowFocused();
 		ImGui::End();
 		ImGui::PopStyleVar();
 	}

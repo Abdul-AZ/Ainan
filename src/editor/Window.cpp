@@ -80,7 +80,7 @@ namespace Ainan {
 
 	void Window::Init(RendererType api)
 	{
-#ifdef DEBUG
+#ifndef NDEBUG
 		glfwSetErrorCallback(window_error_callback);
 #endif // !NDEBUG
 

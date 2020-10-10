@@ -621,11 +621,7 @@ namespace Ainan
 				{
 					Renderer::SetBlendMode(RenderingBlendMode::Overlay);
 					//draw object position gizmo
-					m_Gizmo.Draw(obj->GetPositionRef(),
-						m_ViewportWindow.WindowPosition,
-						m_ViewportWindow.WindowSize,
-						m_ViewportWindow.WindowContentRegionSize,
-						m_Camera);
+					m_Gizmo.Draw(obj->GetPositionRef(), m_ViewportWindow, m_Camera);
 
 					//if particle system needs to edit a force target (a world point), use a gimzo for it
 					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
@@ -634,9 +630,7 @@ namespace Ainan
 						if (ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "")
 							if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce)
 								m_Gizmo.Draw(&ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target,
-									m_ViewportWindow.WindowSize,
-									m_ViewportWindow.WindowPosition,
-									m_ViewportWindow.WindowContentRegionSize,
+									m_ViewportWindow,
 									m_Camera);
 					}
 				}
@@ -1336,7 +1330,7 @@ namespace Ainan
 
 		InputManager::RegisterKey(GLFW_KEY_SPACE, "Clear All Particles", [this]()
 			{
-				for (pEnvironmentObject& obj : m_Env->Objects) 
+				for (pEnvironmentObject& obj : m_Env->Objects)
 				{
 					auto mutexPtr = obj->GetMutex();
 					std::lock_guard lock(*mutexPtr);
@@ -1366,7 +1360,7 @@ namespace Ainan
 		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera Up", [this, displayCameraPosFunc]()
 			{
 				//we don't want to zoom if the focus is not set on the viewport
-				if (m_ViewportWindow.IsHovered == false)
+				if (m_ViewportWindow.IsFocused == false)
 					return;
 
 				//move the camera's position
@@ -1381,7 +1375,7 @@ namespace Ainan
 		//the rest are the same with only a diffrent move direction, that is why they arent commented
 		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this, displayCameraPosFunc]()
 			{
-				if (m_ViewportWindow.IsHovered == false)
+				if (m_ViewportWindow.IsFocused == false)
 					return;
 				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, m_Camera.ZoomFactor / 100.0f));
 				displayCameraPosFunc();
@@ -1390,7 +1384,7 @@ namespace Ainan
 
 		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this, displayCameraPosFunc]()
 			{
-				if (m_ViewportWindow.IsHovered == false)
+				if (m_ViewportWindow.IsFocused == false)
 					return;
 				m_Camera.SetPosition(m_Camera.Position + glm::vec2(-m_Camera.ZoomFactor / 100.0f, 0.0f));
 				displayCameraPosFunc();
@@ -1399,7 +1393,7 @@ namespace Ainan
 
 		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this, displayCameraPosFunc]()
 			{
-				if (m_ViewportWindow.IsHovered == false)
+				if (m_ViewportWindow.IsFocused == false)
 					return;
 				m_Camera.SetPosition(m_Camera.Position + glm::vec2(m_Camera.ZoomFactor / 100.0f, 0.0f));
 				displayCameraPosFunc();
@@ -1425,7 +1419,7 @@ namespace Ainan
 		InputManager::m_ScrollFunctions.push_back([this](double xoffset, double yoffset)
 			{
 				//we don't want to zoom if the focus is not set on the viewport
-				if (m_ViewportWindow.IsHovered == false)
+				if (m_ViewportWindow.IsHovered == false || m_ViewportWindow.IsFocused == false)
 					return;
 
 				//change zoom factor

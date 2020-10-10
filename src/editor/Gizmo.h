@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderer/ShaderProgram.h"
+#include "ViewportWindow.h"
 #include "renderer/Renderer.h"
 
 namespace Ainan {
@@ -26,9 +26,7 @@ namespace Ainan {
 
 		Gizmo();
 		void Draw(glm::vec2* objectPosition,
-			const glm::vec2& viewportWindowPos,
-			const glm::vec2& viewportWindowSize,
-			const glm::vec2& viewportWindowContentRegionSize,
+			const ViewportWindow& window,
 			const Camera& camera);
 
 	private:
