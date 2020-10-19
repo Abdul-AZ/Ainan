@@ -16,7 +16,13 @@ namespace Ainan {
 
 	const glm::vec4 c_OutlineColor = { 0.8f, 0.0, 0.0f, 0.8f };
 
-	class ExportCamera {
+	class ExportCamera 
+	{
+		enum ExportMode
+		{
+			Picture,
+			Video
+		};
 	public:
 		ExportCamera();
 		void DrawOutline();
@@ -44,6 +50,8 @@ namespace Ainan {
 		int RemainingFramesToBeCaptured = 0;
 	private:
 		void SetSize();
+		void ExportVideoLoop(Environment& env);
+		void RenderNextFrame(Environment& env);
 
 	private:
 		bool m_DrawExportCamera = false;
@@ -52,5 +60,21 @@ namespace Ainan {
 		std::shared_ptr<UniformBuffer> m_OutlineUniformBuffer = nullptr;
 		SaveItemBrowser m_ImageLocationBrowser;
 		bool m_FinalizeExportWindowOpen = false;
+		ExportMode m_Mode = ExportMode::Picture;
+
+		std::string GetModeString(ExportMode mode)
+		{
+			switch (mode)
+			{
+			case Picture:
+				return "Picture";
+
+			case Video:
+				return "Video";
+
+			default:
+				return "";
+			}
+		}
 	};
 }

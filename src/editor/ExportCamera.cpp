@@ -1,5 +1,13 @@
 #include "ExportCamera.h"
 
+extern "C"
+{
+#include <libavformat/avformat.h>
+#include <libavformat/avio.h>
+#include <libavcodec/avcodec.h>
+#include <libavutil/imgutils.h>
+}
+
 namespace Ainan {
 
 	//TODO use environment directory instead of default
@@ -59,13 +67,153 @@ namespace Ainan {
 		RealCamera.SetPosition(reversedPos * c_GlobalScaleFactor);
 	}
 
+#define CHECK(x) if((x) < 0) __debugbreak();
+#define CHECKP(x) if((x) == 0) __debugbreak();
+
+	void ExportCamera::ExportVideoLoop(Environment& env)
+	{
+		RenderNextFrame(env);
+
+		AVFormatContext* fContext = nullptr;
+		AVCodecContext* cContext = nullptr;
+		AVStream* vStream = nullptr;
+		AVCodec* codec = avcodec_find_encoder(AV_CODEC_ID_H264);
+		cContext = avcodec_alloc_context3(codec);
+		int32_t result = 0;
+		result = avformat_alloc_output_context2(&fContext, nullptr, nullptr, "sample.mp4");
+		CHECK(result);
+		fContext->duration = 60 * 3;
+
+		vStream = avformat_new_stream(fContext, codec);
+		vStream->codecpar->format = AV_PIX_FMT_YUV420P;
+		vStream->codecpar->width = std::round(m_ExportTargetImage->m_Width / 2.0f) * 2;
+		vStream->codecpar->height = std::round(m_ExportTargetImage->m_Height/ 2.0f) * 2;
+		vStream->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
+		vStream->codecpar->codec_id = AV_CODEC_ID_H264;
+		CHECKP(vStream);
+
+		result = avio_open(&fContext->pb, fContext->filename, AVIO_FLAG_WRITE);
+		CHECK(result);
+
+		cContext->width = vStream->codecpar->width;
+		cContext->height = vStream->codecpar->height;
+		cContext->pix_fmt = AV_PIX_FMT_YUV420P;
+		cContext->framerate = AVRational{ 25,1 };
+		cContext->time_base = AVRational{ 1,25 };
+
+		result = avcodec_open2(cContext, codec, 0);
+		CHECK(result);
+
+		vStream->codec->width = cContext->width;
+		vStream->codec->height = cContext->height;
+		vStream->codec->pix_fmt = cContext->pix_fmt;
+		vStream->codec->framerate = cContext->framerate;
+		vStream->codec->time_base = cContext->time_base;
+
+		result = avformat_write_header(fContext, 0);
+		CHECK(result);
+
+		AVPacket* pkt = av_packet_alloc();
+
+		AVFrame* frame = 0;
+		for (size_t i = 0; i < 60 * 3 - 1; i++)
+		{
+			result = 0;
+			RenderNextFrame(env);
+
+			if(i == 0)
+				frame = av_frame_alloc();
+			frame->width = cContext->width;
+			frame->height = cContext->height;
+			frame->format = AV_PIX_FMT_YUV420P;
+			frame->pts = av_rescale_q(i, cContext->time_base, vStream->time_base);
+			int32_t size = av_image_get_buffer_size(AV_PIX_FMT_YUV420P, frame->width, frame->height, 1);
+			av_image_alloc(frame->data, frame->linesize, frame->width, frame->height, AV_PIX_FMT_YUV420P, 1);
+			CHECK(size);
+			CHECK(result);
+			char buf[AV_ERROR_MAX_STRING_SIZE];
+			av_make_error_string(buf, AV_ERROR_MAX_STRING_SIZE, -11);
+			result = avcodec_send_frame(cContext, frame);
+			CHECK(result);
+			result = avcodec_receive_packet(cContext, pkt);
+			if (result != -11)
+			{
+				result = av_interleaved_write_frame(fContext, pkt);
+			}
+		}
+		av_frame_unref(frame);
+
+		result = av_write_trailer(fContext);
+		CHECK(result);
+	}
+
+	void ExportCamera::RenderNextFrame(Environment& env)
+	{
+		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
+		SceneDescription desc;
+		desc.SceneCamera = RealCamera;
+		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
+		desc.Blur = env.BlurEnabled;
+		desc.BlurRadius = env.BlurRadius;
+		Renderer::BeginScene(desc);
+
+		m_RenderSurface.SetSize(glm::ivec2(RealCamera.ZoomFactor * m_AspectRatio, RealCamera.ZoomFactor));
+		m_RenderSurface.SurfaceFrameBuffer->Bind();
+
+		for (pEnvironmentObject& obj : env.Objects)
+		{
+			if (obj->Type == RadialLightType)
+			{
+				RadialLight* light = static_cast<RadialLight*>(obj.get());
+				Renderer::AddRadialLight(light->Position, light->Color, light->Intensity);
+			}
+			else if (obj->Type == SpotLightType)
+			{
+				SpotLight* light = static_cast<SpotLight*>(obj.get());
+				Renderer::AddSpotLight(light->Position, light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
+			}
+		}
+
+		for (pEnvironmentObject& obj : env.Objects)
+			obj->Draw();
+
+		Renderer::EndScene();
+
+		delete m_ExportTargetImage;
+		m_ExportTargetImage = new Image(m_RenderSurface.SurfaceFrameBuffer->ReadPixels());
+	}
+
+#undef CHECK(x)
+#undef CHECKP(x)
+
 	void ExportCamera::DisplayGUI()
 	{
-		if (SettingsWindowOpen) {
-
-			ImGui::PushID(this);
-
+		ImGui::PushID(this);
+		if (SettingsWindowOpen) 
+		{
 			ImGui::Begin("ExportMode Settings", &SettingsWindowOpen);
+
+			ImGui::Text("Export Mode");
+			ImGui::SameLine();
+			if (ImGui::BeginCombo("##Export Mode", GetModeString(m_Mode).c_str()))
+			{
+				bool is_video = m_Mode == Video ? true : false;
+				if (ImGui::Selectable(GetModeString(Video).c_str(), &is_video))
+				{
+					ImGui::SetItemDefaultFocus();
+					m_Mode = Video;
+				}
+
+				bool is_picture = m_Mode == Picture ? true : false;
+				if (ImGui::Selectable(GetModeString(Picture).c_str(), &is_picture))
+				{
+					ImGui::SetItemDefaultFocus();
+					m_Mode = Picture;
+				}
+
+				ImGui::EndCombo();
+			}
+
 
 			if (ImGui::TreeNode("ExportMode Camera Settings"))
 			{
@@ -203,6 +351,12 @@ namespace Ainan {
 
 	void ExportCamera::ExportFrame(Environment& env)
 	{
+		if (m_Mode == Video)
+		{
+			ExportVideoLoop(env);
+			return;
+		}
+
 		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
 		SceneDescription desc;
 		desc.SceneCamera = RealCamera;
