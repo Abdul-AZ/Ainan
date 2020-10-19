@@ -44,7 +44,8 @@ namespace Ainan {
 
 	void ExportCamera::SetSize()
 	{
-		glm::vec2 size = glm::vec2(RealCamera.ZoomFactor * m_AspectRatio, RealCamera.ZoomFactor) / c_GlobalScaleFactor;
+		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
+		glm::vec2 size = glm::vec2(RealCamera.ZoomFactor * aspectRatio, RealCamera.ZoomFactor) / c_GlobalScaleFactor;
 		m_OutlineVertices[0] = m_ExportCameraPosition - (size / 2.0f); //bottom left
 		m_OutlineVertices[1] = m_ExportCameraPosition + glm::vec2(-size.x, size.y) / 2.0f; //top left
 		m_OutlineVertices[2] = m_ExportCameraPosition + (size / 2.0f);     //top right
@@ -61,8 +62,8 @@ namespace Ainan {
 
 	void ExportCamera::DisplayGUI()
 	{
-		if (SettingsWindowOpen) {
-
+		if (SettingsWindowOpen) 
+		{
 			ImGui::PushID(this);
 
 			ImGui::Begin("ExportMode Settings", &SettingsWindowOpen);
@@ -80,19 +81,23 @@ namespace Ainan {
 				ImGui::SetCursorPosX(100);
 				if (ImGui::DragFloat2("##Position", &m_ExportCameraPosition.x, 0.01f))
 					SetSize();
-				ImGui::Text("Size");
+
+				ImGui::Text("Ratio: ");
 				ImGui::SameLine();
-				ImGui::SetCursorPosX(100);
-
-				ImGui::TreePop();
-			}
-
-			if (ImGui::TreeNode("Image Saving:"))
-			{
-				if (ImGui::DragFloat("Aspect Ratio", &m_AspectRatio, 0.001f, 0.0f, 1000.0f))
+				ImGui::PushItemWidth(30.0f);
+				if (ImGui::DragInt("##WidthRatio", &m_WidthRatio, 0.1))
 					SetSize();
+				ImGui::SameLine();
+				ImGui::Text(" : ");
+				ImGui::SameLine();
+				if (ImGui::DragInt("##HeightRatio", &m_HeightRatio, 0.1))
+					SetSize();
+				ImGui::PopItemWidth();
+
 				if (ImGui::DragFloat("Zoom Factor", &RealCamera.ZoomFactor, 1.0f, 0.0f, 5000.0f))
 					SetSize();
+
+				ImGui::Text("Exported Image Resolution: %.0f, %.0f", std::round(RealCamera.ZoomFactor * (float)m_WidthRatio / m_HeightRatio), RealCamera.ZoomFactor);
 
 				ImGui::TreePop();
 			}
@@ -211,7 +216,8 @@ namespace Ainan {
 		desc.BlurRadius = env.BlurRadius;
 		Renderer::BeginScene(desc);
 
-		m_RenderSurface.SetSize(glm::ivec2(RealCamera.ZoomFactor * m_AspectRatio, RealCamera.ZoomFactor));
+		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
+		m_RenderSurface.SetSize(glm::ivec2(RealCamera.ZoomFactor * aspectRatio, RealCamera.ZoomFactor));
 		m_RenderSurface.SurfaceFrameBuffer->Bind();
 
 		for (pEnvironmentObject& obj : env.Objects)

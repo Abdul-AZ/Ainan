@@ -27,7 +27,8 @@ namespace Ainan {
 		bool SettingsWindowOpen = true;
 
 		glm::vec2 m_ExportCameraPosition = { 0.0f,0.0f };
-		float m_AspectRatio = 16.0f / 9.0f;
+		int32_t m_WidthRatio = 16;
+		int32_t m_HeightRatio = 9;
 
 		Camera RealCamera;
 		RenderSurface m_RenderSurface;
