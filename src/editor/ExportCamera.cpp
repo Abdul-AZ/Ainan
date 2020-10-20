@@ -6,6 +6,7 @@ extern "C"
 #include <libavformat/avio.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
+#include <libswscale/swscale.h>
 }
 
 namespace Ainan {
@@ -52,7 +53,8 @@ namespace Ainan {
 
 	void ExportCamera::SetSize()
 	{
-		glm::vec2 size = glm::vec2(RealCamera.ZoomFactor * m_AspectRatio, RealCamera.ZoomFactor) / c_GlobalScaleFactor;
+		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
+		glm::vec2 size = glm::vec2(RealCamera.ZoomFactor * aspectRatio, RealCamera.ZoomFactor) / c_GlobalScaleFactor;
 		m_OutlineVertices[0] = m_ExportCameraPosition - (size / 2.0f); //bottom left
 		m_OutlineVertices[1] = m_ExportCameraPosition + glm::vec2(-size.x, size.y) / 2.0f; //top left
 		m_OutlineVertices[2] = m_ExportCameraPosition + (size / 2.0f);     //top right
@@ -70,9 +72,10 @@ namespace Ainan {
 #define CHECK(x) if((x) < 0) __debugbreak();
 #define CHECKP(x) if((x) == 0) __debugbreak();
 
-	void ExportCamera::ExportVideoLoop(Environment& env)
+	void ExportCamera::ExportVideoLoop(Environment& env, std::function<void()> advanceEnvToNextFrameFunc)
 	{
 		RenderNextFrame(env);
+		const AVPixelFormat fmt = AV_PIX_FMT_YUV420P;
 
 		AVFormatContext* fContext = nullptr;
 		AVCodecContext* cContext = nullptr;
@@ -85,7 +88,7 @@ namespace Ainan {
 		fContext->duration = 60 * 3;
 
 		vStream = avformat_new_stream(fContext, codec);
-		vStream->codecpar->format = AV_PIX_FMT_YUV420P;
+		vStream->codecpar->format = fmt;
 		vStream->codecpar->width = std::round(m_ExportTargetImage->m_Width / 2.0f) * 2;
 		vStream->codecpar->height = std::round(m_ExportTargetImage->m_Height/ 2.0f) * 2;
 		vStream->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
@@ -97,9 +100,9 @@ namespace Ainan {
 
 		cContext->width = vStream->codecpar->width;
 		cContext->height = vStream->codecpar->height;
-		cContext->pix_fmt = AV_PIX_FMT_YUV420P;
-		cContext->framerate = AVRational{ 25,1 };
-		cContext->time_base = AVRational{ 1,25 };
+		cContext->pix_fmt = fmt;
+		cContext->framerate = AVRational{ 60,1 };
+		cContext->time_base = AVRational{ 1, 60 };
 
 		result = avcodec_open2(cContext, codec, 0);
 		CHECK(result);
@@ -109,30 +112,32 @@ namespace Ainan {
 		vStream->codec->pix_fmt = cContext->pix_fmt;
 		vStream->codec->framerate = cContext->framerate;
 		vStream->codec->time_base = cContext->time_base;
-
+		
 		result = avformat_write_header(fContext, 0);
 		CHECK(result);
 
 		AVPacket* pkt = av_packet_alloc();
-
 		AVFrame* frame = 0;
-		for (size_t i = 0; i < 60 * 3 - 1; i++)
+		SwsContext* swsContext = sws_getContext(cContext->width, cContext->height, AV_PIX_FMT_RGBA,
+			cContext->width, cContext->height, fmt, 0, 0, 0, 0);
+		CHECKP(swsContext);
+		for (size_t i = 0; i < 60 * 3; i++)
 		{
 			result = 0;
-			RenderNextFrame(env);
 
 			if(i == 0)
 				frame = av_frame_alloc();
 			frame->width = cContext->width;
 			frame->height = cContext->height;
-			frame->format = AV_PIX_FMT_YUV420P;
+			frame->format = fmt;
+			frame->color_range = AVColorRange::AVCOL_RANGE_MPEG;
 			frame->pts = av_rescale_q(i, cContext->time_base, vStream->time_base);
-			int32_t size = av_image_get_buffer_size(AV_PIX_FMT_YUV420P, frame->width, frame->height, 1);
-			av_image_alloc(frame->data, frame->linesize, frame->width, frame->height, AV_PIX_FMT_YUV420P, 1);
-			CHECK(size);
+			av_image_alloc(frame->data, frame->linesize, frame->width, frame->height, fmt, 1);
+			int rgba_stride[4] = { 4 * frame->width, 0, 0, 0 };
+			int dst_stride[4] = { frame->height, 0, 0, 0 };
+			int idk = av_image_get_buffer_size(AV_PIX_FMT_RGBA, frame->width, frame->height, 1);
+			result = sws_scale(swsContext, &m_ExportTargetImage->m_Data, rgba_stride, 0, frame->height, frame->data, frame->linesize);
 			CHECK(result);
-			char buf[AV_ERROR_MAX_STRING_SIZE];
-			av_make_error_string(buf, AV_ERROR_MAX_STRING_SIZE, -11);
 			result = avcodec_send_frame(cContext, frame);
 			CHECK(result);
 			result = avcodec_receive_packet(cContext, pkt);
@@ -140,8 +145,11 @@ namespace Ainan {
 			{
 				result = av_interleaved_write_frame(fContext, pkt);
 			}
+			advanceEnvToNextFrameFunc();
+			RenderNextFrame(env);
 		}
 		av_frame_unref(frame);
+		sws_freeContext(swsContext);
 
 		result = av_write_trailer(fContext);
 		CHECK(result);
@@ -156,8 +164,57 @@ namespace Ainan {
 		desc.Blur = env.BlurEnabled;
 		desc.BlurRadius = env.BlurRadius;
 		Renderer::BeginScene(desc);
+		if (SettingsWindowOpen)
+		{
+			float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
+			m_RenderSurface.SetSize(glm::ivec2(std::round(RealCamera.ZoomFactor * aspectRatio / 2.0f) * 2.0f , RealCamera.ZoomFactor));
+			m_RenderSurface.SurfaceFrameBuffer->Bind();
 
-		m_RenderSurface.SetSize(glm::ivec2(RealCamera.ZoomFactor * m_AspectRatio, RealCamera.ZoomFactor));
+			for (pEnvironmentObject& obj : env.Objects)
+			{
+				if (obj->Type == RadialLightType)
+				{
+					RadialLight* light = static_cast<RadialLight*>(obj.get());
+					Renderer::AddRadialLight(light->Position, light->Color, light->Intensity);
+				}
+				else if (obj->Type == SpotLightType)
+				{
+					SpotLight* light = static_cast<SpotLight*>(obj.get());
+					Renderer::AddSpotLight(light->Position, light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
+				}
+			}
+		}
+
+		for (pEnvironmentObject& obj : env.Objects)
+			obj->Draw();
+
+		Renderer::EndScene();
+
+		delete m_ExportTargetImage;
+		m_ExportTargetImage = new Image(m_RenderSurface.SurfaceFrameBuffer->ReadPixels());
+	}
+
+#undef CHECK(x)
+#undef CHECKP(x)
+
+	void ExportCamera::Export(Environment& env, std::function<void()> advanceEnvToNextFrameFunc)
+	{
+		if (m_Mode == Video)
+		{
+			ExportVideoLoop(env, advanceEnvToNextFrameFunc);
+			return;
+		}
+
+		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
+		SceneDescription desc;
+		desc.SceneCamera = RealCamera;
+		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
+		desc.Blur = env.BlurEnabled;
+		desc.BlurRadius = env.BlurRadius;
+		Renderer::BeginScene(desc);
+
+		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
+		m_RenderSurface.SetSize(glm::ivec2(RealCamera.ZoomFactor * aspectRatio, RealCamera.ZoomFactor));
 		m_RenderSurface.SurfaceFrameBuffer->Bind();
 
 		for (pEnvironmentObject& obj : env.Objects)
@@ -180,16 +237,22 @@ namespace Ainan {
 		Renderer::EndScene();
 
 		delete m_ExportTargetImage;
+
 		m_ExportTargetImage = new Image(m_RenderSurface.SurfaceFrameBuffer->ReadPixels());
+
+		if(Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+			m_ExportTargetImage->FlipHorizontally();
+
+		m_ExportTargetTexture = Renderer::CreateTexture(*m_ExportTargetImage);
+
+		m_FinalizeExportWindowOpen = true;
 	}
 
-#undef CHECK(x)
-#undef CHECKP(x)
 
 	void ExportCamera::DisplayGUI()
 	{
 		ImGui::PushID(this);
-		if (SettingsWindowOpen) 
+		if (SettingsWindowOpen)
 		{
 			ImGui::Begin("ExportMode Settings", &SettingsWindowOpen);
 
@@ -228,19 +291,23 @@ namespace Ainan {
 				ImGui::SetCursorPosX(100);
 				if (ImGui::DragFloat2("##Position", &m_ExportCameraPosition.x, 0.01f))
 					SetSize();
-				ImGui::Text("Size");
+
+				ImGui::Text("Ratio: ");
 				ImGui::SameLine();
-				ImGui::SetCursorPosX(100);
-
-				ImGui::TreePop();
-			}
-
-			if (ImGui::TreeNode("Image Saving:"))
-			{
-				if (ImGui::DragFloat("Aspect Ratio", &m_AspectRatio, 0.001f, 0.0f, 1000.0f))
+				ImGui::PushItemWidth(30.0f);
+				if (ImGui::DragInt("##WidthRatio", &m_WidthRatio, 0.1))
 					SetSize();
+				ImGui::SameLine();
+				ImGui::Text(" : ");
+				ImGui::SameLine();
+				if (ImGui::DragInt("##HeightRatio", &m_HeightRatio, 0.1))
+					SetSize();
+				ImGui::PopItemWidth();
+
 				if (ImGui::DragFloat("Zoom Factor", &RealCamera.ZoomFactor, 1.0f, 0.0f, 5000.0f))
 					SetSize();
+
+				ImGui::Text("Exported Image Resolution: %.0f, %.0f", std::round(RealCamera.ZoomFactor * (float)m_WidthRatio / m_HeightRatio), RealCamera.ZoomFactor);
 
 				ImGui::TreePop();
 			}
@@ -269,14 +336,14 @@ namespace Ainan {
 
 			ImGui::End();
 
-			m_ImageLocationBrowser.DisplayGUI([this](const std::string& path) 
+			m_ImageLocationBrowser.DisplayGUI([this](const std::string& path)
 				{
-				ImageSavePath = path;
-				m_ImageLocationBrowser.CloseWindow();
+					ImageSavePath = path;
+					m_ImageLocationBrowser.CloseWindow();
 				});
 		}
 
-		if (m_FinalizeExportWindowOpen) 
+		if (m_FinalizeExportWindowOpen)
 		{
 			ImGui::Begin("Finalize Export", &m_FinalizeExportWindowOpen);
 			ImGui::Columns(2);
@@ -325,7 +392,7 @@ namespace Ainan {
 			if (ImGui::Button("Save"))
 			{
 				std::string saveTarget = ImageSavePath;
-				if(ImageSavePath.back() == '\\')
+				if (ImageSavePath.back() == '\\')
 					saveTarget.append("default name");
 
 				m_ExportTargetImage->SaveToFile(saveTarget, SaveImageFormat);
@@ -347,55 +414,5 @@ namespace Ainan {
 		}
 
 		ImGui::PopID();
-	}
-
-	void ExportCamera::ExportFrame(Environment& env)
-	{
-		if (m_Mode == Video)
-		{
-			ExportVideoLoop(env);
-			return;
-		}
-
-		RealCamera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
-		SceneDescription desc;
-		desc.SceneCamera = RealCamera;
-		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
-		desc.Blur = env.BlurEnabled;
-		desc.BlurRadius = env.BlurRadius;
-		Renderer::BeginScene(desc);
-
-		m_RenderSurface.SetSize(glm::ivec2(RealCamera.ZoomFactor * m_AspectRatio, RealCamera.ZoomFactor));
-		m_RenderSurface.SurfaceFrameBuffer->Bind();
-
-		for (pEnvironmentObject& obj : env.Objects)
-		{
-			if (obj->Type == RadialLightType)
-			{
-				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				Renderer::AddRadialLight(light->Position, light->Color, light->Intensity);
-			}
-			else if (obj->Type == SpotLightType)
-			{
-				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				Renderer::AddSpotLight(light->Position, light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
-			}
-		}
-
-		for (pEnvironmentObject& obj : env.Objects)
-			obj->Draw();
-
-		Renderer::EndScene();
-
-		delete m_ExportTargetImage;
-
-		m_ExportTargetImage = new Image(m_RenderSurface.SurfaceFrameBuffer->ReadPixels());
-
-		if(Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
-			m_ExportTargetImage->FlipHorizontally();
-
-		m_ExportTargetTexture = Renderer::CreateTexture(*m_ExportTargetImage);
-
-		m_FinalizeExportWindowOpen = true;
 	}
 }

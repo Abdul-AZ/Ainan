@@ -105,7 +105,7 @@ namespace Ainan
 			DrawEnvironment(false);
 			if (m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted)
 			{
-				m_ExportCamera.ExportFrame(*m_Env);
+				m_ExportCamera.Export(*m_Env, [this]() { Update(); });
 				m_ExportedFrame = true;
 			}
 			break;
