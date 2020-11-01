@@ -16,7 +16,7 @@ namespace Ainan {
 
 	const glm::vec4 c_OutlineColor = { 0.8f, 0.0, 0.0f, 0.8f };
 
-	class ExportCamera 
+	class Exporter 
 	{
 		enum ExportMode
 		{
@@ -24,19 +24,24 @@ namespace Ainan {
 			Video
 		};
 	public:
-		ExportCamera();
+		Exporter();
 		void DrawOutline();
 		void DisplayGUI();
-		void Export(Environment& env, std::function<void()> advanceEnvToNextFrameFunc);
+		void OpenExporterWindow();
+
+		void ExportIfScheduled(Editor& editor);
+		void ExportImage(Editor& editor);
+		void ExportVideo(Editor& editor);
 
 	public:
 		bool SettingsWindowOpen = true;
+		bool CurrentlyExporting = false;
 
 		glm::vec2 m_ExportCameraPosition = { 0.0f,0.0f };
 		int32_t m_WidthRatio = 16;
 		int32_t m_HeightRatio = 9;
 
-		Camera RealCamera;
+		Camera Camera;
 		RenderSurface m_RenderSurface;
 
 		std::string   ImageSavePath;
@@ -44,17 +49,17 @@ namespace Ainan {
 		Image* m_ExportTargetImage = nullptr;
 		std::shared_ptr<Texture> m_ExportTargetTexture = nullptr;
 
-		//this means after x seconds we will capture the frame using this export camera
-		//timing is handled in the environment class not here
-		float ImageCaptureTime = 5.0f;
-
-		int RemainingFramesToBeCaptured = 0;
+		//this means after x seconds we will capture the frame using this exporter
+		float ExportStartTime = 5.0f;
 	private:
 		void SetSize();
-		void ExportVideoLoop(Environment& env, std::function<void()> advanceEnvToNextFrameFunc);
-		void RenderNextFrame(Environment& env);
+		void DrawEnvToExportSurface(Environment& env);
+		void GetImageFromExportSurfaceToRAM();
 
 	private:
+		bool m_ExporterWindowOpen = false;
+		bool m_ExporterScheduled = false;
+
 		bool m_DrawExportCamera = false;
 		std::array<glm::vec2, 4> m_OutlineVertices;
 		std::shared_ptr<VertexBuffer> m_OutlineVertexBuffer = nullptr;
