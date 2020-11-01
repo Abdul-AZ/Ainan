@@ -327,15 +327,15 @@ namespace Ainan {
 		editor.Stop();
 	}
 
-#define CHECK(x) if((x) < 0) __debugbreak();
-#define CHECKP(x) if((x) == 0) __debugbreak();
+#define CHECK(x) if((x) < 0) { AINAN_LOG_ERROR("Error while exporting video"); editor.Stop(); return; } 
+#define CHECKP(x) if((x) == 0) { AINAN_LOG_ERROR("Error while exporting video"); editor.Stop(); return; } 
 
 	void Exporter::ExportVideo(Editor& editor)
 	{
 		editor.PlayMode();
 		DrawEnvToExportSurface(*editor.m_Env);
 		GetImageFromExportSurfaceToRAM();
-		const AVPixelFormat fmt = AV_PIX_FMT_YUV420P;
+		const AVPixelFormat fmt = AV_PIX_FMT_0BGR;
 
 		AVFormatContext* fContext = nullptr;
 		AVCodecContext* cContext = nullptr;
@@ -377,22 +377,20 @@ namespace Ainan {
 		CHECK(result);
 
 		AVPacket* pkt = av_packet_alloc();
-		AVFrame* frame = 0;
+		AVFrame* frame = av_frame_alloc();
 		SwsContext* swsContext = sws_getContext(cContext->width, cContext->height, AV_PIX_FMT_RGBA,
 			cContext->width, cContext->height, fmt, 0, 0, 0, 0);
 		CHECKP(swsContext);
+		frame->width = cContext->width;
+		frame->height = cContext->height;
+		frame->format = fmt;
+		frame->color_range = AVColorRange::AVCOL_RANGE_MPEG;
+		av_image_alloc(frame->data, frame->linesize, frame->width, frame->height, fmt, 1);
 		for (size_t i = 0; i < 60 * 3; i++)
 		{
 			result = 0;
-
-			if (i == 0)
-				frame = av_frame_alloc();
-			frame->width = cContext->width;
-			frame->height = cContext->height;
-			frame->format = fmt;
-			frame->color_range = AVColorRange::AVCOL_RANGE_MPEG;
+			
 			frame->pts = av_rescale_q(i, cContext->time_base, vStream->time_base);
-			av_image_alloc(frame->data, frame->linesize, frame->width, frame->height, fmt, 1);
 			int rgba_stride[4] = { 4 * frame->width, 0, 0, 0 };
 			int dst_stride[4] = { frame->height, 0, 0, 0 };
 			int idk = av_image_get_buffer_size(AV_PIX_FMT_RGBA, frame->width, frame->height, 1);
@@ -409,15 +407,18 @@ namespace Ainan {
 			DrawEnvToExportSurface(*editor.m_Env);
 			GetImageFromExportSurfaceToRAM();
 		}
-		av_frame_unref(frame);
+		av_packet_unref(pkt);
+		av_freep(&frame->data[0]);
+		av_frame_free(&frame);
 		sws_freeContext(swsContext);
 
 		result = av_write_trailer(fContext);
 		CHECK(result);
 
+		avio_close(fContext->pb);
+		avcodec_free_context(&cContext);
+		avformat_free_context(fContext);
+
 		editor.Stop();
 	}
-#undef CHECK(x)
-#undef CHECKP(x)
-
 }
