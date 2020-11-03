@@ -40,8 +40,8 @@ namespace Ainan {
 		ImGui::SameLine();
 		ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), m_CurrentselectedFilePath.u8string().c_str());
 		ImGui::PushItemWidth(-1);
-		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetWindowSize().y - 100))) {
-
+		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetWindowSize().y - 100))) 
+		{
 			//check if we can go back
 			if (m_CurrentFolderPath.parent_path() != m_CurrentFolderPath) {
 				//back button

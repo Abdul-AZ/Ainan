@@ -15,12 +15,10 @@ namespace Ainan {
 
 	//TODO use environment directory instead of default
 	Exporter::Exporter() :
-		m_ImageLocationBrowser(STARTING_BROWSER_DIRECTORY, "Save Image"), 
 		Camera(CameraMode::CentreIsMidPoint)
 	{
 		memset(m_OutlineVertices.data(), 0, m_OutlineVertices.size() * sizeof(glm::vec2));
 
-		ImageSavePath = STARTING_BROWSER_DIRECTORY;
 
 		VertexLayout layout(1);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
@@ -30,6 +28,12 @@ namespace Ainan {
 		m_OutlineUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout, (void*)&c_OutlineColor);
 
 		SetSize();
+		VideoSettings.ExportTargetLocation.m_FileName = "Example Name";
+		VideoSettings.ExportTargetLocation.FileExtension = ".mp4";
+
+		PictureSettings.ExportTargetLocation.m_FileName = "Example Name";
+		PictureSettings.ExportTargetLocation.FileExtension = ".png";
+		PictureSettings.ExportTargetPath = PictureSettings.ExportTargetLocation.GetSelectedSavePath();
 	}
 
 	void Exporter::ExportIfScheduled(Editor& editor)
@@ -153,6 +157,9 @@ namespace Ainan {
 				ImGui::EndCombo();
 			}
 
+			if (m_Mode == ExportMode::Video)
+				DisplayVideoExportSettingsControls();
+
 
 			if (ImGui::TreeNode("ExportMode Camera Settings"))
 			{
@@ -188,7 +195,6 @@ namespace Ainan {
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("Image Capture Settings:"))
 			{
 				ImGui::Text("Capture After :");
 
@@ -207,8 +213,6 @@ namespace Ainan {
 					ImGui::Text("This specifies when to start exporting");
 					ImGui::EndTooltip();
 				}
-
-				ImGui::TreePop();
 			}
 
 			const float ExportButtonWidth = 300.0f;
@@ -222,84 +226,109 @@ namespace Ainan {
 
 			ImGui::End();
 
-			m_ImageLocationBrowser.DisplayGUI([this](const std::string& path)
+			PictureSettings.ExportTargetLocation.DisplayGUI([this](const std::string& path)
 				{
-					ImageSavePath = path;
-					m_ImageLocationBrowser.CloseWindow();
+					PictureSettings.ExportTargetPath = path;
+					PictureSettings.ExportTargetLocation.CloseWindow();
 				});
 		}
 
-		if (m_FinalizeExportWindowOpen)
-		{
-			ImGui::Begin("Finalize Export", &m_FinalizeExportWindowOpen);
-			ImGui::Columns(2);
-
-			ImGui::Text("Image Format");
-			ImGui::SameLine();
-			if (ImGui::BeginCombo("##Image Format", Image::GetFormatString(SaveImageFormat).c_str()))
-			{
-				bool is_png = SaveImageFormat == ImageFormat::png ? true : false;
-				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::png).c_str(), &is_png)) {
-
-					ImGui::SetItemDefaultFocus();
-					SaveImageFormat = ImageFormat::png;
-				}
-
-				bool is_jpeg = SaveImageFormat == ImageFormat::jpeg ? true : false;
-				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::jpeg).c_str(), &is_jpeg)) {
-
-					ImGui::SetItemDefaultFocus();
-					SaveImageFormat = ImageFormat::jpeg;
-				}
-
-				bool is_bmp = SaveImageFormat == ImageFormat::bmp ? true : false;
-				if (ImGui::Selectable(Image::GetFormatString(ImageFormat::bmp).c_str(), &is_bmp)) {
-
-					ImGui::SetItemDefaultFocus();
-					SaveImageFormat = ImageFormat::bmp;
-				}
-
-				ImGui::EndCombo();
-			}
-
-			if (ImGui::Button("Save Location"))
-				m_ImageLocationBrowser.OpenWindow();
-
-
-			ImGui::Text("Selected Save Path: ");
-			ImGui::SameLine();
-			std::string saveTargetWithFormat = ImageSavePath;
-			if (saveTargetWithFormat.back() == '\\')
-				saveTargetWithFormat.append("default name");
-			saveTargetWithFormat.append("." + Image::GetFormatString(SaveImageFormat));
-
-			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, saveTargetWithFormat.data());
-
-			if (ImGui::Button("Save"))
-			{
-				std::string saveTarget = ImageSavePath;
-				if (ImageSavePath.back() == '\\')
-					saveTarget.append("default name");
-
-				m_ExportTargetImage->SaveToFile(saveTarget, SaveImageFormat);
-				m_FinalizeExportWindowOpen = false;
-			}
-
-			ImGui::NextColumn();
-
-			if (m_ExportTargetTexture)
-			{
-				ImGui::Text("Preview");
-
-				int scale = 250;
-				ImVec2 size = ImVec2(scale * m_ExportTargetImage->m_Width / m_ExportTargetImage->m_Height, scale);
-				ImGui::Image(m_ExportTargetTexture->GetTextureID(), size);
-			}
-
-			ImGui::End();
-		}
+		if (m_FinalizePictureExportWindowOpen)
+			DisplayFinalizePictureExportSettingsWindow();
 
 		ImGui::PopID();
+	}
+
+	void Exporter::DisplayVideoExportSettingsControls()
+	{
+		if (ImGui::Button("Save Location"))
+			VideoSettings.ExportTargetLocation.OpenWindow();
+
+		VideoSettings.ExportTargetLocation.DisplayGUI([this](const std::string& path)
+			{
+				VideoSettings.ExportTargetPath = path + ".mp4";
+				VideoSettings.ExportTargetLocation.CloseWindow();
+			});
+
+		ImGui::PushItemWidth(25);
+		ImGui::Text("Length: ");
+		ImGui::SameLine();
+		ImGui::DragInt("##Minutes", &VideoSettings.LengthMinutes, 1, 0, 60);
+		ImGui::SameLine();
+		ImGui::Text("Minutes");
+		ImGui::SameLine();
+		ImGui::Text(":");
+		ImGui::SameLine();
+		ImGui::DragInt("##Seconds", &VideoSettings.LengthSeconds, 1, 0, 60);
+		ImGui::SameLine();
+		ImGui::Text("Seconds");
+		ImGui::PopItemWidth();
+
+		ImGui::TextColored({ 0.0f, 0.8f, 0.0f, 1.0f }, VideoSettings.ExportTargetLocation.GetSelectedSavePath().c_str());
+	}
+
+	void Exporter::DisplayFinalizePictureExportSettingsWindow()
+	{
+		ImGui::Begin("Finalize Export", &m_FinalizePictureExportWindowOpen);
+		ImGui::Columns(2);
+
+		ImGui::Text("Image Format");
+		ImGui::SameLine();
+		if (ImGui::BeginCombo("##Image Format", Image::GetFormatString(PictureSettings.Format).c_str()))
+		{
+			bool is_png = PictureSettings.Format == ImageFormat::png ? true : false;
+			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::png).c_str(), &is_png)) {
+
+				ImGui::SetItemDefaultFocus();
+				PictureSettings.Format = ImageFormat::png;
+			}
+
+			bool is_jpeg = PictureSettings.Format == ImageFormat::jpeg ? true : false;
+			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::jpeg).c_str(), &is_jpeg)) {
+
+				ImGui::SetItemDefaultFocus();
+				PictureSettings.Format = ImageFormat::jpeg;
+			}
+
+			bool is_bmp = PictureSettings.Format == ImageFormat::bmp ? true : false;
+			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::bmp).c_str(), &is_bmp)) {
+
+				ImGui::SetItemDefaultFocus();
+				PictureSettings.Format = ImageFormat::bmp;
+			}
+
+			ImGui::EndCombo();
+		}
+
+		PictureSettings.ExportTargetLocation.FileExtension = "." + Image::GetFormatString(PictureSettings.Format);
+
+		if (ImGui::Button("Save Location"))
+			PictureSettings.ExportTargetLocation.OpenWindow();
+
+		ImGui::Text("Selected Save Path: ");
+		ImGui::SameLine();
+		PictureSettings.ExportTargetPath = PictureSettings.ExportTargetLocation.GetSelectedSavePath();
+
+		ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, PictureSettings.ExportTargetPath.u8string().c_str());
+
+		if (ImGui::Button("Save"))
+		{
+			m_ExportTargetImage->SaveToFile(PictureSettings.ExportTargetPath.u8string(), PictureSettings.Format);
+			m_FinalizePictureExportWindowOpen = false;
+		}
+
+		ImGui::NextColumn();
+
+		if (m_ExportTargetTexture)
+		{
+			ImGui::Text("Preview");
+
+			int scale = 250;
+			ImVec2 size = ImVec2(scale * m_ExportTargetImage->m_Width / m_ExportTargetImage->m_Height, scale);
+			ImGui::Image(m_ExportTargetTexture->GetTextureID(), size);
+		}
+
+		ImGui::End();
 	}
 
 	void Exporter::OpenExporterWindow()
@@ -322,7 +351,7 @@ namespace Ainan {
 
 		m_ExportTargetTexture = Renderer::CreateTexture(*m_ExportTargetImage);
 
-		m_FinalizeExportWindowOpen = true;
+		m_FinalizePictureExportWindowOpen = true;
 
 		editor.Stop();
 	}
@@ -335,7 +364,7 @@ namespace Ainan {
 		editor.PlayMode();
 		DrawEnvToExportSurface(*editor.m_Env);
 		GetImageFromExportSurfaceToRAM();
-		const AVPixelFormat fmt = AV_PIX_FMT_0BGR;
+		const AVPixelFormat fmt = AV_PIX_FMT_YUV420P;
 
 		AVFormatContext* fContext = nullptr;
 		AVCodecContext* cContext = nullptr;
@@ -343,9 +372,10 @@ namespace Ainan {
 		AVCodec* codec = avcodec_find_encoder(AV_CODEC_ID_H264);
 		cContext = avcodec_alloc_context3(codec);
 		int32_t result = 0;
-		result = avformat_alloc_output_context2(&fContext, nullptr, nullptr, "sample.mp4");
+		result = avformat_alloc_output_context2(&fContext, nullptr, nullptr, VideoSettings.ExportTargetLocation.GetSelectedSavePath().c_str());
 		CHECK(result);
-		fContext->duration = 60 * 3;
+		int32_t totalFrameCount = 60 * VideoSettings.LengthSeconds + 60 * VideoSettings.LengthSeconds * VideoSettings.LengthMinutes;
+		fContext->duration = totalFrameCount;
 
 		vStream = avformat_new_stream(fContext, codec);
 		vStream->codecpar->format = fmt;
@@ -386,7 +416,7 @@ namespace Ainan {
 		frame->format = fmt;
 		frame->color_range = AVColorRange::AVCOL_RANGE_MPEG;
 		av_image_alloc(frame->data, frame->linesize, frame->width, frame->height, fmt, 1);
-		for (size_t i = 0; i < 60 * 3; i++)
+		for (size_t i = 0; i < totalFrameCount; i++)
 		{
 			result = 0;
 			

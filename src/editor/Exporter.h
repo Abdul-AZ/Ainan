@@ -41,13 +41,27 @@ namespace Ainan {
 		int32_t m_WidthRatio = 16;
 		int32_t m_HeightRatio = 9;
 
+		Image* m_ExportTargetImage = nullptr;
+		std::shared_ptr<Texture> m_ExportTargetTexture = nullptr;
+
 		Camera Camera;
 		RenderSurface m_RenderSurface;
 
-		std::string   ImageSavePath;
-		ImageFormat   SaveImageFormat = ImageFormat::png;
-		Image* m_ExportTargetImage = nullptr;
-		std::shared_ptr<Texture> m_ExportTargetTexture = nullptr;
+		struct ExportVideoSettings
+		{
+			SaveItemBrowser ExportTargetLocation;
+			std::filesystem::path ExportTargetPath;
+			int32_t Framerate = 60;
+			int32_t LengthMinutes = 0;
+			int32_t LengthSeconds = 5;
+		} VideoSettings;
+
+		struct ExportPictureSettings
+		{
+			SaveItemBrowser ExportTargetLocation;
+			std::filesystem::path ExportTargetPath;
+			ImageFormat Format = ImageFormat::png;
+		} PictureSettings;
 
 		//this means after x seconds we will capture the frame using this exporter
 		float ExportStartTime = 5.0f;
@@ -55,17 +69,18 @@ namespace Ainan {
 		void SetSize();
 		void DrawEnvToExportSurface(Environment& env);
 		void GetImageFromExportSurfaceToRAM();
+		void DisplayVideoExportSettingsControls();
+		void DisplayFinalizePictureExportSettingsWindow();
 
 	private:
 		bool m_ExporterWindowOpen = false;
 		bool m_ExporterScheduled = false;
+		bool m_FinalizePictureExportWindowOpen = false;
 
 		bool m_DrawExportCamera = false;
 		std::array<glm::vec2, 4> m_OutlineVertices;
 		std::shared_ptr<VertexBuffer> m_OutlineVertexBuffer = nullptr;
 		std::shared_ptr<UniformBuffer> m_OutlineUniformBuffer = nullptr;
-		SaveItemBrowser m_ImageLocationBrowser;
-		bool m_FinalizeExportWindowOpen = false;
 		ExportMode m_Mode = ExportMode::Picture;
 
 		std::string GetModeString(ExportMode mode)
