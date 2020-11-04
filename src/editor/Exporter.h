@@ -71,6 +71,7 @@ namespace Ainan {
 		void GetImageFromExportSurfaceToRAM();
 		void DisplayVideoExportSettingsControls();
 		void DisplayFinalizePictureExportSettingsWindow();
+		void DisplayProgressBarWindow(int32_t operationNum, int32_t operationCount, float fraction);
 
 	private:
 		bool m_ExporterWindowOpen = false;

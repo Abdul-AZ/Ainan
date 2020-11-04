@@ -100,7 +100,11 @@ namespace Ainan
 		}
 
 		Renderer::SetRenderTargetApplicationWindow();
+		Renderer::ImGuiNewFrame();
+		ImGuiWrapper::BeginGlobalDocking(true);
 		DrawUI();
+		ImGuiWrapper::EndGlobalDocking();
+		Renderer::ImGuiEndFrame();
 	}
 
 	void Editor::WorkerThreadLoop()
@@ -590,9 +594,6 @@ namespace Ainan
 
 	void Editor::DrawUI()
 	{
-		Renderer::ImGuiNewFrame();
-		ImGuiWrapper::BeginGlobalDocking(true);
-
 		DisplayMainMenuBarGUI();
 		AssetManager::DisplayGUI();
 		DisplayEnvironmentControlsGUI();
@@ -672,9 +673,6 @@ namespace Ainan
 		InputManager::DisplayGUI();
 
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
-
-		ImGuiWrapper::EndGlobalDocking();
-		Renderer::ImGuiEndFrame();
 	}
 
 	void Editor::OnEnvironmentLoad()

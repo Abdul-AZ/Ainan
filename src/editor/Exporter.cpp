@@ -89,31 +89,29 @@ namespace Ainan {
 
 	void Exporter::DrawEnvToExportSurface(Environment& env)
 	{
-		Camera.Update(0.0f, { 0,0,(int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
+		Camera.Update(0.0f, { 0, 0, (int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
 		SceneDescription desc;
 		desc.SceneCamera = Camera;
 		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
 		desc.Blur = env.BlurEnabled;
 		desc.BlurRadius = env.BlurRadius;
 		Renderer::BeginScene(desc);
-		if (SettingsWindowOpen)
-		{
-			float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
-			m_RenderSurface.SetSize(glm::ivec2(std::round(Camera.ZoomFactor * aspectRatio / 2.0f) * 2.0f, Camera.ZoomFactor));
-			m_RenderSurface.SurfaceFrameBuffer->Bind();
+		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
+		m_RenderSurface.SetSize(glm::ivec2(std::round(Camera.ZoomFactor * aspectRatio / 2.0f) * 2.0f, Camera.ZoomFactor));
+		m_RenderSurface.SurfaceFrameBuffer->Bind();
+		Renderer::ClearScreen();
 
-			for (pEnvironmentObject& obj : env.Objects)
+		for (pEnvironmentObject& obj : env.Objects)
+		{
+			if (obj->Type == RadialLightType)
 			{
-				if (obj->Type == RadialLightType)
-				{
-					RadialLight* light = static_cast<RadialLight*>(obj.get());
-					Renderer::AddRadialLight(light->Position, light->Color, light->Intensity);
-				}
-				else if (obj->Type == SpotLightType)
-				{
-					SpotLight* light = static_cast<SpotLight*>(obj.get());
-					Renderer::AddSpotLight(light->Position, light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
-				}
+				RadialLight* light = static_cast<RadialLight*>(obj.get());
+				Renderer::AddRadialLight(light->Position, light->Color, light->Intensity);
+			}
+			else if (obj->Type == SpotLightType)
+			{
+				SpotLight* light = static_cast<SpotLight*>(obj.get());
+				Renderer::AddSpotLight(light->Position, light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
 			}
 		}
 
@@ -331,6 +329,16 @@ namespace Ainan {
 		ImGui::End();
 	}
 
+	void Exporter::DisplayProgressBarWindow(int32_t operationNum, int32_t operationCount, float fraction)
+	{
+		ImGui::SetNextWindowPosCenter(ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(400, 75));
+		ImGui::Begin("Exporting...", 0, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize);
+		ImGui::Text("Operation %i of %i", operationNum, operationCount);
+		ImGui::ProgressBar(fraction, ImVec2(-1,-1));
+		ImGui::End();
+	}
+
 	void Exporter::OpenExporterWindow()
 	{
 		m_ExporterWindowOpen = true;
@@ -362,6 +370,25 @@ namespace Ainan {
 	void Exporter::ExportVideo(Editor& editor)
 	{
 		editor.PlayMode();
+
+		auto updateUI = [this, &editor](int32_t operationIndex, int32_t operationCount, float fraction)
+		{
+			Renderer::SetRenderTargetApplicationWindow();
+			Renderer::ImGuiNewFrame();
+			ImGuiWrapper::BeginGlobalDocking(true);
+			DisplayProgressBarWindow(operationIndex, operationCount, fraction);
+			editor.DrawUI();
+			ImGuiWrapper::EndGlobalDocking();
+			Renderer::ImGuiEndFrame();
+			Renderer::Present();
+		};
+
+		while (editor.m_TimeSincePlayModeStarted < ExportStartTime)
+		{
+			editor.Update();
+			updateUI(1,2, editor.m_TimeSincePlayModeStarted / ExportStartTime);
+		}
+
 		DrawEnvToExportSurface(*editor.m_Env);
 		GetImageFromExportSurfaceToRAM();
 		const AVPixelFormat fmt = AV_PIX_FMT_YUV420P;
@@ -436,6 +463,7 @@ namespace Ainan {
 			editor.Update();
 			DrawEnvToExportSurface(*editor.m_Env);
 			GetImageFromExportSurfaceToRAM();
+			updateUI(2, 2, (float)i / totalFrameCount);
 		}
 		av_packet_unref(pkt);
 		av_freep(&frame->data[0]);
