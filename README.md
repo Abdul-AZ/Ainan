@@ -7,7 +7,7 @@ At the moment it only runs on windows.
 There are plans for linux and mac support.
 
 # Building the Project
-The project is built using CMake with the usual CMake workflow.
+The project is built using [CMake](https://cmake.org/) with the usual CMake workflow.
 
 Example building steps on Windows with CMake installed using Visual Studio 2019 and the Command Line on the repository directory:
 1. `git clone https://github.com/AbdullrahmanAlzeidi/Ainan.git --recursive`
@@ -27,7 +27,6 @@ Also, feel free to contact me through Email.
 ![](github/appScreenshot.PNG)
 
 # Libraries used
-* [CMake](https://cmake.org/)
 * [GLFW](https://www.glfw.org/)
 * [Dear ImGui](https://github.com/ocornut/imgui)
 * [glad](https://github.com/Dav1dde/glad)
@@ -37,3 +36,4 @@ Also, feel free to contact me through Email.
 * [FastNoise](https://github.com/Auburn/FastNoise)
 * [glslcc](https://github.com/septag/glslcc)
 * [spdlog](https://github.com/gabime/spdlog)
+* [libav](https://libav.org)
