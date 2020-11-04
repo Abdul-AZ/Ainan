@@ -4,8 +4,14 @@ namespace Ainan {
 
 	namespace fs = std::filesystem;
 
+	SaveItemBrowser::SaveItemBrowser():
+		m_CurrentFolderPath(STARTING_BROWSER_DIRECTORY),
+		m_WindowName("File Browser"),
+		m_InputFolder(STARTING_BROWSER_DIRECTORY)
+	{}
+
 	SaveItemBrowser::SaveItemBrowser(const std::string& startingFolder, const std::string& windowName) :
-		m_CurrentFolder(startingFolder),
+		m_CurrentFolderPath(startingFolder),
 		m_WindowName(windowName),
 		m_InputFolder(startingFolder)
 	{}
@@ -32,35 +38,48 @@ namespace Ainan {
 
 		ImGui::Text("Current Directory :");
 		ImGui::SameLine();
-		if (ImGui::InputText("##FolderPath", &m_InputFolder, ImGuiInputTextFlags_EnterReturnsTrue)) {
+		if (ImGui::InputText("##empty", &m_InputFolder, ImGuiInputTextFlags_EnterReturnsTrue))
 			if (fs::exists(m_InputFolder))
-				m_CurrentFolder = m_InputFolder;
-		}
+				m_CurrentFolderPath = m_InputFolder;
 
-		ImGui::PushItemWidth(-1);
-		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetWindowSize().y - 100))) {
+		ImGui::Text("Selected Path: ");
+		ImGui::SameLine();
+		ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, GetSelectedSavePath().c_str());
 
+		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetWindowSize().y - 125)))
+		{
 			//check if we can go back
-			if (std::count(m_CurrentFolder.begin(), m_CurrentFolder.end(), '\\') > 0) {
+			if (m_CurrentFolderPath.parent_path() != m_CurrentFolderPath) {
 				//back button
 				if (ImGui::Button("..")) {
-					auto lastBackslashLoc = m_CurrentFolder.find_last_of('\\');
-					if (std::count(m_CurrentFolder.begin(), m_CurrentFolder.end(), '\\') == 1)
-						m_CurrentFolder.erase(lastBackslashLoc + 1, m_CurrentFolder.size() - lastBackslashLoc + 1);
-					else
-						m_CurrentFolder.erase(lastBackslashLoc, m_CurrentFolder.size() - lastBackslashLoc);
-					m_InputFolder = m_CurrentFolder;
+					m_CurrentFolderPath = m_CurrentFolderPath.parent_path();
+					m_InputFolder = m_CurrentFolderPath.u8string();
 				}
 			}
-			for (const auto& entry : fs::directory_iterator(m_CurrentFolder)) {
-				if (entry.status().type() == fs::file_type::directory && entry.path().filename() != "System Volume Information" && entry.path().filename() != "$RECYCLE.BIN") {
+			for (const auto& entry : fs::directory_iterator(m_CurrentFolderPath)) 
+			{
+				if (entry.status().type() == fs::file_type::directory) 
+				{
+					//make a button for every directory
 					if (ImGui::Button(entry.path().filename().u8string().c_str())) {
-						m_CurrentFolder += "\\" + entry.path().filename().u8string();
-						m_InputFolder = m_CurrentFolder;
+
+						//if button is pressed, enter that directory:
+
+						//if we are in root (eg "C:\", "D:\") we can just append the relative path of the folder
+						if (m_CurrentFolderPath.parent_path() == m_CurrentFolderPath)
+							m_CurrentFolderPath += entry.path().relative_path();
+						//if we are not in root we have to add a backslash before the new folder's name
+						else 
+						{
+							m_CurrentFolderPath += "\\";
+							m_CurrentFolderPath += entry.path().filename();
+						}
+
+						//update the input folder text
+						m_InputFolder = m_CurrentFolderPath.u8string();
 					}
 				}
 			}
-
 			ImGui::ListBoxFooter();
 		}
 
@@ -94,7 +113,8 @@ namespace Ainan {
 		ImGui::End();
 
 		//Handle OnCloseWindow if the new window state is false and the last one is true
-		if (m_LastWindowState == true && m_WindowOpen == false) {
+		if (m_LastWindowState == true && m_WindowOpen == false) 
+		{
 			if (OnCloseWindow)
 				OnCloseWindow();
 			m_LastWindowState = false;
@@ -103,6 +123,9 @@ namespace Ainan {
 
 	std::string SaveItemBrowser::GetSelectedSavePath()
 	{
-		return m_CurrentFolder + '\\' + m_FileName;
+		if (m_CurrentFolderPath.parent_path() == m_CurrentFolderPath)
+			return std::filesystem::path(m_CurrentFolderPath.u8string()  + m_FileName + FileExtension).u8string();
+
+		return std::filesystem::path(m_CurrentFolderPath.u8string() + "\\" + m_FileName + FileExtension).u8string();
 	}
 }

@@ -69,11 +69,9 @@ namespace Ainan
 		case State_PauseMode:
 			Update_PauseMode(frameTime);
 			break;
-
-		case State_ExportMode:
-			Update_ExportMode(frameTime);
-			break;
 		}
+
+		m_Exporter.ExportIfScheduled(*this);
 	}
 
 	void Editor::Draw()
@@ -99,20 +97,14 @@ namespace Ainan
 		case State_PlayMode:
 			DrawEnvironment(false);
 			break;
-
-
-		case State_ExportMode:
-			DrawEnvironment(false);
-			if (m_ExportCamera.ImageCaptureTime < m_TimeSincePlayModeStarted)
-			{
-				m_ExportCamera.ExportFrame(*m_Env);
-				m_ExportedFrame = true;
-			}
-			break;
 		}
 
 		Renderer::SetRenderTargetApplicationWindow();
+		Renderer::ImGuiNewFrame();
+		ImGuiWrapper::BeginGlobalDocking(true);
 		DrawUI();
+		ImGuiWrapper::EndGlobalDocking();
+		Renderer::ImGuiEndFrame();
 	}
 
 	void Editor::WorkerThreadLoop()
@@ -225,9 +217,6 @@ namespace Ainan
 		std::memmove(m_DeltaTimeHistory.data(), m_DeltaTimeHistory.data() + 1, (m_DeltaTimeHistory.size() - 1) * sizeof(float));
 		//register the new time
 		m_DeltaTimeHistory[m_DeltaTimeHistory.size() - 1] = m_DeltaTime;
-
-		if (m_State == State_ExportMode && m_ExportedFrame)
-			Stop();
 	}
 
 	void Editor::Update_PauseMode(float deltaTime)
@@ -254,45 +243,6 @@ namespace Ainan
 
 		if (Window::WindowSizeChangedSinceLastFrame)
 			m_RenderSurface.SetSize(Window::FramebufferSize);
-	}
-
-	void Editor::Update_ExportMode(float deltaTime)
-	{
-		m_Camera.Update(deltaTime, m_ViewportWindow.RenderViewport);
-		m_AppStatusWindow.Update(deltaTime);
-
-		//update all objects
-		{
-			{
-				std::lock_guard lock(UpdateMutex);
-				for (auto& obj : m_Env->Objects)
-				{
-					UpdateQueue.push(obj.get());
-				}
-			}
-			StartUpdating.notify_all();
-		}
-		{
-			static std::mutex mutex;
-			std::unique_lock<std::mutex> lock(mutex);
-			FinishedUpdating.wait(lock);
-		}
-
-		if (Window::WindowSizeChangedSinceLastFrame)
-			m_RenderSurface.SetSize(Window::FramebufferSize);
-
-		//this stuff is used for the profiler
-		m_TimeSincePlayModeStarted += deltaTime;
-
-		//save delta time for the profiler
-
-		//move everything back
-		std::memmove(m_DeltaTimeHistory.data(), m_DeltaTimeHistory.data() + 1, (m_DeltaTimeHistory.size() - 1) * sizeof(float));
-		//register the new time
-		m_DeltaTimeHistory[m_DeltaTimeHistory.size() - 1] = m_DeltaTime;
-
-		if (m_ExportedFrame)
-			Stop();
 	}
 
 	void Editor::DrawHomeWindow()
@@ -635,7 +585,7 @@ namespace Ainan
 					}
 				}
 
-			m_ExportCamera.DrawOutline();
+			m_Exporter.DrawOutline();
 		}
 		Renderer::EndScene();
 		//revert to the scene rendering mode
@@ -644,9 +594,6 @@ namespace Ainan
 
 	void Editor::DrawUI()
 	{
-		Renderer::ImGuiNewFrame();
-		ImGuiWrapper::BeginGlobalDocking(true);
-
 		DisplayMainMenuBarGUI();
 		AssetManager::DisplayGUI();
 		DisplayEnvironmentControlsGUI();
@@ -714,7 +661,7 @@ namespace Ainan
 
 		ImGui::End();
 
-		m_ExportCamera.DisplayGUI();
+		m_Exporter.DisplayGUI();
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
@@ -726,9 +673,6 @@ namespace Ainan
 		InputManager::DisplayGUI();
 
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
-
-		ImGuiWrapper::EndGlobalDocking();
-		Renderer::ImGuiEndFrame();
 	}
 
 	void Editor::OnEnvironmentLoad()
@@ -798,7 +742,7 @@ namespace Ainan
 				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
 				ImGui::MenuItem("General Settings", nullptr, &m_EnvironmentSettingsWindowOpen);
 				ImGui::MenuItem("Profiler", nullptr, &m_ProfilerWindowOpen);
-				ImGui::MenuItem("ExportMode Settings", nullptr, &m_ExportCamera.SettingsWindowOpen);
+				ImGui::MenuItem("ExportMode Settings", nullptr, &m_Exporter.SettingsWindowOpen);
 
 				ImGui::EndMenu();
 			}
@@ -822,11 +766,6 @@ namespace Ainan
 			return;
 
 		ImGui::Begin("Controls", &m_EnvironmentControlsWindowOpen, ImGuiWindowFlags_NoScrollbar);
-		if (m_State == State_ExportMode)
-		{
-			ImGui::End();
-			return;
-		}
 
 		//because ImGui doesnt accept different colors for different image button states, we have to use data from last frame
 		static bool s_playButtonHovered = false;
@@ -958,7 +897,7 @@ namespace Ainan
 		ImGui::SameLine();
 
 		if (ImGui::Button("Export"))
-			ExportMode();
+			m_Exporter.OpenExporterWindow();
 
 		ImGui::End();
 	}
@@ -987,13 +926,6 @@ namespace Ainan
 	void Editor::Resume()
 	{
 		m_State = State_PlayMode;
-	}
-
-	void Editor::ExportMode()
-	{
-		m_State = State_ExportMode;
-		m_TimeSincePlayModeStarted = 0.0f;
-		m_ExportedFrame = false;
 	}
 
 	void Editor::PlayMode()

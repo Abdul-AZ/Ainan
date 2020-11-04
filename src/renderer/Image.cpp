@@ -7,22 +7,22 @@ namespace Ainan {
 	//this runs on a seperate thread to not block the program
 	//this will call delete[] on the dataCpy, so you should first copy the data to a seperate buffer with new then pass it here.
 	//that is to make sure we dont have threading problems
-	static void t_SaveToFile(std::string pathAndName, int width, int height, int comp, unsigned char* dataCpy, ImageFormat format)
+	static void t_SaveToFile(std::string path, int width, int height, int comp, unsigned char* dataCpy, ImageFormat format)
 	{
 		stbi_flip_vertically_on_write(true);
 
 		switch (format)
 		{
 		case ImageFormat::png:
-			stbi_write_png((pathAndName + ".png").c_str(), width, height, comp, dataCpy, width * comp);
+			stbi_write_png(path.c_str(), width, height, comp, dataCpy, width * comp);
 			break;
 
 		case ImageFormat::jpeg:
-			stbi_write_jpg((pathAndName + ".jpg").c_str(), width, height, comp, dataCpy, 100);
+			stbi_write_jpg(path.c_str(), width, height, comp, dataCpy, 100);
 			break;
 
 		case ImageFormat::bmp:
-			stbi_write_bmp((pathAndName + ".bmp").c_str(), width, height, comp, dataCpy);
+			stbi_write_bmp(path.c_str(), width, height, comp, dataCpy);
 			break;
 
 		default:
@@ -72,13 +72,13 @@ namespace Ainan {
 		return image;
 	}
 
-	void Image::SaveToFile(const std::string& pathAndName, const ImageFormat& format)
+	void Image::SaveToFile(const std::string& path, const ImageFormat& format)
 	{
 		uint32_t comp = GetBytesPerPixel(Format);
 
 		unsigned char* dataCpy = new unsigned char[m_Width * m_Height * comp * sizeof(unsigned char)];
 		memcpy(dataCpy, m_Data, m_Width * m_Height * comp * sizeof(unsigned char));
-		std::thread thread(t_SaveToFile, pathAndName, m_Width, m_Height, comp, dataCpy, format);
+		std::thread thread(t_SaveToFile, path, m_Width, m_Height, comp, dataCpy, format);
 		thread.detach();
 	}
 

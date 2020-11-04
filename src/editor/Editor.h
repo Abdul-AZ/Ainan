@@ -11,7 +11,7 @@
 #include "environment/LitSprite.h"
 #include "environment/RadialLight.h"
 #include "environment/SpotLight.h"
-#include "ExportCamera.h"
+#include "Exporter.h"
 #include "file/FolderBrowser.h"
 #include "EditorPreferences.h"
 #include "environment/RadialLight.h"
@@ -36,8 +36,7 @@ namespace Ainan {
 			State_CreateEnv,   //this means we are on Create Environment menu
 			State_EditorMode,  //this means we are in the normal enviornment editor
 			State_PlayMode,    //this means that the environment is being simulated/run
-			State_PauseMode,   //this means that there is a pause in simulation and can be resumed to where it was stopped
-			State_ExportMode   //this means that the environment is being simulated/run and there is also recording/exporting
+			State_PauseMode    //this means that there is a pause in simulation and can be resumed to where it was stopped
 		};
 
 		enum class Profiler
@@ -62,7 +61,7 @@ namespace Ainan {
 		Camera m_Camera;
 		ViewportWindow m_ViewportWindow;
 		AppStatusWindow m_AppStatusWindow;
-		ExportCamera m_ExportCamera;
+		Exporter m_Exporter;
 		RenderSurface m_RenderSurface;
 		Gizmo m_Gizmo;
 		Grid m_Grid;
@@ -85,7 +84,6 @@ namespace Ainan {
 		std::shared_ptr<Texture> m_SpotLightIconTexture;
 		std::shared_ptr<Texture> m_RadialLightIconTexture;
 		float m_TimeSincePlayModeStarted = 0.0f;
-		bool m_ExportedFrame = false;
 		bool m_AddObjectWindowOpen = false;
 		std::string m_AddObjectWindowObjectName = "Example Name";
 		EnvironmentObjectType m_AddObjectWindowObjectType = SpriteType;
@@ -121,7 +119,6 @@ namespace Ainan {
 		void Update_EditorMode(float deltaTime);
 		void Update_PlayMode(float deltaTime);
 		void Update_PauseMode(float deltaTime);
-		void Update_ExportMode(float deltaTime);
 
 		void DrawHomeWindow();
 		void DrawEnvironmentCreationWindow();
@@ -137,7 +134,6 @@ namespace Ainan {
 		void Stop();
 		void Pause();
 		void Resume();
-		void ExportMode();
 		void PlayMode();
 		void DisplayObjectInspecterGUI();
 		void RefreshObjectOrdering();
@@ -148,6 +144,8 @@ namespace Ainan {
 		void DisplayProfilerGUI();
 		void DisplayPreferencesGUI();
 		void UpdateTitle();
+
+		friend class Exporter;
 	};
 }
 
