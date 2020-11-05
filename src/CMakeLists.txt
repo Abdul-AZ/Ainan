@@ -10,7 +10,7 @@ set(SOURCES_LIST
     "editor/Editor.h"                  "editor/Editor.cpp"
     "editor/EditorPreferences.h"       "editor/EditorPreferences.cpp"
     "editor/EditorStyles.h"            "editor/EditorStyles.cpp"
-    "editor/ExportCamera.h"            "editor/ExportCamera.cpp"
+    "editor/Exporter.h"                "editor/Exporter.cpp"
     "editor/Gizmo.h"                   "editor/Gizmo.cpp"
     "editor/Grid.h"                    "editor/Grid.cpp"
     "editor/ImGuiWrapper.h"            "editor/ImGuiWrapper.cpp"

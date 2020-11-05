@@ -4,19 +4,20 @@
 namespace Ainan {
 
 	bool InputManager::ControlsWindowOpen = false;
-	std::vector<RegisteredKey> InputManager::m_Keys;
-	std::vector<RegisteredKey> InputManager::m_MouseKeys;
+	std::vector<RegisteredKey> InputManager::m_SpecificKeyHandler;
+	std::vector<RegisteredKey> InputManager::m_SpecificMouseKeyHandler;
 	std::unordered_map<int32_t, int32_t> InputManager::m_KeyStates;
 	std::array<GLFWcursor*, ImGuiMouseCursor_COUNT> InputManager::m_MouseCursors = {};
 	std::array<bool, 5> InputManager::MouseButtonPressed = { false, false, false, false, false };
-	std::vector<std::function<void(double, double)>> InputManager::m_ScrollFunctions;
-	std::vector<std::function<void(int32_t, int32_t, int32_t)>> InputManager::m_MouseButtonFunctions;
-	std::vector<std::function<void(int32_t, int32_t, int32_t, int32_t)>> InputManager::m_KeyFunctions;
-	std::vector<std::function<void(uint32_t)>> InputManager::m_CharFunctions;
+	std::vector<std::function<void(double, double)>> InputManager::m_ScrollHandlers;
+	std::vector<std::function<void(int32_t, int32_t, int32_t)>> InputManager::m_GlobalButtonHandlers;
+	std::vector<std::function<void(int32_t, int32_t, int32_t, int32_t)>> InputManager::m_GlobalKeyHandlers;
+	std::vector<std::function<void(uint32_t)>> InputManager::m_GlobalCharacterKeyHandler;
+	int32_t InputManager::m_ModsDown = 0;
 
 	static void scroll_callback(GLFWwindow* window, double x, double y) 
 	{
-		for (auto& fun : InputManager::m_ScrollFunctions)
+		for (auto& fun : InputManager::m_ScrollHandlers)
 		{
 			fun(x, y);
 		}
@@ -24,23 +25,50 @@ namespace Ainan {
 
 	static void mouse_button_callback(GLFWwindow* window, int32_t button, int32_t action, int32_t mods)
 	{
-		for (auto& fun : InputManager::m_MouseButtonFunctions)
+		for (auto& fun : InputManager::m_GlobalButtonHandlers)
 		{
 			fun(button, action, mods);
 		}
+		InputManager::m_ModsDown = mods;
 	}
 
 	static void key_callback(GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods)
 	{
-		for (auto& fun : InputManager::m_KeyFunctions)
+		for (auto& fun : InputManager::m_GlobalKeyHandlers)
 		{
 			fun(key, scancode, action, mods);
 		}
+
+		int32_t& currentState = InputManager::m_KeyStates[key];
+
+		if (action == GLFW_RELEASE)
+			currentState = GLFW_RELEASE;
+		else if (action == GLFW_PRESS)
+		{
+			if (currentState == GLFW_PRESS)
+				currentState = GLFW_REPEAT;
+
+			else if (currentState != GLFW_PRESS && currentState != GLFW_REPEAT)
+				currentState = GLFW_PRESS;
+		}
+		else
+			currentState = action;
+
+		//GLFW_REPEAT actions are handled in the HandleInput function
+		if (action == GLFW_PRESS)
+		{
+			for (auto& regKey : InputManager::m_SpecificKeyHandler)
+			{
+				if (regKey.GLFWKeyCode == key)
+					regKey.OnClickFunction(mods);
+			}
+		}
+		InputManager::m_ModsDown = mods;
 	}
 
 	static void char_callback(GLFWwindow*, uint32_t c)
 	{
-		for (auto& fun : InputManager::m_CharFunctions)
+		for (auto& fun : InputManager::m_GlobalCharacterKeyHandler)
 		{
 			fun(c);
 		}
@@ -58,7 +86,7 @@ namespace Ainan {
 			io.MouseWheel += (float)yoffset;
 		};
 
-		m_ScrollFunctions.push_back(imguiScrollFunc);
+		m_ScrollHandlers.push_back(imguiScrollFunc);
 
 		// Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
 		io.KeyMap[ImGuiKey_Tab] = GLFW_KEY_TAB;
@@ -111,7 +139,7 @@ namespace Ainan {
 			if (action == GLFW_PRESS && button >= 0 && button < InputManager::MouseButtonPressed.size())
 				InputManager::MouseButtonPressed[button] = true;
 		};
-		m_MouseButtonFunctions.push_back(imGuiMouseButtonFunc);
+		m_GlobalButtonHandlers.push_back(imGuiMouseButtonFunc);
 
 		glfwSetKeyCallback(Window::Ptr, key_callback);
 
@@ -130,7 +158,7 @@ namespace Ainan {
 			io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
 		};
 
-		m_KeyFunctions.push_back(imguiKeyCallback);
+		m_GlobalKeyHandlers.push_back(imguiKeyCallback);
 
 		glfwSetCharCallback(Window::Ptr, char_callback);
 
@@ -141,7 +169,7 @@ namespace Ainan {
 				io.AddInputCharacter((uint16_t)c);
 		};
 
-		m_CharFunctions.push_back(imguiCharCallback);
+		m_GlobalCharacterKeyHandler.push_back(imguiCharCallback);
 	}
 
 	void InputManager::Terminate()
@@ -157,53 +185,34 @@ namespace Ainan {
 		}
 	}
 
-	void InputManager::RegisterKey(int glfwKeyCode, std::string description, std::function<void()> func, int32_t eventTrigger)
+	void InputManager::RegisterKey(int glfwKeyCode, std::string description, std::function<void(int32_t mods)> func, int32_t eventTrigger)
 	{
-		m_Keys.push_back({ glfwKeyCode, description, func, eventTrigger });
+		m_SpecificKeyHandler.push_back({ glfwKeyCode, description, func, eventTrigger });
 		m_KeyStates[glfwKeyCode] = 0;
 	}
 
-	void InputManager::RegisterMouseKey(int glfwMouseKeyCode, std::string description, std::function<void()> func, int32_t eventTrigger)
+	void InputManager::RegisterMouseKey(int glfwMouseKeyCode, std::string description, std::function<void(int32_t mods)> func, int32_t eventTrigger)
 	{
-		m_MouseKeys.push_back({ glfwMouseKeyCode, description, func, eventTrigger });
+		m_SpecificMouseKeyHandler.push_back({ glfwMouseKeyCode, description, func, eventTrigger });
 	}
 
 	void InputManager::ClearKeys()
 	{
-		m_Keys.clear();
-		m_MouseKeys.clear();
-		m_ScrollFunctions.clear();
+		m_SpecificKeyHandler.clear();
+		m_SpecificMouseKeyHandler.clear();
+		m_ScrollHandlers.clear();
 	}
 
 	void InputManager::HandleInput()
 	{
-		for (RegisteredKey& key : m_Keys)
-		{
-			int state = InputManager::GetKey(key.GLFWKeyCode);
+		for (RegisteredKey& key : m_SpecificKeyHandler)
+			if(key.EventTrigger == GLFW_REPEAT)
+				if (m_KeyStates[key.GLFWKeyCode] == GLFW_PRESS || m_KeyStates[key.GLFWKeyCode] == GLFW_REPEAT)
+					key.OnClickFunction(m_ModsDown);
 
-			int& currentState = m_KeyStates[key.GLFWKeyCode];
-
-			if (state == GLFW_RELEASE)
-				currentState = GLFW_RELEASE;
-			else if (state == GLFW_PRESS)
-			{
-				if (currentState == GLFW_PRESS)
-					currentState = GLFW_REPEAT;
-
-				else if (currentState != GLFW_PRESS && currentState != GLFW_REPEAT)
-					currentState = GLFW_PRESS;
-			}
-			else
-				currentState = state;
-		}
-
-		for (RegisteredKey& key : m_Keys)
-			if (m_KeyStates[key.GLFWKeyCode] == key.EventTrigger)
-				key.OnClickFunction();
-
-		for (RegisteredKey& key : m_MouseKeys)
+		for (RegisteredKey& key : m_SpecificMouseKeyHandler)
 			if (glfwGetMouseButton(Window::Ptr, key.GLFWKeyCode) == key.EventTrigger)
-				key.OnClickFunction();
+				key.OnClickFunction(m_ModsDown);
 
 		//update mouse cursor shape
 		auto& io = ImGui::GetIO();
@@ -215,7 +224,6 @@ namespace Ainan {
 			glfwSetCursor(window, m_MouseCursors[imgui_cursor] ? m_MouseCursors[imgui_cursor] : m_MouseCursors[ImGuiMouseCursor_Arrow]);
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		}
-
 
 		// Update buttons
 		for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
@@ -273,7 +281,7 @@ namespace Ainan {
 
 		ImGui::Begin("Keyboard Controls", &ControlsWindowOpen);
 
-		for (RegisteredKey& key : m_Keys) {
+		for (RegisteredKey& key : m_SpecificKeyHandler) {
 			if (key.Description == "")
 				continue;
 
@@ -286,7 +294,7 @@ namespace Ainan {
 
 		ImGui::Spacing();
 
-		for (RegisteredKey& key : m_MouseKeys) {
+		for (RegisteredKey& key : m_SpecificMouseKeyHandler) {
 			if (key.Description == "")
 				continue;
 

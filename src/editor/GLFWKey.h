@@ -137,6 +137,13 @@
 #define GLFW_RELEASE                0
 #define GLFW_PRESS                  1
 #define GLFW_REPEAT                 2
+#define GLFW_MOD_SHIFT   0x0001
+#define GLFW_MOD_CONTROL   0x0002
+#define GLFW_MOD_ALT   0x0004
+#define GLFW_MOD_SUPER   0x0008
+#define GLFW_MOD_CAPS_LOCK   0x0010
+#define GLFW_MOD_NUM_LOCK   0x0020
+
 
 namespace Ainan {
 

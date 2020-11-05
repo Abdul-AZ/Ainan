@@ -709,7 +709,11 @@ namespace Ainan
 			if (ImGui::BeginMenu("File"))
 			{
 				if (ImGui::MenuItem("Save")) 
-					SaveEnvironment(*m_Env, m_EnvironmentFolderPath.u8string() + "\\" + m_Env->Name + ".env");
+				{
+					std::string name = m_EnvironmentFolderPath.u8string() + "\\" + m_Env->Name + ".env";
+					SaveEnvironment(*m_Env, name);
+					m_AppStatusWindow.SetText("Saved Environment To: " + name);
+				}
 
 				if (ImGui::MenuItem("Close Environment"))
 				{
@@ -1251,16 +1255,25 @@ namespace Ainan
 
 	void Editor::RegisterEnvironmentInputKeys()
 	{
-		InputManager::RegisterKey(GLFW_KEY_F5, "PlayMode/Resume", [this]() {
-			if (m_State == State_EditorMode)
-				PlayMode();
-			if (m_State == State_PauseMode)
-				Resume();
+		InputManager::RegisterKey(GLFW_KEY_F5, "PlayMode/Resume", [this](int32_t mods) 
+			{
+				if (m_State == State_EditorMode)
+					PlayMode();
+				if (m_State == State_PauseMode)
+					Resume();
 			});
 
-		//InputManager::RegisterKey(GLFW_KEY_F1, "Hide Menus", [this]() { m_HideGUI = !m_HideGUI; });
+		InputManager::RegisterKey(GLFW_KEY_S, "Save Project (while CONTROL key down)", [this](int32_t mods)
+			{
+				if (mods & GLFW_MOD_CONTROL)
+				{
+					std::string name = m_EnvironmentFolderPath.u8string() + "\\" + m_Env->Name + ".env";
+					SaveEnvironment(*m_Env, name);
+					m_AppStatusWindow.SetText("Saved Environment To: " + name);
+				}
+			});
 
-		InputManager::RegisterKey(GLFW_KEY_SPACE, "Clear All Particles", [this]()
+		InputManager::RegisterKey(GLFW_KEY_SPACE, "Clear All Particles", [this](int32_t mods)
 			{
 				for (pEnvironmentObject& obj : m_Env->Objects)
 				{
@@ -1289,10 +1302,10 @@ namespace Ainan
 		};
 
 		//map WASD keys to move the camera in the environment
-		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera Up", [this, displayCameraPosFunc]()
+		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera Up", [this, displayCameraPosFunc](int32_t mods)
 			{
-				//we don't want to zoom if the focus is not set on the viewport
-				if (m_ViewportWindow.IsFocused == false)
+				//we don't want to zoom if the focus is not set on the viewport or if a mod key like CONTROL is down
+				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
 
 				//move the camera's position
@@ -1305,27 +1318,27 @@ namespace Ainan
 				GLFW_REPEAT);
 
 		//the rest are the same with only a diffrent move direction, that is why they arent commented
-		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this, displayCameraPosFunc]()
+		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this, displayCameraPosFunc](int32_t mods)
 			{
-				if (m_ViewportWindow.IsFocused == false)
+				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
 				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, m_Camera.ZoomFactor / 100.0f));
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
 
-		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this, displayCameraPosFunc]()
+		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this, displayCameraPosFunc](int32_t mods)
 			{
-				if (m_ViewportWindow.IsFocused == false)
+				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
 				m_Camera.SetPosition(m_Camera.Position + glm::vec2(-m_Camera.ZoomFactor / 100.0f, 0.0f));
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
 
-		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this, displayCameraPosFunc]()
+		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this, displayCameraPosFunc](int32_t mods)
 			{
-				if (m_ViewportWindow.IsFocused == false)
+				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
 				m_Camera.SetPosition(m_Camera.Position + glm::vec2(m_Camera.ZoomFactor / 100.0f, 0.0f));
 				displayCameraPosFunc();
@@ -1333,7 +1346,7 @@ namespace Ainan
 			GLFW_REPEAT);
 
 		//delete object keyboard shortcut
-		InputManager::RegisterKey(GLFW_KEY_DELETE, "Delete Object", [this]()
+		InputManager::RegisterKey(GLFW_KEY_DELETE, "Delete Object", [this](int32_t mods)
 			{
 				for (int i = 0; i < m_Env->Objects.size(); i++)
 				{
@@ -1348,7 +1361,7 @@ namespace Ainan
 			});
 
 		//zoom in and out with mouse scroll wheel
-		InputManager::m_ScrollFunctions.push_back([this](double xoffset, double yoffset)
+		InputManager::m_ScrollHandlers.push_back([this](double xoffset, double yoffset)
 			{
 				//we don't want to zoom if the focus is not set on the viewport
 				if (m_ViewportWindow.IsHovered == false || m_ViewportWindow.IsFocused == false)
@@ -1370,7 +1383,7 @@ namespace Ainan
 			});
 
 
-		InputManager::RegisterMouseKey(GLFW_MOUSE_BUTTON_MIDDLE, "Change Camera Zoom to Default", [this]()
+		InputManager::RegisterMouseKey(GLFW_MOUSE_BUTTON_MIDDLE, "Change Camera Zoom to Default", [this](int32_t mods)
 			{
 				//we don't want to zoom if the focus is not set on the viewport
 				if (m_ViewportWindow.IsHovered == false)
