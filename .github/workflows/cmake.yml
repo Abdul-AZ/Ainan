@@ -20,7 +20,7 @@ jobs:
       
     - name: Generate Project Files
       working-directory: ${{runner.workspace}}/build
-      run: cmake ..
+      run: cmake ${{runner.workspace}}
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
