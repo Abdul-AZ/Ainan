@@ -17,8 +17,11 @@ jobs:
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
+      
+    - name: Generate Project Files
+      working-directory: ${{runner.workspace}}/build
+      run: cmake "Visual Studio 16 2019" ..
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
-      shell: bash
       run: cmake --build . --config $BUILD_TYPE
