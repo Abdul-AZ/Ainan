@@ -20,7 +20,7 @@ jobs:
       
     - name: Generate Project Files
       working-directory: ${{runner.workspace}}/build
-      run: cmake "Visual Studio 16 2019" ..
+      run: cmake ..
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
