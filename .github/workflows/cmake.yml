@@ -10,18 +10,18 @@ env:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2019
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Create Build Environment
-      run: cmake -E make_directory ${{runner.workspace}}/build
+      run: cmake -E make_directory ${{runner.workspace}}\build
       
     - name: Generate Project Files
-      working-directory: ${{runner.workspace}}/build
+      working-directory: ${{runner.workspace}}\build
       run: cmake ${{runner.workspace}}
 
     - name: Build
-      working-directory: ${{runner.workspace}}/build
+      working-directory: ${{runner.workspace}}\build
       run: cmake --build . --config $BUILD_TYPE
