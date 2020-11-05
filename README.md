@@ -1,3 +1,4 @@
+![Windows Build](https://github.com/AbdullrahmanAlzeidi/Ainan/workflows/Windows%20Build/badge.svg)
 # Ainan
 Ainan is a visual effects and motion graphics making application mainly targeting game developers.
 
