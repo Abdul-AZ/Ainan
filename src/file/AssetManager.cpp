@@ -5,11 +5,8 @@ namespace Ainan
 	std::filesystem::path AssetManager::s_EnvironmentDirectory = "";
 	std::filesystem::path AssetManager::s_CurrentDirectory = "";
 
-	void AssetManager::Init(const std::string& environmentDirectory)
+	void AssetManager::Init(const std::filesystem::path& environmentDirectory)
 	{
-		//check if asset manager is initilized more than once
-		assert(s_EnvironmentDirectory == "");
-
 		s_EnvironmentDirectory = environmentDirectory;
 		s_CurrentDirectory = environmentDirectory;
 	}
@@ -55,9 +52,9 @@ namespace Ainan
 		ImGui::End();
 	}
 
-	std::vector<std::string> AssetManager::GetAll2DTextures()
+	std::vector<std::filesystem::path> AssetManager::GetAll2DTextures()
 	{
-		std::vector<std::string> result;
+		std::vector<std::filesystem::path> result;
 		for (const auto& entry : std::filesystem::recursive_directory_iterator(s_EnvironmentDirectory)) 
 		{
 			//check if the files format contains any of the supported image formats(jpg, bmp and png)
@@ -65,7 +62,7 @@ namespace Ainan
 				entry.path().filename().u8string().find(".jpeg") != std::string::npos ||
 				entry.path().filename().u8string().find(".bmp") != std::string::npos ||
 				entry.path().filename().u8string().find(".png") != std::string::npos)
-				result.push_back(entry.path().u8string().c_str());
+				result.push_back(entry.path());
 		}
 
 		return result;

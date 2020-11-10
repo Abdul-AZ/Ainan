@@ -25,7 +25,7 @@ namespace Ainan {
 		float Rotation = 0.0f; //in degrees
 		glm::vec4 Tint = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-		std::string m_TexturePath;
+		std::filesystem::path m_TexturePath; //relative to the environment folder
 	private:
 		std::shared_ptr<Texture> m_Texture;
 	};

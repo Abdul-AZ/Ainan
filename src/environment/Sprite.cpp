@@ -8,7 +8,6 @@ namespace Ainan {
 		m_Name = "Sprite";
 		EditorOpen = false;
 
-
 		Image img = Image::LoadFromFile("res/CheckerBoard.png");
 
 		Image::GrayScaleToRGBA(img);
@@ -38,7 +37,7 @@ namespace Ainan {
 		ImGui::SameLine();
 		ImGui::Image(m_Texture->GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 
-		if (ImGui::BeginCombo("##Texture: ", m_TexturePath == "" ? "None" : std::filesystem::path(m_TexturePath).filename().u8string().c_str()))
+		if (ImGui::BeginCombo("##Texture: ", m_TexturePath == "" ? "None" : m_TexturePath.filename().u8string().c_str()))
 		{
 			auto textures = AssetManager::GetAll2DTextures();
 			bool selected = false;
@@ -54,9 +53,8 @@ namespace Ainan {
 				{
 					if (textureFileName != "Default")
 					{
-						LoadTextureFromFile(tex);
-						std::string absolutePathToEnv = AssetManager::s_EnvironmentDirectory.u8string();
-						m_TexturePath = tex.substr(absolutePathToEnv.size(), tex.size() - absolutePathToEnv.size());
+						LoadTextureFromFile(tex.u8string());
+						m_TexturePath = tex.lexically_relative(AssetManager::s_EnvironmentDirectory).u8string();
 					}
 				}
 			}
@@ -102,7 +100,6 @@ namespace Ainan {
 			Image::GrayScaleToRGB(img);
 
 		m_Texture = Renderer::CreateTexture(img);
-		//m_Texture->SetImage(img);
 	}
 
 }

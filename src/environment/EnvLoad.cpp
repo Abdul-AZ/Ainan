@@ -24,6 +24,9 @@ namespace Ainan {
 	Environment* LoadEnvironment(const std::string& path)
 	{
 		json data;
+
+		//we are assuming the .env file is in environment's top folder
+		AssetManager::Init(std::filesystem::path(path).parent_path());
 		
 		try 
 		{
@@ -142,7 +145,7 @@ namespace Ainan {
 		ps->Customizer.m_TextureCustomizer.m_TexturePath = data[id + "TexturePath"].get<std::string>();
 		if (!ps->Customizer.m_TextureCustomizer.UseDefaultTexture)
 		{
-			ps->Customizer.m_TextureCustomizer.ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(AssetManager::s_EnvironmentDirectory.u8string() + ps->Customizer.m_TextureCustomizer.m_TexturePath));
+			ps->Customizer.m_TextureCustomizer.ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(AssetManager::s_EnvironmentDirectory.u8string() + "\\" + ps->Customizer.m_TextureCustomizer.m_TexturePath.u8string()));
 		}
 
 		//Force data
@@ -217,7 +220,7 @@ namespace Ainan {
 		sprite->Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
 		sprite->m_TexturePath = data[id + "TexturePath"].get<std::string>();
 		if(sprite->m_TexturePath != "")
-			sprite->LoadTextureFromFile(AssetManager::s_EnvironmentDirectory.u8string() + sprite->m_TexturePath);
+			sprite->LoadTextureFromFile(AssetManager::s_EnvironmentDirectory.u8string() + "\\" + sprite->m_TexturePath.u8string());
 
 		pEnvironmentObject obj((EnvironmentObjectInterface*)(sprite.release()));
 		env->Objects.push_back(std::move(obj));

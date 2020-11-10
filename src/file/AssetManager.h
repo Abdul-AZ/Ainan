@@ -9,12 +9,12 @@ namespace Ainan {
 	class AssetManager
 	{
 	public:
-		static void Init(const std::string& environmentDirectory);
+		static void Init(const std::filesystem::path& environmentDirectory);
 		static void Terminate();
 
 		static void DisplayGUI();
 
-		static std::vector<std::string> GetAll2DTextures();
+		static std::vector<std::filesystem::path> GetAll2DTextures();
 		static std::string ReadEntireTextFile(const std::string& path);
 	public:
 		//this a path to the environment directory

@@ -13,7 +13,7 @@ namespace Ainan {
 
 		if (!UseDefaultTexture)
 		{
-			ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(customizer.m_TexturePath));
+			ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(AssetManager::s_EnvironmentDirectory.u8string() + "\\" + customizer.m_TexturePath.u8string()));
 		}
 	}
 
@@ -29,7 +29,7 @@ namespace Ainan {
 		{
 			ImGui::Text("Texture: ");
 			ImGui::SameLine();
-			if (ImGui::BeginCombo("##Texture: ", UseDefaultTexture ? "Default" : std::filesystem::path(m_TexturePath).filename().u8string().c_str()))
+			if (ImGui::BeginCombo("##Texture: ", UseDefaultTexture ? "Default" : m_TexturePath.filename().u8string().c_str()))
 			{
 				auto textures = AssetManager::GetAll2DTextures();
 				bool selected = false;
@@ -45,11 +45,10 @@ namespace Ainan {
 					{
 						if (textureFileName != "Default") 
 						{
-							ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(tex));
-							//ParticleTexture->SetImage(Image::LoadFromFile(tex));
+							ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(tex.u8string()));
+							
 							UseDefaultTexture = false;
-							std::string absolutePathToEnv = AssetManager::s_EnvironmentDirectory.u8string();
-							m_TexturePath = tex.substr(absolutePathToEnv.size(), tex.size() - absolutePathToEnv.size());
+							m_TexturePath = tex.lexically_relative(AssetManager::s_EnvironmentDirectory).u8string();
 						}
 					}
 				}

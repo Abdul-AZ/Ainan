@@ -131,7 +131,7 @@ namespace Ainan {
 
 		//Texture data
 		j[id + "UseDefaultTexture"] = ps.Customizer.m_TextureCustomizer.UseDefaultTexture;
-		j[id + "TexturePath"] = ps.Customizer.m_TextureCustomizer.m_TexturePath;
+		j[id + "TexturePath"] = ps.Customizer.m_TextureCustomizer.m_TexturePath.u8string();
 
 		//Force data
 		{
@@ -185,7 +185,7 @@ namespace Ainan {
 		j[id + "Scale"] = sprite.Scale;
 		j[id + "Rotation"] = sprite.Rotation;
 		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.Tint);
-		j[id + "TexturePath"] = sprite.m_TexturePath;
+		j[id + "TexturePath"] = sprite.m_TexturePath.u8string();
 	}
 
 	void toJson(json& j, const LitSprite& sprite, size_t objectOrder)
