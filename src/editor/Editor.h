@@ -52,8 +52,6 @@ namespace Ainan {
 
 		void Update();
 		void Draw();
-		void StartFrame();
-		void EndFrame();
 
 	private:
 		Environment* m_Env = nullptr;
@@ -106,7 +104,6 @@ namespace Ainan {
 		std::condition_variable StartUpdating;
 		std::condition_variable FinishedUpdating;
 		std::atomic_bool DestroyThreads = false;
-		float m_DeltaTime = 0.0f;			//change in realtime
 		float m_SimulationDeltaTime = 0.0f; //change in simulation time
 		int32_t m_AverageFPS = 0;
 		uint32_t m_GPUMemAllocated = 0;

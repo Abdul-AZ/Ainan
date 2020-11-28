@@ -21,14 +21,10 @@ int main()
 
 	while (Window::ShouldClose == false)
 	{
-		editor->StartFrame();
-		
 		Window::HandleWindowEvents();
 		editor->Update();
 		InputManager::HandleInput();
 		editor->Draw();
-		
-		editor->EndFrame();
 	
 		Renderer::Present();
 	}

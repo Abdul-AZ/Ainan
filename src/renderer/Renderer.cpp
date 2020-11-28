@@ -29,6 +29,9 @@ bool WantUpdateMonitors = true;
 
 namespace Ainan {
 
+	double LastFrameFinishTime = 0.0;
+	double LastFrameDeltaTime = 0.0;
+
 	Renderer::RendererData* Renderer::Rdata = nullptr;
 
 	struct ShaderLoadInfo
@@ -877,11 +880,28 @@ namespace Ainan {
 
 	void Renderer::Present()
 	{
+		std::chrono::high_resolution_clock::now();
+		 
 		auto func = []()
 		{
 			Rdata->CurrentActiveAPI->Present();
 		};
 		PushCommand(func);
+		WaitUntilRendererIdle();
+
+		bool running = true;
+
+		while (running) 
+		{
+			double time = glfwGetTime();
+			LastFrameDeltaTime = time - LastFrameFinishTime;
+
+			if (LastFrameDeltaTime >= c_ApplicationMaxFramePeriod)
+			{
+				LastFrameFinishTime = time;
+				break;
+			}
+		}
 	}
 
 	void Renderer::RecreateSwapchain(const glm::vec2& newSwapchainSize)

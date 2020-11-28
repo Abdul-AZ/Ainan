@@ -51,23 +51,28 @@ namespace Ainan
 
 	void Editor::Update()
 	{
-		//if time passed is less than a frame time, we use the time of a single frame
-		//because we are not going to start the next frame until the time of a single frame finishes
-		float frameTime = m_DeltaTime > 0.01666f ? m_DeltaTime : 0.01666f;
-		m_SimulationDeltaTime = frameTime * m_SimulationSpeedFactor;
+		if (m_ShouldDeleteEnv)
+		{
+			delete m_Env;
+			m_Env = nullptr;
+			UpdateTitle();
+			m_ShouldDeleteEnv = false;
+		}
+
+		m_SimulationDeltaTime = LastFrameDeltaTime * m_SimulationSpeedFactor;
 
 		switch (m_State)
 		{
 		case State_EditorMode:
-			Update_EditorMode(frameTime);
+			Update_EditorMode(LastFrameDeltaTime);
 			break;
 
 		case State_PlayMode:
-			Update_PlayMode(frameTime);
+			Update_PlayMode(LastFrameDeltaTime);
 			break;
 
 		case State_PauseMode:
-			Update_PauseMode(frameTime);
+			Update_PauseMode(LastFrameDeltaTime);
 			break;
 		}
 
@@ -216,7 +221,7 @@ namespace Ainan
 		//move everything back
 		std::memmove(m_DeltaTimeHistory.data(), m_DeltaTimeHistory.data() + 1, (m_DeltaTimeHistory.size() - 1) * sizeof(float));
 		//register the new time
-		m_DeltaTimeHistory[m_DeltaTimeHistory.size() - 1] = m_DeltaTime;
+		m_DeltaTimeHistory[m_DeltaTimeHistory.size() - 1] = LastFrameDeltaTime;
 	}
 
 	void Editor::Update_PauseMode(float deltaTime)
@@ -1403,7 +1408,6 @@ namespace Ainan
 
 	void Editor::DisplayProfilerGUI()
 	{
-
 		if (!m_ProfilerWindowOpen)
 			return;
 
@@ -1667,24 +1671,5 @@ namespace Ainan
 			environmentName = "Start Menu";
 
 		Window::SetTitle("Ainan - " + RendererTypeStr(currentRendererType) + " - " + environmentName);
-	}
-
-	void Editor::StartFrame()
-	{
-		if (m_ShouldDeleteEnv)
-		{
-			delete m_Env;
-			m_Env = nullptr;
-			UpdateTitle();
-			m_ShouldDeleteEnv = false;
-		}
-
-		m_TimeStart = clock();
-	}
-
-	void Editor::EndFrame()
-	{
-		m_TimeEnd = clock();
-		m_DeltaTime = (m_TimeEnd - m_TimeStart) / 1000.0f;
 	}
 }

@@ -13,6 +13,11 @@
 
 namespace Ainan {
 
+	const int32_t c_ApplicationFramerate = 60;
+	const double c_ApplicationMaxFramePeriod = 1.0 / c_ApplicationFramerate;
+	extern double LastFrameFinishTime;
+	extern double LastFrameDeltaTime;
+
 	//lighting constants
 	const int32_t c_MaxRadialLightCount = 10;
 	const int32_t c_MaxSpotLightCount = 10;

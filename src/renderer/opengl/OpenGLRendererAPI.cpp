@@ -24,14 +24,16 @@ namespace Ainan {
 
 		static void opengl_debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 		{
-			AINAN_LOG_ERROR(message);
+			if (severity == GL_DEBUG_SEVERITY_HIGH)
+				AINAN_LOG_ERROR(message);
+			if (severity == GL_DEBUG_SEVERITY_MEDIUM)
+				AINAN_LOG_WARNING(message);
 		};
 
 		OpenGLRendererAPI::OpenGLRendererAPI()
 		{
 			glfwMakeContextCurrent(Window::Ptr);
 			gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-			glfwSwapInterval(1);
 #ifndef NDEBUG
 			glDebugMessageCallback(&opengl_debug_message_callback, nullptr);
 #endif // DEBUG
