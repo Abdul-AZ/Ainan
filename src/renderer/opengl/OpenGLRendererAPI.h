@@ -48,7 +48,6 @@ namespace Ainan {
 			virtual void ImGuiEndFrame() override;
 			virtual void DrawImGui(ImDrawData* drawData) override;
 			virtual void ClearScreen() override;
-			virtual void Present() override;
 			virtual void RecreateSwapchain(const glm::vec2& newSwapchainSize) override;
 			virtual void SetRenderTargetApplicationWindow() override;
 
@@ -63,6 +62,8 @@ namespace Ainan {
 			static OpenGLRendererAPI& Snigleton() { assert(SingletonInstance); return *SingletonInstance; };
 
 		private:
+			void Present();
+
 			static OpenGLRendererAPI* SingletonInstance;
 			//imgui data
 			int32_t AttribLocationVtxPos;
@@ -72,6 +73,9 @@ namespace Ainan {
 			std::shared_ptr<IndexBuffer> ImGuiIndexBuffer;
 			std::shared_ptr<VertexBuffer> ImGuiVertexBuffer;
 			uint32_t FontTexture = 0;
+
+			// Inherited via RendererAPI
+			virtual void ExecuteCommand(RenderCommand cmd) override;
 		};
 	}
 }

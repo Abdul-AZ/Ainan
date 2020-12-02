@@ -105,6 +105,33 @@ namespace Ainan {
 			}
 		}
 
+		void OpenGLRendererAPI::ExecuteCommand(RenderCommand cmd)
+		{
+			switch (cmd.Type)
+			{
+			case RenderCommandType::ClearScreen:
+				ClearScreen();
+				break;
+
+			case RenderCommandType::Present:
+				Present();
+				break;
+
+			case RenderCommandType::DrawIndexed:
+				cmd.VBuffer->Bind();
+				cmd.IBuffer->Bind();
+
+				Draw(*cmd.Shader, cmd.DrawingPrimitive, *cmd.IBuffer);
+
+				cmd.VBuffer->Unbind();
+				cmd.IBuffer->Unbind();
+				break;
+
+			default:
+				break;
+			}
+		}
+
 		void OpenGLRendererAPI::ImGuiNewFrame()
 		{
 			auto func = [this]()

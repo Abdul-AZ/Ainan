@@ -389,15 +389,19 @@ namespace Ainan {
 					std::unique_lock<std::mutex> lock(Rdata->QueueMutex);
 					Rdata->cv.wait(lock, []() { return Rdata->payload == true || Rdata->DestroyThread; });
 				}
-				std::function<void()> func = nullptr;
+				RenderCommand cmd;
 				while (Rdata->CommandBuffer.size() > 0)
 				{
 					{
 						std::unique_lock lock(Rdata->QueueMutex);
-						func = Rdata->CommandBuffer.front();
+						cmd = Rdata->CommandBuffer.front();
 						Rdata->CommandBuffer.pop();
 					}
-					func();
+
+					if (cmd.Type == RenderCommandType::CustomCommand)
+						cmd.CustomCommand();
+					else
+						Rdata->CurrentActiveAPI->ExecuteCommand(cmd);
 				}
 				Rdata->payload = false;
 				Rdata->WorkDoneCV.notify_all();
@@ -418,13 +422,13 @@ namespace Ainan {
 		Rdata->QuadBatchTextures[0].reset();
 	}
 
-	void Renderer::PushCommand(std::function<void()> func)
+	void Renderer::PushCommand(RenderCommand cmd)
 	{
 		if (Window::Minimized)
 			return;
 
 		std::unique_lock lock(Rdata->QueueMutex);
-		Rdata->CommandBuffer.push(func);
+		Rdata->CommandBuffer.push(cmd);
 		Rdata->payload = true;
 		Rdata->cv.notify_one();
 	}
@@ -501,13 +505,13 @@ namespace Ainan {
 		i++;
 	}
 
-	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive mode, const uint32_t vertexCount)
+	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive, int32_t vertexCount)
 	{
-		auto func = [vertexBuffer, shader, mode, vertexCount]()
+		auto func = [vertexBuffer, shader, primitive, vertexCount]()
 		{
 			vertexBuffer->Bind();
 
-			Rdata->CurrentActiveAPI->Draw(*shader, mode, vertexCount);
+			Rdata->CurrentActiveAPI->Draw(*shader, primitive, vertexCount);
 
 			vertexBuffer->Unbind();
 
@@ -742,39 +746,15 @@ namespace Ainan {
 
 	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive, const std::shared_ptr<IndexBuffer>& indexBuffer)
 	{
-		auto func = [vertexBuffer, indexBuffer, shader, primitive]()
-		{
-			vertexBuffer->Bind();
-			indexBuffer->Bind();
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::DrawIndexed;
+		cmd.VBuffer = vertexBuffer;
+		cmd.IBuffer = indexBuffer;
+		cmd.Shader = shader;
+		cmd.DrawingPrimitive = primitive;
 
-			Rdata->CurrentActiveAPI->Draw(*shader, primitive, *indexBuffer);
-
-			vertexBuffer->Unbind();
-			indexBuffer->Unbind();
-
-			Rdata->CurrentNumberOfDrawCalls++;
-		};
-
-		PushCommand(func);
-		WaitUntilRendererIdle();
-	}
-
-	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive, const std::shared_ptr<IndexBuffer>& indexBuffer, int32_t vertexCount)
-	{
-		auto func = [vertexBuffer, shader, indexBuffer, primitive, vertexCount]()
-		{
-			vertexBuffer->Bind();
-			indexBuffer->Bind();
-
-			Rdata->CurrentActiveAPI->Draw(*shader, primitive, *indexBuffer, vertexCount);
-
-			vertexBuffer->Unbind();
-			indexBuffer->Unbind();
-
-			Rdata->CurrentNumberOfDrawCalls++;
-		};
-
-		PushCommand(func);
+		PushCommand(cmd);
+		Rdata->CurrentNumberOfDrawCalls++;
 	}
 
 	void Renderer::ImGuiNewFrame()
@@ -866,11 +846,9 @@ namespace Ainan {
 
 	void Renderer::ClearScreen()
 	{
-		auto func = []()
-		{
-			Rdata->CurrentActiveAPI->ClearScreen();
-		};
-		PushCommand(func);
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::ClearScreen;
+		PushCommand(cmd);
 	}
 
 	void Renderer::ClearScreenUnsafe()
@@ -882,11 +860,9 @@ namespace Ainan {
 	{
 		std::chrono::high_resolution_clock::now();
 		 
-		auto func = []()
-		{
-			Rdata->CurrentActiveAPI->Present();
-		};
-		PushCommand(func);
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::Present;
+		PushCommand(cmd);
 		WaitUntilRendererIdle();
 
 		bool running = true;

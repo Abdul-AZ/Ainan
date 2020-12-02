@@ -2,6 +2,7 @@
 
 #include "editor/Camera.h"
 
+#include "RenderCommand.h"
 #include "RendererAPI.h"
 #include "ShaderProgram.h"
 #include "VertexBuffer.h"
@@ -66,7 +67,7 @@ namespace Ainan {
 	};
 
 	//this class is completely api agnostic, meaning NO gl calls, NO direct3D calls etc
-	class Renderer 
+	class Renderer
 	{
 	public:
 		//this initilizes the renderer and starts the rendering thread
@@ -88,15 +89,11 @@ namespace Ainan {
 		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, std::shared_ptr<Texture> texture = nullptr);
 		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int32_t count, std::shared_ptr<Texture> texture = nullptr);
 
-		//these overloads DO NOT use an index buffer
-		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive mode,
-						 const uint32_t vertexCount);
+		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive,
+			int32_t vertexCount);
 
-		//these overloads DO use an index buffer
 		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive,
-						 const std::shared_ptr<IndexBuffer>& indexBuffer);
-		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive,
-						 const std::shared_ptr<IndexBuffer>& indexBuffer, int32_t vertexCount);
+			const std::shared_ptr<IndexBuffer>& indexBuffer);
 
 		static void ImGuiNewFrame();
 		static void ImGuiEndFrame();
@@ -110,7 +107,8 @@ namespace Ainan {
 
 		static void RecreateSwapchain(const glm::vec2& newSwapchainSize);
 
-		static void PushCommand(std::function<void()> func);
+		static void PushCommand(RenderCommand cmd);
+		static void PushCommand(std::function<void()> func) { return PushCommand(RenderCommand(func)); };
 
 		static void SetBlendMode(RenderingBlendMode blendMode);
 
@@ -153,7 +151,7 @@ namespace Ainan {
 			std::thread Thread;
 			bool DestroyThread = false;
 			std::mutex DataMutex;
-			std::queue<std::function<void()>> CommandBuffer;
+			std::queue<RenderCommand> CommandBuffer;
 			
 			std::mutex QueueMutex;
 			std::condition_variable cv;
