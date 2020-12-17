@@ -9,11 +9,21 @@ namespace Ainan {
 	{
 		ClearScreen,
 		Present,
+		CreateShaderProgram, //requires heap allocated ShaderProgramCreationInfo passed in ExtraData
 		CreateUniformBuffer, //requires heap allocated UniformBufferCreationInfo passed in ExtraData
+		CreateVertexBuffer,  //requires heap allocated VertexBufferCreationInfo passed in ExtraData
 		UpdateUniformBuffer,
+		BindUniformBuffer,
 		CustomCommand,
+		Draw_NewShader,
 		DrawIndexed, //Requires VBuffer, IBuffer, Shader and DrawingPrimitive set
 		Unspecified
+	};
+
+	struct ShaderProgramCreationInfo
+	{
+		std::string vertPath;
+		std::string fragPath;
 	};
 
 	struct UniformBufferCreationInfo
@@ -21,6 +31,15 @@ namespace Ainan {
 		std::string Name;
 		uint32_t reg;
 		VertexLayout layout;
+	};
+
+	struct VertexBufferCreationInfo
+	{
+		void* InitialData;
+		uint32_t Size;
+		VertexLayout Layout;
+		uint64_t Shader;
+		bool Dynamic;
 	};
 
 	enum class Primitive
@@ -38,7 +57,7 @@ namespace Ainan {
 		NotSpecified //this will use the current mode it is set on
 	};
 
-	enum class RenderingStage
+	enum class RenderingStage : uint32_t
 	{
 		VertexShader,
 		FragmentShader
@@ -66,6 +85,7 @@ namespace Ainan {
 		RenderCommandType Type = RenderCommandType::Unspecified;
 		std::shared_ptr<ShaderProgram> Shader = nullptr;
 		std::shared_ptr<VertexBuffer> VBuffer = nullptr;
+		VertexBufferDataView NewVBuffer;
 		std::shared_ptr<IndexBuffer> IBuffer = nullptr;
 		std::shared_ptr<Texture> Tex = nullptr;
 		std::shared_ptr<FrameBuffer> FBuffer = nullptr;
@@ -76,5 +96,8 @@ namespace Ainan {
 		void* ExtraData = nullptr;
 		void* Output = nullptr;
 		std::function<void()> CustomCommand = nullptr;
+
+		uint64_t Misc1 = 0;
+		uint64_t Misc2 = 0;
 	};
 }

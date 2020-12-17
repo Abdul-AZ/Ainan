@@ -521,6 +521,18 @@ namespace Ainan {
 		PushCommand(func);
 	}
 
+	void Renderer::Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, int32_t vertexCount)
+	{
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::Draw_NewShader;
+		cmd.NewVBuffer = Rdata->VertexBuffers[vertexBuffer.Identifier];
+		cmd.ExtraData = &Rdata->ShaderPrograms[shader.Identifier];
+		cmd.Misc1 = (uint32_t)primitive;
+		cmd.Misc2 = vertexCount;
+
+		PushCommand(cmd);
+	}
+
 	void Renderer::EndScene()
 	{
 		auto func = []()
@@ -1045,6 +1057,32 @@ namespace Ainan {
 		return buffer;
 	}
 
+	VertexBufferNew Renderer::CreateVertexBufferNew(void* data, uint32_t size, const VertexLayout& layout, ShaderProgramNew shaderProgram, bool dynamic)
+	{
+		static uint32_t s_IdentifierCounter = 1;
+		VertexBufferNew bufferHandle;
+		bufferHandle.Identifier = s_IdentifierCounter;
+		VertexBufferDataView view;
+		view.Size = size;
+		Rdata->VertexBuffers[s_IdentifierCounter] = view;
+
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::CreateVertexBuffer;
+		VertexBufferCreationInfo* info = new VertexBufferCreationInfo;
+		info->InitialData = new uint8_t[size];
+		memcpy(info->InitialData, data, size);
+		info->Shader = Rdata->ShaderPrograms[shaderProgram.Identifier].Identifier;
+		info->Layout = layout;
+		info->Size = size;
+		info->Dynamic = dynamic;
+		cmd.ExtraData = info;
+		cmd.Output = &Rdata->VertexBuffers[s_IdentifierCounter];
+
+		PushCommand(cmd);
+		s_IdentifierCounter++;
+		return bufferHandle;
+	}
+
 	std::shared_ptr<IndexBuffer> Renderer::CreateIndexBufferUnsafe(uint32_t* data, uint32_t count)
 	{
 		std::shared_ptr<IndexBuffer> buffer;
@@ -1143,6 +1181,27 @@ namespace Ainan {
 			assert(false);
 			return nullptr;
 		}
+	}
+
+	ShaderProgramNew Renderer::CreateShaderProgramNew(const std::string& vertPath, const std::string& fragPath)
+	{
+		static uint32_t s_IdentifierCounter = 1;
+		ShaderProgramNew programHandle;
+		programHandle.Identifier = s_IdentifierCounter;
+		ShaderProgramDataView view;
+		Rdata->ShaderPrograms[s_IdentifierCounter] = view;
+		
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::CreateShaderProgram;
+		ShaderProgramCreationInfo* info = new ShaderProgramCreationInfo;
+		info->vertPath = vertPath;
+		info->fragPath = fragPath;
+		cmd.ExtraData = info;
+		cmd.Output = &Rdata->ShaderPrograms[s_IdentifierCounter];
+		
+		PushCommand(cmd);
+		s_IdentifierCounter++;
+		return programHandle;
 	}
 
 	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgramRaw(const std::string& vertSrc, const std::string& fragSrc)

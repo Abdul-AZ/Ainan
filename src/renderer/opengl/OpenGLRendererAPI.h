@@ -74,10 +74,13 @@ namespace Ainan {
 			std::shared_ptr<VertexBuffer> ImGuiVertexBuffer;
 			uint32_t FontTexture = 0;
 
-			// Inherited via RendererAPI
 			virtual void ExecuteCommand(RenderCommand cmd) override;
+			void DrawWithNewAPI(const RenderCommand& cmd);
+			void CreateShaderProgramNew(const RenderCommand& cmd);
 			void CreateUniformBufferNew(const RenderCommand& cmd);
 			void UpdateUniformBufferNew(const RenderCommand& cmd);
+			void BindUniformBufferNew(const RenderCommand& cmd);
+			void CreateVertexBufferNew(const RenderCommand& cmd);
 		};
 	}
 }

@@ -50,7 +50,7 @@ set(SOURCES_LIST
     "renderer/VertexBuffer.h"
     "renderer/IndexBuffer.h"
     "renderer/UniformBuffer.h"    "renderer/UniformBuffer.cpp"
-    "renderer/ShaderProgram.h"
+    "renderer/ShaderProgram.h"    "renderer/ShaderProgram.cpp"
     "renderer/Texture.h"
     "renderer/Rectangle.h"
     "renderer/FrameBuffer.h"

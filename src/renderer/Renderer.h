@@ -92,6 +92,8 @@ namespace Ainan {
 		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive,
 			int32_t vertexCount);
 
+		static void Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, int32_t vertexCount);
+
 		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive,
 			const std::shared_ptr<IndexBuffer>& indexBuffer);
 
@@ -121,6 +123,10 @@ namespace Ainan {
 			const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
 			bool dynamic = false);
 
+		static VertexBufferNew CreateVertexBufferNew(void* data, uint32_t size,
+			const VertexLayout& layout, ShaderProgramNew shaderProgram,
+			bool dynamic = false);
+
 		//data should ALWAYS a uint32_t array
 		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(uint32_t* data, uint32_t count);
 
@@ -133,6 +139,7 @@ namespace Ainan {
 		//manually create a shader program (mostly used for testing new shaders)
 		//to properly add shaders add them to the CompileOnInit list in the cpp file and access them from the ShaderLibrary member
 		static std::shared_ptr<ShaderProgram> CreateShaderProgram(const std::string& vertPath, const std::string& fragPath);
+		static ShaderProgramNew CreateShaderProgramNew(const std::string& vertPath, const std::string& fragPath);
 		//this is used when you want to create shaders with source code and not from files
 		static std::shared_ptr<ShaderProgram> CreateShaderProgramRaw(const std::string& vertSrc, const std::string& fragSrc);
 
@@ -164,6 +171,8 @@ namespace Ainan {
 
 			//TEMPORARY, new interface data
 			std::unordered_map<uint32_t, UniformBufferDataView> UniformBuffers;
+			std::unordered_map<uint32_t, ShaderProgramDataView> ShaderPrograms;
+			std::unordered_map<uint32_t, VertexBufferDataView> VertexBuffers;
 
 			//scene data
 			RendererAPI* CurrentActiveAPI = nullptr;

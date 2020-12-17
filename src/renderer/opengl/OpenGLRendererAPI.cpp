@@ -6,6 +6,7 @@
 #include "OpenGLShaderProgram.h"
 #include "OpenGLVertexBuffer.h"
 #include "OpenGLIndexBuffer.h"
+#include "file/AssetManager.h" //for reading shader files
 
 namespace Ainan {
 	namespace OpenGL {
@@ -53,6 +54,62 @@ namespace Ainan {
 				return 4 * 4;
 				break;
 			}
+		}
+
+		constexpr GLenum GetOpenglTypeFromShaderType(const ShaderVariableType& type)
+		{
+			switch (type)
+			{
+			case ShaderVariableType::Int:
+				return GL_INT;
+
+			case ShaderVariableType::UnsignedInt:
+				return GL_UNSIGNED_INT;
+
+			case ShaderVariableType::Float:
+			case ShaderVariableType::Vec2:
+			case ShaderVariableType::Vec3:
+			case ShaderVariableType::Vec4:
+			case ShaderVariableType::Mat3:
+			case ShaderVariableType::Mat4:
+				return GL_FLOAT;
+
+			default:
+				return 0;
+			}
+		}
+
+		static std::string LoadAndParseShader(std::string path)
+		{
+			std::string shader = AssetManager::ReadEntireTextFile(path);
+
+			//parse include statements
+			size_t includeLocation = 0;
+			includeLocation = shader.find("#include ");
+			while (includeLocation != std::string::npos)
+			{
+				std::filesystem::path shaderFolder = path;
+				shaderFolder = shaderFolder.parent_path();
+
+				std::string includeStatement = shader.substr(includeLocation, shader.find('\n', includeLocation) - includeLocation);
+				size_t subPathBeginLocation = includeStatement.find('<');
+				size_t subPathEndLocation = includeStatement.find('>');
+				std::string includePath = includeStatement.substr(subPathBeginLocation + 1, subPathEndLocation - subPathBeginLocation - 1);
+
+				std::filesystem::path fullPath = shaderFolder.string() + "/" + includePath;
+				if (std::filesystem::exists(fullPath))
+				{
+					std::string includeFileContents = AssetManager::ReadEntireTextFile(fullPath.string());
+
+					shader.erase(includeLocation, includeStatement.size());
+					shader.insert(includeLocation, includeFileContents.c_str());
+				}
+				else
+					assert(false);
+				includeLocation = shader.find("#include ");
+			}
+
+			return shader;
 		}
 
 		OpenGLRendererAPI* OpenGLRendererAPI::SingletonInstance = nullptr;
@@ -170,9 +227,67 @@ namespace Ainan {
 				UpdateUniformBufferNew(cmd);
 				break;
 
+			case RenderCommandType::BindUniformBuffer:
+				BindUniformBufferNew(cmd);
+				break;
+
+			case RenderCommandType::CreateShaderProgram:
+				CreateShaderProgramNew(cmd);
+				break;
+
+			case RenderCommandType::CreateVertexBuffer:
+				CreateVertexBufferNew(cmd);
+				break;
+
+			case RenderCommandType::Draw_NewShader:
+				DrawWithNewAPI(cmd);
+				break;
+
 			default:
 				break;
 			}
+		}
+
+		void OpenGLRendererAPI::DrawWithNewAPI(const RenderCommand& cmd)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, cmd.NewVBuffer.Identifier);
+			glBindVertexArray(cmd.NewVBuffer.Array);
+			ShaderProgramDataView* view = (ShaderProgramDataView*)cmd.ExtraData;
+			glUseProgram(view->Identifier);
+			glDrawArrays(GetOpenGLPrimitive((Primitive)cmd.Misc1), 0, cmd.Misc2);
+			glUseProgram(0);
+		}
+
+		void OpenGLRendererAPI::CreateShaderProgramNew(const RenderCommand& cmd)
+		{
+			ShaderProgramCreationInfo* info = (ShaderProgramCreationInfo*)cmd.ExtraData;
+			ShaderProgramDataView* output = (ShaderProgramDataView*)cmd.Output;
+
+			uint32_t vertex, fragment, program;
+
+			vertex = glCreateShader(GL_VERTEX_SHADER);
+			std::string vShaderCode = LoadAndParseShader(info->vertPath + ".vert");
+			const char* c_vShaderCode = vShaderCode.c_str();
+			glShaderSource(vertex, 1, &c_vShaderCode, NULL);
+			glCompileShader(vertex);
+
+			fragment = glCreateShader(GL_FRAGMENT_SHADER);
+			std::string fShaderCode = LoadAndParseShader(info->fragPath + ".frag");
+			const char* c_fShaderCode = fShaderCode.c_str();
+			glShaderSource(fragment, 1, &c_fShaderCode, NULL);
+			glCompileShader(fragment);
+
+			// shader Program
+			program = glCreateProgram();
+			glAttachShader(program, vertex);
+			glAttachShader(program, fragment);
+
+			glLinkProgram(program);
+			// delete the shaders as they're linked into our program now and no longer necessery
+			glDeleteShader(vertex);
+			glDeleteShader(fragment);
+
+			output->Identifier = program;
 		}
 
 		void OpenGLRendererAPI::CreateUniformBufferNew(const RenderCommand& cmd)
@@ -210,10 +325,12 @@ namespace Ainan {
 			output->AlignedSize += output->AlignedSize % 16 == 0 ? 0 : 16 - (output->AlignedSize % 16);
 			output->BufferMemory = new uint8_t[output->AlignedSize]();
 
-			glGenBuffers(1, &output->Identifier);
-			glBindBuffer(GL_UNIFORM_BUFFER, output->Identifier);
+			uint32_t identifier = 0;
+			glGenBuffers(1, &identifier);
+			glBindBuffer(GL_UNIFORM_BUFFER, identifier);
 			glBufferData(GL_UNIFORM_BUFFER, output->AlignedSize, nullptr, GL_DYNAMIC_DRAW);
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+			output->Identifier = identifier;
 
 			output->Layout = info->layout;
 			delete info;
@@ -256,6 +373,59 @@ namespace Ainan {
 			glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
 			delete[] cmd.ExtraData;
+		}
+
+		void OpenGLRendererAPI::BindUniformBufferNew(const RenderCommand& cmd)
+		{
+			UniformBufferDataView* ubuffer = (UniformBufferDataView *)cmd.ExtraData;
+			glBindBufferRange(GL_UNIFORM_BUFFER, cmd.Misc1, ubuffer->Identifier, 0, ubuffer->AlignedSize);
+		}
+
+		void OpenGLRendererAPI::CreateVertexBufferNew(const RenderCommand& cmd)
+		{
+			VertexBufferCreationInfo* info = (VertexBufferCreationInfo*)cmd.ExtraData;
+			VertexBufferDataView* output = (VertexBufferDataView*)cmd.Output;
+
+			uint32_t arrayHandle = 0, bufferHandle = 0;
+			glGenVertexArrays(1, &arrayHandle);
+			glBindVertexArray(arrayHandle);
+
+			//create buffer
+			glGenBuffers(1, &bufferHandle);
+			glBindBuffer(GL_ARRAY_BUFFER, bufferHandle);
+			glBindVertexArray(arrayHandle);
+			if (info->Dynamic)
+				glBufferData(GL_ARRAY_BUFFER, info->Size, info->InitialData, GL_DYNAMIC_DRAW);
+			else
+				glBufferData(GL_ARRAY_BUFFER, info->Size, info->InitialData, GL_STATIC_DRAW);
+
+			//set layout
+			int32_t index = 0;
+			int32_t offset = 0;
+			int32_t stride = 0;
+
+			for (auto& layoutPart : info->Layout)
+			{
+				stride += layoutPart.GetSize();
+			}
+
+			for (auto& layoutPart : info->Layout)
+			{
+				int32_t size = layoutPart.GetSize();
+				int32_t componentCount = GetShaderVariableComponentCount(layoutPart.Type);
+				GLenum openglType = GetOpenglTypeFromShaderType(layoutPart.Type);
+
+				glVertexAttribPointer(index, componentCount, openglType, false, stride, (void*)(uintptr_t)offset);
+				offset += size;
+
+				glEnableVertexAttribArray(index);
+				index++;
+			}
+
+			output->Array = arrayHandle;
+			output->Identifier = bufferHandle;
+			delete info->InitialData;
+			delete info;
 		}
 
 		void OpenGLRendererAPI::ImGuiNewFrame()

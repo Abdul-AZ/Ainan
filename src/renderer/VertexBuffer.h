@@ -108,6 +108,26 @@ namespace Ainan {
 		friend class Renderer;
 	};
 
+	class VertexBufferNew
+	{
+	public:
+		uint32_t Identifier;
+
+		//NOTE: offset and size are in bytes
+		//offset is the start of the memory location you want to update
+		void UpdateData(int32_t offset, int32_t size, void* data);
+		uint32_t GetUsedMemory() const;
+
+		friend class Renderer;
+	};
+
+	struct VertexBufferDataView
+	{
+		uint64_t Identifier;
+		uint32_t Size;
+		uint32_t Array; //Used only in OpenGL
+	};
+
 	//returns size in bytes
 	constexpr int GetShaderVariableComponentCount(const ShaderVariableType& type)
 	{

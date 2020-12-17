@@ -26,7 +26,7 @@ namespace Ainan
 
 	struct UniformBufferDataView
 	{
-		uint32_t Identifier = 0;
+		uint64_t Identifier = 0;
 		std::string Name = "";
 		VertexLayout Layout;
 		uint32_t PackedSize = 0;

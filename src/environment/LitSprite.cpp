@@ -5,13 +5,14 @@ namespace Ainan {
 	LitSprite::LitSprite()
 	{
 		Type = LitSpriteType;
+		m_Shader = Renderer::CreateShaderProgramNew("shaders/LitSprite", "shaders/LitSprite");
 		auto vertices = Renderer::GetQuadVertices();
 
 		VertexLayout vertexBufferlayout = 
 		{
 			VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2)
 		};
-		m_VertexBuffer = Renderer::CreateVertexBuffer(vertices.data(), vertices.size() * sizeof(glm::vec2), vertexBufferlayout, Renderer::ShaderLibrary()["LitSpriteShader"]);
+		m_VertexBuffer = Renderer::CreateVertexBufferNew(vertices.data(), vertices.size() * sizeof(glm::vec2), vertexBufferlayout, m_Shader);
 
 		VertexLayout uniformBufferLayout =
 		{
@@ -24,6 +25,7 @@ namespace Ainan {
 		};
 
 		m_UniformBuffer = Renderer::CreateUniformBufferNew("ObjectData", 1, uniformBufferLayout);
+
 	}
 
 	void LitSprite::DisplayGUI()
@@ -88,15 +90,12 @@ namespace Ainan {
 		
 		m_UniformBuffer.UpdateData(&m_UniformBufferData, sizeof(LitSpriteUniformBuffer));
 
-		auto& shader = Renderer::ShaderLibrary()["LitSpriteShader"];
-
-		//TEMPORARY until a newer shader class is implemented
 		uint32_t identifier = Renderer::Rdata->UniformBuffers[m_UniformBuffer.Identifier].Identifier;
 		uint32_t alignedSize = Renderer::Rdata->UniformBuffers[m_UniformBuffer.Identifier].AlignedSize;
 
-		shader->BindUniformBuffer(identifier, alignedSize, 1, RenderingStage::VertexShader);
-		shader->BindUniformBuffer(identifier, alignedSize, 1, RenderingStage::FragmentShader);
+		m_Shader.BindUniformBuffer(m_UniformBuffer, 1, RenderingStage::VertexShader);
+		m_Shader.BindUniformBuffer(m_UniformBuffer, 1, RenderingStage::FragmentShader);
 
-		Renderer::Draw(m_VertexBuffer, shader, Primitive::Triangles, 6);
+		Renderer::Draw(m_VertexBuffer, m_Shader, Primitive::Triangles, 6);
 	}
 }
