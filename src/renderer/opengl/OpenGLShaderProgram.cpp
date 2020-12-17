@@ -151,5 +151,14 @@ namespace Ainan {
 			glActiveTexture(GL_TEXTURE0 + slot);
 			glBindTexture(GL_TEXTURE_2D, openglTexture->m_TextureID);
 		}
+
+		void OpenGLShaderProgram::BindUniformBuffer(uint32_t identifier, uint32_t bufferAlignedSize, uint32_t slot, RenderingStage stage)
+		{
+			auto func = [this, slot, identifier, bufferAlignedSize]()
+			{
+				glBindBufferRange(GL_UNIFORM_BUFFER, slot, identifier, 0, bufferAlignedSize);
+			};
+			Renderer::PushCommand(func);
+		}
 	}
 }

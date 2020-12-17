@@ -26,7 +26,7 @@ namespace Ainan {
 		};
 
 		std::shared_ptr<VertexBuffer> m_VertexBuffer;
-		std::shared_ptr<UniformBuffer> m_UniformBuffer;
+		UniformBufferNew m_UniformBuffer;
 		glm::vec2 m_Position = glm::vec2(0.0f, 0.0f);
 		LitSpriteUniformBuffer m_UniformBufferData;
 		float m_Scale = 0.25f;

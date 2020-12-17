@@ -1105,6 +1105,30 @@ namespace Ainan {
 		return buffer;
 	}
 
+	UniformBufferNew Renderer::CreateUniformBufferNew(const std::string& name, uint32_t reg,
+		const VertexLayout& layout)
+	{
+		static uint32_t s_IdentifierCounter = 1;
+		UniformBufferNew bufferHandle;
+		bufferHandle.Identifier = s_IdentifierCounter;
+		UniformBufferDataView view;
+		view.Name = name;
+		Rdata->UniformBuffers[s_IdentifierCounter] = view;
+
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::CreateUniformBuffer;
+		UniformBufferCreationInfo* info = new UniformBufferCreationInfo;
+		info->Name = name;
+		info->reg = reg;
+		info->layout = layout;
+		cmd.ExtraData = info;
+		cmd.Output = &Rdata->UniformBuffers[s_IdentifierCounter];
+
+		PushCommand(cmd);
+		s_IdentifierCounter++;
+		return bufferHandle;
+	}
+
 	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgram(const std::string& vertPath, const std::string& fragPath)
 	{
 		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())

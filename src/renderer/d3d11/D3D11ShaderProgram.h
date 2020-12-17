@@ -32,6 +32,9 @@ namespace Ainan {
 			//this is needed for creating vertex buffers
 			uint8_t* VertexByteCode = nullptr;
 			uint32_t VertexByteCodeSize = 0;
+
+			// Inherited via ShaderProgram
+			virtual void BindUniformBuffer(uint32_t identifier, uint32_t bufferAlignedSize, uint32_t slot, RenderingStage stage) override;
 		};
 	}
 }

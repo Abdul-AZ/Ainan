@@ -127,6 +127,9 @@ namespace Ainan {
 		static std::shared_ptr<UniformBuffer> CreateUniformBuffer(const std::string& name, uint32_t reg,
 			const VertexLayout& layout, void* data);
 
+		static UniformBufferNew CreateUniformBufferNew(const std::string& name, uint32_t reg,
+			const VertexLayout& layout);
+
 		//manually create a shader program (mostly used for testing new shaders)
 		//to properly add shaders add them to the CompileOnInit list in the cpp file and access them from the ShaderLibrary member
 		static std::shared_ptr<ShaderProgram> CreateShaderProgram(const std::string& vertPath, const std::string& fragPath);
@@ -158,6 +161,9 @@ namespace Ainan {
 			std::atomic_bool payload = false;
 			std::condition_variable WorkDoneCV;
 			std::mutex WorkDoneMutex;
+
+			//TEMPORARY, new interface data
+			std::unordered_map<uint32_t, UniformBufferDataView> UniformBuffers;
 
 			//scene data
 			RendererAPI* CurrentActiveAPI = nullptr;

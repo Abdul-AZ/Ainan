@@ -138,5 +138,8 @@ namespace Ainan {
 				break;
 			}
 		}
+		void D3D11ShaderProgram::BindUniformBuffer(uint32_t identifier, uint32_t bufferAlignedSize, uint32_t slot, RenderingStage stage)
+		{
+		}
 	}
 }

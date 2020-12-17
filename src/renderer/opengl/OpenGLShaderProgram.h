@@ -24,6 +24,9 @@ namespace Ainan {
 			virtual void BindTextureUnsafe(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage) override;
 		public:
 			uint32_t m_RendererID;
+
+			// Inherited via ShaderProgram
+			virtual void BindUniformBuffer(uint32_t identifier, uint32_t bufferAlignedSize, uint32_t slot, RenderingStage stage) override;
 		};
 	}
 }

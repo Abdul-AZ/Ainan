@@ -1,16 +1,27 @@
 #pragma once
 
+//TEMP
+#include "VertexBuffer.h"
+
 namespace Ainan {
 
 	enum class RenderCommandType : int32_t
 	{
 		ClearScreen,
 		Present,
+		CreateUniformBuffer, //requires heap allocated UniformBufferCreationInfo passed in ExtraData
+		UpdateUniformBuffer,
 		CustomCommand,
 		DrawIndexed, //Requires VBuffer, IBuffer, Shader and DrawingPrimitive set
 		Unspecified
 	};
 
+	struct UniformBufferCreationInfo
+	{
+		std::string Name;
+		uint32_t reg;
+		VertexLayout layout;
+	};
 
 	enum class Primitive
 	{
@@ -63,6 +74,7 @@ namespace Ainan {
 		bool FreeUniformDataAfterUse = false;
 		Primitive DrawingPrimitive;
 		void* ExtraData = nullptr;
+		void* Output = nullptr;
 		std::function<void()> CustomCommand = nullptr;
 	};
 }

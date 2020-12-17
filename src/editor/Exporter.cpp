@@ -24,7 +24,7 @@ namespace Ainan {
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 		m_OutlineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 8, layout, Renderer::ShaderLibrary()["LineShader"], true);
 
-		layout[0] = VertexLayoutElement("u_Color",0, ShaderVariableType::Vec4);
+		layout[0] = VertexLayoutElement("u_Color", 0, ShaderVariableType::Vec4);
 		m_OutlineUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout, (void*)&c_OutlineColor);
 
 		SetSize();

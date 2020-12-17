@@ -20,6 +20,41 @@ namespace Ainan {
 			~ImGuiViewportDataGlfw() { IM_ASSERT(Window == NULL); }
 		};
 
+		static uint32_t GetBasestd140Alignemnt(ShaderVariableType type)
+		{
+			switch (type)
+			{
+			case ShaderVariableType::Int:
+				return 4;
+				break;
+			case ShaderVariableType::UnsignedInt:
+				return 4;
+				break;
+			case ShaderVariableType::Float:
+				return 4;
+				break;
+			case ShaderVariableType::Vec2:
+				return 8;
+				break;
+			case ShaderVariableType::Vec3:
+				return 16;
+				break;
+			case ShaderVariableType::Vec4:
+				return 16;
+				break;
+			case ShaderVariableType::Mat3:
+				return 16;
+				break;
+			case ShaderVariableType::Mat4:
+				return 16;
+				break;
+
+			default:
+				return 4 * 4;
+				break;
+			}
+		}
+
 		OpenGLRendererAPI* OpenGLRendererAPI::SingletonInstance = nullptr;
 
 		static void opengl_debug_message_callback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
@@ -127,9 +162,100 @@ namespace Ainan {
 				cmd.IBuffer->Unbind();
 				break;
 
+			case RenderCommandType::CreateUniformBuffer:
+				CreateUniformBufferNew(cmd);
+				break;
+
+			case RenderCommandType::UpdateUniformBuffer:
+				UpdateUniformBufferNew(cmd);
+				break;
+
 			default:
 				break;
 			}
+		}
+
+		void OpenGLRendererAPI::CreateUniformBufferNew(const RenderCommand& cmd)
+		{
+			UniformBufferCreationInfo* info = (UniformBufferCreationInfo*) cmd.ExtraData;
+			UniformBufferDataView* output = (UniformBufferDataView*)cmd.Output;
+
+			output->PackedSize = std::accumulate(info->layout.begin(), info->layout.end(), 0,
+				[](const uint32_t& a, const VertexLayoutElement& b)
+				{
+					return a + b.GetSize();
+				});
+
+			//calculate std140 layout size
+			for (auto& layoutPart : info->layout)
+			{
+				uint32_t size = layoutPart.GetSize();
+
+				//if its an array
+				if (layoutPart.Count > 1)
+				{
+					for (size_t i = 0; i < layoutPart.Count; i++)
+					{
+						output->AlignedSize += output->AlignedSize % 16 == 0 ? 0 : 16 - (output->AlignedSize % 16);
+						output->AlignedSize += size / layoutPart.Count;
+					}
+				}
+				else
+				{
+					uint32_t baseAlignment = GetBasestd140Alignemnt(layoutPart.Type);
+					output->AlignedSize += output->AlignedSize % baseAlignment == 0 ? 0 : baseAlignment - (output->AlignedSize % baseAlignment);
+					output->AlignedSize += size;
+				}
+			}
+			output->AlignedSize += output->AlignedSize % 16 == 0 ? 0 : 16 - (output->AlignedSize % 16);
+			output->BufferMemory = new uint8_t[output->AlignedSize]();
+
+			glGenBuffers(1, &output->Identifier);
+			glBindBuffer(GL_UNIFORM_BUFFER, output->Identifier);
+			glBufferData(GL_UNIFORM_BUFFER, output->AlignedSize, nullptr, GL_DYNAMIC_DRAW);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+			output->Layout = info->layout;
+			delete info;
+		}
+
+		void OpenGLRendererAPI::UpdateUniformBufferNew(const RenderCommand& cmd)
+		{
+			UniformBufferDataView* buffer = (UniformBufferDataView*)cmd.Output;
+
+			//align data with std140 uniform layouts and put the result in m_BufferMemory
+			uint32_t unalignedDataIndex = 0;
+			uint32_t alignedDataIndex = 0;
+			uint8_t* unalignedData = (uint8_t*)cmd.ExtraData;
+			for (auto& layoutPart : buffer->Layout)
+			{
+				uint32_t size = layoutPart.GetSize();
+				if (layoutPart.Count > 1)
+				{
+					for (size_t i = 0; i < layoutPart.Count; i++)
+					{
+						alignedDataIndex += alignedDataIndex % 16 == 0 ? 0 : 16 - (alignedDataIndex % 16);
+						memcpy(&buffer->BufferMemory[alignedDataIndex], &unalignedData[unalignedDataIndex], size / layoutPart.Count);
+						unalignedDataIndex += size / layoutPart.Count;
+						alignedDataIndex += size / layoutPart.Count;
+					}
+				}
+				else
+				{
+					uint32_t baseAlignment = GetBasestd140Alignemnt(layoutPart.Type);
+
+					alignedDataIndex += alignedDataIndex % baseAlignment == 0 ? 0 : baseAlignment - (alignedDataIndex % baseAlignment);
+					memcpy(&buffer->BufferMemory[alignedDataIndex], &unalignedData[unalignedDataIndex], size);
+					alignedDataIndex += size;
+					unalignedDataIndex += size;
+				}
+			}
+
+			glBindBuffer(GL_UNIFORM_BUFFER, buffer->Identifier);
+			glBufferSubData(GL_UNIFORM_BUFFER, 0, buffer->AlignedSize, buffer->BufferMemory);
+			glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+			delete[] cmd.ExtraData;
 		}
 
 		void OpenGLRendererAPI::ImGuiNewFrame()

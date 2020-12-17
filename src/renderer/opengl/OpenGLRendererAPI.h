@@ -76,6 +76,8 @@ namespace Ainan {
 
 			// Inherited via RendererAPI
 			virtual void ExecuteCommand(RenderCommand cmd) override;
+			void CreateUniformBufferNew(const RenderCommand& cmd);
+			void UpdateUniformBufferNew(const RenderCommand& cmd);
 		};
 	}
 }
