@@ -62,11 +62,7 @@ namespace Ainan {
 
 		auto initFunc = [api]()
 		{
-			Renderer::InternalInit(api);
-			AINAN_LOG_INFO("Renderer Initilized\nBackend: " + RendererTypeStr(Rdata->CurrentActiveAPI->GetContext()->GetType()) +
-						   "             Version: " + Rdata->CurrentActiveAPI->GetContext()->GetVersionString() +
-						   "             Physical Device: " + Rdata->CurrentActiveAPI->GetContext()->GetPhysicalDeviceName());
-			Renderer::RendererThreadLoop();
+			Renderer::RendererThreadLoop(api);
 			Renderer::InternalTerminate();
 		};
 
@@ -74,6 +70,7 @@ namespace Ainan {
 
 		//wait until the renderer thread finished initializing
 		WaitUntilRendererIdle();
+		Renderer::InternalInit(api);
 	}
 
 	void Renderer::Terminate()
@@ -89,26 +86,11 @@ namespace Ainan {
 
 	void Renderer::InternalInit(RendererType api)
 	{
-		std::lock_guard lock(Rdata->DataMutex);
-
-		//initilize the renderer api
-		switch (api)
-		{
-#ifdef PLATFORM_WINDOWS
-		case RendererType::D3D11:
-			Rdata->CurrentActiveAPI = new D3D11::D3D11RendererAPI();
-			break;
-#endif
-
-		case RendererType::OpenGL:
-			Rdata->CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
-			break;
-		}
-
 		//load shaders
 		for (auto& shaderInfo : CompileOnInit)
 		{
 			Rdata->ShaderLibrary[shaderInfo.Name] = CreateShaderProgram(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
+			Rdata->ShaderLibraryNew[shaderInfo.Name] = CreateShaderProgramNew(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
 		}
 
 		//setup batch renderer
@@ -119,7 +101,7 @@ namespace Ainan {
 			layout[2] = VertexLayoutElement("TEXCOORD", 0, ShaderVariableType::Float);
 			layout[3] = VertexLayoutElement("TEXCOORD", 1, ShaderVariableType::Vec2);
 
-			Rdata->QuadBatchVertexBuffer = CreateVertexBufferUnsafe(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, Rdata->ShaderLibrary["QuadBatchShader"], true);
+			Rdata->QuadBatchVertexBuffer = CreateVertexBufferNew(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, Rdata->ShaderLibraryNew["QuadBatchShader"], true);
 		}
 
 		const int32_t indexCount = c_MaxQuadsPerBatch * 6;
@@ -137,13 +119,13 @@ namespace Ainan {
 			u += 4;
 		}
 
-		Rdata->QuadBatchIndexBuffer = CreateIndexBufferUnsafe(indicies, indexCount);
+		Rdata->QuadBatchIndexBuffer = CreateIndexBufferNew(indicies, indexCount);
 		delete[] indicies;
 
 		Rdata->QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
 		Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
 
-		Rdata->QuadBatchTextures[0] = CreateTextureUnsafe(glm::vec2(1, 1), TextureFormat::RGBA, nullptr);
+		Rdata->QuadBatchTextures[0] = CreateTexture(glm::vec2(1, 1), TextureFormat::RGBA, nullptr);
 
 		auto img = std::make_shared<Image>();
 		img->m_Width = 1;
@@ -151,17 +133,17 @@ namespace Ainan {
 		img->Format = TextureFormat::RGBA;
 		img->m_Data = new uint8_t[4];
 		memset(img->m_Data, (uint8_t)255, 4);
-		Rdata->QuadBatchTextures[0]->SetImageUnsafe(img);
+		Rdata->QuadBatchTextures[0]->SetImage(img);
 
 		//setup postprocessing
-		Rdata->BlurFrameBuffer = CreateFrameBufferUnsafe(Window::FramebufferSize);
+		Rdata->BlurFrameBuffer = CreateFrameBuffer(Window::FramebufferSize);
 
 		{
 			auto vertices = GetTexturedQuadVertices();
 			VertexLayout layout(2);
 			layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 			layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec2);
-			Rdata->BlurVertexBuffer = CreateVertexBufferUnsafe(vertices.data(), sizeof(vertices), layout, Rdata->ShaderLibrary["BlurShader"]);
+			Rdata->BlurVertexBuffer = CreateVertexBuffer(vertices.data(), sizeof(vertices), layout, Rdata->ShaderLibrary["BlurShader"]);
 		}
 
 		{
@@ -171,11 +153,9 @@ namespace Ainan {
 				VertexLayoutElement("u_BlurDirection",0, ShaderVariableType::Vec2),
 				VertexLayoutElement("u_Radius",0, ShaderVariableType::Float)
 			};
-			Rdata->BlurUniformBuffer = CreateUniformBufferUnsafe("BlurData", 1, layout, nullptr);
-			Rdata->ShaderLibrary["BlurShader"]->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+			Rdata->BlurUniformBuffer = CreateUniformBuffer("BlurData", 1, layout, nullptr);
+			Rdata->ShaderLibrary["BlurShader"]->BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 		}
-
-		Rdata->CurrentActiveAPI->SetBlendMode(Rdata->m_CurrentBlendMode);
 
 		{
 			VertexLayout layout =
@@ -194,14 +174,640 @@ namespace Ainan {
 				VertexLayoutElement("SpotLightIntensity",  0, ShaderVariableType::FloatArray, c_MaxSpotLightCount)
 			};
 
-			Rdata->SceneUniformbuffer = CreateUniformBufferUnsafe("FrameData", 0, layout, nullptr);
+			Rdata->SceneUniformbuffer = CreateUniformBuffer("FrameData", 0, layout, nullptr);
+			Rdata->SceneUniformbufferNew = CreateUniformBufferNew("FrameData", 0, layout);
 
 			for (auto& shaderTuple : Rdata->ShaderLibrary)
 			{
-				shaderTuple.second->BindUniformBufferUnsafe(Rdata->SceneUniformbuffer, 0, RenderingStage::VertexShader);
-				shaderTuple.second->BindUniformBufferUnsafe(Rdata->SceneUniformbuffer, 0, RenderingStage::FragmentShader);
+				shaderTuple.second->BindUniformBuffer(Rdata->SceneUniformbuffer, 0, RenderingStage::VertexShader);
+				shaderTuple.second->BindUniformBuffer(Rdata->SceneUniformbuffer, 0, RenderingStage::FragmentShader);
+			}
+			for (auto& shaderTuple : Rdata->ShaderLibraryNew)
+			{
+				shaderTuple.second.BindUniformBuffer(Rdata->SceneUniformbufferNew, 0, RenderingStage::VertexShader);
+				shaderTuple.second.BindUniformBuffer(Rdata->SceneUniformbufferNew, 0, RenderingStage::FragmentShader);
 			}
 		}
+
+		auto func = []()
+		{
+			std::lock_guard lock(Rdata->DataMutex);
+
+			Rdata->CurrentActiveAPI->SetBlendMode(Rdata->m_CurrentBlendMode);
+
+			InitImGuiRendering();
+		};
+
+		Renderer::PushCommand(func);
+	}
+
+	void Renderer::RendererThreadLoop(RendererType api)
+	{
+		//initilize the renderer api
+		switch (api)
+		{
+#ifdef PLATFORM_WINDOWS
+		case RendererType::D3D11:
+			Rdata->CurrentActiveAPI = new D3D11::D3D11RendererAPI();
+			break;
+#endif
+
+		case RendererType::OpenGL:
+			Rdata->CurrentActiveAPI = new OpenGL::OpenGLRendererAPI();
+			break;
+		}
+
+		AINAN_LOG_INFO("Renderer Initilized\nBackend: " + RendererTypeStr(Rdata->CurrentActiveAPI->GetContext()->GetType()) +
+			"             Version: " + Rdata->CurrentActiveAPI->GetContext()->GetVersionString() +
+			"             Physical Device: " + Rdata->CurrentActiveAPI->GetContext()->GetPhysicalDeviceName());
+
+		while (true)
+		{
+			if (Rdata->DestroyThread)
+				break;
+			{
+				{
+					std::unique_lock<std::mutex> lock(Rdata->QueueMutex);
+					Rdata->cv.wait(lock, []() { return Rdata->payload == true || Rdata->DestroyThread; });
+				}
+				RenderCommand cmd;
+				while (Rdata->CommandBuffer.size() > 0)
+				{
+					{
+						std::unique_lock lock(Rdata->QueueMutex);
+						cmd = Rdata->CommandBuffer.front();
+						Rdata->CommandBuffer.pop();
+					}
+
+					if (cmd.Type == RenderCommandType::CustomCommand)
+						cmd.CustomCommand();
+					else
+						Rdata->CurrentActiveAPI->ExecuteCommand(cmd);
+				}
+				Rdata->payload = false;
+				Rdata->WorkDoneCV.notify_all();
+			}
+		}
+	}
+
+	void Renderer::InternalTerminate()
+	{
+		Rdata->ShaderLibrary.erase(Rdata->ShaderLibrary.begin(), Rdata->ShaderLibrary.end());
+
+		delete Rdata->CurrentActiveAPI;
+
+		//batch renderer data
+		//Rdata->QuadBatchVertexBuffer.reset();
+		//Rdata->QuadBatchIndexBuffer.reset();
+		delete[] Rdata->QuadBatchVertexBufferDataOrigin;
+		Rdata->QuadBatchTextures[0].reset();
+	}
+
+	void Renderer::PushCommand(RenderCommand cmd)
+	{
+		if (Window::Minimized)
+			return;
+
+		std::unique_lock lock(Rdata->QueueMutex);
+		Rdata->CommandBuffer.push(cmd);
+		Rdata->payload = true;
+		Rdata->cv.notify_one();
+	}
+
+	void Renderer::BeginScene(const SceneDescription& desc)
+	{
+		Rdata->CurrentSceneDescription = desc;
+		Rdata->SceneBuffer.CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
+		Rdata->CurrentNumberOfDrawCalls = 0;
+		Rdata->RadialLightSubmissionCount = 0;
+		Rdata->SpotLightSubmissionCount = 0;
+		Rdata->SceneUniformbufferNew.UpdateData(&Rdata->SceneBuffer, sizeof(RendererData::SceneUniformBuffer));
+
+		Rdata->CurrentSceneDescription.SceneDrawTarget.Bind();
+		auto func = [desc]()
+		{
+
+			//update the per-frame uniform buffer
+			Rdata->SceneUniformbuffer->UpdateDataUnsafe(&Rdata->SceneBuffer);
+
+			//update diagnostics stuff
+			for (size_t i = 0; i < Rdata->ReservedTextures.size(); i++)
+				if (Rdata->ReservedTextures[i].expired())
+				{
+					Rdata->ReservedTextures.erase(Rdata->ReservedTextures.begin() + i);
+					i = 0;
+				}
+			for (size_t i = 0; i < Rdata->ReservedVertexBuffers.size(); i++)
+				if (Rdata->ReservedVertexBuffers[i].expired())
+				{
+					Rdata->ReservedVertexBuffers.erase(Rdata->ReservedVertexBuffers.begin() + i);
+					i = 0;
+				}
+			for (size_t i = 0; i < Rdata->ReservedIndexBuffers.size(); i++)
+				if (Rdata->ReservedIndexBuffers[i].expired())
+				{
+					Rdata->ReservedIndexBuffers.erase(Rdata->ReservedIndexBuffers.begin() + i);
+					i = 0;
+				}
+			for (size_t i = 0; i < Rdata->ReservedUniformBuffers.size(); i++)
+				if (Rdata->ReservedUniformBuffers[i].expired())
+				{
+					Rdata->ReservedUniformBuffers.erase(Rdata->ReservedUniformBuffers.begin() + i);
+					i = 0;
+				}
+		};
+
+		PushCommand(func);
+	}
+
+	void Renderer::AddRadialLight(const glm::vec2& pos, const glm::vec4& color, float intensity)
+	{
+		auto& i = Rdata->RadialLightSubmissionCount;
+		auto& buffer = Rdata->SceneBuffer;
+
+		buffer.RadialLightPositions[i] = c_GlobalScaleFactor * pos;
+		buffer.RadialLightColors[i] = color;
+		buffer.RadialLightIntensities[i] = intensity;
+		i++;
+	}
+
+	void Renderer::AddSpotLight(const glm::vec2& pos, const glm::vec4 color, float angle, float innerCutoff, float outerCutoff, float intensity)
+	{
+		auto& i = Rdata->SpotLightSubmissionCount;
+		auto& buffer = Rdata->SceneBuffer;
+
+		buffer.SpotLightPositions[i] = c_GlobalScaleFactor * pos;
+		buffer.SpotLightColors[i] = color;
+		buffer.SpotLightIntensities[i] = intensity;
+		buffer.SpotLightAngles[i] =	      glm::radians(angle);
+		buffer.SpotLightInnerCutoffs[i] = glm::radians(innerCutoff);
+		buffer.SpotLightOuterCutoffs[i] = glm::radians(outerCutoff);
+		i++;
+	}
+
+	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive, int32_t vertexCount)
+	{
+		auto func = [vertexBuffer, shader, primitive, vertexCount]()
+		{
+			vertexBuffer->Bind();
+
+			Rdata->CurrentActiveAPI->Draw(*shader, primitive, vertexCount);
+
+			vertexBuffer->Unbind();
+
+			Rdata->CurrentNumberOfDrawCalls++;
+		};
+
+		PushCommand(func);
+	}
+
+	void Renderer::Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, int32_t vertexCount)
+	{
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::Draw_NewShader;
+		cmd.NewVBuffer = Rdata->VertexBuffers[vertexBuffer.Identifier];
+		cmd.ExtraData = &Rdata->ShaderPrograms[shader.Identifier];
+		cmd.Misc1 = (uint32_t)primitive;
+		cmd.Misc2 = vertexCount;
+
+		PushCommand(cmd);
+	}
+
+	void Renderer::EndScene()
+	{
+		if (Rdata->QuadBatchVertexBufferDataPtr != Rdata->QuadBatchVertexBufferDataOrigin)
+			FlushQuadBatch();
+		
+		auto func = []()
+		{
+			if (Rdata->CurrentSceneDescription.Blur && Rdata->m_CurrentBlendMode != RenderingBlendMode::Screen)
+			{
+				Blur(Rdata->CurrentSceneDescription.SceneDrawTarget, Rdata->CurrentSceneDescription.BlurRadius);
+			}
+
+			memset(&Rdata->CurrentSceneDescription, 0, sizeof(SceneDescription));
+			Rdata->NumberOfDrawCallsLastScene = Rdata->CurrentNumberOfDrawCalls;
+		};
+
+		PushCommand(func);
+	}
+
+	void Renderer::WaitUntilRendererIdle()
+	{
+		using namespace std::chrono;
+		std::unique_lock lock(Rdata->WorkDoneMutex);
+		while (Rdata->payload == true) Rdata->WorkDoneCV.wait_for(lock, 1ms, []() { return Rdata->payload == false; });
+	}
+
+	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture)
+	{
+		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
+			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
+			FlushQuadBatch();
+		
+		float textureSlot;
+		if (texture == nullptr)
+			textureSlot = 0.0f;
+		else
+		{
+			bool foundTexture = false;
+			//check if texture is already used
+			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
+			{
+				if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
+				{
+					foundTexture = true;
+					textureSlot = i;
+					break;
+				}
+			}
+
+			if (!foundTexture)
+			{
+				Rdata->QuadBatchTextures[Rdata->QuadBatchTextureSlotsUsed] = texture;
+				textureSlot = Rdata->QuadBatchTextureSlotsUsed;
+				Rdata->QuadBatchTextureSlotsUsed++;
+			}
+		}
+
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
+
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(0.0f, 1.0f) * scale;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
+
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 1.0f) * scale;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
+
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 0.0f) * scale;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
+	}
+
+	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, std::shared_ptr<Texture> texture)
+	{
+		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
+			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
+			FlushQuadBatch();
+
+		float textureSlot;
+		if (texture == nullptr)
+			textureSlot = 0.0f;
+		else
+		{
+			bool foundTexture = false;
+			//check if texture is already used
+			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
+			{
+				if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
+				{
+					foundTexture = true;
+					textureSlot = i;
+					break;
+				}
+			}
+
+			if (!foundTexture)
+			{
+				Rdata->QuadBatchTextures[Rdata->QuadBatchTextureSlotsUsed] = texture;
+				textureSlot = Rdata->QuadBatchTextureSlotsUsed;
+				Rdata->QuadBatchTextureSlotsUsed++;
+			}
+		}
+
+		float distance = 0.5f * scale;
+		float sine = std::sin(rotationInRadians);
+		float cosine = std::cos(rotationInRadians);
+
+		glm::vec2 relPosV0 = glm::vec2((-distance) * cosine - (-distance) * sine, (-distance) * sine + (-distance) * cosine);
+		glm::vec2 relPosV1 = glm::vec2((-distance) * cosine - (+distance) * sine, (-distance) * sine + (+distance) * cosine);
+		glm::vec2 relPosV2 = glm::vec2((+distance) * cosine - (+distance) * sine, (+distance) * sine + (+distance) * cosine);
+		glm::vec2 relPosV3 = glm::vec2((+distance) * cosine - (-distance) * sine, (+distance) * sine + (-distance) * cosine);
+
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV0;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
+
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV1;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
+
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV2;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
+
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV3;
+		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
+		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
+		Rdata->QuadBatchVertexBufferDataPtr++;
+	}
+
+	void Renderer::DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, std::shared_ptr<Texture> texture)
+	{
+		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > count * 4 ||
+			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
+			FlushQuadBatch();
+		
+		assert(count < c_MaxQuadsPerBatch);
+
+		float textureSlot;
+		if (texture == nullptr)
+			textureSlot = 0.0f;
+		else
+		{
+			bool foundTexture = false;
+			//check if texture is already used
+			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
+			{
+				if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
+				{
+					foundTexture = true;
+					textureSlot = i;
+					break;
+				}
+			}
+
+			if (!foundTexture)
+			{
+				Rdata->QuadBatchTextures[Rdata->QuadBatchTextureSlotsUsed] = texture;
+				textureSlot = Rdata->QuadBatchTextureSlotsUsed;
+				Rdata->QuadBatchTextureSlotsUsed++;
+			}
+		}
+
+		for (size_t i = 0; i < count; i++)
+		{
+			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
+			Rdata->QuadBatchVertexBufferDataPtr++;
+
+			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(0.0f, 1.0f) * scale[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
+			Rdata->QuadBatchVertexBufferDataPtr++;
+
+			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 1.0f) * scale[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
+			Rdata->QuadBatchVertexBufferDataPtr++;
+
+			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 0.0f) * scale[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
+			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
+			Rdata->QuadBatchVertexBufferDataPtr++;
+		}
+	}
+
+	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive, const std::shared_ptr<IndexBuffer>& indexBuffer)
+	{
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::DrawIndexed;
+		cmd.VBuffer = vertexBuffer;
+		cmd.IBuffer = indexBuffer;
+		cmd.Shader = shader;
+		cmd.DrawingPrimitive = primitive;
+
+		PushCommand(cmd);
+		Rdata->CurrentNumberOfDrawCalls++;
+	}
+
+	void Renderer::ImGuiNewFrame()
+	{
+		Rdata->CurrentActiveAPI->ImGuiNewFrame();
+
+		ImGuiIO& io = ImGui::GetIO();
+
+		// Setup display size (every frame to accommodate for window resizing)
+		int w, h;
+		int display_w, display_h;
+		glfwGetWindowSize(Window::Ptr, &w, &h);
+		glfwGetFramebufferSize(Window::Ptr, &display_w, &display_h);
+		io.DisplaySize = ImVec2((float)w, (float)h);
+		if (w > 0 && h > 0)
+			io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
+		if (WantUpdateMonitors)
+		{
+			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+			int monitors_count = 0;
+			GLFWmonitor** glfw_monitors = glfwGetMonitors(&monitors_count);
+			platform_io.Monitors.resize(0);
+			for (int n = 0; n < monitors_count; n++)
+			{
+				ImGuiPlatformMonitor monitor;
+				int x, y;
+				glfwGetMonitorPos(glfw_monitors[n], &x, &y);
+				const GLFWvidmode* vid_mode = glfwGetVideoMode(glfw_monitors[n]);
+				monitor.MainPos = monitor.WorkPos = ImVec2((float)x, (float)y);
+				monitor.MainSize = monitor.WorkSize = ImVec2((float)vid_mode->width, (float)vid_mode->height);
+				platform_io.Monitors.push_back(monitor);
+			}
+			WantUpdateMonitors = false;
+		}
+
+		// Setup time step
+		double current_time = glfwGetTime();
+		io.DeltaTime = Rdata->Time > 0.0 ? (float)(current_time - Rdata->Time) : (float)(1.0f / 60.0f);
+		Rdata->Time = current_time;
+
+		ImGui::NewFrame();
+	}
+
+	void Renderer::Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, IndexBufferNew indexBuffer)
+	{
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::DrawIndexedNew;
+
+		cmd.NewVBuffer = Rdata->VertexBuffers[vertexBuffer.Identifier];
+		cmd.NewIBuffer = Rdata->IndexBuffers[indexBuffer.Identifier];
+		cmd.NewShader = Rdata->ShaderPrograms[shader.Identifier];
+		cmd.DrawingPrimitive = primitive;
+
+		Renderer::PushCommand(cmd);
+	}
+
+
+	void Renderer::ImGuiEndFrame()
+	{
+		Rdata->CurrentActiveAPI->ImGuiEndFrame();
+	}
+
+	uint32_t Renderer::GetUsedGPUMemory()
+	{
+		uint32_t memory = 0;
+
+		memory += std::accumulate(Rdata->ReservedVertexBuffers.begin(), Rdata->ReservedVertexBuffers.end(), 0,
+			[](uint32_t a, const std::weak_ptr<VertexBuffer>& b) -> uint32_t
+			{
+				return a + b.lock()->GetUsedMemory();
+			});
+
+		memory += std::accumulate(Rdata->ReservedIndexBuffers.begin(), Rdata->ReservedIndexBuffers.end(), 0,
+			[](uint32_t a, const std::weak_ptr<IndexBuffer>& b) -> uint32_t
+			{
+				return a + b.lock()->GetUsedMemory();
+			});
+
+		memory += std::accumulate(Rdata->ReservedUniformBuffers.begin(), Rdata->ReservedUniformBuffers.end(), 0,
+			[](uint32_t a, const std::weak_ptr<UniformBuffer>& b) -> uint32_t
+			{
+				return a + b.lock()->GetAlignedSize();
+			});
+
+		memory += std::accumulate(Rdata->ReservedTextures.begin(), Rdata->ReservedTextures.end(), 0,
+			[](uint32_t a, const std::weak_ptr<Texture>& b) -> uint32_t
+			{
+				return a + b.lock()->GetMemorySize();
+			});
+		 
+		return memory;
+	}
+
+	void Renderer::DrawImGui(ImDrawData* drawData)
+	{
+		auto func = [drawData]()
+		{
+			Rdata->CurrentActiveAPI->DrawImGui(drawData);
+		};
+		PushCommand(func);
+		WaitUntilRendererIdle();
+	}
+
+	void Renderer::ClearScreen()
+	{
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::ClearScreen;
+		PushCommand(cmd);
+	}
+
+	void Renderer::ClearScreenUnsafe()
+	{
+		Rdata->CurrentActiveAPI->ClearScreen();
+	}
+
+	void Renderer::Present()
+	{
+		std::chrono::high_resolution_clock::now();
+		 
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::Present;
+		PushCommand(cmd);
+		WaitUntilRendererIdle();
+
+		bool running = true;
+
+		while (running) 
+		{
+			double time = glfwGetTime();
+			LastFrameDeltaTime = time - LastFrameFinishTime;
+
+			if (LastFrameDeltaTime >= c_ApplicationMaxFramePeriod)
+			{
+				LastFrameFinishTime = time;
+				break;
+			}
+		}
+	}
+
+	void Renderer::RecreateSwapchain(const glm::vec2& newSwapchainSize)
+	{
+		auto func = [newSwapchainSize]()
+		{
+			Rdata->CurrentActiveAPI->RecreateSwapchain(newSwapchainSize);
+		};
+		PushCommand(func);
+	}
+
+	//Only called internally by the Renderer, and used only by the Renderer thread
+	void Renderer::Blur(FrameBufferNew target, float radius)
+	{
+		//TODO
+		//Rectangle lastViewport = Renderer::GetCurrentViewport();
+		//RenderingBlendMode lastBlendMode = Rdata->m_CurrentBlendMode;
+		//Rdata->CurrentActiveAPI->SetBlendMode(RenderingBlendMode::Screen);
+		//
+		//Rectangle viewport;
+		//viewport.X = 0;
+		//viewport.Y = 0;
+		//viewport.Width = (int)Renderer::Rdata->FrameBuffers[target.Identifier].Size.x;
+		//viewport.Height = (int)Renderer::Rdata->FrameBuffers[target.Identifier].Size.y;
+		//
+		//Rdata->CurrentActiveAPI->SetViewport(viewport);
+		//auto& shader = Rdata->ShaderLibrary["BlurShader"];
+		//shader->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+		//
+		//auto resolution = Renderer::Rdata->FrameBuffers[target.Identifier];
+		////make a buffer for all the uniform data
+		//uint8_t bufferData[20];
+		//glm::vec2 horizonatlDirection = glm::vec2(1.0f, 0.0f);
+		//glm::vec2 verticalDirection = glm::vec2(0.0f, 1.0f);
+		//memset(bufferData, 0, 20);
+		//
+		//memcpy(bufferData, &resolution, sizeof(glm::vec2));
+		//memcpy(bufferData + 8, &horizonatlDirection, sizeof(glm::vec2));
+		//memcpy(bufferData + 16, &radius, sizeof(float));
+		//Rdata->BlurUniformBuffer->UpdateDataUnsafe(bufferData);
+		//
+		////Horizontal blur
+		//Rdata->BlurFrameBuffer->ResizeUnsafe(Renderer::Rdata->FrameBuffers[target.Identifier].Size);
+		//
+		//Rdata->BlurFrameBuffer->BindUnsafe();
+		//Rdata->CurrentActiveAPI->ClearScreen();
+		//
+		////do the horizontal blur to the surface we revieved and put the result in tempSurface
+		//shader->BindTextureUnsafe(target, 0, RenderingStage::FragmentShader);
+		//
+		//{
+		//	Rdata->BlurVertexBuffer->Bind();
+		//	Rdata->CurrentActiveAPI->Draw(*shader, Primitive::Triangles, 6);
+		//}
+		//
+		////this specifies that we are doing vertical blur
+		//memcpy(bufferData + 8, &verticalDirection, sizeof(glm::vec2));
+		//Rdata->BlurUniformBuffer->UpdateDataUnsafe(bufferData);
+		//
+		////clear the buffer we recieved
+		//target->BindUnsafe();
+		//Rdata->CurrentActiveAPI->ClearScreen();
+		//
+		////do the vertical blur to the tempSurface and put the result in the buffer we recieved
+		//shader->BindTextureUnsafe(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
+		//{
+		//	Rdata->BlurVertexBuffer->Bind();
+		//	Rdata->CurrentActiveAPI->Draw(*shader, Primitive::Triangles, 6);
+		//}
+		//
+		//Rdata->CurrentActiveAPI->SetViewport(lastViewport);
+		//Rdata->CurrentActiveAPI->SetBlendMode(lastBlendMode);
+		//
+		//std::lock_guard lock(Rdata->DataMutex);
+		//Rdata->CurrentNumberOfDrawCalls += 2;
+	}
+
+	void Renderer::InitImGuiRendering()
+	{
 
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
@@ -378,594 +984,6 @@ namespace Ainan {
 		Rdata->CurrentActiveAPI->InitImGui();
 	}
 
-	void Renderer::RendererThreadLoop()
-	{
-		while (true)
-		{
-			if (Rdata->DestroyThread)
-				break;
-			{
-				{
-					std::unique_lock<std::mutex> lock(Rdata->QueueMutex);
-					Rdata->cv.wait(lock, []() { return Rdata->payload == true || Rdata->DestroyThread; });
-				}
-				RenderCommand cmd;
-				while (Rdata->CommandBuffer.size() > 0)
-				{
-					{
-						std::unique_lock lock(Rdata->QueueMutex);
-						cmd = Rdata->CommandBuffer.front();
-						Rdata->CommandBuffer.pop();
-					}
-
-					if (cmd.Type == RenderCommandType::CustomCommand)
-						cmd.CustomCommand();
-					else
-						Rdata->CurrentActiveAPI->ExecuteCommand(cmd);
-				}
-				Rdata->payload = false;
-				Rdata->WorkDoneCV.notify_all();
-			}
-		}
-	}
-
-	void Renderer::InternalTerminate()
-	{
-		Rdata->ShaderLibrary.erase(Rdata->ShaderLibrary.begin(), Rdata->ShaderLibrary.end());
-
-		delete Rdata->CurrentActiveAPI;
-
-		//batch renderer data
-		Rdata->QuadBatchVertexBuffer.reset();
-		Rdata->QuadBatchIndexBuffer.reset();
-		delete[] Rdata->QuadBatchVertexBufferDataOrigin;
-		Rdata->QuadBatchTextures[0].reset();
-	}
-
-	void Renderer::PushCommand(RenderCommand cmd)
-	{
-		if (Window::Minimized)
-			return;
-
-		std::unique_lock lock(Rdata->QueueMutex);
-		Rdata->CommandBuffer.push(cmd);
-		Rdata->payload = true;
-		Rdata->cv.notify_one();
-	}
-
-	void Renderer::BeginScene(const SceneDescription& desc)
-	{
-		auto func = [desc]()
-		{
-			assert(desc.SceneDrawTarget);
-
-			Rdata->CurrentSceneDescription = desc;
-			Rdata->SceneBuffer.CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
-			Rdata->CurrentNumberOfDrawCalls = 0;
-			Rdata->RadialLightSubmissionCount = 0;
-			Rdata->SpotLightSubmissionCount = 0;
-
-			(*Rdata->CurrentSceneDescription.SceneDrawTarget)->BindUnsafe();
-
-			//update the per-frame uniform buffer
-			Rdata->SceneUniformbuffer->UpdateDataUnsafe(&Rdata->SceneBuffer);
-
-			//update diagnostics stuff
-			for (size_t i = 0; i < Rdata->ReservedTextures.size(); i++)
-				if (Rdata->ReservedTextures[i].expired())
-				{
-					Rdata->ReservedTextures.erase(Rdata->ReservedTextures.begin() + i);
-					i = 0;
-				}
-			for (size_t i = 0; i < Rdata->ReservedVertexBuffers.size(); i++)
-				if (Rdata->ReservedVertexBuffers[i].expired())
-				{
-					Rdata->ReservedVertexBuffers.erase(Rdata->ReservedVertexBuffers.begin() + i);
-					i = 0;
-				}
-			for (size_t i = 0; i < Rdata->ReservedIndexBuffers.size(); i++)
-				if (Rdata->ReservedIndexBuffers[i].expired())
-				{
-					Rdata->ReservedIndexBuffers.erase(Rdata->ReservedIndexBuffers.begin() + i);
-					i = 0;
-				}
-			for (size_t i = 0; i < Rdata->ReservedUniformBuffers.size(); i++)
-				if (Rdata->ReservedUniformBuffers[i].expired())
-				{
-					Rdata->ReservedUniformBuffers.erase(Rdata->ReservedUniformBuffers.begin() + i);
-					i = 0;
-				}
-		};
-
-		PushCommand(func);
-	}
-
-	void Renderer::AddRadialLight(const glm::vec2& pos, const glm::vec4& color, float intensity)
-	{
-		auto& i = Rdata->RadialLightSubmissionCount;
-		auto& buffer = Rdata->SceneBuffer;
-
-		buffer.RadialLightPositions[i] = c_GlobalScaleFactor * pos;
-		buffer.RadialLightColors[i] = color;
-		buffer.RadialLightIntensities[i] = intensity;
-		i++;
-	}
-
-	void Renderer::AddSpotLight(const glm::vec2& pos, const glm::vec4 color, float angle, float innerCutoff, float outerCutoff, float intensity)
-	{
-		auto& i = Rdata->SpotLightSubmissionCount;
-		auto& buffer = Rdata->SceneBuffer;
-
-		buffer.SpotLightPositions[i] = c_GlobalScaleFactor * pos;
-		buffer.SpotLightColors[i] = color;
-		buffer.SpotLightIntensities[i] = intensity;
-		buffer.SpotLightAngles[i] =	      glm::radians(angle);
-		buffer.SpotLightInnerCutoffs[i] = glm::radians(innerCutoff);
-		buffer.SpotLightOuterCutoffs[i] = glm::radians(outerCutoff);
-		i++;
-	}
-
-	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive, int32_t vertexCount)
-	{
-		auto func = [vertexBuffer, shader, primitive, vertexCount]()
-		{
-			vertexBuffer->Bind();
-
-			Rdata->CurrentActiveAPI->Draw(*shader, primitive, vertexCount);
-
-			vertexBuffer->Unbind();
-
-			Rdata->CurrentNumberOfDrawCalls++;
-		};
-
-		PushCommand(func);
-	}
-
-	void Renderer::Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, int32_t vertexCount)
-	{
-		RenderCommand cmd;
-		cmd.Type = RenderCommandType::Draw_NewShader;
-		cmd.NewVBuffer = Rdata->VertexBuffers[vertexBuffer.Identifier];
-		cmd.ExtraData = &Rdata->ShaderPrograms[shader.Identifier];
-		cmd.Misc1 = (uint32_t)primitive;
-		cmd.Misc2 = vertexCount;
-
-		PushCommand(cmd);
-	}
-
-	void Renderer::EndScene()
-	{
-		auto func = []()
-		{
-			if (Rdata->QuadBatchVertexBufferDataPtr != Rdata->QuadBatchVertexBufferDataOrigin)
-				FlushQuadBatch();
-
-			if (Rdata->CurrentSceneDescription.Blur && Rdata->m_CurrentBlendMode != RenderingBlendMode::Screen)
-			{
-				Blur(*Rdata->CurrentSceneDescription.SceneDrawTarget, Rdata->CurrentSceneDescription.BlurRadius);
-			}
-
-			memset(&Rdata->CurrentSceneDescription, 0, sizeof(SceneDescription));
-			Rdata->NumberOfDrawCallsLastScene = Rdata->CurrentNumberOfDrawCalls;
-		};
-
-		PushCommand(func);
-	}
-
-	void Renderer::WaitUntilRendererIdle()
-	{
-		using namespace std::chrono;
-		std::unique_lock lock(Rdata->WorkDoneMutex);
-		while (Rdata->payload == true) Rdata->WorkDoneCV.wait_for(lock, 1ms, []() { return Rdata->payload == false; });
-	}
-
-	void Ainan::Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture)
-	{
-		auto func = [texture, position, color, scale]()
-		{
-			if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
-				Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
-				FlushQuadBatch();
-
-			float textureSlot;
-			if (texture == nullptr)
-				textureSlot = 0.0f;
-			else
-			{
-				bool foundTexture = false;
-				//check if texture is already used
-				for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
-				{
-					if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
-					{
-						foundTexture = true;
-						textureSlot = i;
-						break;
-					}
-				}
-
-				if (!foundTexture)
-				{
-					Rdata->QuadBatchTextures[Rdata->QuadBatchTextureSlotsUsed] = texture;
-					textureSlot = Rdata->QuadBatchTextureSlotsUsed;
-					Rdata->QuadBatchTextureSlotsUsed++;
-				}
-			}
-
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position;
-			Rdata->QuadBatchVertexBufferDataPtr->Color = color;
-			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
-			Rdata->QuadBatchVertexBufferDataPtr++;
-
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(0.0f, 1.0f) * scale;
-			Rdata->QuadBatchVertexBufferDataPtr->Color = color;
-			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
-			Rdata->QuadBatchVertexBufferDataPtr++;
-
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 1.0f) * scale;
-			Rdata->QuadBatchVertexBufferDataPtr->Color = color;
-			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
-			Rdata->QuadBatchVertexBufferDataPtr++;
-
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 0.0f) * scale;
-			Rdata->QuadBatchVertexBufferDataPtr->Color = color;
-			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
-			Rdata->QuadBatchVertexBufferDataPtr++;
-		};
-
-		PushCommand(func);
-	}
-
-	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, std::shared_ptr<Texture> texture)
-	{
-		auto func = [position, color, scale, rotationInRadians, texture]()
-		{
-			if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
-				Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
-				FlushQuadBatch();
-
-			float textureSlot;
-			if (texture == nullptr)
-				textureSlot = 0.0f;
-			else
-			{
-				bool foundTexture = false;
-				//check if texture is already used
-				for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
-				{
-					if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
-					{
-						foundTexture = true;
-						textureSlot = i;
-						break;
-					}
-				}
-
-				if (!foundTexture)
-				{
-					Rdata->QuadBatchTextures[Rdata->QuadBatchTextureSlotsUsed] = texture;
-					textureSlot = Rdata->QuadBatchTextureSlotsUsed;
-					Rdata->QuadBatchTextureSlotsUsed++;
-				}
-			}
-
-			float distance = 0.5f * scale;
-			float sine = std::sin(rotationInRadians);
-			float cosine = std::cos(rotationInRadians);
-
-			glm::vec2 relPosV0 = glm::vec2((-distance) * cosine - (-distance) * sine, (-distance) * sine + (-distance) * cosine);
-			glm::vec2 relPosV1 = glm::vec2((-distance) * cosine - (+distance) * sine, (-distance) * sine + (+distance) * cosine);
-			glm::vec2 relPosV2 = glm::vec2((+distance) * cosine - (+distance) * sine, (+distance) * sine + (+distance) * cosine);
-			glm::vec2 relPosV3 = glm::vec2((+distance) * cosine - (-distance) * sine, (+distance) * sine + (-distance) * cosine);
-
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV0;
-			Rdata->QuadBatchVertexBufferDataPtr->Color = color;
-			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
-			Rdata->QuadBatchVertexBufferDataPtr++;
-
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV1;
-			Rdata->QuadBatchVertexBufferDataPtr->Color = color;
-			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
-			Rdata->QuadBatchVertexBufferDataPtr++;
-
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV2;
-			Rdata->QuadBatchVertexBufferDataPtr->Color = color;
-			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
-			Rdata->QuadBatchVertexBufferDataPtr++;
-
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV3;
-			Rdata->QuadBatchVertexBufferDataPtr->Color = color;
-			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
-			Rdata->QuadBatchVertexBufferDataPtr++;
-		};
-
-		PushCommand(func);
-	}
-
-	void Renderer::DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, std::shared_ptr<Texture> texture)
-	{
-		auto func = [position, color, scale, count, texture]()
-		{
-			assert(count < c_MaxQuadsPerBatch);
-
-			if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > count * 4 ||
-				Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
-				FlushQuadBatch();
-
-			float textureSlot;
-			if (texture == nullptr)
-				textureSlot = 0.0f;
-			else
-			{
-				bool foundTexture = false;
-				//check if texture is already used
-				for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
-				{
-					if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
-					{
-						foundTexture = true;
-						textureSlot = i;
-						break;
-					}
-				}
-
-				if (!foundTexture)
-				{
-					Rdata->QuadBatchTextures[Rdata->QuadBatchTextureSlotsUsed] = texture;
-					textureSlot = Rdata->QuadBatchTextureSlotsUsed;
-					Rdata->QuadBatchTextureSlotsUsed++;
-				}
-			}
-
-			for (size_t i = 0; i < count; i++)
-			{
-				Rdata->QuadBatchVertexBufferDataPtr->Position = position[i];
-				Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
-				Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-				Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
-				Rdata->QuadBatchVertexBufferDataPtr++;
-
-				Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(0.0f, 1.0f) * scale[i];
-				Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
-				Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-				Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
-				Rdata->QuadBatchVertexBufferDataPtr++;
-
-				Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 1.0f) * scale[i];
-				Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
-				Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-				Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
-				Rdata->QuadBatchVertexBufferDataPtr++;
-
-				Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 0.0f) * scale[i];
-				Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
-				Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
-				Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
-				Rdata->QuadBatchVertexBufferDataPtr++;
-			}
-		};
-
-		PushCommand(func);
-	}
-
-	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive, const std::shared_ptr<IndexBuffer>& indexBuffer)
-	{
-		RenderCommand cmd;
-		cmd.Type = RenderCommandType::DrawIndexed;
-		cmd.VBuffer = vertexBuffer;
-		cmd.IBuffer = indexBuffer;
-		cmd.Shader = shader;
-		cmd.DrawingPrimitive = primitive;
-
-		PushCommand(cmd);
-		Rdata->CurrentNumberOfDrawCalls++;
-	}
-
-	void Renderer::ImGuiNewFrame()
-	{
-		Rdata->CurrentActiveAPI->ImGuiNewFrame();
-
-		ImGuiIO& io = ImGui::GetIO();
-
-		// Setup display size (every frame to accommodate for window resizing)
-		int w, h;
-		int display_w, display_h;
-		glfwGetWindowSize(Window::Ptr, &w, &h);
-		glfwGetFramebufferSize(Window::Ptr, &display_w, &display_h);
-		io.DisplaySize = ImVec2((float)w, (float)h);
-		if (w > 0 && h > 0)
-			io.DisplayFramebufferScale = ImVec2((float)display_w / w, (float)display_h / h);
-		if (WantUpdateMonitors)
-		{
-			ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-			int monitors_count = 0;
-			GLFWmonitor** glfw_monitors = glfwGetMonitors(&monitors_count);
-			platform_io.Monitors.resize(0);
-			for (int n = 0; n < monitors_count; n++)
-			{
-				ImGuiPlatformMonitor monitor;
-				int x, y;
-				glfwGetMonitorPos(glfw_monitors[n], &x, &y);
-				const GLFWvidmode* vid_mode = glfwGetVideoMode(glfw_monitors[n]);
-				monitor.MainPos = monitor.WorkPos = ImVec2((float)x, (float)y);
-				monitor.MainSize = monitor.WorkSize = ImVec2((float)vid_mode->width, (float)vid_mode->height);
-				platform_io.Monitors.push_back(monitor);
-			}
-			WantUpdateMonitors = false;
-		}
-
-		// Setup time step
-		double current_time = glfwGetTime();
-		io.DeltaTime = Rdata->Time > 0.0 ? (float)(current_time - Rdata->Time) : (float)(1.0f / 60.0f);
-		Rdata->Time = current_time;
-
-		ImGui::NewFrame();
-	}
-
-	void Renderer::ImGuiEndFrame()
-	{
-		Rdata->CurrentActiveAPI->ImGuiEndFrame();
-	}
-
-	uint32_t Renderer::GetUsedGPUMemory()
-	{
-		uint32_t memory = 0;
-
-		memory += std::accumulate(Rdata->ReservedVertexBuffers.begin(), Rdata->ReservedVertexBuffers.end(), 0,
-			[](uint32_t a, const std::weak_ptr<VertexBuffer>& b) -> uint32_t
-			{
-				return a + b.lock()->GetUsedMemory();
-			});
-
-		memory += std::accumulate(Rdata->ReservedIndexBuffers.begin(), Rdata->ReservedIndexBuffers.end(), 0,
-			[](uint32_t a, const std::weak_ptr<IndexBuffer>& b) -> uint32_t
-			{
-				return a + b.lock()->GetUsedMemory();
-			});
-
-		memory += std::accumulate(Rdata->ReservedUniformBuffers.begin(), Rdata->ReservedUniformBuffers.end(), 0,
-			[](uint32_t a, const std::weak_ptr<UniformBuffer>& b) -> uint32_t
-			{
-				return a + b.lock()->GetAlignedSize();
-			});
-
-		memory += std::accumulate(Rdata->ReservedTextures.begin(), Rdata->ReservedTextures.end(), 0,
-			[](uint32_t a, const std::weak_ptr<Texture>& b) -> uint32_t
-			{
-				return a + b.lock()->GetMemorySize();
-			});
-		 
-		return memory;
-	}
-
-	void Renderer::DrawImGui(ImDrawData* drawData)
-	{
-		auto func = [drawData]()
-		{
-			Rdata->CurrentActiveAPI->DrawImGui(drawData);
-		};
-		PushCommand(func);
-		WaitUntilRendererIdle();
-	}
-
-	void Renderer::ClearScreen()
-	{
-		RenderCommand cmd;
-		cmd.Type = RenderCommandType::ClearScreen;
-		PushCommand(cmd);
-	}
-
-	void Renderer::ClearScreenUnsafe()
-	{
-		Rdata->CurrentActiveAPI->ClearScreen();
-	}
-
-	void Renderer::Present()
-	{
-		std::chrono::high_resolution_clock::now();
-		 
-		RenderCommand cmd;
-		cmd.Type = RenderCommandType::Present;
-		PushCommand(cmd);
-		WaitUntilRendererIdle();
-
-		bool running = true;
-
-		while (running) 
-		{
-			double time = glfwGetTime();
-			LastFrameDeltaTime = time - LastFrameFinishTime;
-
-			if (LastFrameDeltaTime >= c_ApplicationMaxFramePeriod)
-			{
-				LastFrameFinishTime = time;
-				break;
-			}
-		}
-	}
-
-	void Renderer::RecreateSwapchain(const glm::vec2& newSwapchainSize)
-	{
-		auto func = [newSwapchainSize]()
-		{
-			Rdata->CurrentActiveAPI->RecreateSwapchain(newSwapchainSize);
-		};
-		PushCommand(func);
-	}
-
-	//Only called internally by the Renderer, and used only by the Renderer thread
-	void Renderer::Blur(std::shared_ptr<FrameBuffer>& target, float radius)
-	{
-		Rectangle lastViewport = Renderer::GetCurrentViewport();
-		RenderingBlendMode lastBlendMode = Rdata->m_CurrentBlendMode;
-		Rdata->CurrentActiveAPI->SetBlendMode(RenderingBlendMode::Screen);
-
-		Rectangle viewport;
-		viewport.X = 0;
-		viewport.Y = 0;
-		viewport.Width = (int)target->GetSize().x;
-		viewport.Height = (int)target->GetSize().y;
-
-		Rdata->CurrentActiveAPI->SetViewport(viewport);
-		auto& shader = Rdata->ShaderLibrary["BlurShader"];
-		shader->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
-
-		auto resolution = target->GetSize();
-		//make a buffer for all the uniform data
-		uint8_t bufferData[20];
-		glm::vec2 horizonatlDirection = glm::vec2(1.0f, 0.0f);
-		glm::vec2 verticalDirection = glm::vec2(0.0f, 1.0f);
-		memset(bufferData, 0, 20);
-
-		memcpy(bufferData, &resolution, sizeof(glm::vec2));
-		memcpy(bufferData + 8, &horizonatlDirection, sizeof(glm::vec2));
-		memcpy(bufferData + 16, &radius, sizeof(float));
-		Rdata->BlurUniformBuffer->UpdateDataUnsafe(bufferData);
-
-		//Horizontal blur
-		Rdata->BlurFrameBuffer->ResizeUnsafe(target->GetSize());
-
-		Rdata->BlurFrameBuffer->BindUnsafe();
-		Rdata->CurrentActiveAPI->ClearScreen();
-
-		//do the horizontal blur to the surface we revieved and put the result in tempSurface
-		shader->BindTextureUnsafe(target, 0, RenderingStage::FragmentShader);
-		
-		{
-			Rdata->BlurVertexBuffer->Bind();
-			Rdata->CurrentActiveAPI->Draw(*shader, Primitive::Triangles, 6);
-		}
-
-		//this specifies that we are doing vertical blur
-		memcpy(bufferData + 8, &verticalDirection, sizeof(glm::vec2));
-		Rdata->BlurUniformBuffer->UpdateDataUnsafe(bufferData);
-
-		//clear the buffer we recieved
-		target->BindUnsafe();
-		Rdata->CurrentActiveAPI->ClearScreen();
-
-		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
-		shader->BindTextureUnsafe(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
-		{
-			Rdata->BlurVertexBuffer->Bind();
-			Rdata->CurrentActiveAPI->Draw(*shader, Primitive::Triangles, 6);
-		}
-
-		Rdata->CurrentActiveAPI->SetViewport(lastViewport);
-		Rdata->CurrentActiveAPI->SetBlendMode(lastBlendMode);
-
-		std::lock_guard lock(Rdata->DataMutex);
-		Rdata->CurrentNumberOfDrawCalls += 2;
-	}
-
 	void Renderer::SetBlendMode(RenderingBlendMode blendMode)
 	{
 		auto func = [blendMode]()
@@ -1057,6 +1075,30 @@ namespace Ainan {
 		return buffer;
 	}
 
+	IndexBufferNew Renderer::CreateIndexBufferNew(uint32_t* data, uint32_t count)
+	{
+		static uint32_t s_IdentifierCounter = 1;
+		IndexBufferNew bufferHandle;
+		bufferHandle.Identifier = s_IdentifierCounter;
+		IndexBufferDataView view;
+		view.Count = count;
+		view.Size = count * sizeof(uint32_t);
+		Rdata->IndexBuffers[s_IdentifierCounter] = view;
+
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::CreateIndexBuffer;
+		IndexBufferCreationInfo* info = new IndexBufferCreationInfo;
+		info->InitialData = new uint8_t[view.Size];
+		memcpy(info->InitialData, data, view.Size);
+		info->Count = count;
+		cmd.ExtraData = info;
+		cmd.Output = &Rdata->IndexBuffers[s_IdentifierCounter];
+
+		PushCommand(cmd);
+		s_IdentifierCounter++;
+		return bufferHandle;
+	}
+
 	VertexBufferNew Renderer::CreateVertexBufferNew(void* data, uint32_t size, const VertexLayout& layout, ShaderProgramNew shaderProgram, bool dynamic)
 	{
 		static uint32_t s_IdentifierCounter = 1;
@@ -1069,8 +1111,13 @@ namespace Ainan {
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::CreateVertexBuffer;
 		VertexBufferCreationInfo* info = new VertexBufferCreationInfo;
-		info->InitialData = new uint8_t[size];
-		memcpy(info->InitialData, data, size);
+		if (data != nullptr)
+		{
+			info->InitialData = new uint8_t[size];
+			memcpy(info->InitialData, data, size);
+		}
+		else
+			info->InitialData = nullptr;
 		info->Shader = Rdata->ShaderPrograms[shaderProgram.Identifier].Identifier;
 		info->Layout = layout;
 		info->Size = size;
@@ -1167,20 +1214,47 @@ namespace Ainan {
 		return bufferHandle;
 	}
 
+	FrameBufferNew Renderer::CreateFrameBufferNew(const glm::vec2& size)
+	{
+		static uint32_t s_IdentifierCounter = 1;
+		FrameBufferNew bufferHandle;
+		bufferHandle.Identifier = s_IdentifierCounter;
+		FrameBufferDataView view;
+		view.Size = size;
+		Rdata->FrameBuffers[s_IdentifierCounter] = view;
+
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::CreateFrameBuffer;
+		FrameBufferCreationInfo* info = new FrameBufferCreationInfo;
+		info->Size = size;
+		cmd.ExtraData = info;
+		cmd.Output = &Rdata->FrameBuffers[s_IdentifierCounter];
+
+		PushCommand(cmd);
+		s_IdentifierCounter++;
+		return bufferHandle;
+	}
+
 	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgram(const std::string& vertPath, const std::string& fragPath)
 	{
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+		std::shared_ptr<ShaderProgram> program;
+
+		auto func = [&program, vertPath, fragPath]()
 		{
-		case RendererType::OpenGL:
-			return std::make_shared<OpenGL::OpenGLShaderProgram>(vertPath, fragPath);
+			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+			{
+			case RendererType::OpenGL:
+				program = std::make_shared<OpenGL::OpenGLShaderProgram>(vertPath, fragPath);
+				break;
+			case RendererType::D3D11:
+				program = std::make_shared<D3D11::D3D11ShaderProgram>(vertPath, fragPath, Rdata->CurrentActiveAPI->GetContext());
+				break;
+			}
+		};
 
-		case RendererType::D3D11:
-			return std::make_shared<D3D11::D3D11ShaderProgram>(vertPath, fragPath, Rdata->CurrentActiveAPI->GetContext());
-
-		default:
-			assert(false);
-			return nullptr;
-		}
+		PushCommand(func);
+		WaitUntilRendererIdle();
+		return program;
 	}
 
 	ShaderProgramNew Renderer::CreateShaderProgramNew(const std::string& vertPath, const std::string& fragPath)
@@ -1402,30 +1476,40 @@ namespace Ainan {
 		return quadVertices;
 	}
 
+	void Renderer::Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, IndexBufferNew indexBuffer, uint32_t indexCount)
+	{
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::DrawIndexedNewWithCustomNumberOfVertices;
+		cmd.NewVBuffer = Rdata->VertexBuffers[vertexBuffer.Identifier];
+		cmd.NewIBuffer = Rdata->IndexBuffers[indexBuffer.Identifier];
+		cmd.NewShader = Rdata->ShaderPrograms[shader.Identifier];
+		cmd.DrawingPrimitive = primitive;
+		cmd.Misc1 = indexCount;
+
+		Renderer::PushCommand(cmd);
+	}
+
 	void Renderer::FlushQuadBatch()
 	{
 		for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
-			Rdata->ShaderLibrary["QuadBatchShader"]->BindTextureUnsafe(Rdata->QuadBatchTextures[i], i, RenderingStage::FragmentShader);
+			Rdata->ShaderLibraryNew["QuadBatchShader"].BindTexture(Rdata->QuadBatchTextures[i], i, RenderingStage::FragmentShader);
 
 		int32_t numVertices = (Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin);
 
-		Rdata->QuadBatchVertexBuffer->UpdateDataUnsafe(0,
+		Rdata->QuadBatchVertexBuffer.UpdateData(0,
 			numVertices * sizeof(QuadVertex),
 			Rdata->QuadBatchVertexBufferDataOrigin);
 
-		Rdata->QuadBatchVertexBuffer->Bind();
-		Rdata->QuadBatchIndexBuffer->Bind();
-
-		Rdata->CurrentActiveAPI->Draw(*Rdata->ShaderLibrary["QuadBatchShader"], Primitive::Triangles, *Rdata->QuadBatchIndexBuffer, (numVertices * 3) / 2);
-
-		Rdata->QuadBatchVertexBuffer->Unbind();
-		Rdata->QuadBatchIndexBuffer->Unbind();
+		Draw(Rdata->QuadBatchVertexBuffer, Rdata->ShaderLibraryNew["QuadBatchShader"], Primitive::Triangles, Rdata->QuadBatchIndexBuffer, (numVertices * 3) / 2);
 
 		Rdata->CurrentNumberOfDrawCalls++;
 
 		//reset data so we can accept the next batch
 		Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
 		Rdata->QuadBatchTextureSlotsUsed = 1;
+
+		//TODO remove this safely
+		WaitUntilRendererIdle();
 	}
 
 	std::string RendererTypeStr(RendererType type)

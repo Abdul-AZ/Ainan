@@ -92,13 +92,13 @@ namespace Ainan {
 		Camera.Update(0.0f, { 0, 0, (int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
 		SceneDescription desc;
 		desc.SceneCamera = Camera;
-		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
 		desc.Blur = env.BlurEnabled;
 		desc.BlurRadius = env.BlurRadius;
 		Renderer::BeginScene(desc);
 		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
 		m_RenderSurface.SetSize(glm::ivec2(std::round(Camera.ZoomFactor * aspectRatio / 2.0f) * 2.0f, Camera.ZoomFactor));
-		m_RenderSurface.SurfaceFrameBuffer->Bind();
+		m_RenderSurface.SurfaceFrameBuffer.Bind();
 		Renderer::ClearScreen();
 
 		for (pEnvironmentObject& obj : env.Objects)
@@ -124,7 +124,8 @@ namespace Ainan {
 	void Exporter::GetImageFromExportSurfaceToRAM()
 	{
 		delete m_ExportTargetImage;
-		m_ExportTargetImage = new Image(m_RenderSurface.SurfaceFrameBuffer->ReadPixels());
+		//TODO
+		//m_ExportTargetImage = new Image(m_RenderSurface.SurfaceFrameBuffer.ReadPixels());
 	}
 
 	void Exporter::DisplayGUI()

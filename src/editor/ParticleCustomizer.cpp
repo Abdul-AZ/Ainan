@@ -7,7 +7,7 @@ namespace Ainan {
 	{
 		VertexLayout layout(1);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
-		m_LineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibrary()["LineShader"], true);
+		m_LineVertexBuffer = Renderer::CreateVertexBufferNew(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibraryNew()["LineShader"], true);
 
 		glm::vec2 vertices[c_CircleVertexCount];
 		uint32_t indecies[c_CircleVertexCount * 2 - 2];
@@ -29,14 +29,15 @@ namespace Ainan {
 		vertices[c_CircleVertexCount - 1] = vertices[0];
 
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
-		m_CircleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * c_CircleVertexCount, layout, Renderer::ShaderLibrary()["CircleOutlineShader"]);
+		m_CircleVertexBuffer = Renderer::CreateVertexBufferNew(vertices, sizeof(glm::vec2) * c_CircleVertexCount, layout, Renderer::ShaderLibraryNew()["CircleOutlineShader"]);
 
-		m_CircleIndexBuffer = Renderer::CreateIndexBuffer(indecies, c_CircleVertexCount * 2 - 2);
+		m_CircleIndexBuffer = Renderer::CreateIndexBufferNew(indecies, c_CircleVertexCount * 2 - 2);
 
-		m_CircleTransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { VertexLayoutElement("u_Model", 0, ShaderVariableType::Mat4) }, nullptr);
+		m_CircleTransformUniformBuffer = Renderer::CreateUniformBufferNew("ObjectTransform", 1, { VertexLayoutElement("u_Model", 0, ShaderVariableType::Mat4) });
 
 		layout[0] = VertexLayoutElement("COLOR", 0, ShaderVariableType::Vec4);
-		m_SpawnAreaColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout, (void*)&c_ParticleSpawnAreaColor);
+		m_SpawnAreaColorUniformBuffer = Renderer::CreateUniformBufferNew("ObjectColor", 1, layout);
+		m_SpawnAreaColorUniformBuffer.UpdateData((void*)&c_ParticleSpawnAreaColor, sizeof(glm::vec4));
 	}
 
 	std::string GetModeAsText(const SpawnMode& mode)
@@ -277,10 +278,10 @@ namespace Ainan {
 			vertices[0] = (m_SpawnPosition + offset) * c_GlobalScaleFactor;
 			vertices[1] = (m_SpawnPosition - offset) * c_GlobalScaleFactor;
 
-			m_LineVertexBuffer->UpdateData(0, sizeof(glm::vec2) * 2, vertices.data());
+			m_LineVertexBuffer.UpdateData(0, sizeof(glm::vec2) * 2, vertices.data());
 
-			auto& shader = Renderer::ShaderLibrary()["LineShader"];
-			shader->BindUniformBuffer(m_SpawnAreaColorUniformBuffer, 1, RenderingStage::FragmentShader);
+			auto& shader = Renderer::ShaderLibraryNew()["LineShader"];
+			shader.BindUniformBuffer(m_SpawnAreaColorUniformBuffer, 1, RenderingStage::FragmentShader);
 
 			Renderer::Draw(m_LineVertexBuffer, shader, Primitive::Lines, 2);
 		}
@@ -290,12 +291,12 @@ namespace Ainan {
 			model = glm::translate(model, glm::vec3(m_SpawnPosition.x * c_GlobalScaleFactor, m_SpawnPosition.y * c_GlobalScaleFactor, 0.0f));
 			model = glm::scale(model, glm::vec3(m_CircleRadius * c_GlobalScaleFactor, m_CircleRadius * c_GlobalScaleFactor, m_CircleRadius * c_GlobalScaleFactor));
 
-			auto& shader = Renderer::ShaderLibrary()["CircleOutlineShader"];
+			auto& shader = Renderer::ShaderLibraryNew()["CircleOutlineShader"];
 
-			shader->BindUniformBuffer(m_CircleTransformUniformBuffer, 1, RenderingStage::VertexShader);
-			m_CircleTransformUniformBuffer->UpdateData(&model);
+			shader.BindUniformBuffer(m_CircleTransformUniformBuffer, 1, RenderingStage::VertexShader);
+			m_CircleTransformUniformBuffer.UpdateData(&model, sizeof(glm::mat4));
 
-			shader->BindUniformBuffer(m_SpawnAreaColorUniformBuffer, 2, RenderingStage::FragmentShader);
+			shader.BindUniformBuffer(m_SpawnAreaColorUniformBuffer, 2, RenderingStage::FragmentShader);
 
 			Renderer::Draw(m_CircleVertexBuffer, shader, Primitive::Lines, m_CircleIndexBuffer);
 		}

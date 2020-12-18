@@ -36,8 +36,8 @@ namespace Ainan {
 		GizmoArrow m_CurrentlyPressedArrow = None;
 		float m_DistanceBetweenMouseAndArrowNDC = 0.0f;
 
-		std::shared_ptr<VertexBuffer> m_VertexBuffer;
-		std::shared_ptr<IndexBuffer> m_IndexBuffer;
-		std::shared_ptr<UniformBuffer> m_UniformBuffer;
+		VertexBufferNew m_VertexBuffer;
+		IndexBufferNew m_IndexBuffer;
+		UniformBufferNew m_UniformBuffer;
 	};
 }

@@ -1,8 +1,12 @@
 #pragma once
 
-#include "RendererAPI.h"
-
 namespace Ainan {
+
+	enum class RenderingStage : uint32_t
+	{
+		VertexShader,
+		FragmentShader
+	};
 
 	class Texture;
 	class UniformBuffer;
@@ -26,6 +30,7 @@ namespace Ainan {
 	};
 
 	class UniformBufferNew;
+	class FrameBufferNew;
 	class ShaderProgramNew
 	{
 	public:
@@ -35,7 +40,7 @@ namespace Ainan {
 		void BindUniformBuffer(UniformBufferNew buffer, uint32_t slot, RenderingStage stage);
 		void BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage);
 		void BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage);
-		void BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage);
+		void BindTexture(FrameBufferNew fb, uint32_t slot, RenderingStage stage);
 
 		friend class Renderer;
 	};

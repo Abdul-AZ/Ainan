@@ -3,7 +3,7 @@
 
 namespace Ainan {
 
-	void ViewportWindow::DisplayGUI(std::shared_ptr<FrameBuffer>& fb)
+	void ViewportWindow::DisplayGUI(FrameBufferNew fb)
 	{
 		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 
@@ -39,7 +39,7 @@ namespace Ainan {
 			uv1 = ImVec2(1, 1);
 		}
 
-		ImGui::Image(fb->GetTextureID(), ImVec2(RenderViewport.Width, RenderViewport.Height), uv0, uv1);
+		ImGui::Image(fb.GetTextureID(), ImVec2(RenderViewport.Width, RenderViewport.Height), uv0, uv1);
 
 		IsHovered = ImGui::IsWindowHovered();
 		IsFocused = ImGui::IsWindowFocused();

@@ -12,14 +12,14 @@ namespace Ainan {
 		RenderSurface operator=(const RenderSurface&) = delete;
 
 		void Render();
-		void Render(std::shared_ptr<ShaderProgram>& shader);
+		void Render(ShaderProgramNew shader);
 		void RenderToScreen(const Rectangle& viewport);
 
 		void SetSize(const glm::vec2& size);
 	public:
-		std::shared_ptr<FrameBuffer> SurfaceFrameBuffer;
+		FrameBufferNew SurfaceFrameBuffer;
 	
 	private:
-		std::shared_ptr<VertexBuffer> m_VertexBuffer;
+		VertexBufferNew m_VertexBuffer;
 	};
 }

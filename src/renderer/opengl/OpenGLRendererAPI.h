@@ -76,11 +76,17 @@ namespace Ainan {
 
 			virtual void ExecuteCommand(RenderCommand cmd) override;
 			void DrawWithNewAPI(const RenderCommand& cmd);
+			void DrawIndexedWithNewAPI(const RenderCommand& cmd);
+			void CreateFrameBufferNew(const RenderCommand& cmd);
 			void CreateShaderProgramNew(const RenderCommand& cmd);
 			void CreateUniformBufferNew(const RenderCommand& cmd);
+			void CreateIndexBufferNew(const RenderCommand& cmd);
 			void UpdateUniformBufferNew(const RenderCommand& cmd);
 			void BindUniformBufferNew(const RenderCommand& cmd);
 			void CreateVertexBufferNew(const RenderCommand& cmd);
+			void UpdateVertexBufferNew(const RenderCommand& cmd);
+			void DrawIndexedWithCustomNumberOfVertices(const RenderCommand& cmd);
+			void BlitFrameBufferNew(const RenderCommand& cmd);
 		};
 	}
 }

@@ -239,8 +239,52 @@ namespace Ainan {
 				CreateVertexBufferNew(cmd);
 				break;
 
+			case RenderCommandType::CreateIndexBuffer:
+				CreateIndexBufferNew(cmd);
+				break;
+
+			case RenderCommandType::CreateFrameBuffer:
+				CreateFrameBufferNew(cmd);
+				break;
+
 			case RenderCommandType::Draw_NewShader:
 				DrawWithNewAPI(cmd);
+				break;
+
+			case RenderCommandType::DrawIndexedNew:
+				DrawIndexedWithNewAPI(cmd);
+				break;
+
+			case RenderCommandType::DrawIndexedNewWithCustomNumberOfVertices:
+				DrawIndexedWithCustomNumberOfVertices(cmd);
+				break;
+
+			case RenderCommandType::UpdateVertexBuffer:
+				UpdateVertexBufferNew(cmd);
+				break;
+
+			case RenderCommandType::BindTexture:
+				glActiveTexture(GL_TEXTURE0 + cmd.Misc1);
+				glBindTexture(GL_TEXTURE_2D, (uint32_t)cmd.Tex->GetTextureID());
+				break;
+
+			case RenderCommandType::BindFrameBufferAsTexture:
+				glActiveTexture(GL_TEXTURE0 + cmd.Misc1);
+				glBindTexture(GL_TEXTURE_2D, cmd.NewFBuffer.TextureIdentifier);
+				break;
+
+			case RenderCommandType::ResizeFrameBuffer:
+				glBindTexture(GL_TEXTURE_2D, cmd.NewFBuffer.TextureIdentifier);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, cmd.Misc1, cmd.Misc2, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+				glBindTexture(GL_TEXTURE_2D, 0);
+				break;
+
+			case RenderCommandType::BindFrameBufferAsRenderTarget:
+				glBindFramebuffer(GL_FRAMEBUFFER, cmd.NewFBuffer.Identifier);
+				break;
+
+			case RenderCommandType::BlitFrameBuffer:
+				BlitFrameBufferNew(cmd);
 				break;
 
 			default:
@@ -256,6 +300,42 @@ namespace Ainan {
 			glUseProgram(view->Identifier);
 			glDrawArrays(GetOpenGLPrimitive((Primitive)cmd.Misc1), 0, cmd.Misc2);
 			glUseProgram(0);
+		}
+
+		void OpenGLRendererAPI::DrawIndexedWithNewAPI(const RenderCommand& cmd)
+		{
+			glBindVertexArray(cmd.NewVBuffer.Array);
+			glBindBuffer(GL_ARRAY_BUFFER, cmd.NewVBuffer.Identifier);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd.NewIBuffer.Identifier);
+			glUseProgram(cmd.NewShader.Identifier);
+			glDrawElements(GetOpenGLPrimitive(cmd.DrawingPrimitive), cmd.NewIBuffer.Count, GL_UNSIGNED_INT, nullptr);
+			glUseProgram(0);
+		}
+
+		void OpenGLRendererAPI::CreateFrameBufferNew(const RenderCommand& cmd)
+		{
+			FrameBufferCreationInfo* info = (FrameBufferCreationInfo*)cmd.ExtraData;
+			FrameBufferDataView* output = (FrameBufferDataView*)cmd.Output;
+			
+			uint32_t bufferHandle, textureHandle;
+			glGenFramebuffers(1, &bufferHandle);
+			glGenTextures(1, &textureHandle);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, bufferHandle);
+			glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, info->Size.x, info->Size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureHandle, 0);
+
+			glBindTexture(GL_TEXTURE_2D, 0);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			output->Identifier = bufferHandle;
+			output->TextureIdentifier = textureHandle;
+			delete info;
 		}
 
 		void OpenGLRendererAPI::CreateShaderProgramNew(const RenderCommand& cmd)
@@ -333,6 +413,23 @@ namespace Ainan {
 			output->Identifier = identifier;
 
 			output->Layout = info->layout;
+			delete info;
+		}
+
+		void OpenGLRendererAPI::CreateIndexBufferNew(const RenderCommand& cmd)
+		{
+
+			IndexBufferCreationInfo* info = (IndexBufferCreationInfo*)cmd.ExtraData;
+			IndexBufferDataView* output = (IndexBufferDataView*)cmd.Output;
+
+			uint32_t bufferHandle = 0;
+			glGenBuffers(1, &bufferHandle);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferHandle);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, info->Count * sizeof(uint32_t), info->InitialData, GL_STATIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+			output->Identifier = bufferHandle;
+			delete info->InitialData;
 			delete info;
 		}
 
@@ -426,6 +523,42 @@ namespace Ainan {
 			output->Identifier = bufferHandle;
 			delete info->InitialData;
 			delete info;
+		}
+
+		void OpenGLRendererAPI::UpdateVertexBufferNew(const RenderCommand& cmd)
+		{
+			glBindBuffer(GL_ARRAY_BUFFER, cmd.NewVBuffer.Identifier);
+			glBindVertexArray(cmd.NewVBuffer.Array);
+			glBufferSubData(GL_ARRAY_BUFFER, cmd.Misc2, cmd.Misc1, cmd.ExtraData);
+
+			delete[] cmd.ExtraData;
+		}
+
+		void OpenGLRendererAPI::DrawIndexedWithCustomNumberOfVertices(const RenderCommand& cmd)
+		{
+			glBindVertexArray(cmd.NewVBuffer.Array);
+			glBindBuffer(GL_ARRAY_BUFFER, cmd.NewVBuffer.Identifier);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd.NewIBuffer.Identifier);
+			glUseProgram(cmd.NewShader.Identifier);
+			glDrawElements(GetOpenGLPrimitive(cmd.DrawingPrimitive), cmd.Misc1, GL_UNSIGNED_INT, nullptr);
+		}
+
+		void OpenGLRendererAPI::BlitFrameBufferNew(const RenderCommand& cmd)
+		{
+			FrameBufferDataView* otherFB = (FrameBufferDataView*)cmd.ExtraData;
+
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, cmd.NewFBuffer.Identifier);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, otherFB ? otherFB->Identifier : 0);
+
+			glm::vec2 sourceSize = *((glm::vec2*)&cmd.Misc1);
+			glm::vec2 targetSize = *((glm::vec2*)&cmd.Misc2);
+
+			glBlitFramebuffer(0, 0, (GLint)sourceSize.x, (GLint)sourceSize.y,
+				0, 0, (GLint)targetSize.x, (GLint)targetSize.y,
+				GL_COLOR_BUFFER_BIT,
+				GL_LINEAR);
+
+			delete cmd.ExtraData;
 		}
 
 		void OpenGLRendererAPI::ImGuiNewFrame()

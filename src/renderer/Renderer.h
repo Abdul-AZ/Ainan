@@ -40,7 +40,7 @@ namespace Ainan {
 	struct SceneDescription
 	{
 		Camera SceneCamera = {};								   //Required
-		std::shared_ptr<FrameBuffer>* SceneDrawTarget = nullptr;   //Required
+		FrameBufferNew SceneDrawTarget;							   //Required
 		bool Blur = false;										   //Required
 		float BlurRadius = 0.0f;								   //Required if Blur == true
 
@@ -97,6 +97,10 @@ namespace Ainan {
 		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive,
 			const std::shared_ptr<IndexBuffer>& indexBuffer);
 
+		static void Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, IndexBufferNew indexBuffer, uint32_t indexCount);
+
+		static void Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, IndexBufferNew indexBuffer);
+
 		static void ImGuiNewFrame();
 		static void ImGuiEndFrame();
 
@@ -129,6 +133,7 @@ namespace Ainan {
 
 		//data should ALWAYS a uint32_t array
 		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(uint32_t* data, uint32_t count);
+		static IndexBufferNew CreateIndexBufferNew(uint32_t* data, uint32_t count);
 
 		static std::shared_ptr<UniformBuffer> CreateUniformBuffer(const std::string& name, uint32_t reg,
 			const VertexLayout& layout, void* data);
@@ -144,6 +149,7 @@ namespace Ainan {
 		static std::shared_ptr<ShaderProgram> CreateShaderProgramRaw(const std::string& vertSrc, const std::string& fragSrc);
 
 		static std::shared_ptr<FrameBuffer> CreateFrameBuffer(const glm::vec2& size);
+		static FrameBufferNew CreateFrameBufferNew(const glm::vec2& size);
 
 		static std::shared_ptr<Texture> CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
 		static std::shared_ptr<Texture> CreateTexture(Image& img);
@@ -170,15 +176,19 @@ namespace Ainan {
 			std::mutex WorkDoneMutex;
 
 			//TEMPORARY, new interface data
+			std::unordered_map<uint32_t, VertexBufferDataView> VertexBuffers;
+			std::unordered_map<uint32_t, IndexBufferDataView> IndexBuffers;
 			std::unordered_map<uint32_t, UniformBufferDataView> UniformBuffers;
 			std::unordered_map<uint32_t, ShaderProgramDataView> ShaderPrograms;
-			std::unordered_map<uint32_t, VertexBufferDataView> VertexBuffers;
+			std::unordered_map<uint32_t, FrameBufferDataView> FrameBuffers;
 
 			//scene data
 			RendererAPI* CurrentActiveAPI = nullptr;
 			SceneDescription CurrentSceneDescription = {};
 			std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary;
+			std::unordered_map<std::string, ShaderProgramNew> ShaderLibraryNew;
 			std::shared_ptr<UniformBuffer> SceneUniformbuffer = nullptr;
+			UniformBufferNew SceneUniformbufferNew;
 			RenderingBlendMode m_CurrentBlendMode = RenderingBlendMode::Additive;
 			Rectangle CurrentViewport = { 0, 0, 0, 0 };
 
@@ -206,8 +216,8 @@ namespace Ainan {
 			int32_t SpotLightSubmissionCount = 0;
 
 			//batch renderer data
-			std::shared_ptr<VertexBuffer> QuadBatchVertexBuffer = nullptr;
-			std::shared_ptr<IndexBuffer> QuadBatchIndexBuffer = nullptr;
+			VertexBufferNew QuadBatchVertexBuffer;
+			IndexBufferNew QuadBatchIndexBuffer;
 			QuadVertex* QuadBatchVertexBufferDataOrigin = nullptr;
 			QuadVertex* QuadBatchVertexBufferDataPtr = nullptr;
 			//first one is reserved for blank white texture, so we have c_MaxQuadTexturesPerBatch - 1 textures in total
@@ -233,6 +243,7 @@ namespace Ainan {
 		static RendererData* Rdata;
 
 		static decltype(Rdata->ShaderLibrary)& ShaderLibrary() { return Rdata->ShaderLibrary; }
+		static decltype(Rdata->ShaderLibraryNew)& ShaderLibraryNew() { return Rdata->ShaderLibraryNew; }
 
 	private:
 		static std::shared_ptr<VertexBuffer> CreateVertexBufferUnsafe(void* data, uint32_t size,
@@ -249,10 +260,11 @@ namespace Ainan {
 		static std::shared_ptr<Texture> CreateTextureUnsafe(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
 
 		static void InternalInit(RendererType api);
-		static void RendererThreadLoop();
+		static void RendererThreadLoop(RendererType api);
 		static void InternalTerminate();
+		static void InitImGuiRendering();
 		static void DrawImGui(ImDrawData* drawData);
-		static void Blur(std::shared_ptr<FrameBuffer>& target, float radius);
+		static void Blur(FrameBufferNew target, float radius);
 	};
 
 	struct ImGuiViewportDataGlfw

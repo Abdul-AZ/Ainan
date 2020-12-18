@@ -4,7 +4,7 @@ namespace Ainan {
 
 	RenderSurface::RenderSurface()
 	{
-		SurfaceFrameBuffer = Renderer::CreateFrameBuffer(Window::FramebufferSize);
+		SurfaceFrameBuffer = Renderer::CreateFrameBufferNew(Window::FramebufferSize);
 
 		float quadVertices[] = { 
 			// positions   // texCoords
@@ -20,28 +20,28 @@ namespace Ainan {
 		VertexLayout layout(2);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 		layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec2);
-		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, Renderer::ShaderLibrary()["ImageShader"]);
+		m_VertexBuffer = Renderer::CreateVertexBufferNew(quadVertices, sizeof(quadVertices), layout, Renderer::ShaderLibraryNew()["ImageShader"]);
 
 		Renderer::SetRenderTargetApplicationWindow();
 	}
 
 	void RenderSurface::Render()
 	{
-		auto& shader = Renderer::ShaderLibrary()["ImageShader"];
-		shader->BindTexture(SurfaceFrameBuffer, 0, RenderingStage::FragmentShader);
+		auto& shader = Renderer::ShaderLibraryNew()["ImageShader"];
+		shader.BindTexture(SurfaceFrameBuffer, 0, RenderingStage::FragmentShader);
 		Renderer::Draw(m_VertexBuffer, shader, Primitive::Triangles, 6);
 	}
 
-	void RenderSurface::Render(std::shared_ptr<ShaderProgram>& shader)
+	void RenderSurface::Render(ShaderProgramNew shader)
 	{
-		shader->BindTexture(SurfaceFrameBuffer, 0, RenderingStage::FragmentShader);
+		shader.BindTexture(SurfaceFrameBuffer, 0, RenderingStage::FragmentShader);
 		Renderer::Draw(m_VertexBuffer, shader, Primitive::Triangles, 6);
 	}
 
 	void RenderSurface::RenderToScreen(const Rectangle& viewport)
 	{
 		//nullptr means we are copying to the default render buffer (which is the one being displayed)
-		SurfaceFrameBuffer->Blit(nullptr, SurfaceFrameBuffer->GetSize(), SurfaceFrameBuffer->GetSize());
+		SurfaceFrameBuffer.Blit(nullptr, SurfaceFrameBuffer.GetSize(), SurfaceFrameBuffer.GetSize());
 
 		Rectangle screenViewport;
 		screenViewport.X = 0;
@@ -54,6 +54,6 @@ namespace Ainan {
 
 	void RenderSurface::SetSize(const glm::vec2& size)
 	{
-		SurfaceFrameBuffer->Resize(size);
+		SurfaceFrameBuffer.Resize(size);
 	}
 }

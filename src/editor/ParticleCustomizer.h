@@ -67,11 +67,11 @@ namespace Ainan {
 		float m_LineLength = 0.2f;
 		float m_LineAngle = 0.0f; //in degrees
 		float m_CircleRadius = 0.25f;
-		std::shared_ptr<VertexBuffer> m_LineVertexBuffer = nullptr;
-		std::shared_ptr<VertexBuffer> m_CircleVertexBuffer = nullptr;
-		std::shared_ptr<IndexBuffer> m_CircleIndexBuffer = nullptr;
-		std::shared_ptr<UniformBuffer> m_SpawnAreaColorUniformBuffer = nullptr;
-		std::shared_ptr<UniformBuffer> m_CircleTransformUniformBuffer = nullptr;
+		VertexBufferNew m_LineVertexBuffer;
+		VertexBufferNew m_CircleVertexBuffer;
+		IndexBufferNew m_CircleIndexBuffer;
+		UniformBufferNew m_SpawnAreaColorUniformBuffer;
+		UniformBufferNew m_CircleTransformUniformBuffer;
 
 		//random number generator
 		std::mt19937 mt;

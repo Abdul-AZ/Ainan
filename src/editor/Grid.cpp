@@ -40,30 +40,29 @@ namespace Ainan {
 			indecies.push_back((uint32_t)numLinesPerAxis * 2 + i + numLinesPerAxis);
 		}
 
-		m_VertexBuffer = Renderer::CreateVertexBuffer(vertices.data(),
+		m_VertexBuffer = Renderer::CreateVertexBufferNew(vertices.data(),
 			(uint32_t)sizeof(glm::vec2) * vertices.size(),
 			{ VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2) },
-			Renderer::ShaderLibrary()["LineShader"]);
+			Renderer::ShaderLibraryNew()["LineShader"]);
 
-		m_IndexBuffer = Renderer::CreateIndexBuffer(indecies.data(), (uint32_t)indecies.size());
+		m_IndexBuffer = Renderer::CreateIndexBufferNew(indecies.data(), (uint32_t)indecies.size());
 
-		m_TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform",
+		m_TransformUniformBuffer = Renderer::CreateUniformBufferNew("ObjectTransform",
 			1,
-			{ VertexLayoutElement("u_Model",0, ShaderVariableType::Mat4) },
-			nullptr);
+			{ VertexLayoutElement("u_Model", 0, ShaderVariableType::Mat4) }
+		);
 	}
 
 	void Grid::Draw(const Camera& camera)
 	{
-		auto& shader = Renderer::ShaderLibrary()["GridShader"];
+		auto& shader = Renderer::ShaderLibraryNew()["GridShader"];
 
 		glm::vec2 pos = glm::vec2(std::round(camera.Position.x / m_UnitLength), std::round(camera.Position.y / m_UnitLength)) * m_UnitLength;
 
 		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3{ -pos, 0.0f });
-		m_TransformUniformBuffer->UpdateData(&model);
-		Renderer::WaitUntilRendererIdle();
+		m_TransformUniformBuffer.UpdateData(&model, sizeof(glm::mat4));
 
-		shader->BindUniformBuffer(m_TransformUniformBuffer, 1, RenderingStage::VertexShader);
+		shader.BindUniformBuffer(m_TransformUniformBuffer, 1, RenderingStage::VertexShader);
 		Renderer::Draw(m_VertexBuffer, shader, Primitive::Lines, m_IndexBuffer);
 	}
 }

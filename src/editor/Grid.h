@@ -15,8 +15,8 @@ namespace Ainan {
 
 	private:
 		float m_UnitLength = 0.0f;
-		std::shared_ptr<VertexBuffer> m_VertexBuffer = nullptr;
-		std::shared_ptr<IndexBuffer> m_IndexBuffer = nullptr;
-		std::shared_ptr<UniformBuffer> m_TransformUniformBuffer = nullptr;
+		VertexBufferNew m_VertexBuffer;
+		IndexBufferNew m_IndexBuffer;
+		UniformBufferNew m_TransformUniformBuffer;
 	};
 }

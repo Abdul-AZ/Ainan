@@ -471,12 +471,12 @@ namespace Ainan
 
 	void Editor::DrawEnvironment(bool drawWorldSpaceUI)
 	{
-		m_RenderSurface.SurfaceFrameBuffer->Bind();
+		m_RenderSurface.SurfaceFrameBuffer.Bind();
 		Renderer::ClearScreen();
 
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
-		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -497,8 +497,6 @@ namespace Ainan
 			}
 		}
 
-		//m_Background.Draw(*m_Env);
-
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
 			auto mutexPtr = obj->GetMutex();
@@ -513,14 +511,14 @@ namespace Ainan
 		//draw the UI as a different scene on top of the environment scene
 		SceneDescription descUI;
 		descUI.SceneCamera = m_Camera;
-		descUI.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
+		descUI.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
 		descUI.Blur = false;
 		descUI.BlurRadius = 0;
 		Renderer::SetBlendMode(RenderingBlendMode::Screen);
 
 		Renderer::BeginScene(descUI);
 
-		m_RenderSurface.SurfaceFrameBuffer->Bind();
+		m_RenderSurface.SurfaceFrameBuffer.Bind();
 
 		if (drawWorldSpaceUI)
 		{
@@ -566,10 +564,7 @@ namespace Ainan
 				}
 			}
 
-			Renderer::PushCommand([]()
-				{
-					Renderer::FlushQuadBatch();
-				});
+					//Renderer::FlushQuadBatch();
 
 			for (pEnvironmentObject& obj : m_Env->Objects)
 				if (obj->Selected)
@@ -593,6 +588,7 @@ namespace Ainan
 			m_Exporter.DrawOutline();
 		}
 		Renderer::EndScene();
+		Renderer::WaitUntilRendererIdle();
 		//revert to the scene rendering mode
 		Renderer::SetBlendMode(m_Env->BlendMode);
 	}

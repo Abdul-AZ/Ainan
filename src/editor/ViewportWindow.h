@@ -9,7 +9,7 @@ namespace Ainan {
 	class ViewportWindow
 	{
 	public:
-		void DisplayGUI(std::shared_ptr<FrameBuffer>& fb);
+		void DisplayGUI(FrameBufferNew fb);
 
 	public:
 		Rectangle RenderViewport = {0, 0, 0, 0};

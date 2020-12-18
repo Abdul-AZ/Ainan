@@ -2,6 +2,9 @@
 
 //TEMP
 #include "VertexBuffer.h"
+#include "ShaderProgram.h"
+#include "IndexBuffer.h"
+#include "FrameBuffer.h"
 
 namespace Ainan {
 
@@ -10,13 +13,23 @@ namespace Ainan {
 		ClearScreen,
 		Present,
 		CreateShaderProgram, //requires heap allocated ShaderProgramCreationInfo passed in ExtraData
+		CreateIndexBuffer, //requires heap allocated IndexBufferCreationInfo passed in ExtraData
 		CreateUniformBuffer, //requires heap allocated UniformBufferCreationInfo passed in ExtraData
 		CreateVertexBuffer,  //requires heap allocated VertexBufferCreationInfo passed in ExtraData
+		CreateFrameBuffer,  //requires heap allocated FrameBufferCreationInfo passed in ExtraData
+		UpdateVertexBuffer, //VBuffer is populated, Misc 1 is size, Misc2 is offset and ExtraData is a heap allocated memory buffer
 		UpdateUniformBuffer,
-		BindUniformBuffer,
+		BindUniformBuffer, //Misc 1 is slot
+		BindTexture, //
+		BindFrameBufferAsTexture, //
+		BindFrameBufferAsRenderTarget,
 		CustomCommand,
 		Draw_NewShader,
 		DrawIndexed, //Requires VBuffer, IBuffer, Shader and DrawingPrimitive set
+		DrawIndexedNew,
+		DrawIndexedNewWithCustomNumberOfVertices, //Misc 1 is index count
+		ResizeFrameBuffer, //Misc1 is width, Misc2 is Height
+		BlitFrameBuffer, //Misc1 source size and misc 2 is target size, to be interpreted as glm::vec2 each -ExtraData must contain a heap allocated FrameBufferDataView
 		Unspecified
 	};
 
@@ -42,6 +55,17 @@ namespace Ainan {
 		bool Dynamic;
 	};
 
+	struct IndexBufferCreationInfo
+	{
+		void* InitialData;
+		uint32_t Count;
+	};
+
+	struct FrameBufferCreationInfo
+	{
+		glm::vec2 Size;
+	};
+
 	enum class Primitive
 	{
 		Triangles,
@@ -55,12 +79,6 @@ namespace Ainan {
 		Screen,
 		Overlay,
 		NotSpecified //this will use the current mode it is set on
-	};
-
-	enum class RenderingStage : uint32_t
-	{
-		VertexShader,
-		FragmentShader
 	};
 
 	class VertexBuffer;
@@ -87,8 +105,11 @@ namespace Ainan {
 		std::shared_ptr<VertexBuffer> VBuffer = nullptr;
 		VertexBufferDataView NewVBuffer;
 		std::shared_ptr<IndexBuffer> IBuffer = nullptr;
+		IndexBufferDataView NewIBuffer;
 		std::shared_ptr<Texture> Tex = nullptr;
+		ShaderProgramDataView NewShader;
 		std::shared_ptr<FrameBuffer> FBuffer = nullptr;
+		FrameBufferDataView NewFBuffer;
 		std::array<std::shared_ptr<UniformBuffer>, MAX_UNIFORM_BUFFERS_PER_COMMAND> UBuffers;
 		std::array<void*, MAX_UNIFORM_BUFFERS_PER_COMMAND> UBuffersData;
 		bool FreeUniformDataAfterUse = false;
@@ -96,6 +117,8 @@ namespace Ainan {
 		void* ExtraData = nullptr;
 		void* Output = nullptr;
 		std::function<void()> CustomCommand = nullptr;
+
+		RenderingStage Stage;
 
 		uint64_t Misc1 = 0;
 		uint64_t Misc2 = 0;
