@@ -17,12 +17,12 @@ namespace Ainan
 		Renderer::PushCommand(cmd);
 	}
 
-	void ShaderProgramNew::BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage)
+	void ShaderProgramNew::BindTexture(TextureNew texture, uint32_t slot, RenderingStage stage)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::BindTexture;
 		cmd.NewShader = Renderer::Rdata->ShaderPrograms[Identifier];
-		cmd.Tex = texture;
+		cmd.NewTex = &Renderer::Rdata->Textures[texture.Identifier];
 		cmd.Misc1 = slot;
 		cmd.Stage = stage;
 

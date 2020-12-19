@@ -318,13 +318,13 @@ namespace Ainan {
 
 		ImGui::NextColumn();
 
-		if (m_ExportTargetTexture)
+		if (m_ExportTargetTexture.IsValid())
 		{
 			ImGui::Text("Preview");
 
 			int scale = 250;
 			ImVec2 size = ImVec2(scale * m_ExportTargetImage->m_Width / m_ExportTargetImage->m_Height, scale);
-			ImGui::Image(m_ExportTargetTexture->GetTextureID(), size);
+			ImGui::Image((void*)m_ExportTargetTexture.GetTextureID(), size);
 		}
 
 		ImGui::End();
@@ -358,7 +358,7 @@ namespace Ainan {
 		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
 			m_ExportTargetImage->FlipHorizontally();
 
-		m_ExportTargetTexture = Renderer::CreateTexture(*m_ExportTargetImage);
+		m_ExportTargetTexture = Renderer::CreateTextureNew(*m_ExportTargetImage);
 
 		m_FinalizePictureExportWindowOpen = true;
 

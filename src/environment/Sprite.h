@@ -27,6 +27,6 @@ namespace Ainan {
 
 		std::filesystem::path m_TexturePath; //relative to the environment folder
 	private:
-		std::shared_ptr<Texture> m_Texture;
+		TextureNew m_Texture;
 	};
 }

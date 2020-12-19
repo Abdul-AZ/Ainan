@@ -1,7 +1,7 @@
 #include "ParticleSystem.h"
 
 namespace Ainan {
-	static std::shared_ptr<Texture> DefaultTexture;
+	static TextureNew DefaultTexture;
 	static int s_DefaultTextureUserCount = 0;
 
 	ParticleSystem::ParticleSystem()
@@ -28,15 +28,15 @@ namespace Ainan {
 		s_DefaultTextureUserCount++;
 		if (s_DefaultTextureUserCount == 1)
 		{
-			DefaultTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Circle.png"));
+			DefaultTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/Circle.png"));
 		}
 	}
 
 	ParticleSystem::~ParticleSystem()
 	{
 		s_DefaultTextureUserCount--;
-		if (s_DefaultTextureUserCount == 0)
-			DefaultTexture.reset();
+		//if (s_DefaultTextureUserCount == 0)
+		//	DefaultTexture.reset();
 	}
 
 	void ParticleSystem::Update(const float deltaTime)

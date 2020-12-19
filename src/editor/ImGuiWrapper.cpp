@@ -21,12 +21,8 @@ namespace Ainan {
 		ImGui::Begin("DockSpace Demo", nullptr, window_flags);
 		ImGui::PopStyleVar(3);
 
-		ImGuiIO& io = ImGui::GetIO();
-		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-		{
-			ImGuiID dockspace_id = ImGui::GetID("GlobalDockSpace");
-			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
-		}
+		ImGuiID dockspace_id = ImGui::GetID("GlobalDockSpace");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
 	}
 
 	void ImGuiWrapper::EndGlobalDocking()

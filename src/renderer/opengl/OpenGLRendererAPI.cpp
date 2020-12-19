@@ -186,7 +186,7 @@ namespace Ainan {
 			switch (blendMode)
 			{
 			case RenderingBlendMode::Additive:
-					glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 				break;
 			case RenderingBlendMode::Screen:
 					glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
@@ -247,6 +247,10 @@ namespace Ainan {
 				CreateFrameBufferNew(cmd);
 				break;
 
+			case RenderCommandType::CreateTexture:
+				CreateTextureNew(cmd);
+				break;
+
 			case RenderCommandType::Draw_NewShader:
 				DrawWithNewAPI(cmd);
 				break;
@@ -259,13 +263,21 @@ namespace Ainan {
 				DrawIndexedWithCustomNumberOfVertices(cmd);
 				break;
 
+			case RenderCommandType::DrawNew:
+				DrawNew(cmd);
+				break;
+
 			case RenderCommandType::UpdateVertexBuffer:
 				UpdateVertexBufferNew(cmd);
 				break;
 
+			case RenderCommandType::UpdateTexture:
+				UpdateTextureNew(cmd);
+				break;
+
 			case RenderCommandType::BindTexture:
 				glActiveTexture(GL_TEXTURE0 + cmd.Misc1);
-				glBindTexture(GL_TEXTURE_2D, (uint32_t)cmd.Tex->GetTextureID());
+				glBindTexture(GL_TEXTURE_2D, (uint32_t)cmd.NewTex->Identifier);
 				break;
 
 			case RenderCommandType::BindFrameBufferAsTexture:
@@ -559,6 +571,104 @@ namespace Ainan {
 				GL_LINEAR);
 
 			delete cmd.ExtraData;
+		}
+
+		void OpenGLRendererAPI::CreateTextureNew(const RenderCommand& cmd)
+		{
+			TextureCreationInfo* info = (TextureCreationInfo*)cmd.ExtraData;
+			TextureDataView* output = (TextureDataView*)cmd.Output;
+
+			uint32_t textureHandle = 0;
+			glGenTextures(1, &textureHandle);
+
+			glBindTexture(GL_TEXTURE_2D, textureHandle);
+
+			switch (info->Format)
+			{
+			case TextureFormat::RGBA:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, info->Size.x, info->Size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, info->InitialData);
+				break;
+
+			case TextureFormat::RGB:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, info->Size.x, info->Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, info->InitialData);
+				break;
+
+			case TextureFormat::RG:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, info->Size.x, info->Size.y, 0, GL_RG, GL_UNSIGNED_BYTE, info->InitialData);
+				break;
+
+			case TextureFormat::R:
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, info->Size.x, info->Size.y, 0, GL_RED, GL_UNSIGNED_BYTE, info->InitialData);
+				break;
+
+			case TextureFormat::Unspecified:
+				assert(false);
+			}
+
+			glGenerateMipmap(GL_TEXTURE_2D);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			output->Identifier = textureHandle;
+			output->Size = info->Size;
+
+			delete[] info->InitialData;
+			delete info;
+		}
+
+		void OpenGLRendererAPI::UpdateTextureNew(const RenderCommand& cmd)
+		{
+			glBindTexture(GL_TEXTURE_2D, cmd.NewTex->Identifier);
+
+			glm::vec2 size;
+			memcpy(&size, &cmd.Misc1, sizeof(glm::vec2));
+
+			switch ((TextureFormat)cmd.Misc2)
+			{
+				case TextureFormat::RGBA:
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, cmd.ExtraData);
+					break;
+
+				case TextureFormat::RGB:
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, size.x, size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, cmd.ExtraData);
+					break;
+
+				case TextureFormat::RG:
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, size.x, size.y, 0, GL_RG, GL_UNSIGNED_BYTE, cmd.ExtraData);
+					break;
+
+				case TextureFormat::R:
+					glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, size.x, size.y, 0, GL_RED, GL_UNSIGNED_BYTE, cmd.ExtraData);
+					break;
+
+				case TextureFormat::Unspecified:
+					assert(false);
+			}
+
+			glGenerateMipmap(GL_TEXTURE_2D);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			delete[] cmd.ExtraData;
+		}
+
+		void OpenGLRendererAPI::DrawNew(const RenderCommand& cmd)
+		{
+			glUseProgram(cmd.NewShader.Identifier);
+			glBindVertexArray(cmd.NewVBuffer.Array);
+			glBindBuffer(GL_ARRAY_BUFFER, cmd.NewVBuffer.Identifier);
+
+			glDrawArrays(GetOpenGLPrimitive(cmd.DrawingPrimitive), 0, cmd.Misc1);
+
+			glUseProgram(0);
+			glBindVertexArray(0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 
 		void OpenGLRendererAPI::ImGuiNewFrame()

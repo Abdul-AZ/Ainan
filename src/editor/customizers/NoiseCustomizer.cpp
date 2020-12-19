@@ -7,7 +7,7 @@ namespace Ainan {
 
 	NoiseCustomizer::NoiseCustomizer()
 	{
-		NoisePreviewTexture = Renderer::CreateTexture(glm::vec2(NOISE_TEXTURE_SIZE, NOISE_TEXTURE_SIZE), TextureFormat::RGBA, nullptr);
+		NoisePreviewTexture = Renderer::CreateTextureNew(glm::vec2(NOISE_TEXTURE_SIZE, NOISE_TEXTURE_SIZE), TextureFormat::RGBA, nullptr);
 		NoiseLibrary.SetNoiseType(FastNoise::NoiseType::Perlin);
 		UpdateNoiseTex();
 	}
@@ -130,7 +130,7 @@ namespace Ainan {
 
 				ImGui::Text("Noise Preview: ");
 				SET_GUI_POS_INPUT();
-				ImGui::Image(NoisePreviewTexture->GetTextureID(), ImVec2(128, 128),
+				ImGui::Image((void*)NoisePreviewTexture.GetTextureID(), ImVec2(128, 128),
 					ImVec2(0,0), ImVec2(1,1),ImVec4(1, 1, 1, 1), ImVec4(0.9, 0.9, 0.9, 1));
 			}
 
@@ -200,7 +200,7 @@ namespace Ainan {
 		}
 
 		//send image to the gpu
-		NoisePreviewTexture->SetImage(img);
+		NoisePreviewTexture.SetImage(img);
 	}
 }
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Texture.h"
+
 namespace Ainan {
 
 	enum class RenderingStage : uint32_t
@@ -39,7 +41,7 @@ namespace Ainan {
 
 		void BindUniformBuffer(UniformBufferNew buffer, uint32_t slot, RenderingStage stage);
 		void BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage);
-		void BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage);
+		void BindTexture(TextureNew texture, uint32_t slot, RenderingStage stage);
 		void BindTexture(FrameBufferNew fb, uint32_t slot, RenderingStage stage);
 
 		friend class Renderer;

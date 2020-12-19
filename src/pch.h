@@ -15,6 +15,7 @@
 #include <queue>
 #include <atomic>
 #include <numeric>
+#include <limits>
 
 //dependencies
 #include "Log.h" //includes spdlog

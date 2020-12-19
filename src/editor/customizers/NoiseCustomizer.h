@@ -84,7 +84,7 @@ namespace Ainan {
 		}
 
 	public:
-		std::shared_ptr<Texture> NoisePreviewTexture;
+		TextureNew NoisePreviewTexture;
 
 	private:
 		void UpdateNoiseTex();

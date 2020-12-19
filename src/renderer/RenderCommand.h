@@ -5,6 +5,7 @@
 #include "ShaderProgram.h"
 #include "IndexBuffer.h"
 #include "FrameBuffer.h"
+#include "Texture.h"
 
 namespace Ainan {
 
@@ -17,6 +18,8 @@ namespace Ainan {
 		CreateUniformBuffer, //requires heap allocated UniformBufferCreationInfo passed in ExtraData
 		CreateVertexBuffer,  //requires heap allocated VertexBufferCreationInfo passed in ExtraData
 		CreateFrameBuffer,  //requires heap allocated FrameBufferCreationInfo passed in ExtraData
+		CreateTexture,  //requires heap allocated TextureCreationInfo passed in ExtraData
+		UpdateTexture,  //Misc1 size to be interpreted as glm::vec2, Misc2 is Format and Extradata is a heap allocated array that will be freed by delete[]
 		UpdateVertexBuffer, //VBuffer is populated, Misc 1 is size, Misc2 is offset and ExtraData is a heap allocated memory buffer
 		UpdateUniformBuffer,
 		BindUniformBuffer, //Misc 1 is slot
@@ -25,6 +28,7 @@ namespace Ainan {
 		BindFrameBufferAsRenderTarget,
 		CustomCommand,
 		Draw_NewShader,
+		DrawNew, // Requires NewVBuffer, Shader, DrawingPrimitive and Misc1 represents vertex draw count
 		DrawIndexed, //Requires VBuffer, IBuffer, Shader and DrawingPrimitive set
 		DrawIndexedNew,
 		DrawIndexedNewWithCustomNumberOfVertices, //Misc 1 is index count
@@ -37,6 +41,13 @@ namespace Ainan {
 	{
 		std::string vertPath;
 		std::string fragPath;
+	};
+
+	struct TextureCreationInfo
+	{
+		glm::vec2 Size;
+		TextureFormat Format;
+		uint8_t* InitialData;
 	};
 
 	struct UniformBufferCreationInfo
@@ -101,12 +112,12 @@ namespace Ainan {
 		}
 
 		RenderCommandType Type = RenderCommandType::Unspecified;
+		TextureDataView* NewTex;
 		std::shared_ptr<ShaderProgram> Shader = nullptr;
 		std::shared_ptr<VertexBuffer> VBuffer = nullptr;
 		VertexBufferDataView NewVBuffer;
 		std::shared_ptr<IndexBuffer> IBuffer = nullptr;
 		IndexBufferDataView NewIBuffer;
-		std::shared_ptr<Texture> Tex = nullptr;
 		ShaderProgramDataView NewShader;
 		std::shared_ptr<FrameBuffer> FBuffer = nullptr;
 		FrameBufferDataView NewFBuffer;

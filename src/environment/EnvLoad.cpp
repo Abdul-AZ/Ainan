@@ -145,7 +145,7 @@ namespace Ainan {
 		ps->Customizer.m_TextureCustomizer.m_TexturePath = data[id + "TexturePath"].get<std::string>();
 		if (!ps->Customizer.m_TextureCustomizer.UseDefaultTexture)
 		{
-			ps->Customizer.m_TextureCustomizer.ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(AssetManager::s_EnvironmentDirectory.u8string() + "\\" + ps->Customizer.m_TextureCustomizer.m_TexturePath.u8string()));
+			ps->Customizer.m_TextureCustomizer.ParticleTexture = Renderer::CreateTextureNew(Image::LoadFromFile(AssetManager::s_EnvironmentDirectory.u8string() + "\\" + ps->Customizer.m_TextureCustomizer.m_TexturePath.u8string()));
 		}
 
 		//Force data

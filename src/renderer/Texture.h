@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Image.h"
+
+#undef max
+
 namespace Ainan {
-
-	class Image;
-
 
 	class Texture {
 	public:
@@ -17,6 +18,33 @@ namespace Ainan {
 
 	private:
 		virtual void SetImageUnsafe(std::shared_ptr<Image> image) = 0;
+
+		friend class Renderer;
+	};
+
+	struct TextureDataView
+	{
+		uint64_t Identifier = std::numeric_limits<uint64_t>::max();
+		glm::vec2 Size;
+		TextureFormat Format;
+	};
+
+	class TextureNew
+	{
+	public:
+		uint32_t Identifier = std::numeric_limits<uint32_t>::max();
+
+		bool IsValid() 
+		{
+			return Identifier != std::numeric_limits<uint32_t>::max();
+		}
+
+		void SetImage(std::shared_ptr<Image> image);
+
+		uint32_t GetMemorySize() const; //in bytes
+
+		//used by ImGui
+		uint64_t GetTextureID();
 
 		friend class Renderer;
 	};

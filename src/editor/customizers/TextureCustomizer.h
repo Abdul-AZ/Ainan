@@ -19,7 +19,7 @@ namespace Ainan {
 
 	public:
 		bool UseDefaultTexture = true;
-		std::shared_ptr<Texture> ParticleTexture;
+		TextureNew ParticleTexture;
 		std::filesystem::path m_TexturePath = ""; //relative to the environment folder
 
 		EXPOSE_CUSTOMIZER_TO_JSON

@@ -14,14 +14,14 @@ namespace Ainan
 			Window::CenterWindow();
 		};
 
-		m_PlayButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PlayButton.png"));
-		m_PauseButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PauseButton.png"));
-		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png"));
-		m_SpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Sprite.png", TextureFormat::RGBA));
-		m_LitSpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/LitSprite.png", TextureFormat::RGBA));
-		m_ParticleSystemIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/ParticleSystem.png", TextureFormat::RGBA));
-		m_RadialLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/RadialLight.png", TextureFormat::RGBA));
-		m_SpotLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
+		m_PlayButtonTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/PlayButton.png"));
+		m_PauseButtonTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/PauseButton.png"));
+		m_StopButtonTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/StopButton.png"));
+		m_SpriteIconTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/Sprite.png", TextureFormat::RGBA));
+		m_LitSpriteIconTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/LitSprite.png", TextureFormat::RGBA));
+		m_ParticleSystemIconTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/ParticleSystem.png", TextureFormat::RGBA));
+		m_RadialLightIconTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/RadialLight.png", TextureFormat::RGBA));
+		m_SpotLightIconTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
 
 		UpdateTitle();
 		SetEditorStyle(m_Preferences.Style);
@@ -792,7 +792,7 @@ namespace Ainan
 		//code for displaying each of the control buttons in lambdas so that we can reuse it
 		auto displayPlayButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 playButtonoTint = s_playButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton(m_PlayButtonTexture->GetTextureID(),
+			if (ImGui::ImageButton((void*)m_PlayButtonTexture.GetTextureID(),
 				c_buttonSize,
 				ImVec2(0, 0),
 				ImVec2(1, 1),
@@ -816,7 +816,7 @@ namespace Ainan
 
 		auto displayStopButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 stopButtonoTint = s_stopButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton(m_StopButtonTexture->GetTextureID(),
+			if (ImGui::ImageButton((void*)m_StopButtonTexture.GetTextureID(),
 				ImVec2(50, 50),
 				ImVec2(0, 0),
 				ImVec2(1, 1),
@@ -840,7 +840,7 @@ namespace Ainan
 
 		auto displayPauseButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 pauseButtonoTint = s_pauseButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton(m_PauseButtonTexture->GetTextureID(),
+			if (ImGui::ImageButton((void*)m_PauseButtonTexture.GetTextureID(),
 				ImVec2(50, 50),
 				ImVec2(0, 0),
 				ImVec2(1, 1),
@@ -1004,23 +1004,23 @@ namespace Ainan
 				switch (m_Env->Objects[i]->Type)
 				{
 				case SpriteType:
-					icon = m_SpriteIconTexture->GetTextureID();
+					icon = (void*)m_SpriteIconTexture.GetTextureID();
 					break;
 
 				case LitSpriteType:
-					icon = m_LitSpriteIconTexture->GetTextureID();
+					icon = (void*)m_LitSpriteIconTexture.GetTextureID();
 					break;
 
 				case ParticleSystemType:
-					icon = m_ParticleSystemIconTexture->GetTextureID();
+					icon = (void*)m_ParticleSystemIconTexture.GetTextureID();
 					break;
 
 				case RadialLightType:
-					icon = m_RadialLightIconTexture->GetTextureID();
+					icon = (void*)m_RadialLightIconTexture.GetTextureID();
 					break;
 
 				case SpotLightType:
-					icon = m_SpotLightIconTexture->GetTextureID();
+					icon = (void*)m_SpotLightIconTexture.GetTextureID();
 					break;
 				}
 				//display the image in the same line

@@ -85,9 +85,9 @@ namespace Ainan {
 		static void WaitUntilRendererIdle();
 
 		//position is in world coordinates
-		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture = nullptr);
-		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, std::shared_ptr<Texture> texture = nullptr);
-		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int32_t count, std::shared_ptr<Texture> texture = nullptr);
+		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, TextureNew texture);
+		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, TextureNew texture);
+		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int32_t count, TextureNew texture);
 
 		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive,
 			int32_t vertexCount);
@@ -101,6 +101,8 @@ namespace Ainan {
 
 		static void Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, IndexBufferNew indexBuffer);
 
+		static void Draw(ShaderProgramNew shader, VertexBufferNew vertexBuffer, Primitive primitive, uint32_t vertexCount);
+		
 		static void ImGuiNewFrame();
 		static void ImGuiEndFrame();
 
@@ -151,8 +153,10 @@ namespace Ainan {
 		static std::shared_ptr<FrameBuffer> CreateFrameBuffer(const glm::vec2& size);
 		static FrameBufferNew CreateFrameBufferNew(const glm::vec2& size);
 
-		static std::shared_ptr<Texture> CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
-		static std::shared_ptr<Texture> CreateTexture(Image& img);
+		//static std::shared_ptr<Texture> CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
+		static TextureNew CreateTextureNew(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
+		//static std::shared_ptr<Texture> CreateTexture(Image& img);
+		static TextureNew CreateTextureNew(Image& img);
 
 		static void FlushQuadBatch();
 
@@ -181,6 +185,7 @@ namespace Ainan {
 			std::unordered_map<uint32_t, UniformBufferDataView> UniformBuffers;
 			std::unordered_map<uint32_t, ShaderProgramDataView> ShaderPrograms;
 			std::unordered_map<uint32_t, FrameBufferDataView> FrameBuffers;
+			std::unordered_map<uint32_t, TextureDataView> Textures;
 
 			//scene data
 			RendererAPI* CurrentActiveAPI = nullptr;
@@ -221,13 +226,13 @@ namespace Ainan {
 			QuadVertex* QuadBatchVertexBufferDataOrigin = nullptr;
 			QuadVertex* QuadBatchVertexBufferDataPtr = nullptr;
 			//first one is reserved for blank white texture, so we have c_MaxQuadTexturesPerBatch - 1 textures in total
-			std::array<std::shared_ptr<Texture>, c_MaxQuadTexturesPerBatch> QuadBatchTextures;
+			std::array<TextureNew, c_MaxQuadTexturesPerBatch> QuadBatchTextures;
 			uint32_t QuadBatchTextureSlotsUsed = 0;
 
 			//Postprocessing data
-			std::shared_ptr<FrameBuffer> BlurFrameBuffer = nullptr;
-			std::shared_ptr<VertexBuffer> BlurVertexBuffer = nullptr;
-			std::shared_ptr<UniformBuffer> BlurUniformBuffer = nullptr;
+			FrameBufferNew BlurFrameBuffer;
+			VertexBufferNew BlurVertexBuffer;
+			UniformBufferNew BlurUniformBuffer;
 
 			//profiling data
 			uint32_t NumberOfDrawCallsLastScene = 0;

@@ -42,7 +42,7 @@ namespace Ainan {
 		int32_t m_HeightRatio = 9;
 
 		Image* m_ExportTargetImage = nullptr;
-		std::shared_ptr<Texture> m_ExportTargetTexture = nullptr;
+		TextureNew m_ExportTargetTexture;
 
 		Camera Camera;
 		RenderSurface m_RenderSurface;

@@ -23,6 +23,8 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
+#undef max
+
 #endif // PLATFORM_WINDOWS
 
 bool WantUpdateMonitors = true;
@@ -125,7 +127,7 @@ namespace Ainan {
 		Rdata->QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
 		Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
 
-		Rdata->QuadBatchTextures[0] = CreateTexture(glm::vec2(1, 1), TextureFormat::RGBA, nullptr);
+		Rdata->QuadBatchTextures[0] = CreateTextureNew(glm::vec2(1, 1), TextureFormat::RGBA, nullptr);
 
 		auto img = std::make_shared<Image>();
 		img->m_Width = 1;
@@ -133,17 +135,17 @@ namespace Ainan {
 		img->Format = TextureFormat::RGBA;
 		img->m_Data = new uint8_t[4];
 		memset(img->m_Data, (uint8_t)255, 4);
-		Rdata->QuadBatchTextures[0]->SetImage(img);
+		Rdata->QuadBatchTextures[0].SetImage(img);
 
 		//setup postprocessing
-		Rdata->BlurFrameBuffer = CreateFrameBuffer(Window::FramebufferSize);
+		Rdata->BlurFrameBuffer = CreateFrameBufferNew(Window::FramebufferSize);
 
 		{
 			auto vertices = GetTexturedQuadVertices();
 			VertexLayout layout(2);
 			layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 			layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec2);
-			Rdata->BlurVertexBuffer = CreateVertexBuffer(vertices.data(), sizeof(vertices), layout, Rdata->ShaderLibrary["BlurShader"]);
+			Rdata->BlurVertexBuffer = CreateVertexBufferNew(vertices.data(), sizeof(vertices), layout, Rdata->ShaderLibraryNew["BlurShader"]);
 		}
 
 		{
@@ -153,8 +155,8 @@ namespace Ainan {
 				VertexLayoutElement("u_BlurDirection",0, ShaderVariableType::Vec2),
 				VertexLayoutElement("u_Radius",0, ShaderVariableType::Float)
 			};
-			Rdata->BlurUniformBuffer = CreateUniformBuffer("BlurData", 1, layout, nullptr);
-			Rdata->ShaderLibrary["BlurShader"]->BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+			Rdata->BlurUniformBuffer = CreateUniformBufferNew("BlurData", 1, layout);
+			Rdata->ShaderLibraryNew["BlurShader"].BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 		}
 
 		{
@@ -260,7 +262,7 @@ namespace Ainan {
 		//Rdata->QuadBatchVertexBuffer.reset();
 		//Rdata->QuadBatchIndexBuffer.reset();
 		delete[] Rdata->QuadBatchVertexBufferDataOrigin;
-		Rdata->QuadBatchTextures[0].reset();
+		//Rdata->QuadBatchTextures[0].reset();
 	}
 
 	void Renderer::PushCommand(RenderCommand cmd)
@@ -399,14 +401,14 @@ namespace Ainan {
 		while (Rdata->payload == true) Rdata->WorkDoneCV.wait_for(lock, 1ms, []() { return Rdata->payload == false; });
 	}
 
-	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, std::shared_ptr<Texture> texture)
+	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, TextureNew texture)
 	{
 		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
 			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
 			FlushQuadBatch();
 		
 		float textureSlot;
-		if (texture == nullptr)
+		if (texture.IsValid() == false)
 			textureSlot = 0.0f;
 		else
 		{
@@ -414,7 +416,7 @@ namespace Ainan {
 			//check if texture is already used
 			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
-				if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
+				if (Rdata->QuadBatchTextures[i].GetTextureID() == texture.GetTextureID())
 				{
 					foundTexture = true;
 					textureSlot = i;
@@ -455,14 +457,14 @@ namespace Ainan {
 		Rdata->QuadBatchVertexBufferDataPtr++;
 	}
 
-	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, std::shared_ptr<Texture> texture)
+	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, TextureNew texture)
 	{
 		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
 			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
 			FlushQuadBatch();
 
 		float textureSlot;
-		if (texture == nullptr)
+		if (texture.Identifier == std::numeric_limits<uint32_t>::max())
 			textureSlot = 0.0f;
 		else
 		{
@@ -470,7 +472,7 @@ namespace Ainan {
 			//check if texture is already used
 			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
-				if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
+				if (Rdata->QuadBatchTextures[i].GetTextureID() == texture.GetTextureID())
 				{
 					foundTexture = true;
 					textureSlot = i;
@@ -520,7 +522,7 @@ namespace Ainan {
 		Rdata->QuadBatchVertexBufferDataPtr++;
 	}
 
-	void Renderer::DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, std::shared_ptr<Texture> texture)
+	void Renderer::DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, TextureNew texture)
 	{
 		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > count * 4 ||
 			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
@@ -529,7 +531,7 @@ namespace Ainan {
 		assert(count < c_MaxQuadsPerBatch);
 
 		float textureSlot;
-		if (texture == nullptr)
+		if (texture.IsValid() == false)
 			textureSlot = 0.0f;
 		else
 		{
@@ -537,7 +539,7 @@ namespace Ainan {
 			//check if texture is already used
 			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
-				if (Rdata->QuadBatchTextures[i]->GetTextureID() == texture->GetTextureID())
+				if (Rdata->QuadBatchTextures[i].GetTextureID() == texture.GetTextureID())
 				{
 					foundTexture = true;
 					textureSlot = i;
@@ -740,70 +742,86 @@ namespace Ainan {
 		PushCommand(func);
 	}
 
+	void Renderer::Draw(ShaderProgramNew shader, VertexBufferNew vertexBuffer, Primitive primitive, uint32_t vertexCount)
+	{
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::DrawNew;
+		cmd.NewShader = Rdata->ShaderPrograms[shader.Identifier];
+		cmd.NewVBuffer = Rdata->VertexBuffers[vertexBuffer.Identifier];
+		cmd.DrawingPrimitive = primitive;
+		cmd.Misc1 = vertexCount;
+
+		Renderer::PushCommand(cmd);
+	} 
+
 	//Only called internally by the Renderer, and used only by the Renderer thread
 	void Renderer::Blur(FrameBufferNew target, float radius)
 	{
-		//TODO
-		//Rectangle lastViewport = Renderer::GetCurrentViewport();
-		//RenderingBlendMode lastBlendMode = Rdata->m_CurrentBlendMode;
-		//Rdata->CurrentActiveAPI->SetBlendMode(RenderingBlendMode::Screen);
-		//
-		//Rectangle viewport;
-		//viewport.X = 0;
-		//viewport.Y = 0;
-		//viewport.Width = (int)Renderer::Rdata->FrameBuffers[target.Identifier].Size.x;
-		//viewport.Height = (int)Renderer::Rdata->FrameBuffers[target.Identifier].Size.y;
-		//
-		//Rdata->CurrentActiveAPI->SetViewport(viewport);
-		//auto& shader = Rdata->ShaderLibrary["BlurShader"];
-		//shader->BindUniformBufferUnsafe(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
-		//
-		//auto resolution = Renderer::Rdata->FrameBuffers[target.Identifier];
-		////make a buffer for all the uniform data
-		//uint8_t bufferData[20];
-		//glm::vec2 horizonatlDirection = glm::vec2(1.0f, 0.0f);
-		//glm::vec2 verticalDirection = glm::vec2(0.0f, 1.0f);
-		//memset(bufferData, 0, 20);
-		//
-		//memcpy(bufferData, &resolution, sizeof(glm::vec2));
-		//memcpy(bufferData + 8, &horizonatlDirection, sizeof(glm::vec2));
-		//memcpy(bufferData + 16, &radius, sizeof(float));
-		//Rdata->BlurUniformBuffer->UpdateDataUnsafe(bufferData);
-		//
-		////Horizontal blur
-		//Rdata->BlurFrameBuffer->ResizeUnsafe(Renderer::Rdata->FrameBuffers[target.Identifier].Size);
-		//
-		//Rdata->BlurFrameBuffer->BindUnsafe();
-		//Rdata->CurrentActiveAPI->ClearScreen();
-		//
-		////do the horizontal blur to the surface we revieved and put the result in tempSurface
-		//shader->BindTextureUnsafe(target, 0, RenderingStage::FragmentShader);
-		//
-		//{
-		//	Rdata->BlurVertexBuffer->Bind();
-		//	Rdata->CurrentActiveAPI->Draw(*shader, Primitive::Triangles, 6);
-		//}
-		//
-		////this specifies that we are doing vertical blur
-		//memcpy(bufferData + 8, &verticalDirection, sizeof(glm::vec2));
-		//Rdata->BlurUniformBuffer->UpdateDataUnsafe(bufferData);
-		//
-		////clear the buffer we recieved
-		//target->BindUnsafe();
-		//Rdata->CurrentActiveAPI->ClearScreen();
-		//
-		////do the vertical blur to the tempSurface and put the result in the buffer we recieved
-		//shader->BindTextureUnsafe(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
-		//{
-		//	Rdata->BlurVertexBuffer->Bind();
-		//	Rdata->CurrentActiveAPI->Draw(*shader, Primitive::Triangles, 6);
-		//}
-		//
-		//Rdata->CurrentActiveAPI->SetViewport(lastViewport);
-		//Rdata->CurrentActiveAPI->SetBlendMode(lastBlendMode);
-		//
-		//std::lock_guard lock(Rdata->DataMutex);
-		//Rdata->CurrentNumberOfDrawCalls += 2;
+		Rectangle lastViewport = Renderer::GetCurrentViewport();
+		RenderingBlendMode lastBlendMode = Rdata->m_CurrentBlendMode;
+		auto func = []()
+		{
+			Rdata->CurrentActiveAPI->SetBlendMode(RenderingBlendMode::Screen);
+		};
+		PushCommand(func);
+		
+		Rectangle viewport;
+		viewport.X = 0;
+		viewport.Y = 0;
+		viewport.Width = (int)Renderer::Rdata->FrameBuffers[target.Identifier].Size.x;
+		viewport.Height = (int)Renderer::Rdata->FrameBuffers[target.Identifier].Size.y;
+		
+		auto func2 = [viewport]() 
+		{
+			Rdata->CurrentActiveAPI->SetViewport(viewport);
+		};
+		PushCommand(func2);
+		auto& shader = Rdata->ShaderLibraryNew["BlurShader"];
+		shader.BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+		
+		auto resolution = Renderer::Rdata->FrameBuffers[target.Identifier].Size;
+		//make a buffer for all the uniform data
+		uint8_t bufferData[20];
+		glm::vec2 horizonatlDirection = glm::vec2(1.0f, 0.0f);
+		glm::vec2 verticalDirection = glm::vec2(0.0f, 1.0f);
+		memset(bufferData, 0, 20);
+		
+		memcpy(bufferData, &resolution, sizeof(glm::vec2));
+		memcpy(bufferData + 8, &horizonatlDirection, sizeof(glm::vec2));
+		memcpy(bufferData + 16, &radius, sizeof(float));
+		Rdata->BlurUniformBuffer.UpdateData(bufferData, sizeof(bufferData));
+		
+		//Horizontal blur
+		Rdata->BlurFrameBuffer.Resize(Renderer::Rdata->FrameBuffers[target.Identifier].Size);
+		
+		Rdata->BlurFrameBuffer.Bind();
+		ClearScreen();
+		
+		//do the horizontal blur to the surface we revieved and put the result in tempSurface
+		shader.BindTexture(target, 0, RenderingStage::FragmentShader);
+		Draw(shader, Rdata->BlurVertexBuffer, Primitive::Triangles, 6);
+		
+		//this specifies that we are doing vertical blur
+		memcpy(bufferData + 8, &verticalDirection, sizeof(glm::vec2));
+		Rdata->BlurUniformBuffer.UpdateData(bufferData, sizeof(bufferData));
+		
+		//clear the buffer we recieved
+		target.Bind();
+		ClearScreen();
+		
+		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
+		shader.BindTexture(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
+		Draw(shader, Rdata->BlurVertexBuffer, Primitive::Triangles, 6);
+		
+		auto func3 = [lastViewport, lastBlendMode]()
+		{
+			Rdata->CurrentActiveAPI->SetViewport(lastViewport);
+			Rdata->CurrentActiveAPI->SetBlendMode(lastBlendMode);
+		};
+		PushCommand(func3);
+		
+		std::lock_guard lock(Rdata->DataMutex);
+		Rdata->CurrentNumberOfDrawCalls += 2;
 	}
 
 	void Renderer::InitImGuiRendering()
@@ -1235,6 +1253,55 @@ namespace Ainan {
 		return bufferHandle;
 	}
 
+	TextureNew Renderer::CreateTextureNew(Image& img)
+	{
+		static uint32_t s_IdentifierCounter = 1;
+		TextureNew textureHandle;
+		textureHandle.Identifier = s_IdentifierCounter;
+		TextureDataView view;
+		Rdata->Textures[s_IdentifierCounter] = view;
+
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::CreateTexture;
+		TextureCreationInfo* info = new TextureCreationInfo;
+		info->Size = glm::vec2(img.m_Width, img.m_Height);
+		info->Format = img.Format;
+		int32_t comp = 0;
+		switch (info->Format)
+		{
+		case TextureFormat::RGBA:
+			comp = 4;
+			break;
+
+		case TextureFormat::RGB:
+			comp = 3;
+			break;
+
+		case TextureFormat::RG:
+			comp = 2;
+			break;
+
+		case TextureFormat::R:
+			comp = 1;
+			break;
+		default:
+			break;
+		}
+		if (img.m_Data)
+		{
+			info->InitialData = new uint8_t[img.m_Width * img.m_Height * comp];
+			memcpy(info->InitialData, img.m_Data, sizeof(uint8_t) * img.m_Width * img.m_Height * comp);
+		}
+		else
+			info->InitialData = nullptr;
+		cmd.ExtraData = info;
+		cmd.Output = &Rdata->Textures[s_IdentifierCounter];
+
+		PushCommand(cmd);
+		s_IdentifierCounter++;
+		return textureHandle;
+	}
+
 	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgram(const std::string& vertPath, const std::string& fragPath)
 	{
 		std::shared_ptr<ShaderProgram> program;
@@ -1338,31 +1405,14 @@ namespace Ainan {
 		return buffer;
 	}
 
-	std::shared_ptr<Texture> Renderer::CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data)
+	TextureNew Renderer::CreateTextureNew(const glm::vec2& size, TextureFormat format, uint8_t* data)
 	{
-		std::shared_ptr<Texture> texture;
-
-		auto func = [&texture, size, format, data]
-		{
-			texture = CreateTextureUnsafe(size, format, data);
-		};
-
-		PushCommand(func);
-		WaitUntilRendererIdle();
-		return texture;
-	}
-
-	std::shared_ptr<Texture> Renderer::CreateTexture(Image& img)
-	{
-		std::shared_ptr<Texture> texture;
-		auto func = [&texture, img]()
-		{
-			texture = CreateTextureUnsafe(glm::vec2(img.m_Width, img.m_Height), img.Format, img.m_Data);
-		};
-
-		PushCommand(func);
-		WaitUntilRendererIdle();
-		return texture;
+		Image img;
+		img.m_Data = data;
+		img.Format = format;
+		img.m_Width = size.x;
+		img.m_Height = size.y;
+		return CreateTextureNew(img);
 	}
 
 	std::shared_ptr<Texture> Renderer::CreateTextureUnsafe(const glm::vec2& size, TextureFormat format, uint8_t* data)
