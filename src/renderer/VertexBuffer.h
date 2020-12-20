@@ -126,6 +126,7 @@ namespace Ainan {
 		uint64_t Identifier;
 		uint32_t Size;
 		uint32_t Array; //Used only in OpenGL
+		bool Deleted = false;
 	};
 
 	//returns size in bytes

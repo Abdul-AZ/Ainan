@@ -210,7 +210,7 @@ namespace Ainan {
 				break;
 
 			case RenderCommandType::CreateUniformBuffer:
-				CreateUniformBufferNew(cmd);
+				CreateUniformBuffer(cmd);
 				break;
 
 			case RenderCommandType::UpdateUniformBuffer:
@@ -221,24 +221,45 @@ namespace Ainan {
 				BindUniformBufferNew(cmd);
 				break;
 
+			case RenderCommandType::DestroyUniformBuffer:
+				DestroyUniformBuffer(cmd);
+				break;
+
 			case RenderCommandType::CreateShaderProgram:
 				CreateShaderProgramNew(cmd);
 				break;
+			
+			case RenderCommandType::DestroyShaderProgram:
+				glDeleteProgram(cmd.Shader->Identifier);
+				cmd.Shader->Deleted = true;
+				break;
 
 			case RenderCommandType::CreateVertexBuffer:
-				CreateVertexBufferNew(cmd);
+				CreateVertexBuffer(cmd);
+				break;
+
+			case RenderCommandType::DestroyVertexBuffer:
+				DestroyVertexBuffer(cmd);
 				break;
 
 			case RenderCommandType::CreateIndexBuffer:
-				CreateIndexBufferNew(cmd);
+				CreateIndexBuffer(cmd);
+				break;
+
+			case RenderCommandType::DestroyIndexBuffer:
+				DestroyIndexBuffer(cmd);
 				break;
 
 			case RenderCommandType::CreateFrameBuffer:
-				CreateFrameBufferNew(cmd);
+				CreateFrameBuffer(cmd);
+				break;
+
+			case RenderCommandType::DestroyFrameBuffer:
+				DestroyFrameBufferNew(cmd);
 				break;
 
 			case RenderCommandType::CreateTexture:
-				CreateTextureNew(cmd);
+				CreateTexture(cmd);
 				break;
 
 			case RenderCommandType::Draw_NewShader:
@@ -265,6 +286,10 @@ namespace Ainan {
 				UpdateTextureNew(cmd);
 				break;
 
+			case RenderCommandType::DestroyTexture:
+				DestroyTexture(cmd);
+				break;
+
 			case RenderCommandType::BindTexture:
 				glActiveTexture(GL_TEXTURE0 + cmd.Misc1);
 				glBindTexture(GL_TEXTURE_2D, (uint32_t)cmd.NewTex->Identifier);
@@ -272,17 +297,17 @@ namespace Ainan {
 
 			case RenderCommandType::BindFrameBufferAsTexture:
 				glActiveTexture(GL_TEXTURE0 + cmd.Misc1);
-				glBindTexture(GL_TEXTURE_2D, cmd.NewFBuffer.TextureIdentifier);
+				glBindTexture(GL_TEXTURE_2D, cmd.FrameBuffer->TextureIdentifier);
 				break;
 
 			case RenderCommandType::ResizeFrameBuffer:
-				glBindTexture(GL_TEXTURE_2D, cmd.NewFBuffer.TextureIdentifier);
+				glBindTexture(GL_TEXTURE_2D, cmd.FrameBuffer->TextureIdentifier);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, cmd.Misc1, cmd.Misc2, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				break;
 
 			case RenderCommandType::BindFrameBufferAsRenderTarget:
-				glBindFramebuffer(GL_FRAMEBUFFER, cmd.NewFBuffer.Identifier);
+				glBindFramebuffer(GL_FRAMEBUFFER, cmd.FrameBuffer->Identifier);
 				break;
 
 			case RenderCommandType::BlitFrameBuffer:
@@ -296,8 +321,8 @@ namespace Ainan {
 
 		void OpenGLRendererAPI::DrawWithNewAPI(const RenderCommand& cmd)
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, cmd.NewVBuffer.Identifier);
-			glBindVertexArray(cmd.NewVBuffer.Array);
+			glBindBuffer(GL_ARRAY_BUFFER, cmd.VertexBuffer->Identifier);
+			glBindVertexArray(cmd.VertexBuffer->Array);
 			ShaderProgramDataView* view = (ShaderProgramDataView*)cmd.ExtraData;
 			glUseProgram(view->Identifier);
 			glDrawArrays(GetOpenGLPrimitive((Primitive)cmd.Misc1), 0, cmd.Misc2);
@@ -306,15 +331,15 @@ namespace Ainan {
 
 		void OpenGLRendererAPI::DrawIndexedWithNewAPI(const RenderCommand& cmd)
 		{
-			glBindVertexArray(cmd.NewVBuffer.Array);
-			glBindBuffer(GL_ARRAY_BUFFER, cmd.NewVBuffer.Identifier);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd.NewIBuffer.Identifier);
-			glUseProgram(cmd.NewShader.Identifier);
-			glDrawElements(GetOpenGLPrimitive(cmd.DrawingPrimitive), cmd.NewIBuffer.Count, GL_UNSIGNED_INT, nullptr);
+			glBindVertexArray(cmd.VertexBuffer->Array);
+			glBindBuffer(GL_ARRAY_BUFFER, cmd.VertexBuffer->Identifier);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd.IndexBuffer->Identifier);
+			glUseProgram(cmd.Shader->Identifier);
+			glDrawElements(GetOpenGLPrimitive(cmd.DrawingPrimitive), cmd.IndexBuffer->Count, GL_UNSIGNED_INT, nullptr);
 			glUseProgram(0);
 		}
 
-		void OpenGLRendererAPI::CreateFrameBufferNew(const RenderCommand& cmd)
+		void OpenGLRendererAPI::CreateFrameBuffer(const RenderCommand& cmd)
 		{
 			FrameBufferCreationInfo* info = (FrameBufferCreationInfo*)cmd.ExtraData;
 			FrameBufferDataView* output = (FrameBufferDataView*)cmd.Output;
@@ -372,7 +397,7 @@ namespace Ainan {
 			output->Identifier = program;
 		}
 
-		void OpenGLRendererAPI::CreateUniformBufferNew(const RenderCommand& cmd)
+		void OpenGLRendererAPI::CreateUniformBuffer(const RenderCommand& cmd)
 		{
 			UniformBufferCreationInfo* info = (UniformBufferCreationInfo*) cmd.ExtraData;
 			UniformBufferDataView* output = (UniformBufferDataView*)cmd.Output;
@@ -418,7 +443,14 @@ namespace Ainan {
 			delete info;
 		}
 
-		void OpenGLRendererAPI::CreateIndexBufferNew(const RenderCommand& cmd)
+		void OpenGLRendererAPI::DestroyUniformBuffer(const RenderCommand& cmd)
+		{
+			uint32_t buffer = cmd.UniformBuffer->Identifier;
+			glDeleteBuffers(1, &buffer);
+			cmd.UniformBuffer->Deleted = true;
+		}
+
+		void OpenGLRendererAPI::CreateIndexBuffer(const RenderCommand& cmd)
 		{
 
 			IndexBufferCreationInfo* info = (IndexBufferCreationInfo*)cmd.ExtraData;
@@ -480,7 +512,7 @@ namespace Ainan {
 			glBindBufferRange(GL_UNIFORM_BUFFER, cmd.Misc1, ubuffer->Identifier, 0, ubuffer->AlignedSize);
 		}
 
-		void OpenGLRendererAPI::CreateVertexBufferNew(const RenderCommand& cmd)
+		void OpenGLRendererAPI::CreateVertexBuffer(const RenderCommand& cmd)
 		{
 			VertexBufferCreationInfo* info = (VertexBufferCreationInfo*)cmd.ExtraData;
 			VertexBufferDataView* output = (VertexBufferDataView*)cmd.Output;
@@ -527,10 +559,26 @@ namespace Ainan {
 			delete info;
 		}
 
+		void OpenGLRendererAPI::DestroyVertexBuffer(const RenderCommand& cmd)
+		{
+			uint32_t varray = cmd.VertexBuffer->Array;
+			uint32_t buffer = cmd.VertexBuffer->Identifier;
+			glDeleteVertexArrays(1, &varray);
+			glDeleteBuffers(1, &buffer);
+			cmd.VertexBuffer->Deleted = true;
+		}
+
+		void OpenGLRendererAPI::DestroyIndexBuffer(const RenderCommand& cmd)
+		{
+			uint32_t buffer = cmd.IndexBuffer->Identifier;
+			glDeleteBuffers(1, &buffer);
+			cmd.IndexBuffer->Deleted = true;
+		}
+
 		void OpenGLRendererAPI::UpdateVertexBufferNew(const RenderCommand& cmd)
 		{
-			glBindBuffer(GL_ARRAY_BUFFER, cmd.NewVBuffer.Identifier);
-			glBindVertexArray(cmd.NewVBuffer.Array);
+			glBindBuffer(GL_ARRAY_BUFFER, cmd.VertexBuffer->Identifier);
+			glBindVertexArray(cmd.VertexBuffer->Array);
 			glBufferSubData(GL_ARRAY_BUFFER, cmd.Misc2, cmd.Misc1, cmd.ExtraData);
 
 			delete[] cmd.ExtraData;
@@ -538,10 +586,10 @@ namespace Ainan {
 
 		void OpenGLRendererAPI::DrawIndexedWithCustomNumberOfVertices(const RenderCommand& cmd)
 		{
-			glBindVertexArray(cmd.NewVBuffer.Array);
-			glBindBuffer(GL_ARRAY_BUFFER, cmd.NewVBuffer.Identifier);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd.NewIBuffer.Identifier);
-			glUseProgram(cmd.NewShader.Identifier);
+			glBindVertexArray(cmd.VertexBuffer->Array);
+			glBindBuffer(GL_ARRAY_BUFFER, cmd.VertexBuffer->Identifier);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cmd.IndexBuffer->Identifier);
+			glUseProgram(cmd.Shader->Identifier);
 			glDrawElements(GetOpenGLPrimitive(cmd.DrawingPrimitive), cmd.Misc1, GL_UNSIGNED_INT, nullptr);
 		}
 
@@ -549,7 +597,7 @@ namespace Ainan {
 		{
 			FrameBufferDataView* otherFB = (FrameBufferDataView*)cmd.ExtraData;
 
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, cmd.NewFBuffer.Identifier);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, cmd.FrameBuffer->Identifier);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, otherFB ? otherFB->Identifier : 0);
 
 			glm::vec2 sourceSize = *((glm::vec2*)&cmd.Misc1);
@@ -563,7 +611,16 @@ namespace Ainan {
 			delete cmd.ExtraData;
 		}
 
-		void OpenGLRendererAPI::CreateTextureNew(const RenderCommand& cmd)
+		void OpenGLRendererAPI::DestroyFrameBufferNew(const RenderCommand& cmd)
+		{
+			uint32_t buffer = cmd.FrameBuffer->Identifier;
+			uint32_t texture = cmd.FrameBuffer->TextureIdentifier;
+			glDeleteFramebuffers(1, &buffer);
+			glDeleteTextures(1, &texture);
+			cmd.FrameBuffer->Deleted = true;
+		}
+
+		void OpenGLRendererAPI::CreateTexture(const RenderCommand& cmd)
 		{
 			TextureCreationInfo* info = (TextureCreationInfo*)cmd.ExtraData;
 			TextureDataView* output = (TextureDataView*)cmd.Output;
@@ -648,11 +705,18 @@ namespace Ainan {
 			delete[] cmd.ExtraData;
 		}
 
+		void OpenGLRendererAPI::DestroyTexture(const RenderCommand& cmd)
+		{
+			uint32_t tex = cmd.NewTex->Identifier;
+			glDeleteTextures(1, &tex);
+			cmd.NewTex->Deleted = true;
+		}
+
 		void OpenGLRendererAPI::DrawNew(const RenderCommand& cmd)
 		{
-			glUseProgram(cmd.NewShader.Identifier);
-			glBindVertexArray(cmd.NewVBuffer.Array);
-			glBindBuffer(GL_ARRAY_BUFFER, cmd.NewVBuffer.Identifier);
+			glUseProgram(cmd.Shader->Identifier);
+			glBindVertexArray(cmd.VertexBuffer->Array);
+			glBindBuffer(GL_ARRAY_BUFFER, cmd.VertexBuffer->Identifier);
 
 			glDrawArrays(GetOpenGLPrimitive(cmd.DrawingPrimitive), 0, cmd.Misc1);
 
@@ -744,7 +808,7 @@ namespace Ainan {
 						vBufferInfo->Dynamic = false;
 						cmd.ExtraData = vBufferInfo;
 						cmd.Output = &ImGuiVertexBuffer;
-						CreateVertexBufferNew(cmd);
+						CreateVertexBuffer(cmd);
 					}
 
 					{
@@ -755,7 +819,7 @@ namespace Ainan {
 						vBufferInfo->Count = 0;
 						cmd.ExtraData = vBufferInfo;
 						cmd.Output = &ImGuiIndexBuffer;
-						CreateIndexBufferNew(cmd);
+						CreateIndexBuffer(cmd);
 					}
 
 					// Build texture atlas
@@ -839,6 +903,15 @@ namespace Ainan {
 				}
 				OpenGLRendererAPI::Snigleton().DrawImGui(viewport->DrawData);
 			};
+		}
+
+		void OpenGLRendererAPI::TerminateImGui()
+		{
+			RenderCommand cmd;
+			cmd.Type = RenderCommandType::DestroyShaderProgram;
+			cmd.Shader = &ImGuiShader;
+
+			Renderer::PushCommand(cmd);
 		}
 
 		void OpenGLRendererAPI::DrawImGui(ImDrawData* drawData)

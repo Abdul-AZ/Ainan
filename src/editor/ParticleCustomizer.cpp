@@ -7,7 +7,7 @@ namespace Ainan {
 	{
 		VertexLayout layout(1);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
-		m_LineVertexBuffer = Renderer::CreateVertexBufferNew(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibraryNew()["LineShader"], true);
+		m_LineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibraryNew()["LineShader"], true);
 
 		glm::vec2 vertices[c_CircleVertexCount];
 		uint32_t indecies[c_CircleVertexCount * 2 - 2];
@@ -29,15 +29,24 @@ namespace Ainan {
 		vertices[c_CircleVertexCount - 1] = vertices[0];
 
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
-		m_CircleVertexBuffer = Renderer::CreateVertexBufferNew(vertices, sizeof(glm::vec2) * c_CircleVertexCount, layout, Renderer::ShaderLibraryNew()["CircleOutlineShader"]);
+		m_CircleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * c_CircleVertexCount, layout, Renderer::ShaderLibraryNew()["CircleOutlineShader"]);
 
-		m_CircleIndexBuffer = Renderer::CreateIndexBufferNew(indecies, c_CircleVertexCount * 2 - 2);
+		m_CircleIndexBuffer = Renderer::CreateIndexBuffer(indecies, c_CircleVertexCount * 2 - 2);
 
-		m_CircleTransformUniformBuffer = Renderer::CreateUniformBufferNew("ObjectTransform", 1, { VertexLayoutElement("u_Model", 0, ShaderVariableType::Mat4) });
+		m_CircleTransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1, { VertexLayoutElement("u_Model", 0, ShaderVariableType::Mat4) });
 
 		layout[0] = VertexLayoutElement("COLOR", 0, ShaderVariableType::Vec4);
-		m_SpawnAreaColorUniformBuffer = Renderer::CreateUniformBufferNew("ObjectColor", 1, layout);
+		m_SpawnAreaColorUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout);
 		m_SpawnAreaColorUniformBuffer.UpdateData((void*)&c_ParticleSpawnAreaColor, sizeof(glm::vec4));
+	}
+
+	ParticleCustomizer::~ParticleCustomizer()
+	{
+		Renderer::DestroyVertexBuffer(m_LineVertexBuffer);
+		Renderer::DestroyVertexBuffer(m_CircleVertexBuffer);
+		Renderer::DestroyIndexBuffer(m_CircleIndexBuffer);
+		Renderer::DestroyUniformBuffer(m_SpawnAreaColorUniformBuffer);
+		Renderer::DestroyUniformBuffer(m_CircleTransformUniformBuffer);
 	}
 
 	std::string GetModeAsText(const SpawnMode& mode)

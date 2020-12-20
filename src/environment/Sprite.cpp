@@ -12,7 +12,12 @@ namespace Ainan {
 
 		Image::GrayScaleToRGBA(img);
 
-		m_Texture = Renderer::CreateTextureNew(img);
+		m_Texture = Renderer::CreateTexture(img);
+	}
+
+	Sprite::~Sprite()
+	{
+		Renderer::DestroyTexture(m_Texture);
 	}
 
 	void Sprite::Update(const float deltaTime)
@@ -91,15 +96,14 @@ namespace Ainan {
 
 	void Sprite::LoadTextureFromFile(const std::string& path)
 	{
-		//TODO destroyTex
-		//m_Texture.reset();
+		Renderer::DestroyTexture(m_Texture);
 
 		Image img = Image::LoadFromFile(path);
 
 		if (img.Format == TextureFormat::R)
 			Image::GrayScaleToRGB(img);
 
-		m_Texture = Renderer::CreateTextureNew(img);
+		m_Texture = Renderer::CreateTexture(img);
 	}
 
 }

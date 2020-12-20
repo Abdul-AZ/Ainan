@@ -9,6 +9,7 @@ namespace Ainan {
 	{
 	public:
 		LitSprite();
+		~LitSprite();
 
 		virtual glm::vec2* GetPositionRef() override { return &m_Position; };
 		virtual void DisplayGUI() override;
@@ -27,7 +28,6 @@ namespace Ainan {
 
 		VertexBufferNew m_VertexBuffer;
 		UniformBufferNew m_UniformBuffer;
-		ShaderProgramNew m_Shader;
 		glm::vec2 m_Position = glm::vec2(0.0f, 0.0f);
 		LitSpriteUniformBuffer m_UniformBufferData;
 		float m_Scale = 0.25f;

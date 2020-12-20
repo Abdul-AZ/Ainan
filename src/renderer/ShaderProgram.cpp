@@ -21,7 +21,7 @@ namespace Ainan
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::BindTexture;
-		cmd.NewShader = Renderer::Rdata->ShaderPrograms[Identifier];
+		cmd.Shader = &Renderer::Rdata->ShaderPrograms[Identifier];
 		cmd.NewTex = &Renderer::Rdata->Textures[texture.Identifier];
 		cmd.Misc1 = slot;
 		cmd.Stage = stage;
@@ -33,8 +33,8 @@ namespace Ainan
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::BindFrameBufferAsTexture;
-		cmd.NewShader = Renderer::Rdata->ShaderPrograms[Identifier];
-		cmd.NewFBuffer = Renderer::Rdata->FrameBuffers[fb.Identifier];
+		cmd.Shader = &Renderer::Rdata->ShaderPrograms[Identifier];
+		cmd.FrameBuffer = &Renderer::Rdata->FrameBuffers[fb.Identifier];
 		cmd.Misc1 = slot;
 		cmd.Stage = stage;
 

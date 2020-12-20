@@ -1065,6 +1065,10 @@ namespace Ainan {
 			Context.DeviceContext->OMSetRenderTargets(1, &Context.BackbufferView, nullptr);
 		}
 
+		void D3D11RendererAPI::TerminateImGui()
+		{
+		}
+
 		void D3D11RendererAPI::RecreateSwapchain(const glm::vec2& newSwapchainSize)
 		{
 			Context.DeviceContext->OMSetRenderTargets(0, nullptr, nullptr);

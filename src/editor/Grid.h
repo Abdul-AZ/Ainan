@@ -11,6 +11,7 @@ namespace Ainan {
 	{
 	public:
 		Grid(float unitLength = 100.0f, int32_t numLinesPerAxis = 51);
+		~Grid();
 		void Draw(const Camera& camera);
 
 	private:

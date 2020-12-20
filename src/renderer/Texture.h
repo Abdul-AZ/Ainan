@@ -27,6 +27,7 @@ namespace Ainan {
 		uint64_t Identifier = std::numeric_limits<uint64_t>::max();
 		glm::vec2 Size;
 		TextureFormat Format;
+		bool Deleted = false;
 	};
 
 	class TextureNew

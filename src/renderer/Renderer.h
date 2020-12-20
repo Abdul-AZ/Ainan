@@ -119,23 +119,28 @@ namespace Ainan {
 
 		static void SetRenderTargetApplicationWindow();
 
-		static VertexBufferNew CreateVertexBufferNew(void* data, uint32_t size,
+		static VertexBufferNew CreateVertexBuffer(void* data, uint32_t size,
 			const VertexLayout& layout, ShaderProgramNew shaderProgram,
 			bool dynamic = false);
+		static void DestroyVertexBuffer(VertexBufferNew vb);
 
 		//data should ALWAYS a uint32_t array
-		static IndexBufferNew CreateIndexBufferNew(uint32_t* data, uint32_t count);
+		static IndexBufferNew CreateIndexBuffer(uint32_t* data, uint32_t count);
+		static void DestroyIndexBuffer(IndexBufferNew ib);
 
-		static UniformBufferNew CreateUniformBufferNew(const std::string& name, uint32_t reg, const VertexLayout& layout);
+		static UniformBufferNew CreateUniformBuffer(const std::string& name, uint32_t reg, const VertexLayout& layout);
+		static void DestroyUniformBuffer(UniformBufferNew ub);
 
 		//manually create a shader program (mostly used for testing new shaders)
 		//to properly add shaders add them to the CompileOnInit list in the cpp file and access them from the ShaderLibrary member
 		static ShaderProgramNew CreateShaderProgramNew(const std::string& vertPath, const std::string& fragPath);
 
-		static FrameBufferNew CreateFrameBufferNew(const glm::vec2& size);
+		static FrameBufferNew CreateFrameBuffer(const glm::vec2& size);
+		static void DestroyFrameBuffer(FrameBufferNew fb);
 
-		static TextureNew CreateTextureNew(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
-		static TextureNew CreateTextureNew(Image& img);
+		static TextureNew CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
+		static TextureNew CreateTexture(Image& img);
+		static void DestroyTexture(TextureNew tex);
 
 		static void FlushQuadBatch();
 
@@ -205,6 +210,7 @@ namespace Ainan {
 			QuadVertex* QuadBatchVertexBufferDataOrigin = nullptr;
 			QuadVertex* QuadBatchVertexBufferDataPtr = nullptr;
 			//first one is reserved for blank white texture, so we have c_MaxQuadTexturesPerBatch - 1 textures in total
+			TextureNew WhiteTexture;
 			std::array<TextureNew, c_MaxQuadTexturesPerBatch> QuadBatchTextures;
 			uint32_t QuadBatchTextureSlotsUsed = 0;
 
@@ -235,6 +241,7 @@ namespace Ainan {
 		static void InitImGuiRendering();
 		static void DrawImGui(ImDrawData* drawData);
 		static void Blur(FrameBufferNew target, float radius);
+		static void CleanupDeletedObjects();
 	};
 
 	struct ImGuiViewportDataGlfw

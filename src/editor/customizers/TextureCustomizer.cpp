@@ -7,13 +7,19 @@ namespace Ainan {
 	{
 	}
 
+	TextureCustomizer::~TextureCustomizer()
+	{
+		if (ParticleTexture.IsValid())
+			Renderer::DestroyTexture(ParticleTexture);
+	}
+
 	TextureCustomizer::TextureCustomizer(const TextureCustomizer& customizer)
 	{
 		UseDefaultTexture = customizer.UseDefaultTexture;
 
 		if (!UseDefaultTexture)
 		{
-			ParticleTexture = Renderer::CreateTextureNew(Image::LoadFromFile(AssetManager::s_EnvironmentDirectory.u8string() + "\\" + customizer.m_TexturePath.u8string()));
+			ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(AssetManager::s_EnvironmentDirectory.u8string() + "\\" + customizer.m_TexturePath.u8string()));
 		}
 	}
 
@@ -45,7 +51,7 @@ namespace Ainan {
 					{
 						if (textureFileName != "Default") 
 						{
-							ParticleTexture = Renderer::CreateTextureNew(Image::LoadFromFile(tex.u8string()));
+							ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(tex.u8string()));
 							Renderer::WaitUntilRendererIdle(); //TEMPORARY FIX 
 							
 							UseDefaultTexture = false;

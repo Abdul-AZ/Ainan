@@ -97,14 +97,14 @@ namespace Ainan {
 		VertexLayout layout(2);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 		layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec4);
-		m_VertexBuffer = Renderer::CreateVertexBufferNew((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibraryNew()["GizmoShader"]);
+		m_VertexBuffer = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibraryNew()["GizmoShader"]);
 
 		if(Renderer::Rdata->API == RendererType::OpenGL)
-			m_IndexBuffer = Renderer::CreateIndexBufferNew((uint32_t*)c_OpenGLArrowIndecies, sizeof(c_OpenGLArrowIndecies) / sizeof(uint32_t));
+			m_IndexBuffer = Renderer::CreateIndexBuffer((uint32_t*)c_OpenGLArrowIndecies, sizeof(c_OpenGLArrowIndecies) / sizeof(uint32_t));
 		else
-			m_IndexBuffer = Renderer::CreateIndexBufferNew((uint32_t*)c_DirectXArrowIndecies, sizeof(c_DirectXArrowIndecies) / sizeof(uint32_t));
+			m_IndexBuffer = Renderer::CreateIndexBuffer((uint32_t*)c_DirectXArrowIndecies, sizeof(c_DirectXArrowIndecies) / sizeof(uint32_t));
 
-		m_UniformBuffer = Renderer::CreateUniformBufferNew("ObjectTransform", 1,
+		m_UniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1,
 			{ 
 				VertexLayoutElement("u_Position", 0, ShaderVariableType::Vec2),
 				VertexLayoutElement("u_AspectRatio", 1, ShaderVariableType::Float),
@@ -112,6 +112,13 @@ namespace Ainan {
 				VertexLayoutElement("u_OpacityG", 3, ShaderVariableType::Float) 
 			}
 		);
+	}
+
+	Gizmo::~Gizmo()
+	{
+		Renderer::DestroyVertexBuffer(m_VertexBuffer);
+		Renderer::DestroyIndexBuffer(m_IndexBuffer);
+		Renderer::DestroyUniformBuffer(m_UniformBuffer);
 	}
 
 	void Gizmo::Draw(glm::vec2* objectPosition,

@@ -8,7 +8,6 @@ namespace Ainan {
 	class Gizmo
 	{
 	public:
-
 		enum GizmoArrow 
 		{
 			None,
@@ -25,6 +24,7 @@ namespace Ainan {
 		};
 
 		Gizmo();
+		~Gizmo();
 		void Draw(glm::vec2* objectPosition,
 			const ViewportWindow& window,
 			const Camera& camera);

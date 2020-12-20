@@ -50,5 +50,6 @@ namespace Ainan {
 	struct ShaderProgramDataView
 	{
 		uint64_t Identifier = 0;
+		bool Deleted = false;
 	};
 }

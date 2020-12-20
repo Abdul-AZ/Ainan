@@ -28,15 +28,15 @@ namespace Ainan {
 		s_DefaultTextureUserCount++;
 		if (s_DefaultTextureUserCount == 1)
 		{
-			DefaultTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/Circle.png"));
+			DefaultTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Circle.png"));
 		}
 	}
 
 	ParticleSystem::~ParticleSystem()
 	{
 		s_DefaultTextureUserCount--;
-		//if (s_DefaultTextureUserCount == 0)
-		//	DefaultTexture.reset();
+		if (s_DefaultTextureUserCount == 0)
+			Renderer::DestroyTexture(DefaultTexture);
 	}
 
 	void ParticleSystem::Update(const float deltaTime)

@@ -25,6 +25,7 @@ namespace Ainan {
 		};
 	public:
 		Exporter();
+		~Exporter();
 		void DrawOutline();
 		void DisplayGUI();
 		void OpenExporterWindow();

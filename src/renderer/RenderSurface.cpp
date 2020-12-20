@@ -4,7 +4,7 @@ namespace Ainan {
 
 	RenderSurface::RenderSurface()
 	{
-		SurfaceFrameBuffer = Renderer::CreateFrameBufferNew(Window::FramebufferSize);
+		SurfaceFrameBuffer = Renderer::CreateFrameBuffer(Window::FramebufferSize);
 
 		float quadVertices[] = { 
 			// positions   // texCoords
@@ -20,9 +20,15 @@ namespace Ainan {
 		VertexLayout layout(2);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 		layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec2);
-		m_VertexBuffer = Renderer::CreateVertexBufferNew(quadVertices, sizeof(quadVertices), layout, Renderer::ShaderLibraryNew()["ImageShader"]);
+		m_VertexBuffer = Renderer::CreateVertexBuffer(quadVertices, sizeof(quadVertices), layout, Renderer::ShaderLibraryNew()["ImageShader"]);
 
 		Renderer::SetRenderTargetApplicationWindow();
+	}
+
+	RenderSurface::~RenderSurface()
+	{
+		Renderer::DestroyVertexBuffer(m_VertexBuffer);
+		Renderer::DestroyFrameBuffer(SurfaceFrameBuffer);
 	}
 
 	void RenderSurface::Render()

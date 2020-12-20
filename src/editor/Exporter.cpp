@@ -22,10 +22,10 @@ namespace Ainan {
 
 		VertexLayout layout(1);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
-		m_OutlineVertexBuffer = Renderer::CreateVertexBufferNew(nullptr, sizeof(glm::vec2) * 8, layout, Renderer::ShaderLibraryNew()["LineShader"], true);
+		m_OutlineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 8, layout, Renderer::ShaderLibraryNew()["LineShader"], true);
 
 		layout[0] = VertexLayoutElement("u_Color", 0, ShaderVariableType::Vec4);
-		m_OutlineUniformBuffer = Renderer::CreateUniformBufferNew("ObjectColor", 1, layout);
+		m_OutlineUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout);
 		m_OutlineUniformBuffer.UpdateData((void*)&c_OutlineColor, sizeof(glm::vec4));
 
 		SetSize();
@@ -35,6 +35,14 @@ namespace Ainan {
 		PictureSettings.ExportTargetLocation.m_FileName = "Example Name";
 		PictureSettings.ExportTargetLocation.FileExtension = ".png";
 		PictureSettings.ExportTargetPath = PictureSettings.ExportTargetLocation.GetSelectedSavePath();
+	}
+
+	Exporter::~Exporter()
+	{
+		Renderer::DestroyVertexBuffer(m_OutlineVertexBuffer);
+		Renderer::DestroyUniformBuffer(m_OutlineUniformBuffer);
+		if (m_ExportTargetTexture.IsValid())
+			Renderer::DestroyTexture(m_ExportTargetTexture);
 	}
 
 	void Exporter::ExportIfScheduled(Editor& editor)
@@ -359,7 +367,7 @@ namespace Ainan {
 		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
 			m_ExportTargetImage->FlipHorizontally();
 
-		m_ExportTargetTexture = Renderer::CreateTextureNew(*m_ExportTargetImage);
+		m_ExportTargetTexture = Renderer::CreateTexture(*m_ExportTargetImage);
 
 		m_FinalizePictureExportWindowOpen = true;
 

@@ -36,6 +36,7 @@ namespace Ainan {
 		uint64_t Identifier = 0;
 		uint64_t TextureIdentifier = 0;
 		glm::vec2 Size;
+		bool Deleted = false;
 	};
 
 	class FrameBufferNew

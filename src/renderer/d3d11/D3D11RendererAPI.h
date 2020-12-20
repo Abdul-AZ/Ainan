@@ -23,6 +23,7 @@ namespace Ainan {
 			virtual void Draw(ShaderProgram& shader, Primitive mode, const IndexBuffer& indexBuffer) override;
 			virtual void Draw(ShaderProgram& shader, Primitive mode, const IndexBuffer& indexBuffer, uint32_t vertexCount) override;
 			virtual void InitImGui() override;
+			virtual void TerminateImGui() override;
 			virtual void DrawImGui(ImDrawData* drawData) override;
 			virtual void ClearScreen() override;
 			virtual void RecreateSwapchain(const glm::vec2& newSwapchainSize) override;

@@ -14,14 +14,14 @@ namespace Ainan
 			Window::CenterWindow();
 		};
 
-		m_PlayButtonTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/PlayButton.png"));
-		m_PauseButtonTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/PauseButton.png"));
-		m_StopButtonTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/StopButton.png"));
-		m_SpriteIconTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/Sprite.png", TextureFormat::RGBA));
-		m_LitSpriteIconTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/LitSprite.png", TextureFormat::RGBA));
-		m_ParticleSystemIconTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/ParticleSystem.png", TextureFormat::RGBA));
-		m_RadialLightIconTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/RadialLight.png", TextureFormat::RGBA));
-		m_SpotLightIconTexture = Renderer::CreateTextureNew(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
+		m_PlayButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PlayButton.png"));
+		m_PauseButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/PauseButton.png"));
+		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png"));
+		m_SpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Sprite.png", TextureFormat::RGBA));
+		m_LitSpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/LitSprite.png", TextureFormat::RGBA));
+		m_ParticleSystemIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/ParticleSystem.png", TextureFormat::RGBA));
+		m_RadialLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/RadialLight.png", TextureFormat::RGBA));
+		m_SpotLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
 
 		UpdateTitle();
 		SetEditorStyle(m_Preferences.Style);
@@ -37,6 +37,15 @@ namespace Ainan
 
 	Editor::~Editor()
 	{
+		Renderer::DestroyTexture(m_PlayButtonTexture);
+		Renderer::DestroyTexture(m_PauseButtonTexture);
+		Renderer::DestroyTexture(m_StopButtonTexture);
+		Renderer::DestroyTexture(m_SpriteIconTexture);
+		Renderer::DestroyTexture(m_LitSpriteIconTexture);
+		Renderer::DestroyTexture(m_ParticleSystemIconTexture);
+		Renderer::DestroyTexture(m_RadialLightIconTexture);
+		Renderer::DestroyTexture(m_SpotLightIconTexture);
+
 		delete m_Env;
 		m_Preferences.SaveToDefaultPath();
 

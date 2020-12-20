@@ -12,6 +12,7 @@ namespace Ainan {
 	{
 	public:
 		TextureCustomizer();
+		~TextureCustomizer();
 		TextureCustomizer(const TextureCustomizer& customizer);
 		TextureCustomizer operator=(const TextureCustomizer& customizer);
 

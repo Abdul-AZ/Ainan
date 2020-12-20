@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RendererAPI.h"
+#include "VertexBuffer.h"
 
 namespace Ainan 
 {
@@ -32,6 +32,7 @@ namespace Ainan
 		uint32_t PackedSize = 0;
 		uint32_t AlignedSize = 0;
 		uint8_t* BufferMemory = nullptr;
+		bool Deleted = false;
 	};
 
 	class UniformBufferNew

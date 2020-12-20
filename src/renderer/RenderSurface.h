@@ -7,6 +7,7 @@ namespace Ainan {
 	class RenderSurface {
 	public:
 		RenderSurface();
+		~RenderSurface();
 
 		RenderSurface(const RenderSurface&) = delete;
 		RenderSurface operator=(const RenderSurface&) = delete;

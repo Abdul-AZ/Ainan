@@ -7,9 +7,14 @@ namespace Ainan {
 
 	NoiseCustomizer::NoiseCustomizer()
 	{
-		NoisePreviewTexture = Renderer::CreateTextureNew(glm::vec2(NOISE_TEXTURE_SIZE, NOISE_TEXTURE_SIZE), TextureFormat::RGBA, nullptr);
+		NoisePreviewTexture = Renderer::CreateTexture(glm::vec2(NOISE_TEXTURE_SIZE, NOISE_TEXTURE_SIZE), TextureFormat::RGBA, nullptr);
 		NoiseLibrary.SetNoiseType(FastNoise::NoiseType::Perlin);
 		UpdateNoiseTex();
+	}
+
+	NoiseCustomizer::~NoiseCustomizer()
+	{
+		Renderer::DestroyTexture(NoisePreviewTexture);
 	}
 
 #define SET_GUI_POS_INPUT() ImGui::SameLine();\

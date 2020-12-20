@@ -40,17 +40,24 @@ namespace Ainan {
 			indecies.push_back((uint32_t)numLinesPerAxis * 2 + i + numLinesPerAxis);
 		}
 
-		m_VertexBuffer = Renderer::CreateVertexBufferNew(vertices.data(),
+		m_VertexBuffer = Renderer::CreateVertexBuffer(vertices.data(),
 			(uint32_t)sizeof(glm::vec2) * vertices.size(),
 			{ VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2) },
 			Renderer::ShaderLibraryNew()["LineShader"]);
 
-		m_IndexBuffer = Renderer::CreateIndexBufferNew(indecies.data(), (uint32_t)indecies.size());
+		m_IndexBuffer = Renderer::CreateIndexBuffer(indecies.data(), (uint32_t)indecies.size());
 
-		m_TransformUniformBuffer = Renderer::CreateUniformBufferNew("ObjectTransform",
+		m_TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform",
 			1,
 			{ VertexLayoutElement("u_Model", 0, ShaderVariableType::Mat4) }
 		);
+	}
+
+	Grid::~Grid()
+	{
+		Renderer::DestroyVertexBuffer(m_VertexBuffer);
+		Renderer::DestroyIndexBuffer(m_IndexBuffer);
+		Renderer::DestroyUniformBuffer(m_TransformUniformBuffer);
 	}
 
 	void Grid::Draw(const Camera& camera)

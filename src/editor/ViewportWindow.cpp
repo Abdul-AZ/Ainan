@@ -7,8 +7,6 @@ namespace Ainan {
 
 	void ViewportWindow::DisplayGUI(FrameBufferNew fb)
 	{
-		auto x = ImGui::GetStyle().Colors[ImGuiCol_WindowBg];
-		ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0, 0, 0, 1);
 		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
@@ -43,14 +41,12 @@ namespace Ainan {
 			uv1 = ImVec2(1, 1);
 		}
 
-		ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(0, 0), ImVec2(100, 100), ImGui::GetColorU32(ImVec4(0, 0, 0, 1)));
+		ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(), ImVec2(Window::Size.x, Window::Size.y), ImGui::ColorConvertFloat4ToU32(ImVec4(0, 0, 0, 1)));
 		ImGui::Image(fb.GetTextureID(), ImVec2(RenderViewport.Width, RenderViewport.Height), uv0, uv1);
 
 		IsHovered = ImGui::IsWindowHovered();
 		IsFocused = ImGui::IsWindowFocused();
 		ImGui::End();
 		ImGui::PopStyleVar();
-		ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = ImVec4(0, 0, 0, 1);
 	}
-
 }

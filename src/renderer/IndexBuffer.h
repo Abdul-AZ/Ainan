@@ -31,5 +31,6 @@ namespace Ainan {
 		uint64_t Identifier;
 		uint32_t Size;
 		uint32_t Count;
+		bool Deleted = false;
 	};
 }

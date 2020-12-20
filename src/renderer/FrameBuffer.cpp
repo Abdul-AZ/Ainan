@@ -8,7 +8,7 @@ namespace Ainan
     {
         RenderCommand cmd;
         cmd.Type = RenderCommandType::BlitFrameBuffer;
-        cmd.NewFBuffer = Renderer::Rdata->FrameBuffers[Identifier];
+        cmd.FrameBuffer = &Renderer::Rdata->FrameBuffers[Identifier];
         if (otherBuffer)
         {
             cmd.ExtraData = new FrameBufferDataView;
@@ -29,7 +29,7 @@ namespace Ainan
         cmd.Misc1 = newSize.x;
         cmd.Misc2 = newSize.y;
         Renderer::Rdata->FrameBuffers[Identifier].Size = newSize;
-        cmd.NewFBuffer = Renderer::Rdata->FrameBuffers[Identifier];
+        cmd.FrameBuffer = &Renderer::Rdata->FrameBuffers[Identifier];
 
         Renderer::PushCommand(cmd);
     }
@@ -48,7 +48,7 @@ namespace Ainan
     {
         RenderCommand cmd;
         cmd.Type = RenderCommandType::BindFrameBufferAsRenderTarget;
-        cmd.NewFBuffer = Renderer::Rdata->FrameBuffers[Identifier];
+        cmd.FrameBuffer = &Renderer::Rdata->FrameBuffers[Identifier];
 
         Renderer::PushCommand(cmd);
     }

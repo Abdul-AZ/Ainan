@@ -6,6 +6,7 @@
 #include "IndexBuffer.h"
 #include "FrameBuffer.h"
 #include "Texture.h"
+#include "UniformBuffer.h"
 
 namespace Ainan {
 
@@ -14,26 +15,32 @@ namespace Ainan {
 		ClearScreen,
 		Present,
 
-		CreateShaderProgram, //requires heap allocated ShaderProgramCreationInfo passed in ExtraData
+		CreateShaderProgram,  //requires heap allocated ShaderProgramCreationInfo passed in ExtraData
+		DestroyShaderProgram,
+
+		CreateVertexBuffer,  //requires heap allocated VertexBufferCreationInfo passed in ExtraData
+		UpdateVertexBuffer, //VBuffer is populated, Misc 1 is size, Misc2 is offset and ExtraData is a heap allocated memory buffer
+		DestroyVertexBuffer,
 
 		CreateIndexBuffer, //requires heap allocated IndexBufferCreationInfo passed in ExtraData
+		DestroyIndexBuffer,
 
 		CreateUniformBuffer, //requires heap allocated UniformBufferCreationInfo passed in ExtraData
 		BindUniformBuffer,   //Misc 1 is slot
 		UpdateUniformBuffer,
-
-		CreateVertexBuffer,  //requires heap allocated VertexBufferCreationInfo passed in ExtraData
-		UpdateVertexBuffer, //VBuffer is populated, Misc 1 is size, Misc2 is offset and ExtraData is a heap allocated memory buffer
+		DestroyUniformBuffer,
 
 		CreateFrameBuffer,  //requires heap allocated FrameBufferCreationInfo passed in ExtraData
 		BindFrameBufferAsTexture, //
 		BindFrameBufferAsRenderTarget,
 		ResizeFrameBuffer, //Misc1 is width, Misc2 is Height
 		BlitFrameBuffer, //Misc1 source size and misc 2 is target size, to be interpreted as glm::vec2 each -ExtraData must contain a heap allocated FrameBufferDataView
+		DestroyFrameBuffer, 
 
 		CreateTexture,  //requires heap allocated TextureCreationInfo passed in ExtraData
 		BindTexture, 
 		UpdateTexture,  //Misc1 size to be interpreted as glm::vec2, Misc2 is Format and Extradata is a heap allocated array that will be freed by delete[]
+		DestroyTexture,
 
 		Draw_NewShader,
 		DrawNew, // Requires NewVBuffer, Shader, DrawingPrimitive and Misc1 represents vertex draw count
@@ -120,10 +127,11 @@ namespace Ainan {
 
 		RenderCommandType Type = RenderCommandType::Unspecified;
 		TextureDataView* NewTex;
-		VertexBufferDataView NewVBuffer;
-		IndexBufferDataView NewIBuffer;
-		ShaderProgramDataView NewShader;
-		FrameBufferDataView NewFBuffer;
+		VertexBufferDataView* VertexBuffer;
+		IndexBufferDataView* IndexBuffer;
+		ShaderProgramDataView* Shader;
+		UniformBufferDataView* UniformBuffer;
+		FrameBufferDataView* FrameBuffer;
 		Primitive DrawingPrimitive;
 		void* ExtraData = nullptr;
 		void* Output = nullptr;
