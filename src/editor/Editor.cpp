@@ -1658,7 +1658,7 @@ namespace Ainan
 
 	void Editor::UpdateTitle()
 	{
-		RendererType currentRendererType = Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType();
+		RendererType currentRendererType = Renderer::Rdata->API;
 
 		std::string environmentName = "";
 		if (m_Env)

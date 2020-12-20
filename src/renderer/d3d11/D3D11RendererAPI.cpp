@@ -557,16 +557,6 @@ namespace Ainan {
 				Present();
 				break;
 
-			case RenderCommandType::DrawIndexed:
-				cmd.VBuffer->Bind();
-				cmd.IBuffer->Bind();
-
-				Draw(*cmd.Shader, cmd.DrawingPrimitive, *cmd.IBuffer);
-
-				cmd.VBuffer->Unbind();
-				cmd.IBuffer->Unbind();
-				break;
-
 			default:
 				break;
 			}

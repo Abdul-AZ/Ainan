@@ -22,10 +22,11 @@ namespace Ainan {
 
 		VertexLayout layout(1);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
-		m_OutlineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 8, layout, Renderer::ShaderLibrary()["LineShader"], true);
+		m_OutlineVertexBuffer = Renderer::CreateVertexBufferNew(nullptr, sizeof(glm::vec2) * 8, layout, Renderer::ShaderLibraryNew()["LineShader"], true);
 
 		layout[0] = VertexLayoutElement("u_Color", 0, ShaderVariableType::Vec4);
-		m_OutlineUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout, (void*)&c_OutlineColor);
+		m_OutlineUniformBuffer = Renderer::CreateUniformBufferNew("ObjectColor", 1, layout);
+		m_OutlineUniformBuffer.UpdateData((void*)&c_OutlineColor, sizeof(glm::vec4));
 
 		SetSize();
 		VideoSettings.ExportTargetLocation.m_FileName = "Example Name";
@@ -61,10 +62,10 @@ namespace Ainan {
 			m_OutlineVertices[3], m_OutlineVertices[0]  //bottom right to bottom left
 		};
 
-		m_OutlineVertexBuffer->UpdateData(0, sizeof(glm::vec2) * 8, vertices.data());
+		m_OutlineVertexBuffer.UpdateData(0, sizeof(glm::vec2) * 8, vertices.data());
 
-		auto& shader = Renderer::ShaderLibrary()["LineShader"];
-		shader->BindUniformBuffer(m_OutlineUniformBuffer, 1, RenderingStage::FragmentShader);
+		auto& shader = Renderer::ShaderLibraryNew()["LineShader"];
+		shader.BindUniformBuffer(m_OutlineUniformBuffer, 1, RenderingStage::FragmentShader);
 
 		Renderer::Draw(m_OutlineVertexBuffer, shader, Primitive::Lines,  8);
 	}

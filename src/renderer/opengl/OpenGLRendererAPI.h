@@ -69,9 +69,9 @@ namespace Ainan {
 			int32_t AttribLocationVtxPos;
 			int32_t AttribLocationVtxUV;
 			int32_t AttribLocationVtxColor;
-			std::shared_ptr<OpenGLShaderProgram> ImGuiShader;
-			std::shared_ptr<IndexBuffer> ImGuiIndexBuffer;
-			std::shared_ptr<VertexBuffer> ImGuiVertexBuffer;
+			ShaderProgramDataView ImGuiShader;
+			IndexBufferDataView ImGuiIndexBuffer;
+			VertexBufferDataView ImGuiVertexBuffer;
 			uint32_t FontTexture = 0;
 
 			virtual void ExecuteCommand(RenderCommand cmd) override;

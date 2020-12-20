@@ -80,8 +80,8 @@ namespace Ainan {
 
 		bool m_DrawExportCamera = false;
 		std::array<glm::vec2, 4> m_OutlineVertices;
-		std::shared_ptr<VertexBuffer> m_OutlineVertexBuffer = nullptr;
-		std::shared_ptr<UniformBuffer> m_OutlineUniformBuffer = nullptr;
+		VertexBufferNew m_OutlineVertexBuffer;
+		UniformBufferNew m_OutlineUniformBuffer;
 		ExportMode m_Mode = ExportMode::Picture;
 
 		std::string GetModeString(ExportMode mode)

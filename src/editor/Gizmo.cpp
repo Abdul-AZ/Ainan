@@ -99,7 +99,7 @@ namespace Ainan {
 		layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec4);
 		m_VertexBuffer = Renderer::CreateVertexBufferNew((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibraryNew()["GizmoShader"]);
 
-		if(Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+		if(Renderer::Rdata->API == RendererType::OpenGL)
 			m_IndexBuffer = Renderer::CreateIndexBufferNew((uint32_t*)c_OpenGLArrowIndecies, sizeof(c_OpenGLArrowIndecies) / sizeof(uint32_t));
 		else
 			m_IndexBuffer = Renderer::CreateIndexBufferNew((uint32_t*)c_DirectXArrowIndecies, sizeof(c_DirectXArrowIndecies) / sizeof(uint32_t));

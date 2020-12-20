@@ -209,16 +209,6 @@ namespace Ainan {
 				Present();
 				break;
 
-			case RenderCommandType::DrawIndexed:
-				cmd.VBuffer->Bind();
-				cmd.IBuffer->Bind();
-
-				Draw(*cmd.Shader, cmd.DrawingPrimitive, *cmd.IBuffer);
-
-				cmd.VBuffer->Unbind();
-				cmd.IBuffer->Unbind();
-				break;
-
 			case RenderCommandType::CreateUniformBuffer:
 				CreateUniformBufferNew(cmd);
 				break;
@@ -713,16 +703,60 @@ namespace Ainan {
 					std::string vertSrc = (std::string)"#version 420 core" + (std::string)vertexShaderSrc;
 					std::string fragSrc = (std::string)"#version 420 core" + (std::string)fragmentShaderSrc;
 
-					ImGuiShader = OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
+					uint32_t vertex, fragment;
 
-					AttribLocationVtxPos = glGetAttribLocation(ImGuiShader->m_RendererID, "Position");
-					AttribLocationVtxUV = glGetAttribLocation(ImGuiShader->m_RendererID, "UV");
-					AttribLocationVtxColor = glGetAttribLocation(ImGuiShader->m_RendererID, "Color");
+					vertex = glCreateShader(GL_VERTEX_SHADER);
+					const char* c_vShaderCode = vertSrc.c_str();
+					glShaderSource(vertex, 1, &c_vShaderCode, NULL);
+					glCompileShader(vertex);
+
+
+					fragment = glCreateShader(GL_FRAGMENT_SHADER);
+					const char* c_fShaderCode = fragSrc.c_str();
+					glShaderSource(fragment, 1, &c_fShaderCode, NULL);
+					glCompileShader(fragment);
+
+
+					// shader Program
+					ImGuiShader.Identifier = glCreateProgram();
+					glAttachShader(ImGuiShader.Identifier, vertex);
+					glAttachShader(ImGuiShader.Identifier, fragment);
+
+					glLinkProgram(ImGuiShader.Identifier);
+					// delete the shaders as they're linked into our program now and no longer necessery
+					glDeleteShader(vertex);
+					glDeleteShader(fragment);
+
+					AttribLocationVtxPos = glGetAttribLocation(ImGuiShader.Identifier, "Position");
+					AttribLocationVtxUV = glGetAttribLocation(ImGuiShader.Identifier, "UV");
+					AttribLocationVtxColor = glGetAttribLocation(ImGuiShader.Identifier, "Color");
 
 					// Create buffers
 					VertexLayout layout;
-					ImGuiVertexBuffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(nullptr, 0, layout, false);
-					ImGuiIndexBuffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(nullptr, 0);
+					{
+						RenderCommand cmd;
+						cmd.Type = RenderCommandType::CreateVertexBuffer;
+						auto vBufferInfo = new VertexBufferCreationInfo;
+						vBufferInfo->InitialData = nullptr;
+						vBufferInfo->Size = 0;
+						vBufferInfo->Layout = layout;
+						vBufferInfo->Shader = ImGuiShader.Identifier;
+						vBufferInfo->Dynamic = false;
+						cmd.ExtraData = vBufferInfo;
+						cmd.Output = &ImGuiVertexBuffer;
+						CreateVertexBufferNew(cmd);
+					}
+
+					{
+						RenderCommand cmd;
+						cmd.Type = RenderCommandType::CreateIndexBuffer;
+						auto vBufferInfo = new IndexBufferCreationInfo;
+						vBufferInfo->InitialData = nullptr;
+						vBufferInfo->Count = 0;
+						cmd.ExtraData = vBufferInfo;
+						cmd.Output = &ImGuiIndexBuffer;
+						CreateIndexBufferNew(cmd);
+					}
 
 					// Build texture atlas
 					ImGuiIO& io = ImGui::GetIO();
@@ -865,17 +899,18 @@ namespace Ainan {
 				{ (R + L) / (L - R),  (T + B) / (B - T),  0.0f,   1.0f },
 			};
 
-			glUseProgram(ImGuiShader->m_RendererID);
-			glUniformMatrix4fv(glGetUniformLocation(ImGuiShader->m_RendererID, "ProjMtx"), 1, GL_FALSE, (GLfloat*)&orthoProjection);
+			glUseProgram(ImGuiShader.Identifier);
+			glUniformMatrix4fv(glGetUniformLocation(ImGuiShader.Identifier, "ProjMtx"), 1, GL_FALSE, (GLfloat*)&orthoProjection);
 			glBindSampler(0, 0); // We use combined texture/sampler state. Applications using GL 3.3 may set that otherwise.
 
-			VertexLayout layout;
-			std::shared_ptr<VertexBuffer> tempVA = std::make_shared<OpenGLVertexBuffer>(nullptr, 0, layout, false);
-			tempVA->Bind();
+			uint32_t tempVA = 0;
+			glGenVertexArrays(1, &tempVA);
+			glBindVertexArray(tempVA);
 
 			// Bind vertex/index buffers and setup attributes for ImDrawVert
-			ImGuiVertexBuffer->Bind();
-			ImGuiIndexBuffer->Bind();
+			glBindVertexArray(ImGuiVertexBuffer.Array);
+			glBindBuffer(GL_ARRAY_BUFFER, ImGuiVertexBuffer.Identifier);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ImGuiIndexBuffer.Identifier);
 			glEnableVertexAttribArray(AttribLocationVtxPos);
 			glEnableVertexAttribArray(AttribLocationVtxUV);
 			glEnableVertexAttribArray(AttribLocationVtxColor);
@@ -947,6 +982,7 @@ namespace Ainan {
 
 			SetViewport(lastViewport);
 			glScissor(lastScissor.X, lastScissor.Y, lastScissor.Width, lastScissor.Height);
+			glDeleteVertexArrays(1, &tempVA);
 		}
 
 		void OpenGLRendererAPI::SetRenderTargetApplicationWindow()

@@ -61,6 +61,7 @@ namespace Ainan {
 	{
 		//allocate renderer memory
 		Rdata = new RendererData();
+		Rdata->API = api;
 
 		auto initFunc = [api]()
 		{
@@ -71,8 +72,8 @@ namespace Ainan {
 		Rdata->Thread = std::thread(initFunc);
 
 		//wait until the renderer thread finished initializing
-		WaitUntilRendererIdle();
 		Renderer::InternalInit(api);
+		WaitUntilRendererIdle();
 	}
 
 	void Renderer::Terminate()
@@ -91,7 +92,6 @@ namespace Ainan {
 		//load shaders
 		for (auto& shaderInfo : CompileOnInit)
 		{
-			Rdata->ShaderLibrary[shaderInfo.Name] = CreateShaderProgram(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
 			Rdata->ShaderLibraryNew[shaderInfo.Name] = CreateShaderProgramNew(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
 		}
 
@@ -141,11 +141,44 @@ namespace Ainan {
 		Rdata->BlurFrameBuffer = CreateFrameBufferNew(Window::FramebufferSize);
 
 		{
-			auto vertices = GetTexturedQuadVertices();
+			std::array<std::pair<glm::vec2, glm::vec2>, 6> quadVertices;
+
+			switch (api)
+			{
+			case RendererType::OpenGL:
+			{
+				quadVertices =
+				{
+					std::pair(glm::vec2(-1.0f, -1.0f),  glm::vec2(0.0f, 0.0f)),
+					std::pair(glm::vec2(-1.0f,  1.0f),  glm::vec2(0.0f, 1.0f)),
+					std::pair(glm::vec2(1.0f, -1.0f),  glm::vec2(1.0f, 0.0f)),
+
+					std::pair(glm::vec2(-1.0f,  1.0f),  glm::vec2(0.0f, 1.0f)),
+					std::pair(glm::vec2(1.0f,  1.0f),  glm::vec2(1.0f, 1.0f)),
+					std::pair(glm::vec2(1.0f, -1.0f),  glm::vec2(1.0f, 0.0f))
+				};
+				break;
+			}
+
+			case RendererType::D3D11:
+			{
+				quadVertices =
+				{
+					std::pair(glm::vec2(-1.0f,  1.0f),  glm::vec2(0.0f, 0.0f)),
+					std::pair(glm::vec2(1.0f, -1.0f),  glm::vec2(1.0f, 1.0f)),
+					std::pair(glm::vec2(-1.0f, -1.0f),  glm::vec2(0.0f, 1.0f)),
+
+					std::pair(glm::vec2(-1.0f,  1.0f),  glm::vec2(0.0f, 0.0f)),
+					std::pair(glm::vec2(1.0f,  1.0f),  glm::vec2(1.0f, 0.0f)),
+					std::pair(glm::vec2(1.0f, -1.0f),  glm::vec2(1.0f, 1.0f))
+				};
+				break;
+			}
+			}
 			VertexLayout layout(2);
 			layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 			layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec2);
-			Rdata->BlurVertexBuffer = CreateVertexBufferNew(vertices.data(), sizeof(vertices), layout, Rdata->ShaderLibraryNew["BlurShader"]);
+			Rdata->BlurVertexBuffer = CreateVertexBufferNew(quadVertices.data(), sizeof(quadVertices), layout, Rdata->ShaderLibraryNew["BlurShader"]);
 		}
 
 		{
@@ -176,14 +209,8 @@ namespace Ainan {
 				VertexLayoutElement("SpotLightIntensity",  0, ShaderVariableType::FloatArray, c_MaxSpotLightCount)
 			};
 
-			Rdata->SceneUniformbuffer = CreateUniformBuffer("FrameData", 0, layout, nullptr);
 			Rdata->SceneUniformbufferNew = CreateUniformBufferNew("FrameData", 0, layout);
 
-			for (auto& shaderTuple : Rdata->ShaderLibrary)
-			{
-				shaderTuple.second->BindUniformBuffer(Rdata->SceneUniformbuffer, 0, RenderingStage::VertexShader);
-				shaderTuple.second->BindUniformBuffer(Rdata->SceneUniformbuffer, 0, RenderingStage::FragmentShader);
-			}
 			for (auto& shaderTuple : Rdata->ShaderLibraryNew)
 			{
 				shaderTuple.second.BindUniformBuffer(Rdata->SceneUniformbufferNew, 0, RenderingStage::VertexShader);
@@ -254,8 +281,6 @@ namespace Ainan {
 
 	void Renderer::InternalTerminate()
 	{
-		Rdata->ShaderLibrary.erase(Rdata->ShaderLibrary.begin(), Rdata->ShaderLibrary.end());
-
 		delete Rdata->CurrentActiveAPI;
 
 		//batch renderer data
@@ -288,10 +313,6 @@ namespace Ainan {
 		Rdata->CurrentSceneDescription.SceneDrawTarget.Bind();
 		auto func = [desc]()
 		{
-
-			//update the per-frame uniform buffer
-			Rdata->SceneUniformbuffer->UpdateDataUnsafe(&Rdata->SceneBuffer);
-
 			//update diagnostics stuff
 			for (size_t i = 0; i < Rdata->ReservedTextures.size(); i++)
 				if (Rdata->ReservedTextures[i].expired())
@@ -345,22 +366,6 @@ namespace Ainan {
 		buffer.SpotLightInnerCutoffs[i] = glm::radians(innerCutoff);
 		buffer.SpotLightOuterCutoffs[i] = glm::radians(outerCutoff);
 		i++;
-	}
-
-	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive, int32_t vertexCount)
-	{
-		auto func = [vertexBuffer, shader, primitive, vertexCount]()
-		{
-			vertexBuffer->Bind();
-
-			Rdata->CurrentActiveAPI->Draw(*shader, primitive, vertexCount);
-
-			vertexBuffer->Unbind();
-
-			Rdata->CurrentNumberOfDrawCalls++;
-		};
-
-		PushCommand(func);
 	}
 
 	void Renderer::Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, int32_t vertexCount)
@@ -581,19 +586,6 @@ namespace Ainan {
 			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
 			Rdata->QuadBatchVertexBufferDataPtr++;
 		}
-	}
-
-	void Renderer::Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive, const std::shared_ptr<IndexBuffer>& indexBuffer)
-	{
-		RenderCommand cmd;
-		cmd.Type = RenderCommandType::DrawIndexed;
-		cmd.VBuffer = vertexBuffer;
-		cmd.IBuffer = indexBuffer;
-		cmd.Shader = shader;
-		cmd.DrawingPrimitive = primitive;
-
-		PushCommand(cmd);
-		Rdata->CurrentNumberOfDrawCalls++;
 	}
 
 	void Renderer::ImGuiNewFrame()
@@ -826,7 +818,6 @@ namespace Ainan {
 
 	void Renderer::InitImGuiRendering()
 	{
-
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
@@ -1039,60 +1030,6 @@ namespace Ainan {
 		PushCommand(func);
 	}
 
-	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBuffer(void* data, uint32_t size,
-		const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
-		bool dynamic)
-	{
-		std::shared_ptr<VertexBuffer> buffer;
-		auto func = [&buffer, data, size, layout, shaderProgram, dynamic]()
-		{
-			buffer = CreateVertexBufferUnsafe(data, size, layout, shaderProgram, dynamic);
-		};
-
-		PushCommand(func);
-
-		WaitUntilRendererIdle();
-		return buffer;
-	}
-
-	std::shared_ptr<VertexBuffer> Renderer::CreateVertexBufferUnsafe(void* data, uint32_t size, const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram, bool dynamic)
-	{
-		std::shared_ptr<VertexBuffer> buffer;
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-		{
-		case RendererType::OpenGL:
-			buffer = std::make_shared<OpenGL::OpenGLVertexBuffer>(data, size, layout, dynamic);
-			break;
-
-#ifdef PLATFORM_WINDOWS
-		case RendererType::D3D11:
-			buffer = std::make_shared<D3D11::D3D11VertexBuffer>(data, size, layout, shaderProgram, dynamic, Rdata->CurrentActiveAPI->GetContext());
-			break;
-#endif // PLATFORM_WINDOWS
-
-		default:
-			assert(false);
-		}
-		Rdata->ReservedVertexBuffers.push_back(buffer);
-
-		return buffer;
-	}
-
-	std::shared_ptr<IndexBuffer> Renderer::CreateIndexBuffer(uint32_t* data, uint32_t count)
-	{
-		std::shared_ptr<IndexBuffer> buffer;
-
-		auto func = [&buffer, data, count]()
-		{
-			buffer = CreateIndexBufferUnsafe(data, count);
-		};
-
-		PushCommand(func);
-
-		WaitUntilRendererIdle();
-		return buffer;
-	}
-
 	IndexBufferNew Renderer::CreateIndexBufferNew(uint32_t* data, uint32_t count)
 	{
 		static uint32_t s_IdentifierCounter = 1;
@@ -1148,66 +1085,6 @@ namespace Ainan {
 		return bufferHandle;
 	}
 
-	std::shared_ptr<IndexBuffer> Renderer::CreateIndexBufferUnsafe(uint32_t* data, uint32_t count)
-	{
-		std::shared_ptr<IndexBuffer> buffer;
-
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-		{
-		case RendererType::OpenGL:
-			buffer = std::make_shared<OpenGL::OpenGLIndexBuffer>(data, count);
-			break;
-
-		case RendererType::D3D11:
-			buffer = std::make_shared<D3D11::D3D11IndexBuffer>(data, count, Rdata->CurrentActiveAPI->GetContext());
-			break;
-
-		default:
-			assert(false);
-		}
-		Rdata->ReservedIndexBuffers.push_back(buffer);
-
-		return buffer;
-	}
-
-	std::shared_ptr<UniformBuffer> Renderer::CreateUniformBuffer(const std::string& name, uint32_t reg, const VertexLayout& layout, void* data)
-	{
-		std::shared_ptr<UniformBuffer> buffer;
-
-		auto func = [&buffer, name, reg, layout, data]()
-		{
-			buffer = CreateUniformBufferUnsafe(name, reg, layout, data);
-		};
-
-		PushCommand(func);
-		WaitUntilRendererIdle();
-		return buffer;
-	}
-
-	std::shared_ptr<UniformBuffer> Renderer::CreateUniformBufferUnsafe(const std::string& name, uint32_t reg, const VertexLayout& layout, void* data)
-	{
-		std::shared_ptr<UniformBuffer> buffer;
-
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-		{
-		case RendererType::OpenGL:
-			buffer = std::make_shared<OpenGL::OpenGLUniformBuffer>(name, layout, data);
-			break;
-
-#ifdef PLATFORM_WINDOWS
-		case RendererType::D3D11:
-			buffer = std::make_shared<D3D11::D3D11UniformBuffer>(name, reg, layout, data, Rdata->CurrentActiveAPI->GetContext());
-			break;
-#endif // PLATFORM_WINDOWS
-
-		default:
-			assert(false);
-		}
-		Rdata->ReservedUniformBuffers.push_back(buffer);
-
-		return buffer;
-	}
-
 	UniformBufferNew Renderer::CreateUniformBufferNew(const std::string& name, uint32_t reg,
 		const VertexLayout& layout)
 	{
@@ -1251,6 +1128,16 @@ namespace Ainan {
 		PushCommand(cmd);
 		s_IdentifierCounter++;
 		return bufferHandle;
+	}
+
+	TextureNew Renderer::CreateTextureNew(const glm::vec2& size, TextureFormat format, uint8_t* data)
+	{
+		Image img;
+		img.m_Width = size.x;
+		img.m_Height = size.y;
+		img.Format = format;
+		img.m_Data = data;
+		return CreateTextureNew(img);
 	}
 
 	TextureNew Renderer::CreateTextureNew(Image& img)
@@ -1302,28 +1189,6 @@ namespace Ainan {
 		return textureHandle;
 	}
 
-	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgram(const std::string& vertPath, const std::string& fragPath)
-	{
-		std::shared_ptr<ShaderProgram> program;
-
-		auto func = [&program, vertPath, fragPath]()
-		{
-			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-			{
-			case RendererType::OpenGL:
-				program = std::make_shared<OpenGL::OpenGLShaderProgram>(vertPath, fragPath);
-				break;
-			case RendererType::D3D11:
-				program = std::make_shared<D3D11::D3D11ShaderProgram>(vertPath, fragPath, Rdata->CurrentActiveAPI->GetContext());
-				break;
-			}
-		};
-
-		PushCommand(func);
-		WaitUntilRendererIdle();
-		return program;
-	}
-
 	ShaderProgramNew Renderer::CreateShaderProgramNew(const std::string& vertPath, const std::string& fragPath)
 	{
 		static uint32_t s_IdentifierCounter = 1;
@@ -1343,100 +1208,6 @@ namespace Ainan {
 		PushCommand(cmd);
 		s_IdentifierCounter++;
 		return programHandle;
-	}
-
-	std::shared_ptr<ShaderProgram> Renderer::CreateShaderProgramRaw(const std::string& vertSrc, const std::string& fragSrc)
-	{
-		std::shared_ptr<ShaderProgram> shader;
-
-		auto func = [&shader, vertSrc, fragSrc]()
-		{
-			switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-			{
-			case RendererType::OpenGL:
-				shader = OpenGL::OpenGLShaderProgram::CreateRaw(vertSrc, fragSrc);
-
-			default:
-				assert(false);
-				shader = nullptr;
-			}
-		};
-
-		PushCommand(func);
-		WaitUntilRendererIdle();
-		return shader;
-	}
-
-	std::shared_ptr<FrameBuffer> Renderer::CreateFrameBuffer(const glm::vec2& size)
-	{
-		std::shared_ptr<FrameBuffer> buffer;
-
-		auto func = [&buffer, size]()
-		{
-			buffer = CreateFrameBufferUnsafe(size);
-		};
-
-		PushCommand(func);
-		WaitUntilRendererIdle();
-		return buffer;
-	}
-
-	std::shared_ptr<FrameBuffer> Renderer::CreateFrameBufferUnsafe(const glm::vec2& size)
-	{
-		std::shared_ptr<FrameBuffer> buffer;
-
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-		{
-		case RendererType::OpenGL:
-			buffer = std::make_shared<OpenGL::OpenGLFrameBuffer>(size);
-			break;
-#ifdef PLATFORM_WINDOWS
-
-		case RendererType::D3D11:
-			buffer = std::make_shared<D3D11::D3D11FrameBuffer>(size, Rdata->CurrentActiveAPI->GetContext());
-			break;
-#endif
-
-		default:
-			assert(false);
-			buffer = nullptr;
-		}
-
-		return buffer;
-	}
-
-	TextureNew Renderer::CreateTextureNew(const glm::vec2& size, TextureFormat format, uint8_t* data)
-	{
-		Image img;
-		img.m_Data = data;
-		img.Format = format;
-		img.m_Width = size.x;
-		img.m_Height = size.y;
-		return CreateTextureNew(img);
-	}
-
-	std::shared_ptr<Texture> Renderer::CreateTextureUnsafe(const glm::vec2& size, TextureFormat format, uint8_t* data)
-	{
-		std::shared_ptr<Texture> texture;
-
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
-		{
-		case RendererType::OpenGL:
-			texture = std::make_shared<OpenGL::OpenGLTexture>(size, format, data);
-			break;
-
-#ifdef PLATFORM_WINDOWS
-		case RendererType::D3D11:
-			texture = std::make_shared<D3D11::D3D11Texture>(size, format, data, Rdata->CurrentActiveAPI->GetContext());
-			break;
-#endif // PLATFORM_WINDOWS
-
-		default:
-			assert(false);
-		}
-
-		Rdata->ReservedTextures.push_back(texture);
-		return texture;
 	}
 
 	std::array<glm::vec2, 6> Renderer::GetQuadVertices()
@@ -1490,7 +1261,7 @@ namespace Ainan {
 	{
 		std::array<std::pair<glm::vec2, glm::vec2>, 6> quadVertices;
 
-		switch (Rdata->CurrentActiveAPI->GetContext()->GetType())
+		switch (Rdata->API)
 		{
 		case RendererType::OpenGL:
 		{

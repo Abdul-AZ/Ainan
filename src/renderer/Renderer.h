@@ -89,13 +89,7 @@ namespace Ainan {
 		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, TextureNew texture);
 		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int32_t count, TextureNew texture);
 
-		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive,
-			int32_t vertexCount);
-
 		static void Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, int32_t vertexCount);
-
-		static void Draw(const std::shared_ptr<VertexBuffer>& vertexBuffer, std::shared_ptr<ShaderProgram>& shader, Primitive primitive,
-			const std::shared_ptr<IndexBuffer>& indexBuffer);
 
 		static void Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, IndexBufferNew indexBuffer, uint32_t indexCount);
 
@@ -125,37 +119,22 @@ namespace Ainan {
 
 		static void SetRenderTargetApplicationWindow();
 
-		static std::shared_ptr<VertexBuffer> CreateVertexBuffer(void* data, uint32_t size,
-			const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
-			bool dynamic = false);
-
 		static VertexBufferNew CreateVertexBufferNew(void* data, uint32_t size,
 			const VertexLayout& layout, ShaderProgramNew shaderProgram,
 			bool dynamic = false);
 
 		//data should ALWAYS a uint32_t array
-		static std::shared_ptr<IndexBuffer> CreateIndexBuffer(uint32_t* data, uint32_t count);
 		static IndexBufferNew CreateIndexBufferNew(uint32_t* data, uint32_t count);
 
-		static std::shared_ptr<UniformBuffer> CreateUniformBuffer(const std::string& name, uint32_t reg,
-			const VertexLayout& layout, void* data);
-
-		static UniformBufferNew CreateUniformBufferNew(const std::string& name, uint32_t reg,
-			const VertexLayout& layout);
+		static UniformBufferNew CreateUniformBufferNew(const std::string& name, uint32_t reg, const VertexLayout& layout);
 
 		//manually create a shader program (mostly used for testing new shaders)
 		//to properly add shaders add them to the CompileOnInit list in the cpp file and access them from the ShaderLibrary member
-		static std::shared_ptr<ShaderProgram> CreateShaderProgram(const std::string& vertPath, const std::string& fragPath);
 		static ShaderProgramNew CreateShaderProgramNew(const std::string& vertPath, const std::string& fragPath);
-		//this is used when you want to create shaders with source code and not from files
-		static std::shared_ptr<ShaderProgram> CreateShaderProgramRaw(const std::string& vertSrc, const std::string& fragSrc);
 
-		static std::shared_ptr<FrameBuffer> CreateFrameBuffer(const glm::vec2& size);
 		static FrameBufferNew CreateFrameBufferNew(const glm::vec2& size);
 
-		//static std::shared_ptr<Texture> CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
 		static TextureNew CreateTextureNew(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
-		//static std::shared_ptr<Texture> CreateTexture(Image& img);
 		static TextureNew CreateTextureNew(Image& img);
 
 		static void FlushQuadBatch();
@@ -167,6 +146,8 @@ namespace Ainan {
 
 		struct RendererData
 		{
+			RendererType API;
+
 			//sync objects
 			std::thread Thread;
 			bool DestroyThread = false;
@@ -190,9 +171,7 @@ namespace Ainan {
 			//scene data
 			RendererAPI* CurrentActiveAPI = nullptr;
 			SceneDescription CurrentSceneDescription = {};
-			std::unordered_map<std::string, std::shared_ptr<ShaderProgram>> ShaderLibrary;
 			std::unordered_map<std::string, ShaderProgramNew> ShaderLibraryNew;
-			std::shared_ptr<UniformBuffer> SceneUniformbuffer = nullptr;
 			UniformBufferNew SceneUniformbufferNew;
 			RenderingBlendMode m_CurrentBlendMode = RenderingBlendMode::Additive;
 			Rectangle CurrentViewport = { 0, 0, 0, 0 };
@@ -247,23 +226,9 @@ namespace Ainan {
 
 		static RendererData* Rdata;
 
-		static decltype(Rdata->ShaderLibrary)& ShaderLibrary() { return Rdata->ShaderLibrary; }
 		static decltype(Rdata->ShaderLibraryNew)& ShaderLibraryNew() { return Rdata->ShaderLibraryNew; }
 
 	private:
-		static std::shared_ptr<VertexBuffer> CreateVertexBufferUnsafe(void* data, uint32_t size,
-			const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram,
-			bool dynamic = false);
-
-		static std::shared_ptr<IndexBuffer> CreateIndexBufferUnsafe(uint32_t* data, uint32_t count);
-
-		static std::shared_ptr<UniformBuffer> CreateUniformBufferUnsafe(const std::string& name, uint32_t reg,
-			const VertexLayout& layout, void* data);
-
-		static std::shared_ptr<FrameBuffer> CreateFrameBufferUnsafe(const glm::vec2& size);
-
-		static std::shared_ptr<Texture> CreateTextureUnsafe(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
-
 		static void InternalInit(RendererType api);
 		static void RendererThreadLoop(RendererType api);
 		static void InternalTerminate();
