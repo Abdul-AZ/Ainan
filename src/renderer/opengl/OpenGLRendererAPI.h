@@ -91,6 +91,7 @@ namespace Ainan {
 			void UpdateVertexBufferNew(const RenderCommand& cmd);
 			void DrawIndexedWithCustomNumberOfVertices(const RenderCommand& cmd);
 			void BlitFrameBufferNew(const RenderCommand& cmd);
+			void ReadFrameBuffer(const RenderCommand& cmd);
 			void DestroyFrameBufferNew(const RenderCommand& cmd);
 			void CreateTexture(const RenderCommand& cmd);
 			void UpdateTextureNew(const RenderCommand& cmd);

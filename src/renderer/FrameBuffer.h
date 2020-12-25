@@ -56,7 +56,8 @@ namespace Ainan {
 		glm::vec2 GetSize() const;
 
 		//will read the entire framebuffer if no arguments are specified
-		Image ReadPixels(glm::vec2 bottomLeftPixel = { 0,0 }, glm::vec2 topRightPixel = { 0,0 });
+		//returns an image that should be freed with delete
+		Image* ReadPixels(glm::vec2 bottomLeftPixel = { 0,0 }, glm::vec2 topRightPixel = { 0,0 });
 
 		void Bind() const;
 

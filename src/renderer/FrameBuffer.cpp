@@ -44,6 +44,20 @@ namespace Ainan
         return Renderer::Rdata->FrameBuffers[Identifier].Size;
     }
 
+    Image* FrameBufferNew::ReadPixels(glm::vec2 bottomLeftPixel, glm::vec2 topRightPixel)
+    {
+        RenderCommand cmd;
+        cmd.Type = RenderCommandType::ReadFrameBuffer;
+        memcpy(&cmd.Misc1, &bottomLeftPixel, sizeof(glm::vec2));
+        memcpy(&cmd.Misc1, &topRightPixel, sizeof(glm::vec2));
+        cmd.FrameBuffer = &Renderer::Rdata->FrameBuffers[Identifier];
+        cmd.Output = new Image;
+
+        Renderer::PushCommand(cmd);
+        Renderer::WaitUntilRendererIdle();
+        return (Image*)cmd.Output;
+    }
+
     void FrameBufferNew::Bind() const
     {
         RenderCommand cmd;

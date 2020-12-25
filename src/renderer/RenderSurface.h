@@ -14,7 +14,6 @@ namespace Ainan {
 
 		void Render();
 		void Render(ShaderProgramNew shader);
-		void RenderToScreen(const Rectangle& viewport);
 
 		void SetSize(const glm::vec2& size);
 	public:

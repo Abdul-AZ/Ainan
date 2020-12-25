@@ -17,4 +17,9 @@ namespace Ainan
 
 		Renderer::PushCommand(cmd);
 	}
+
+	uint32_t VertexBufferNew::GetUsedMemory() const
+	{
+		return Renderer::Rdata->VertexBuffers[Identifier].Size;
+	}
 }

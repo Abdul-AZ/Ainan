@@ -115,7 +115,6 @@ namespace Ainan {
 		static void SetBlendMode(RenderingBlendMode blendMode);
 
 		static void SetViewport(const Rectangle& viewport);
-		static Rectangle GetCurrentViewport();
 
 		static void SetRenderTargetApplicationWindow();
 
@@ -165,7 +164,7 @@ namespace Ainan {
 			std::condition_variable WorkDoneCV;
 			std::mutex WorkDoneMutex;
 
-			//TEMPORARY, new interface data
+			//GPU objects
 			std::unordered_map<uint32_t, VertexBufferDataView> VertexBuffers;
 			std::unordered_map<uint32_t, IndexBufferDataView> IndexBuffers;
 			std::unordered_map<uint32_t, UniformBufferDataView> UniformBuffers;
@@ -185,7 +184,6 @@ namespace Ainan {
 			struct SceneUniformBuffer
 			{
 				glm::mat4 CurrentViewProjection = glm::mat4(1.0f);
-
 
 				//point lights
 				std::array<glm::vec2, c_MaxRadialLightCount> RadialLightPositions;
@@ -222,11 +220,6 @@ namespace Ainan {
 			//profiling data
 			uint32_t NumberOfDrawCallsLastScene = 0;
 			uint32_t CurrentNumberOfDrawCalls = 0;
-			//refrences to created objects
-			std::vector<std::weak_ptr<Texture>> ReservedTextures;
-			std::vector<std::weak_ptr<VertexBuffer>> ReservedVertexBuffers;
-			std::vector<std::weak_ptr<IndexBuffer>> ReservedIndexBuffers;
-			std::vector<std::weak_ptr<UniformBuffer>> ReservedUniformBuffers;
 			double Time = 0.0;
 		};
 

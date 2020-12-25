@@ -90,7 +90,7 @@ namespace Ainan {
 		for (glm::vec2& vertex : m_OutlineVertices)
 			vertex *= c_GlobalScaleFactor;
 
-		Camera.Update(0.0f, Renderer::GetCurrentViewport());
+		Camera.Update(0.0f, Renderer::Rdata->CurrentViewport);
 		glm::vec2 reversedPos = glm::vec2(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y);
 
 		Camera.SetPosition(reversedPos * c_GlobalScaleFactor);
@@ -133,8 +133,7 @@ namespace Ainan {
 	void Exporter::GetImageFromExportSurfaceToRAM()
 	{
 		delete m_ExportTargetImage;
-		//TODO
-		//m_ExportTargetImage = new Image(m_RenderSurface.SurfaceFrameBuffer.ReadPixels());
+		m_ExportTargetImage = m_RenderSurface.SurfaceFrameBuffer.ReadPixels();
 	}
 
 	void Exporter::DisplayGUI()
@@ -364,7 +363,7 @@ namespace Ainan {
 		DrawEnvToExportSurface(*editor.m_Env);
 		GetImageFromExportSurfaceToRAM();
 
-		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+		if (Renderer::Rdata->API == RendererType::OpenGL)
 			m_ExportTargetImage->FlipHorizontally();
 
 		m_ExportTargetTexture = Renderer::CreateTexture(*m_ExportTargetImage);
@@ -401,6 +400,8 @@ namespace Ainan {
 
 		DrawEnvToExportSurface(*editor.m_Env);
 		GetImageFromExportSurfaceToRAM();
+		if (Renderer::Rdata->API == RendererType::OpenGL)
+			m_ExportTargetImage->FlipHorizontally();
 		const AVPixelFormat fmt = AV_PIX_FMT_YUV420P;
 
 		AVFormatContext* fContext = nullptr;
@@ -473,6 +474,8 @@ namespace Ainan {
 			editor.Update();
 			DrawEnvToExportSurface(*editor.m_Env);
 			GetImageFromExportSurfaceToRAM();
+			if (Renderer::Rdata->API == RendererType::OpenGL)
+				m_ExportTargetImage->FlipHorizontally();
 			updateUI(2, 2, (float)i / totalFrameCount);
 		}
 		av_packet_unref(pkt);

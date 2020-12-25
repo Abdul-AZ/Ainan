@@ -60,6 +60,12 @@ namespace Ainan
 
 	void Editor::Update()
 	{
+		FrameCounter++;
+		if (FrameCounter > c_ApplicationFramerate)
+			FrameCounter = 0;
+		if ((FrameCounter % c_ApplicationFramerate) == 0)
+			m_GPUMemAllocated = Renderer::GetUsedGPUMemory();
+
 		if (m_ShouldDeleteEnv)
 		{
 			delete m_Env;
@@ -1500,29 +1506,36 @@ namespace Ainan
 
 			ImGui::Text("Textures: ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->ReservedTextures.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->Textures.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   VBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->ReservedVertexBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->VertexBuffers.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   EBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->ReservedIndexBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->IndexBuffers.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   UBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->ReservedUniformBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->UniformBuffers.size()).c_str());
 
+			bool displayTooltip = false;
 			ImGui::SameLine();
 			ImGui::Text("   Used GPU Memory: ");
+			displayTooltip |= ImGui::IsItemHovered();
 			ImGui::SameLine();
 			ImGui::Text(std::to_string(m_GPUMemAllocated / (1024 * 1024)).c_str());
+			displayTooltip |= ImGui::IsItemHovered();
 			ImGui::SameLine();
 			ImGui::Text("Mb");
+			displayTooltip |= ImGui::IsItemHovered();
+
+			if(displayTooltip)
+				ImGui::SetTooltip((std::to_string(m_GPUMemAllocated / (1024)) + " KB").c_str());
 		}
 		break;
 

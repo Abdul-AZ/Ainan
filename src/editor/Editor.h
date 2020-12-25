@@ -108,6 +108,7 @@ namespace Ainan {
 		int32_t m_AverageFPS = 0;
 		uint32_t m_GPUMemAllocated = 0;
 		int32_t m_DrawCalls = 0;
+		uint32_t FrameCounter = 0; //advances by 1 on every update iteration. when it reaches c_ApplicationFramerate, it goes back to 0.
 
 	private:
 		void WorkerThreadLoop();

@@ -247,6 +247,7 @@ namespace Ainan {
 		img->m_Data = new uint8_t[4];
 		memset(img->m_Data, (uint8_t)255, 4);
 		Rdata->QuadBatchTextures[0].SetImage(img);
+		Rdata->QuadBatchTextureSlotsUsed = 1;
 
 		//setup postprocessing
 		Rdata->BlurFrameBuffer = CreateFrameBuffer(Window::FramebufferSize);
@@ -329,16 +330,8 @@ namespace Ainan {
 			}
 		}
 
-		auto func = []()
-		{
-			std::lock_guard lock(Rdata->DataMutex);
-
-			Rdata->CurrentActiveAPI->SetBlendMode(Rdata->m_CurrentBlendMode);
-
-			InitImGuiRendering();
-		};
-
-		Renderer::PushCommand(func);
+		SetBlendMode(Rdata->m_CurrentBlendMode);
+		InitImGuiRendering();
 	}
 
 	void Renderer::RendererThreadLoop(RendererType api)
@@ -392,13 +385,8 @@ namespace Ainan {
 
 	void Renderer::InternalTerminate()
 	{
-		delete Rdata->CurrentActiveAPI;
-
-		//batch renderer data
-		//Rdata->QuadBatchVertexBuffer.reset();
-		//Rdata->QuadBatchIndexBuffer.reset();
 		delete[] Rdata->QuadBatchVertexBufferDataOrigin;
-		//Rdata->QuadBatchTextures[0].reset();
+		delete Rdata->CurrentActiveAPI;
 	}
 
 	void Renderer::PushCommand(RenderCommand cmd)
@@ -422,36 +410,6 @@ namespace Ainan {
 		Rdata->SceneUniformbufferNew.UpdateData(&Rdata->SceneBuffer, sizeof(RendererData::SceneUniformBuffer));
 
 		Rdata->CurrentSceneDescription.SceneDrawTarget.Bind();
-		auto func = [desc]()
-		{
-			//update diagnostics stuff
-			for (size_t i = 0; i < Rdata->ReservedTextures.size(); i++)
-				if (Rdata->ReservedTextures[i].expired())
-				{
-					Rdata->ReservedTextures.erase(Rdata->ReservedTextures.begin() + i);
-					i = 0;
-				}
-			for (size_t i = 0; i < Rdata->ReservedVertexBuffers.size(); i++)
-				if (Rdata->ReservedVertexBuffers[i].expired())
-				{
-					Rdata->ReservedVertexBuffers.erase(Rdata->ReservedVertexBuffers.begin() + i);
-					i = 0;
-				}
-			for (size_t i = 0; i < Rdata->ReservedIndexBuffers.size(); i++)
-				if (Rdata->ReservedIndexBuffers[i].expired())
-				{
-					Rdata->ReservedIndexBuffers.erase(Rdata->ReservedIndexBuffers.begin() + i);
-					i = 0;
-				}
-			for (size_t i = 0; i < Rdata->ReservedUniformBuffers.size(); i++)
-				if (Rdata->ReservedUniformBuffers[i].expired())
-				{
-					Rdata->ReservedUniformBuffers.erase(Rdata->ReservedUniformBuffers.begin() + i);
-					i = 0;
-				}
-		};
-
-		PushCommand(func);
 	}
 
 	void Renderer::AddRadialLight(const glm::vec2& pos, const glm::vec4& color, float intensity)
@@ -496,18 +454,13 @@ namespace Ainan {
 		if (Rdata->QuadBatchVertexBufferDataPtr != Rdata->QuadBatchVertexBufferDataOrigin)
 			FlushQuadBatch();
 		
-		auto func = []()
+		if (Rdata->CurrentSceneDescription.Blur && Rdata->m_CurrentBlendMode != RenderingBlendMode::Screen)
 		{
-			if (Rdata->CurrentSceneDescription.Blur && Rdata->m_CurrentBlendMode != RenderingBlendMode::Screen)
-			{
-				Blur(Rdata->CurrentSceneDescription.SceneDrawTarget, Rdata->CurrentSceneDescription.BlurRadius);
-			}
+			Blur(Rdata->CurrentSceneDescription.SceneDrawTarget, Rdata->CurrentSceneDescription.BlurRadius);
+		}
 
-			memset(&Rdata->CurrentSceneDescription, 0, sizeof(SceneDescription));
-			Rdata->NumberOfDrawCallsLastScene = Rdata->CurrentNumberOfDrawCalls;
-		};
-
-		PushCommand(func);
+		memset(&Rdata->CurrentSceneDescription, 0, sizeof(SceneDescription));
+		Rdata->NumberOfDrawCallsLastScene = Rdata->CurrentNumberOfDrawCalls;
 	}
 
 	void Renderer::WaitUntilRendererIdle()
@@ -530,7 +483,7 @@ namespace Ainan {
 		{
 			bool foundTexture = false;
 			//check if texture is already used
-			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
+			for (size_t i = 1; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
 				if (Rdata->QuadBatchTextures[i].GetTextureID() == texture.GetTextureID())
 				{
@@ -586,7 +539,7 @@ namespace Ainan {
 		{
 			bool foundTexture = false;
 			//check if texture is already used
-			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
+			for (size_t i = 1; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
 				if (Rdata->QuadBatchTextures[i].GetTextureID() == texture.GetTextureID())
 				{
@@ -653,7 +606,7 @@ namespace Ainan {
 		{
 			bool foundTexture = false;
 			//check if texture is already used
-			for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
+			for (size_t i = 1; i < Rdata->QuadBatchTextureSlotsUsed; i++)
 			{
 				if (Rdata->QuadBatchTextures[i].GetTextureID() == texture.GetTextureID())
 				{
@@ -763,28 +716,28 @@ namespace Ainan {
 	{
 		uint32_t memory = 0;
 
-		memory += std::accumulate(Rdata->ReservedVertexBuffers.begin(), Rdata->ReservedVertexBuffers.end(), 0,
-			[](uint32_t a, const std::weak_ptr<VertexBuffer>& b) -> uint32_t
+		memory += std::accumulate(Rdata->VertexBuffers.begin(), Rdata->VertexBuffers.end(), 0,
+			[](uint32_t a, const std::pair<uint32_t, VertexBufferDataView>& buffer) -> uint32_t
 			{
-				return a + b.lock()->GetUsedMemory();
+				return a + buffer.second.Size;
 			});
-
-		memory += std::accumulate(Rdata->ReservedIndexBuffers.begin(), Rdata->ReservedIndexBuffers.end(), 0,
-			[](uint32_t a, const std::weak_ptr<IndexBuffer>& b) -> uint32_t
+		
+		memory += std::accumulate(Rdata->IndexBuffers.begin(), Rdata->IndexBuffers.end(), 0,
+			[](uint32_t a, const std::pair<uint32_t, IndexBufferDataView>& buffer) -> uint32_t
 			{
-				return a + b.lock()->GetUsedMemory();
+				return a + buffer.second.Size;
 			});
-
-		memory += std::accumulate(Rdata->ReservedUniformBuffers.begin(), Rdata->ReservedUniformBuffers.end(), 0,
-			[](uint32_t a, const std::weak_ptr<UniformBuffer>& b) -> uint32_t
+		
+		memory += std::accumulate(Rdata->UniformBuffers.begin(), Rdata->UniformBuffers.end(), 0,
+			[](uint32_t a, const std::pair<uint32_t, UniformBufferDataView>& buffer) -> uint32_t
 			{
-				return a + b.lock()->GetAlignedSize();
+				return a + buffer.second.AlignedSize;
 			});
-
-		memory += std::accumulate(Rdata->ReservedTextures.begin(), Rdata->ReservedTextures.end(), 0,
-			[](uint32_t a, const std::weak_ptr<Texture>& b) -> uint32_t
+		
+		memory += std::accumulate(Rdata->Textures.begin(), Rdata->Textures.end(), 0,
+			[](uint32_t a, const std::pair<uint32_t, TextureDataView>& tex) -> uint32_t
 			{
-				return a + b.lock()->GetMemorySize();
+				return a + tex.second.Size.x * tex.second.Size.y * GetBytesPerPixel(tex.second.Format);
 			});
 		 
 		return memory;
@@ -797,7 +750,6 @@ namespace Ainan {
 			Rdata->CurrentActiveAPI->DrawImGui(drawData);
 		};
 		PushCommand(func);
-		WaitUntilRendererIdle();
 	}
 
 	void Renderer::ClearScreen()
@@ -814,8 +766,6 @@ namespace Ainan {
 
 	void Renderer::Present()
 	{
-		std::chrono::high_resolution_clock::now();
-		 
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::Present;
 		PushCommand(cmd);
@@ -833,16 +783,19 @@ namespace Ainan {
 				LastFrameFinishTime = time;
 				break;
 			}
+			else
+			{
+				int32_t sleepTime = (c_ApplicationMaxFramePeriod - LastFrameDeltaTime) * 1000000 - 750;
+				std::this_thread::sleep_for(std::chrono::microseconds(sleepTime));
+			}
 		}
 	}
 
 	void Renderer::RecreateSwapchain(const glm::vec2& newSwapchainSize)
 	{
-		auto func = [newSwapchainSize]()
-		{
-			Rdata->CurrentActiveAPI->RecreateSwapchain(newSwapchainSize);
-		};
-		PushCommand(func);
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::RecreateSweapchain;
+		PushCommand(cmd);
 	}
 
 	void Renderer::Draw(ShaderProgramNew shader, VertexBufferNew vertexBuffer, Primitive primitive, uint32_t vertexCount)
@@ -857,16 +810,12 @@ namespace Ainan {
 		Renderer::PushCommand(cmd);
 	} 
 
-	//Only called internally by the Renderer, and used only by the Renderer thread
 	void Renderer::Blur(FrameBufferNew target, float radius)
 	{
-		Rectangle lastViewport = Renderer::GetCurrentViewport();
+		Rectangle lastViewport = Rdata->CurrentViewport;
 		RenderingBlendMode lastBlendMode = Rdata->m_CurrentBlendMode;
-		auto func = []()
-		{
-			Rdata->CurrentActiveAPI->SetBlendMode(RenderingBlendMode::Screen);
-		};
-		PushCommand(func);
+
+		SetBlendMode(RenderingBlendMode::Screen);
 		
 		Rectangle viewport;
 		viewport.X = 0;
@@ -874,11 +823,7 @@ namespace Ainan {
 		viewport.Width = (int)Renderer::Rdata->FrameBuffers[target.Identifier].Size.x;
 		viewport.Height = (int)Renderer::Rdata->FrameBuffers[target.Identifier].Size.y;
 		
-		auto func2 = [viewport]() 
-		{
-			Rdata->CurrentActiveAPI->SetViewport(viewport);
-		};
-		PushCommand(func2);
+		SetViewport(viewport);
 		auto& shader = Rdata->ShaderLibraryNew["BlurShader"];
 		shader.BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 		
@@ -916,14 +861,9 @@ namespace Ainan {
 		shader.BindTexture(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
 		Draw(shader, Rdata->BlurVertexBuffer, Primitive::Triangles, 6);
 		
-		auto func3 = [lastViewport, lastBlendMode]()
-		{
-			Rdata->CurrentActiveAPI->SetViewport(lastViewport);
-			Rdata->CurrentActiveAPI->SetBlendMode(lastBlendMode);
-		};
-		PushCommand(func3);
-		
-		std::lock_guard lock(Rdata->DataMutex);
+		SetViewport(lastViewport);
+		SetBlendMode(lastBlendMode);
+
 		Rdata->CurrentNumberOfDrawCalls += 2;
 	}
 
@@ -1101,44 +1041,35 @@ namespace Ainan {
 		main_viewport->PlatformHandle = (void*)Window::Ptr;
 
 		io.Fonts->AddFontFromFileTTF("res/Roboto-Medium.ttf", 15);
-		Rdata->CurrentActiveAPI->InitImGui();
+		PushCommand([]() 
+			{
+			Rdata->CurrentActiveAPI->InitImGui();
+			});
 	}
 
 	void Renderer::SetBlendMode(RenderingBlendMode blendMode)
 	{
-		auto func = [blendMode]()
-		{
-			Rdata->CurrentActiveAPI->SetBlendMode(blendMode);
-		};
-		PushCommand(func);
-
-		std::lock_guard lock(Rdata->DataMutex);
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::SetBlendMode;
+		cmd.Misc1 = (uint64_t)blendMode;
+		PushCommand(cmd);
 		Rdata->m_CurrentBlendMode = blendMode;
 	}
 
 	void Renderer::SetViewport(const Rectangle& viewport)
 	{
-		auto func = [viewport]()
-		{
-			Rdata->CurrentActiveAPI->SetViewport(viewport);
-		};
-		PushCommand(func);
-		std::lock_guard lock(Rdata->DataMutex);
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::SetViewport;
+		memcpy(&cmd.Misc1, &viewport, sizeof(Rectangle)); //Misc1 will hold x and y. Misc2 will gold width and height
+		PushCommand(cmd);
 		Rdata->CurrentViewport = viewport;
-	}
-
-	Rectangle Renderer::GetCurrentViewport()
-	{
-		return Rdata->CurrentViewport;
 	}
 
 	void Renderer::SetRenderTargetApplicationWindow()
 	{
-		auto func = []()
-		{
-			Rdata->CurrentActiveAPI->SetRenderTargetApplicationWindow();
-		};
-		PushCommand(func);
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::BindWindowFrameBufferAsRenderTarget;
+		PushCommand(cmd);
 	}
 
 	void Renderer::DestroyVertexBuffer(VertexBufferNew vb)
@@ -1289,6 +1220,8 @@ namespace Ainan {
 		TextureNew textureHandle;
 		textureHandle.Identifier = s_IdentifierCounter;
 		TextureDataView view;
+		view.Format = img.Format;
+		view.Size = { img.m_Width, img.m_Height };
 		Rdata->Textures[s_IdentifierCounter] = view;
 
 		RenderCommand cmd;
@@ -1480,8 +1413,8 @@ namespace Ainan {
 		Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
 		Rdata->QuadBatchTextureSlotsUsed = 1;
 
-		//TODO remove this safely
-		WaitUntilRendererIdle();
+		for (size_t i = 1; i < c_MaxQuadTexturesPerBatch; i++)
+			Rdata->QuadBatchTextures[i].Identifier = std::numeric_limits<uint32_t>::max();
 	}
 
 	std::string RendererTypeStr(RendererType type)

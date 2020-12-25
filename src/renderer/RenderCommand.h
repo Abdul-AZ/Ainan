@@ -14,6 +14,9 @@ namespace Ainan {
 	{
 		ClearScreen,
 		Present,
+		RecreateSweapchain,
+		SetViewport, //Misc1 holds X and Y. Misc2 hold width and height all as uint32_t
+		SetBlendMode, //Misc1 is RenderingBlendMode enum cast as uint64_t
 
 		CreateShaderProgram,  //requires heap allocated ShaderProgramCreationInfo passed in ExtraData
 		DestroyShaderProgram,
@@ -33,8 +36,10 @@ namespace Ainan {
 		CreateFrameBuffer,  //requires heap allocated FrameBufferCreationInfo passed in ExtraData
 		BindFrameBufferAsTexture, //
 		BindFrameBufferAsRenderTarget,
+		BindWindowFrameBufferAsRenderTarget,
 		ResizeFrameBuffer, //Misc1 is width, Misc2 is Height
 		BlitFrameBuffer, //Misc1 source size and misc 2 is target size, to be interpreted as glm::vec2 each -ExtraData must contain a heap allocated FrameBufferDataView
+		ReadFrameBuffer,
 		DestroyFrameBuffer, 
 
 		CreateTexture,  //requires heap allocated TextureCreationInfo passed in ExtraData

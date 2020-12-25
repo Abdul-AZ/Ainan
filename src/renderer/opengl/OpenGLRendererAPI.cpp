@@ -209,6 +209,14 @@ namespace Ainan {
 				Present();
 				break;
 
+			case RenderCommandType::SetViewport:
+				SetViewport(*reinterpret_cast<Rectangle*>(&cmd.Misc1));
+				break;
+
+			case RenderCommandType::SetBlendMode:
+				SetBlendMode((RenderingBlendMode)cmd.Misc1);
+				break;
+
 			case RenderCommandType::CreateUniformBuffer:
 				CreateUniformBuffer(cmd);
 				break;
@@ -252,6 +260,10 @@ namespace Ainan {
 
 			case RenderCommandType::CreateFrameBuffer:
 				CreateFrameBuffer(cmd);
+				break;
+
+			case RenderCommandType::ReadFrameBuffer:
+				ReadFrameBuffer(cmd);
 				break;
 
 			case RenderCommandType::DestroyFrameBuffer:
@@ -308,6 +320,10 @@ namespace Ainan {
 
 			case RenderCommandType::BindFrameBufferAsRenderTarget:
 				glBindFramebuffer(GL_FRAMEBUFFER, cmd.FrameBuffer->Identifier);
+				break;
+
+			case RenderCommandType::BindWindowFrameBufferAsRenderTarget:
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				break;
 
 			case RenderCommandType::BlitFrameBuffer:
@@ -611,6 +627,31 @@ namespace Ainan {
 			delete cmd.ExtraData;
 		}
 
+		void OpenGLRendererAPI::ReadFrameBuffer(const RenderCommand& cmd)
+		{
+			Image* img = (Image*)cmd.Output;
+			glm::vec2 bottomLeftPixel;
+			glm::vec2 topRightPixel;
+			memcpy(&bottomLeftPixel, &cmd.Misc1, sizeof(glm::vec2));
+			memcpy(&topRightPixel, &cmd.Misc2, sizeof(glm::vec2));
+
+			img->m_Width = (uint32_t)cmd.FrameBuffer->Size.x;
+			img->m_Height = (uint32_t)cmd.FrameBuffer->Size.y;
+			img->m_Data = new uint8_t[cmd.FrameBuffer->Size.x * cmd.FrameBuffer->Size.y * 4];
+			img->Format = TextureFormat::RGBA;
+
+			glBindFramebuffer(GL_FRAMEBUFFER, cmd.FrameBuffer->Identifier);
+			glReadPixels(
+				bottomLeftPixel.x,
+				bottomLeftPixel.y,
+				topRightPixel.x == 0 ? cmd.FrameBuffer->Size.x : topRightPixel.x,
+				topRightPixel.y == 0 ? cmd.FrameBuffer->Size.y : topRightPixel.y,
+				GL_RGBA,
+				GL_UNSIGNED_BYTE,
+				img->m_Data);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		}
+
 		void OpenGLRendererAPI::DestroyFrameBufferNew(const RenderCommand& cmd)
 		{
 			uint32_t buffer = cmd.FrameBuffer->Identifier;
@@ -907,11 +948,26 @@ namespace Ainan {
 
 		void OpenGLRendererAPI::TerminateImGui()
 		{
-			RenderCommand cmd;
-			cmd.Type = RenderCommandType::DestroyShaderProgram;
-			cmd.Shader = &ImGuiShader;
+			{
+				RenderCommand cmd;
+				cmd.Type = RenderCommandType::DestroyShaderProgram;
+				cmd.Shader = &ImGuiShader;
+				Renderer::PushCommand(cmd);
+			}
 
-			Renderer::PushCommand(cmd);
+			{
+				RenderCommand cmd;
+				cmd.Type = RenderCommandType::DestroyVertexBuffer;
+				cmd.VertexBuffer = &ImGuiVertexBuffer;
+				Renderer::PushCommand(cmd);
+			}
+
+			{
+				RenderCommand cmd;
+				cmd.Type = RenderCommandType::DestroyIndexBuffer;
+				cmd.IndexBuffer = &ImGuiIndexBuffer;
+				Renderer::PushCommand(cmd);
+			}
 		}
 
 		void OpenGLRendererAPI::DrawImGui(ImDrawData* drawData)
