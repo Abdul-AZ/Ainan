@@ -9,7 +9,7 @@ namespace Ainan
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::UpdateUniformBuffer;
-		cmd.Output = &Renderer::Rdata->UniformBuffers[Identifier];
+		cmd.UniformBuffer = &Renderer::Rdata->UniformBuffers[Identifier];
 		void* dataCpy = new uint8_t[packedDataSizeofBuffer];
 		memcpy(dataCpy, data, packedDataSizeofBuffer);
 		cmd.ExtraData = dataCpy;

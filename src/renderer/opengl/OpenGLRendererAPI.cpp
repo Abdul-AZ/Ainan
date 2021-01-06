@@ -411,6 +411,8 @@ namespace Ainan {
 			glDeleteShader(fragment);
 
 			output->Identifier = program;
+
+			delete info;
 		}
 
 		void OpenGLRendererAPI::CreateUniformBuffer(const RenderCommand& cmd)
@@ -468,7 +470,6 @@ namespace Ainan {
 
 		void OpenGLRendererAPI::CreateIndexBuffer(const RenderCommand& cmd)
 		{
-
 			IndexBufferCreationInfo* info = (IndexBufferCreationInfo*)cmd.ExtraData;
 			IndexBufferDataView* output = (IndexBufferDataView*)cmd.Output;
 
@@ -485,7 +486,7 @@ namespace Ainan {
 
 		void OpenGLRendererAPI::UpdateUniformBufferNew(const RenderCommand& cmd)
 		{
-			UniformBufferDataView* buffer = (UniformBufferDataView*)cmd.Output;
+			UniformBufferDataView* buffer = (UniformBufferDataView*)cmd.UniformBuffer;
 
 			//align data with std140 uniform layouts and put the result in m_BufferMemory
 			uint32_t unalignedDataIndex = 0;
@@ -524,8 +525,7 @@ namespace Ainan {
 
 		void OpenGLRendererAPI::BindUniformBufferNew(const RenderCommand& cmd)
 		{
-			UniformBufferDataView* ubuffer = (UniformBufferDataView *)cmd.ExtraData;
-			glBindBufferRange(GL_UNIFORM_BUFFER, cmd.Misc1, ubuffer->Identifier, 0, ubuffer->AlignedSize);
+			glBindBufferRange(GL_UNIFORM_BUFFER, cmd.Misc1, cmd.UniformBuffer->Identifier, 0, cmd.UniformBuffer->AlignedSize);
 		}
 
 		void OpenGLRendererAPI::CreateVertexBuffer(const RenderCommand& cmd)
@@ -845,7 +845,7 @@ namespace Ainan {
 						vBufferInfo->InitialData = nullptr;
 						vBufferInfo->Size = 0;
 						vBufferInfo->Layout = layout;
-						vBufferInfo->Shader = ImGuiShader.Identifier;
+						vBufferInfo->Shader = &ImGuiShader;
 						vBufferInfo->Dynamic = false;
 						cmd.ExtraData = vBufferInfo;
 						cmd.Output = &ImGuiVertexBuffer;

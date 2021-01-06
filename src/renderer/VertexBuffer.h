@@ -125,7 +125,9 @@ namespace Ainan {
 	{
 		uint64_t Identifier;
 		uint32_t Size;
+		uint64_t Layout;
 		uint32_t Array; //Used only in OpenGL
+		uint32_t Stride;
 		bool Deleted = false;
 	};
 

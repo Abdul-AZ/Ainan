@@ -10,9 +10,9 @@ namespace Ainan
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::BindUniformBuffer;
-		cmd.ExtraData = &Renderer::Rdata->UniformBuffers[buffer.Identifier];
+		cmd.UniformBuffer = &Renderer::Rdata->UniformBuffers[buffer.Identifier];
+		cmd.Stage = stage;
 		cmd.Misc1 = slot;
-		cmd.Misc2 = (uint32_t)stage;
 
 		Renderer::PushCommand(cmd);
 	}

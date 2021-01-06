@@ -34,16 +34,16 @@ namespace Ainan {
 		DestroyUniformBuffer,
 
 		CreateFrameBuffer,  //requires heap allocated FrameBufferCreationInfo passed in ExtraData
-		BindFrameBufferAsTexture, //
+		BindFrameBufferAsTexture, //Misc 1 is slot
 		BindFrameBufferAsRenderTarget,
 		BindWindowFrameBufferAsRenderTarget,
 		ResizeFrameBuffer, //Misc1 is width, Misc2 is Height
 		BlitFrameBuffer, //Misc1 source size and misc 2 is target size, to be interpreted as glm::vec2 each -ExtraData must contain a heap allocated FrameBufferDataView
-		ReadFrameBuffer,
+		ReadFrameBuffer, //Output is an Image*
 		DestroyFrameBuffer, 
 
 		CreateTexture,  //requires heap allocated TextureCreationInfo passed in ExtraData
-		BindTexture, 
+		BindTexture,  //Misc1 is slot
 		UpdateTexture,  //Misc1 size to be interpreted as glm::vec2, Misc2 is Format and Extradata is a heap allocated array that will be freed by delete[]
 		DestroyTexture,
 
@@ -81,7 +81,7 @@ namespace Ainan {
 		void* InitialData;
 		uint32_t Size;
 		VertexLayout Layout;
-		uint64_t Shader;
+		ShaderProgramDataView* Shader;
 		bool Dynamic;
 	};
 

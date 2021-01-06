@@ -42,6 +42,10 @@ namespace Ainan
 
 	uint64_t TextureNew::GetTextureID()
 	{
-		return Renderer::Rdata->Textures[Identifier].Identifier;
+		auto& data = Renderer::Rdata->Textures[Identifier];
+		if (data.Sampler == std::numeric_limits<uint64_t>::max())
+			return Renderer::Rdata->Textures[Identifier].Identifier;
+		else
+			return data.View;
 	}
 }

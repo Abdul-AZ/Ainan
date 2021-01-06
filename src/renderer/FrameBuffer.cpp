@@ -36,6 +36,10 @@ namespace Ainan
 
     void* FrameBufferNew::GetTextureID()
     {
+        //TODO clean this
+        if(Renderer::Rdata->API == RendererType::D3D11)
+            return (void*)Renderer::Rdata->FrameBuffers[Identifier].ResourceIdentifier;
+
         return (void*)Renderer::Rdata->FrameBuffers[Identifier].TextureIdentifier;
     }
 

@@ -795,6 +795,7 @@ namespace Ainan {
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::RecreateSweapchain;
+		memcpy(&cmd.Misc1, &newSwapchainSize, sizeof(glm::vec2));
 		PushCommand(cmd);
 	}
 
@@ -1131,7 +1132,7 @@ namespace Ainan {
 		}
 		else
 			info->InitialData = nullptr;
-		info->Shader = Rdata->ShaderPrograms[shaderProgram.Identifier].Identifier;
+		info->Shader = &Rdata->ShaderPrograms[shaderProgram.Identifier];
 		info->Layout = layout;
 		info->Size = size;
 		info->Dynamic = dynamic;
