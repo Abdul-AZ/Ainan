@@ -10,8 +10,6 @@
 #include <GLFW/glfw3native.h>
 #include <d3dcompiler.h>
 
-#include "D3D11ShaderProgram.h"
-
 #include "renderer/d3d11/D3D11RendererAPI.h"
 #include "renderer/Renderer.h"
 
@@ -293,42 +291,6 @@ namespace Ainan {
 			Context.Swapchain->Release();
 			Context.DeviceContext->Release();
 			Context.Device->Release();
-		}
-
-		void D3D11RendererAPI::Draw(ShaderProgram& shader, Primitive mode, uint32_t vertexCount)
-		{
-			Context.DeviceContext->IASetPrimitiveTopology(GetD3DPrimitive(mode));
-
-			D3D11ShaderProgram* d3dShader = (D3D11ShaderProgram*)&shader;;
-
-			Context.DeviceContext->VSSetShader(d3dShader->VertexShader, 0, 0);
-			Context.DeviceContext->PSSetShader(d3dShader->FragmentShader, 0, 0);
-
-			Context.DeviceContext->Draw(vertexCount, 0);
-		}
-
-		void D3D11RendererAPI::Draw(ShaderProgram& shader, Primitive mode, const IndexBuffer& indexBuffer)
-		{
-			Context.DeviceContext->IASetPrimitiveTopology(GetD3DPrimitive(mode));
-
-			D3D11ShaderProgram* d3dShader = (D3D11ShaderProgram*)&shader;;
-
-			Context.DeviceContext->VSSetShader(d3dShader->VertexShader, 0, 0);
-			Context.DeviceContext->PSSetShader(d3dShader->FragmentShader, 0, 0);
-
-			Context.DeviceContext->DrawIndexed(indexBuffer.GetCount(), 0, 0);
-		}
-
-		void D3D11RendererAPI::Draw(ShaderProgram& shader, Primitive mode, const IndexBuffer& indexBuffer, uint32_t vertexCount)
-		{
-			Context.DeviceContext->IASetPrimitiveTopology(GetD3DPrimitive(mode));
-
-			D3D11ShaderProgram* d3dShader = (D3D11ShaderProgram*)&shader;;
-
-			Context.DeviceContext->VSSetShader(d3dShader->VertexShader, 0, 0);
-			Context.DeviceContext->PSSetShader(d3dShader->FragmentShader, 0, 0);
-			
-			Context.DeviceContext->DrawIndexed(vertexCount, 0, 0);
 		}
 
 		void D3D11RendererAPI::ClearScreen()

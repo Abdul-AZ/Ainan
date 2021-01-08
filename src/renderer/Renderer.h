@@ -103,7 +103,6 @@ namespace Ainan {
 		static uint32_t GetUsedGPUMemory();
 
 		static void ClearScreen();
-		static void ClearScreenUnsafe();
 
 		static void Present();
 

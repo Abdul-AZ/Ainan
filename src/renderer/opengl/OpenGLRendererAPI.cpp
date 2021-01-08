@@ -1,11 +1,9 @@
 #include <glad/glad.h>
 
+#include "renderer/Renderer.h"
 #include "OpenGLRendererAPI.h"
 #include "editor/Window.h"
 #include <GLFW/glfw3.h>
-#include "OpenGLShaderProgram.h"
-#include "OpenGLVertexBuffer.h"
-#include "OpenGLIndexBuffer.h"
 #include "file/AssetManager.h" //for reading shader files
 
 namespace Ainan {
@@ -151,29 +149,6 @@ namespace Ainan {
 			ImGui::DestroyContext();
 		}
 
-		void OpenGLRendererAPI::Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer)
-		{
-			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
-
-			glUseProgram(openglShader->m_RendererID);
-			glDrawElements(GetOpenGLPrimitive(primitive), indexBuffer.GetCount(), GL_UNSIGNED_INT, nullptr);
-			glUseProgram(0);
-		}
-
-		void OpenGLRendererAPI::Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer, uint32_t vertexCount)
-		{
-			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
-
-			glUseProgram(openglShader->m_RendererID);
-			glDrawElements(GetOpenGLPrimitive(primitive), vertexCount, GL_UNSIGNED_INT, nullptr);
-			glUseProgram(0);
-		}
-
-		void OpenGLRendererAPI::ClearScreen()
-		{
-			glClear(GL_COLOR_BUFFER_BIT);
-		}
-
 		void OpenGLRendererAPI::SetViewport(const Rectangle& viewport)
 		{
 			glViewport(viewport.X, viewport.Y, viewport.Width, viewport.Height);
@@ -202,7 +177,7 @@ namespace Ainan {
 			switch (cmd.Type)
 			{
 			case RenderCommandType::ClearScreen:
-				ClearScreen();
+				glClear(GL_COLOR_BUFFER_BIT);
 				break;
 
 			case RenderCommandType::Present:
@@ -1114,28 +1089,10 @@ namespace Ainan {
 			glDeleteVertexArrays(1, &tempVA);
 		}
 
-		void OpenGLRendererAPI::SetRenderTargetApplicationWindow()
-		{
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		}
-
-		//we don't do anything because this is handled by OpenGL, it's different for other API's
-		void OpenGLRendererAPI::RecreateSwapchain(const glm::vec2& newSwapchainSize)
-		{}
-
 		void OpenGLRendererAPI::Present()
 		{
 			glfwSwapBuffers(Window::Ptr);
 			Window::WindowSizeChangedSinceLastFrame = false;
-		}
-
-		void OpenGLRendererAPI::Draw(ShaderProgram& shader, Primitive primitive, uint32_t vertexCount)
-		{
-			OpenGLShaderProgram* openglShader = reinterpret_cast<OpenGLShaderProgram*>(&shader);
-
-			glUseProgram(openglShader->m_RendererID);
-			glDrawArrays(GetOpenGLPrimitive(primitive), 0, vertexCount);
-			glUseProgram(0);
 		}
 	}
 }

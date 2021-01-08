@@ -57,14 +57,8 @@ set(SOURCES_LIST
     "renderer/Image.h"            "renderer/Image.cpp"
     "renderer/RenderSurface.h"    "renderer/RenderSurface.cpp"
 
-    "renderer/opengl/OpenGLFrameBuffer.h"      "renderer/opengl/OpenGLFrameBuffer.cpp"
-    "renderer/opengl/OpenGLIndexBuffer.h"      "renderer/opengl/OpenGLIndexBuffer.cpp"
     "renderer/opengl/OpenGLRendererAPI.h"      "renderer/opengl/OpenGLRendererAPI.cpp"
     "renderer/opengl/OpenGLRendererContext.h"  "renderer/opengl/OpenGLRendererContext.cpp"
-    "renderer/opengl/OpenGLShaderProgram.h"    "renderer/opengl/OpenGLShaderProgram.cpp"
-    "renderer/opengl/OpenGLTexture.h"          "renderer/opengl/OpenGLTexture.cpp"
-    "renderer/opengl/OpenGLUniformBuffer.h"    "renderer/opengl/OpenGLUniformBuffer.cpp"
-    "renderer/opengl/OpenGLVertexBuffer.h"     "renderer/opengl/OpenGLVertexBuffer.cpp"
 
     "vendor/glad/glad.h"            "vendor/glad/glad.cpp"
     "vendor/stb/stb_image.h"        "vendor/stb/stb_image.cpp"
@@ -95,14 +89,8 @@ if(WIN32)
 
     list(APPEND SOURCES_LIST
         "windows/WinMain.cpp"
-        "renderer/d3d11/D3D11FrameBuffer.h"      "renderer/d3d11/D3D11FrameBuffer.cpp"
-        "renderer/d3d11/D3D11IndexBuffer.h"      "renderer/d3d11/D3D11IndexBuffer.cpp"
         "renderer/d3d11/D3D11RendererAPI.h"      "renderer/d3d11/D3D11RendererAPI.cpp"
         "renderer/d3d11/D3D11RendererContext.h"  "renderer/d3d11/D3D11RendererContext.cpp"
-        "renderer/d3d11/D3D11ShaderProgram.h"    "renderer/d3d11/D3D11ShaderProgram.cpp"
-        "renderer/d3d11/D3D11Texture.h"          "renderer/d3d11/D3D11Texture.cpp"
-        "renderer/d3d11/D3D11UniformBuffer.h"    "renderer/d3d11/D3D11UniformBuffer.cpp"
-        "renderer/d3d11/D3D11VertexBuffer.h"     "renderer/d3d11/D3D11VertexBuffer.cpp"
         )
 
     

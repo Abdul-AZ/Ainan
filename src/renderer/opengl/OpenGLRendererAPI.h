@@ -7,7 +7,6 @@
 #include "renderer/Rectangle.h"
 
 #include "OpenGLRendererContext.h"
-#include "OpenGLShaderProgram.h"
 
 #include <glad/glad.h>
 
@@ -40,17 +39,11 @@ namespace Ainan {
 			virtual ~OpenGLRendererAPI();
 
 			// Inherited via RendererAPI
-			virtual void Draw(ShaderProgram& shader, Primitive primitive, uint32_t vertexCount) override;
-			virtual void Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer) override;
-			virtual void Draw(ShaderProgram& shader, Primitive primitive, const IndexBuffer& indexBuffer, uint32_t vertexCount) override;
 			virtual void InitImGui() override;
 			virtual void TerminateImGui() override;
 			virtual void ImGuiNewFrame() override;
 			virtual void ImGuiEndFrame() override;
 			virtual void DrawImGui(ImDrawData* drawData) override;
-			virtual void ClearScreen() override;
-			virtual void RecreateSwapchain(const glm::vec2& newSwapchainSize) override;
-			virtual void SetRenderTargetApplicationWindow() override;
 
 			virtual void SetViewport(const Rectangle& viewport) override;
 

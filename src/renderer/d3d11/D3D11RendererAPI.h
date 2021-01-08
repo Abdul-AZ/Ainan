@@ -19,21 +19,19 @@ namespace Ainan {
 
 			virtual void ExecuteCommand(RenderCommand cmd) override;
 
-			virtual void Draw(ShaderProgram& shader, Primitive mode, uint32_t vertexCount) override;
-			virtual void Draw(ShaderProgram& shader, Primitive mode, const IndexBuffer& indexBuffer) override;
-			virtual void Draw(ShaderProgram& shader, Primitive mode, const IndexBuffer& indexBuffer, uint32_t vertexCount) override;
 			virtual void InitImGui() override;
 			virtual void TerminateImGui() override;
 			virtual void DrawImGui(ImDrawData* drawData) override;
-			virtual void ClearScreen() override;
-			virtual void RecreateSwapchain(const glm::vec2& newSwapchainSize) override;
 			virtual void SetViewport(const Rectangle& viewport) override;
 			virtual RendererContext* GetContext() override { return &Context; };
 			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
-			virtual void SetRenderTargetApplicationWindow() override;
 			virtual void ImGuiNewFrame() override;
 			virtual void ImGuiEndFrame() override;
 
+		private:
+			void ClearScreen();
+			void RecreateSwapchain(const glm::vec2& newSwapchainSize);
+			void SetRenderTargetApplicationWindow();
 			void CreateShaderProgramNew(const RenderCommand& cmd);
 			void DestroyShaderProgramNew(const RenderCommand& cmd);
 			void CreateVertexBufferNew(const RenderCommand& cmd);

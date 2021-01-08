@@ -1,24 +1,12 @@
 #include "Renderer.h"
 
 #include "opengl/OpenGLRendererAPI.h"
-#include "opengl/OpenGLShaderProgram.h"
-#include "opengl/OpenGLVertexBuffer.h"
-#include "opengl/OpenGLIndexBuffer.h"
-#include "opengl/OpenGLTexture.h"
-#include "opengl/OpenGLFrameBuffer.h"
-#include "opengl/OpenGLUniformBuffer.h"
 
 #include <GLFW/glfw3.h>
 
 #ifdef PLATFORM_WINDOWS
 
 #include "d3d11/D3D11RendererAPI.h"
-#include "d3d11/D3D11ShaderProgram.h"
-#include "d3d11/D3D11VertexBuffer.h"
-#include "d3d11/D3D11IndexBuffer.h"
-#include "d3d11/D3D11UniformBuffer.h"
-#include "d3d11/D3D11Texture.h"
-#include "d3d11/D3D11FrameBuffer.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
@@ -757,11 +745,6 @@ namespace Ainan {
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::ClearScreen;
 		PushCommand(cmd);
-	}
-
-	void Renderer::ClearScreenUnsafe()
-	{
-		Rdata->CurrentActiveAPI->ClearScreen();
 	}
 
 	void Renderer::Present()
