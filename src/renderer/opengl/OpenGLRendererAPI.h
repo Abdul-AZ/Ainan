@@ -45,8 +45,6 @@ namespace Ainan {
 			virtual void ImGuiEndFrame() override;
 			virtual void DrawImGui(ImDrawData* drawData) override;
 
-			virtual void SetViewport(const Rectangle& viewport) override;
-
 			virtual RendererContext* GetContext() override { return &Context; };
 
 			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
@@ -69,7 +67,6 @@ namespace Ainan {
 			uint32_t FontTexture = 0;
 
 			virtual void ExecuteCommand(RenderCommand cmd) override;
-			void DrawWithNewAPI(const RenderCommand& cmd);
 			void DrawIndexedWithNewAPI(const RenderCommand& cmd);
 			void CreateFrameBuffer(const RenderCommand& cmd);
 			void CreateShaderProgramNew(const RenderCommand& cmd);
@@ -83,13 +80,13 @@ namespace Ainan {
 			void DestroyIndexBuffer(const RenderCommand& cmd);
 			void UpdateVertexBufferNew(const RenderCommand& cmd);
 			void DrawIndexedWithCustomNumberOfVertices(const RenderCommand& cmd);
-			void BlitFrameBufferNew(const RenderCommand& cmd);
 			void ReadFrameBuffer(const RenderCommand& cmd);
 			void DestroyFrameBufferNew(const RenderCommand& cmd);
 			void CreateTexture(const RenderCommand& cmd);
 			void UpdateTextureNew(const RenderCommand& cmd);
 			void DestroyTexture(const RenderCommand& cmd);
 			void DrawNew(const RenderCommand& cmd);
+			void SetViewport(const Rectangle& viewport);
 		};
 	}
 }

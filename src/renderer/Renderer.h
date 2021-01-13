@@ -95,8 +95,6 @@ namespace Ainan {
 
 		static void Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, IndexBufferNew indexBuffer);
 
-		static void Draw(ShaderProgramNew shader, VertexBufferNew vertexBuffer, Primitive primitive, uint32_t vertexCount);
-		
 		static void ImGuiNewFrame();
 		static void ImGuiEndFrame();
 

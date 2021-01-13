@@ -47,11 +47,6 @@ namespace Ainan {
 		//This is used by the renderer to interact with the abstracted uniform buffer
 		uint32_t Identifier = 0;
 
-
-		//we take a pointer instead of a refrence because sometimes we need to the render to the default buffer (by passing nullptr)
-		//this makes us avoid having to create a buffer for bliting the default buffer
-		//basically this function copies the buffer to another buffer
-		void Blit(FrameBufferNew* otherBuffer, const glm::vec2& sourceSize, const glm::vec2& targetSize);
 		void Resize(const glm::vec2& newSize);
 
 		void* GetTextureID();

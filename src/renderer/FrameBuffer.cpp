@@ -4,32 +4,14 @@
 
 namespace Ainan
 {
-    void FrameBufferNew::Blit(FrameBufferNew* otherBuffer, const glm::vec2& sourceSize, const glm::vec2& targetSize)
-    {
-        RenderCommand cmd;
-        cmd.Type = RenderCommandType::BlitFrameBuffer;
-        cmd.FrameBuffer = &Renderer::Rdata->FrameBuffers[Identifier];
-        if (otherBuffer)
-        {
-            cmd.ExtraData = new FrameBufferDataView;
-            memcpy(cmd.ExtraData, &Renderer::Rdata->FrameBuffers[otherBuffer->Identifier], sizeof(FrameBufferDataView));
-        }
-        cmd.ExtraData = nullptr;
-
-        memcpy(&cmd.Misc1, &sourceSize, sizeof(glm::vec2));
-        memcpy(&cmd.Misc2, &targetSize, sizeof(glm::vec2));
-
-        Renderer::PushCommand(cmd);
-    }
-
     void FrameBufferNew::Resize(const glm::vec2& newSize)
     {
         RenderCommand cmd;
         cmd.Type = RenderCommandType::ResizeFrameBuffer;
-        cmd.Misc1 = newSize.x;
-        cmd.Misc2 = newSize.y;
+        cmd.ResizeFrameBufferCmdDesc.Width = newSize.x;
+        cmd.ResizeFrameBufferCmdDesc.Height = newSize.y;
         Renderer::Rdata->FrameBuffers[Identifier].Size = newSize;
-        cmd.FrameBuffer = &Renderer::Rdata->FrameBuffers[Identifier];
+        cmd.ResizeFrameBufferCmdDesc.Buffer = &Renderer::Rdata->FrameBuffers[Identifier];
 
         Renderer::PushCommand(cmd);
     }
@@ -52,21 +34,23 @@ namespace Ainan
     {
         RenderCommand cmd;
         cmd.Type = RenderCommandType::ReadFrameBuffer;
-        memcpy(&cmd.Misc1, &bottomLeftPixel, sizeof(glm::vec2));
-        memcpy(&cmd.Misc1, &topRightPixel, sizeof(glm::vec2));
-        cmd.FrameBuffer = &Renderer::Rdata->FrameBuffers[Identifier];
-        cmd.Output = new Image;
+        cmd.ReadFrameBufferCmdDesc.Buffer = &Renderer::Rdata->FrameBuffers[Identifier];
+        cmd.ReadFrameBufferCmdDesc.Output = new Image;
+        cmd.ReadFrameBufferCmdDesc.BottomLeftX = bottomLeftPixel.x;
+        cmd.ReadFrameBufferCmdDesc.BottomLeftY = bottomLeftPixel.y;
+        cmd.ReadFrameBufferCmdDesc.TopRightX = topRightPixel.x;
+        cmd.ReadFrameBufferCmdDesc.TopRightY = topRightPixel.y;
 
         Renderer::PushCommand(cmd);
         Renderer::WaitUntilRendererIdle();
-        return (Image*)cmd.Output;
+        return (Image*)cmd.ReadFrameBufferCmdDesc.Output;
     }
 
     void FrameBufferNew::Bind() const
     {
         RenderCommand cmd;
         cmd.Type = RenderCommandType::BindFrameBufferAsRenderTarget;
-        cmd.FrameBuffer = &Renderer::Rdata->FrameBuffers[Identifier];
+        cmd.BindFrameBufferAsRenderTargetCmdDesc.Buffer = &Renderer::Rdata->FrameBuffers[Identifier];
 
         Renderer::PushCommand(cmd);
     }

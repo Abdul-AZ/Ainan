@@ -22,7 +22,6 @@ namespace Ainan {
 			virtual void InitImGui() override;
 			virtual void TerminateImGui() override;
 			virtual void DrawImGui(ImDrawData* drawData) override;
-			virtual void SetViewport(const Rectangle& viewport) override;
 			virtual RendererContext* GetContext() override { return &Context; };
 			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
 			virtual void ImGuiNewFrame() override;
@@ -30,7 +29,7 @@ namespace Ainan {
 
 		private:
 			void ClearScreen();
-			void RecreateSwapchain(const glm::vec2& newSwapchainSize);
+			void RecreateSwapchain(const RenderCommand& cmd);
 			void SetRenderTargetApplicationWindow();
 			void CreateShaderProgramNew(const RenderCommand& cmd);
 			void DestroyShaderProgramNew(const RenderCommand& cmd);
@@ -48,17 +47,17 @@ namespace Ainan {
 			void BindFrameBufferAsRenderTargetNew(const RenderCommand& cmd);
 			void BindWindowFrameBufferAsRenderTargetNew(const RenderCommand& cmd);
 			void ResizeFrameBufferNew(const RenderCommand& cmd);
-			void BlitFrameBufferNew(const RenderCommand& cmd);
 			void ReadFrameBufferNew(const RenderCommand& cmd);
 			void DestroyFrameBufferNew(const RenderCommand& cmd);
 			void CreateTextureNew(const RenderCommand& cmd);
 			void BindTextureNew(const RenderCommand& cmd);
+			void UpdateTextureNew(const RenderCommand& cmd);
 			void DestroyTextureNew(const RenderCommand& cmd);
-			void Draw_NewShader(const RenderCommand& cmd);
 			void DrawNew(const RenderCommand& cmd);
 			void DrawIndexedNew(const RenderCommand& cmd);
 			void DrawIndexedNewWithCustomNumberOfVertices(const RenderCommand& cmd);
-
+			void SetViewport(const Rectangle& viewport);
+			void SetViewport(const RenderCommand& cmd);
 		public:
 			void Present();
 			D3D11RendererContext Context;

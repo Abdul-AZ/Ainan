@@ -10,47 +10,46 @@
 
 namespace Ainan {
 
+	//see structs in RenderCommand union for info on what parameters are needed for each command
 	enum class RenderCommandType : int32_t
 	{
-		ClearScreen,
+		Clear,
 		Present,
 		RecreateSweapchain,
-		SetViewport, //Misc1 holds X and Y. Misc2 hold width and height all as uint32_t
-		SetBlendMode, //Misc1 is RenderingBlendMode enum cast as uint64_t
+		SetViewport,
+		SetBlendMode,
 
-		CreateShaderProgram,  //requires heap allocated ShaderProgramCreationInfo passed in ExtraData
+		CreateShaderProgram,
 		DestroyShaderProgram,
 
-		CreateVertexBuffer,  //requires heap allocated VertexBufferCreationInfo passed in ExtraData
-		UpdateVertexBuffer, //VBuffer is populated, Misc 1 is size, Misc2 is offset and ExtraData is a heap allocated memory buffer
+		CreateVertexBuffer,
+		UpdateVertexBuffer,
 		DestroyVertexBuffer,
 
-		CreateIndexBuffer, //requires heap allocated IndexBufferCreationInfo passed in ExtraData
+		CreateIndexBuffer,
 		DestroyIndexBuffer,
 
-		CreateUniformBuffer, //requires heap allocated UniformBufferCreationInfo passed in ExtraData
-		BindUniformBuffer,   //Misc 1 is slot
+		CreateUniformBuffer,
+		BindUniformBuffer,
 		UpdateUniformBuffer,
 		DestroyUniformBuffer,
 
-		CreateFrameBuffer,  //requires heap allocated FrameBufferCreationInfo passed in ExtraData
-		BindFrameBufferAsTexture, //Misc 1 is slot
-		BindFrameBufferAsRenderTarget,
-		BindWindowFrameBufferAsRenderTarget,
-		ResizeFrameBuffer, //Misc1 is width, Misc2 is Height
-		BlitFrameBuffer, //Misc1 source size and misc 2 is target size, to be interpreted as glm::vec2 each -ExtraData must contain a heap allocated FrameBufferDataView
-		ReadFrameBuffer, //Output is an Image*
+		CreateFrameBuffer,
+		BindFrameBufferAsTexture,
+		BindFrameBufferAsRenderTarget, 
+		BindBackBufferAsRenderTarget,
+		ResizeFrameBuffer,
+		ReadFrameBuffer,
 		DestroyFrameBuffer, 
 
-		CreateTexture,  //requires heap allocated TextureCreationInfo passed in ExtraData
-		BindTexture,  //Misc1 is slot
-		UpdateTexture,  //Misc1 size to be interpreted as glm::vec2, Misc2 is Format and Extradata is a heap allocated array that will be freed by delete[]
+		CreateTexture,
+		BindTexture,
+		UpdateTexture,
 		DestroyTexture,
 
-		Draw_NewShader,
-		DrawNew, // Requires NewVBuffer, Shader, DrawingPrimitive and Misc1 represents vertex draw count
+		DrawNew,
 		DrawIndexedNew,
-		DrawIndexedNewWithCustomNumberOfVertices, //Misc 1 is index count
+		DrawIndexedNewWithCustomNumberOfVertices,
 
 		CustomCommand,
 		Unspecified
@@ -131,18 +130,226 @@ namespace Ainan {
 		}
 
 		RenderCommandType Type = RenderCommandType::Unspecified;
-		TextureDataView* NewTex;
-		VertexBufferDataView* VertexBuffer;
-		IndexBufferDataView* IndexBuffer;
-		ShaderProgramDataView* Shader;
-		UniformBufferDataView* UniformBuffer;
-		FrameBufferDataView* FrameBuffer;
-		Primitive DrawingPrimitive;
-		void* ExtraData = nullptr;
-		void* Output = nullptr;
+		union
+		{
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//general commands
+			struct ClearCmdDescStruct
+			{
+			} ClearCmdDesc;
+
+			struct PresentCmdDescStruct
+			{
+			} PresentCmdDesc;
+			
+			struct RecreateSweapchainCmdDescStruct
+			{
+				uint32_t Width;
+				uint32_t Height;
+			} RecreateSweapchainCmdDesc;
+			
+			struct SetViewportCmdDescStruct
+			{
+				uint32_t X;
+				uint32_t Y;
+				uint32_t Width;
+				uint32_t Height;
+				float MinDepth;
+				float MaxDepth;
+			} SetViewportCmdDesc;
+			
+			struct SetBlendModeCmdDescStruct
+			{
+				RenderingBlendMode Mode;
+			} SetBlendModeCmdDesc;
+			
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//shader commands
+			struct CreateShaderProgramCmdDescStruct
+			{
+				//create with new, memory is handled internally
+				ShaderProgramCreationInfo* Info;
+				ShaderProgramDataView* Output;
+			} CreateShaderProgramCmdDesc;
+
+			struct DestroyShaderProgramCmdDescStruct
+			{
+				ShaderProgramDataView* Program;
+			} DestroyShaderProgramCmdDesc;
+
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//vertex buffer commands
+			struct CreateVertexBufferCmdDescStruct
+			{
+				//create with new, memory is handled internally
+				VertexBufferCreationInfo* Info;
+				VertexBufferDataView* Output;
+			} CreateVertexBufferCmdDesc;
+
+			struct UpdateVertexBufferCmdDescStruct
+			{
+				VertexBufferDataView* VertexBuffer;
+				void* Data;
+				uint32_t Size;
+				uint32_t Offset;
+			} UpdateVertexBufferCmdDesc;
+
+			struct DestroyVertexBufferCmdDescStruct
+			{
+				VertexBufferDataView* Buffer;
+			} DestroyVertexBufferCmdDesc;
+
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//index buffer commands
+			struct CreateIndexBufferCmdDescStruct
+			{
+				//create with new, memory is handled internally
+				IndexBufferCreationInfo* Info;
+				IndexBufferDataView* Output;
+			} CreateIndexBufferCmdDesc;
+
+			struct DestroyIndexBufferCmdDescStruct
+			{
+				IndexBufferDataView* Buffer;
+			} DestroyIndexBufferCmdDesc;
+
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//uniform buffer commands
+			struct CreateUniformBufferCmdDescStruct
+			{
+				//create with new, memory is handled internally
+				UniformBufferCreationInfo* Info;
+				UniformBufferDataView* Output;
+			} CreateUniformBufferCmdDesc;
+
+			struct BindUniformBufferCmdDescStruct
+			{
+				UniformBufferDataView* Buffer;
+				RenderingStage Stage;
+				uint32_t Slot; //This corrosponds to the slot/index in the shader
+			} BindUniformBufferCmdDesc;
+
+			struct UpdateUniformBufferCmdDescStruct
+			{
+				UniformBufferDataView* Buffer;
+				void* Data;
+			} UpdateUniformBufferCmdDesc;
+
+			struct DestroyUniformBufferCmdDescStruct
+			{
+				UniformBufferDataView* Buffer;
+			} DestroyUniformBufferCmdDesc;
+
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//framebuffer commands
+			struct CreateFrameBufferCmdDescStruct
+			{
+				//create with new, memory is handled internally
+				FrameBufferCreationInfo* Info;
+				FrameBufferDataView* Output;
+			} CreateFrameBufferCmdDesc;
+			
+			struct BindFrameBufferAsTextureCmdDescStruct
+			{
+				FrameBufferDataView* Buffer;
+				RenderingStage Stage;
+				uint32_t Slot; //This corrosponds to the slot/index in the shader
+			} BindFrameBufferAsTextureCmdDesc;
+			
+			struct BindFrameBufferAsRenderTargetCmdDescStruct
+			{
+				FrameBufferDataView* Buffer;
+			} BindFrameBufferAsRenderTargetCmdDesc;
+
+			struct BindBackBufferAsRenderTargetCmdDescStruct
+			{
+			} BindBackBufferAsRenderTargetCmdDesc;
+			
+			struct ResizeFrameBufferCmdDescStruct
+			{
+				FrameBufferDataView* Buffer;
+				uint32_t Width;
+				uint32_t Height;
+			} ResizeFrameBufferCmdDesc;
+			
+			struct ReadFrameBufferCmdDescStruct
+			{
+				FrameBufferDataView* Buffer;
+				Image* Output;
+
+				//rectangular area that is read from
+				//TODO make these actually work instead of reading the whole buffer
+				uint32_t BottomLeftX;
+				uint32_t BottomLeftY;
+				uint32_t TopRightX;
+				uint32_t TopRightY;
+			} ReadFrameBufferCmdDesc;
+
+			struct DestroyFrameBufferCmdDescStruct
+			{
+				FrameBufferDataView* Buffer;
+			} DestroyFrameBufferCmdDesc;
+
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//texture commands
+			struct CreateTextureCmdDescStruct
+			{
+				TextureCreationInfo* Info;
+				TextureDataView* Output;
+			} CreateTextureProgramCmdDesc;
+
+			struct BindTextureCmdDescStruct
+			{
+				TextureDataView* Texture;
+				RenderingStage Stage;
+				uint32_t Slot; //This corrosponds to the slot/index in the shader
+			} BindTextureProgramCmdDesc;
+			
+			struct UpdateTextureCmdDescStruct
+			{
+				TextureDataView* Texture;
+				uint32_t Width;
+				uint32_t Height;
+				TextureFormat Format;
+				//create with new, memory is handled internally
+				void* Data;
+			} UpdateTextureCmdDesc;
+
+			struct DestroyTextureCmdDescStruct
+			{
+				TextureDataView* Texture;
+			} DestroyTextureCmdDesc;
+
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//draw commands
+			struct DrawNewCmdDescStruct
+			{
+				VertexBufferDataView* VertexBuffer;
+				ShaderProgramDataView* Shader;
+				Primitive DrawingPrimitive;
+				uint32_t VertexCount;
+			} DrawNewCmdDesc;
+
+			struct DrawIndexedCmdDescStruct
+			{
+				VertexBufferDataView* VertexBuffer;
+				IndexBufferDataView* IndexBuffer;
+				ShaderProgramDataView* Shader;
+				Primitive DrawingPrimitive;
+			} DrawIndexedCmdDesc;
+			
+			struct DrawIndexedWithCustomNumberOfVerticesCmdDescStruct
+			{
+				VertexBufferDataView* VertexBuffer;
+				IndexBufferDataView* IndexBuffer;
+				ShaderProgramDataView* Shader;
+				Primitive DrawingPrimitive;
+				uint32_t IndexCount;
+			} DrawIndexedWithCustomNumberOfVerticesCmdDesc;
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		};
+
+		//TODO remove this
 		std::function<void()> CustomCommand = nullptr;
-		RenderingStage Stage;
-		uint64_t Misc1 = 0;
-		uint64_t Misc2 = 0;
 	};
 }

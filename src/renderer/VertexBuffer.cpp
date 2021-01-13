@@ -9,11 +9,11 @@ namespace Ainan
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::UpdateVertexBuffer;
-		cmd.Misc1 = size;
-		cmd.Misc2 = offset;
-		cmd.ExtraData = new uint8_t[size];
-		memcpy(cmd.ExtraData, data, size);
-		cmd.VertexBuffer = &Renderer::Rdata->VertexBuffers[Identifier];
+		cmd.UpdateVertexBufferCmdDesc.Size = size;
+		cmd.UpdateVertexBufferCmdDesc.Offset = offset;
+		cmd.UpdateVertexBufferCmdDesc.Data = new uint8_t[size];
+		memcpy(cmd.UpdateVertexBufferCmdDesc.Data, data, size);
+		cmd.UpdateVertexBufferCmdDesc.VertexBuffer = &Renderer::Rdata->VertexBuffers[Identifier];
 
 		Renderer::PushCommand(cmd);
 	}

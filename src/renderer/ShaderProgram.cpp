@@ -10,9 +10,9 @@ namespace Ainan
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::BindUniformBuffer;
-		cmd.UniformBuffer = &Renderer::Rdata->UniformBuffers[buffer.Identifier];
-		cmd.Stage = stage;
-		cmd.Misc1 = slot;
+		cmd.BindUniformBufferCmdDesc.Buffer = &Renderer::Rdata->UniformBuffers[buffer.Identifier];
+		cmd.BindUniformBufferCmdDesc.Stage = stage;
+		cmd.BindUniformBufferCmdDesc.Slot = slot;
 
 		Renderer::PushCommand(cmd);
 	}
@@ -21,10 +21,9 @@ namespace Ainan
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::BindTexture;
-		cmd.Shader = &Renderer::Rdata->ShaderPrograms[Identifier];
-		cmd.NewTex = &Renderer::Rdata->Textures[texture.Identifier];
-		cmd.Misc1 = slot;
-		cmd.Stage = stage;
+		cmd.BindTextureProgramCmdDesc.Texture = &Renderer::Rdata->Textures[texture.Identifier];
+		cmd.BindTextureProgramCmdDesc.Stage = stage;
+		cmd.BindTextureProgramCmdDesc.Slot = slot;
 
 		Renderer::PushCommand(cmd);
 	}
@@ -33,10 +32,9 @@ namespace Ainan
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::BindFrameBufferAsTexture;
-		cmd.Shader = &Renderer::Rdata->ShaderPrograms[Identifier];
-		cmd.FrameBuffer = &Renderer::Rdata->FrameBuffers[fb.Identifier];
-		cmd.Misc1 = slot;
-		cmd.Stage = stage;
+		cmd.BindFrameBufferAsTextureCmdDesc.Buffer = &Renderer::Rdata->FrameBuffers[fb.Identifier];
+		cmd.BindFrameBufferAsTextureCmdDesc.Slot = slot;
+		cmd.BindFrameBufferAsTextureCmdDesc.Stage = stage;
 
 		Renderer::PushCommand(cmd);
 	}

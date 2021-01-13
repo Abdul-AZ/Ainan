@@ -22,9 +22,6 @@ namespace Ainan {
 		virtual void DrawImGui(ImDrawData* drawData) = 0;
 		virtual void ExecuteCommand(RenderCommand cmd) = 0;
 		virtual void SetBlendMode(RenderingBlendMode blendMode) = 0;
-
-		virtual void SetViewport(const Rectangle& viewport) = 0;
-
 		virtual RendererContext* GetContext() = 0;
 	};
 }

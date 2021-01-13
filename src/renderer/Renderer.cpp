@@ -80,7 +80,7 @@ namespace Ainan {
 		{
 			RenderCommand cmd;
 			cmd.Type = RenderCommandType::DestroyShaderProgram;
-			cmd.Shader = &Rdata->ShaderPrograms[shader.second.Identifier];
+			cmd.DestroyShaderProgramCmdDesc.Program = &Rdata->ShaderPrograms[shader.second.Identifier];
 
 			Renderer::PushCommand(cmd);
 		}
@@ -428,11 +428,11 @@ namespace Ainan {
 	void Renderer::Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, int32_t vertexCount)
 	{
 		RenderCommand cmd;
-		cmd.Type = RenderCommandType::Draw_NewShader;
-		cmd.VertexBuffer = &Rdata->VertexBuffers[vertexBuffer.Identifier];
-		cmd.ExtraData = &Rdata->ShaderPrograms[shader.Identifier];
-		cmd.Misc1 = (uint32_t)primitive;
-		cmd.Misc2 = vertexCount;
+		cmd.Type = RenderCommandType::DrawNew;
+		cmd.DrawNewCmdDesc.VertexBuffer = &Rdata->VertexBuffers[vertexBuffer.Identifier];
+		cmd.DrawNewCmdDesc.Shader = &Rdata->ShaderPrograms[shader.Identifier];
+		cmd.DrawNewCmdDesc.DrawingPrimitive = primitive;
+		cmd.DrawNewCmdDesc.VertexCount = vertexCount;
 
 		PushCommand(cmd);
 	}
@@ -686,10 +686,10 @@ namespace Ainan {
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DrawIndexedNew;
 
-		cmd.VertexBuffer = &Rdata->VertexBuffers[vertexBuffer.Identifier];
-		cmd.IndexBuffer = &Rdata->IndexBuffers[indexBuffer.Identifier];
-		cmd.Shader = &Rdata->ShaderPrograms[shader.Identifier];
-		cmd.DrawingPrimitive = primitive;
+		cmd.DrawIndexedCmdDesc.VertexBuffer = &Rdata->VertexBuffers[vertexBuffer.Identifier];
+		cmd.DrawIndexedCmdDesc.IndexBuffer = &Rdata->IndexBuffers[indexBuffer.Identifier];
+		cmd.DrawIndexedCmdDesc.Shader = &Rdata->ShaderPrograms[shader.Identifier];
+		cmd.DrawIndexedCmdDesc.DrawingPrimitive = primitive;
 
 		Renderer::PushCommand(cmd);
 	}
@@ -743,7 +743,7 @@ namespace Ainan {
 	void Renderer::ClearScreen()
 	{
 		RenderCommand cmd;
-		cmd.Type = RenderCommandType::ClearScreen;
+		cmd.Type = RenderCommandType::Clear;
 		PushCommand(cmd);
 	}
 
@@ -778,21 +778,10 @@ namespace Ainan {
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::RecreateSweapchain;
-		memcpy(&cmd.Misc1, &newSwapchainSize, sizeof(glm::vec2));
+		cmd.RecreateSweapchainCmdDesc.Width = newSwapchainSize.x;
+		cmd.RecreateSweapchainCmdDesc.Height = newSwapchainSize.y;
 		PushCommand(cmd);
 	}
-
-	void Renderer::Draw(ShaderProgramNew shader, VertexBufferNew vertexBuffer, Primitive primitive, uint32_t vertexCount)
-	{
-		RenderCommand cmd;
-		cmd.Type = RenderCommandType::DrawNew;
-		cmd.Shader = &Rdata->ShaderPrograms[shader.Identifier];
-		cmd.VertexBuffer = &Rdata->VertexBuffers[vertexBuffer.Identifier];
-		cmd.DrawingPrimitive = primitive;
-		cmd.Misc1 = vertexCount;
-
-		Renderer::PushCommand(cmd);
-	} 
 
 	void Renderer::Blur(FrameBufferNew target, float radius)
 	{
@@ -831,7 +820,7 @@ namespace Ainan {
 		
 		//do the horizontal blur to the surface we revieved and put the result in tempSurface
 		shader.BindTexture(target, 0, RenderingStage::FragmentShader);
-		Draw(shader, Rdata->BlurVertexBuffer, Primitive::Triangles, 6);
+		Draw(Rdata->BlurVertexBuffer, shader, Primitive::Triangles, 6);
 		
 		//this specifies that we are doing vertical blur
 		memcpy(bufferData + 8, &verticalDirection, sizeof(glm::vec2));
@@ -843,7 +832,7 @@ namespace Ainan {
 		
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
 		shader.BindTexture(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
-		Draw(shader, Rdata->BlurVertexBuffer, Primitive::Triangles, 6);
+		Draw(Rdata->BlurVertexBuffer, shader, Primitive::Triangles, 6);
 		
 		SetViewport(lastViewport);
 		SetBlendMode(lastBlendMode);
@@ -1035,16 +1024,22 @@ namespace Ainan {
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::SetBlendMode;
-		cmd.Misc1 = (uint64_t)blendMode;
+		cmd.SetBlendModeCmdDesc.Mode = blendMode;
 		PushCommand(cmd);
 		Rdata->m_CurrentBlendMode = blendMode;
 	}
 
+	//TODO handle depth values
 	void Renderer::SetViewport(const Rectangle& viewport)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::SetViewport;
-		memcpy(&cmd.Misc1, &viewport, sizeof(Rectangle)); //Misc1 will hold x and y. Misc2 will gold width and height
+		cmd.SetViewportCmdDesc.X = viewport.X;
+		cmd.SetViewportCmdDesc.Y = viewport.Y;
+		cmd.SetViewportCmdDesc.Width = viewport.Width;
+		cmd.SetViewportCmdDesc.Height = viewport.Height;
+		cmd.SetViewportCmdDesc.MinDepth = 0;
+		cmd.SetViewportCmdDesc.MaxDepth = 0;
 		PushCommand(cmd);
 		Rdata->CurrentViewport = viewport;
 	}
@@ -1052,7 +1047,7 @@ namespace Ainan {
 	void Renderer::SetRenderTargetApplicationWindow()
 	{
 		RenderCommand cmd;
-		cmd.Type = RenderCommandType::BindWindowFrameBufferAsRenderTarget;
+		cmd.Type = RenderCommandType::BindBackBufferAsRenderTarget;
 		PushCommand(cmd);
 	}
 
@@ -1060,7 +1055,7 @@ namespace Ainan {
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DestroyVertexBuffer;
-		cmd.VertexBuffer = &Rdata->VertexBuffers[vb.Identifier];
+		cmd.DestroyVertexBufferCmdDesc.Buffer = &Rdata->VertexBuffers[vb.Identifier];
 		Renderer::PushCommand(cmd);
 	}
 
@@ -1080,8 +1075,8 @@ namespace Ainan {
 		info->InitialData = new uint8_t[view.Size];
 		memcpy(info->InitialData, data, view.Size);
 		info->Count = count;
-		cmd.ExtraData = info;
-		cmd.Output = &Rdata->IndexBuffers[s_IdentifierCounter];
+		cmd.CreateIndexBufferCmdDesc.Info = info;
+		cmd.CreateIndexBufferCmdDesc.Output = &Rdata->IndexBuffers[s_IdentifierCounter];
 
 		PushCommand(cmd);
 		s_IdentifierCounter++;
@@ -1092,7 +1087,7 @@ namespace Ainan {
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DestroyIndexBuffer;
-		cmd.IndexBuffer = &Rdata->IndexBuffers[ib.Identifier];
+		cmd.DestroyIndexBufferCmdDesc.Buffer = &Rdata->IndexBuffers[ib.Identifier];
 		Renderer::PushCommand(cmd);
 	}
 
@@ -1119,8 +1114,8 @@ namespace Ainan {
 		info->Layout = layout;
 		info->Size = size;
 		info->Dynamic = dynamic;
-		cmd.ExtraData = info;
-		cmd.Output = &Rdata->VertexBuffers[s_IdentifierCounter];
+		cmd.CreateVertexBufferCmdDesc.Info = info;
+		cmd.CreateVertexBufferCmdDesc.Output = &Rdata->VertexBuffers[s_IdentifierCounter];
 
 		PushCommand(cmd);
 		s_IdentifierCounter++;
@@ -1143,8 +1138,8 @@ namespace Ainan {
 		info->Name = name;
 		info->reg = reg;
 		info->layout = layout;
-		cmd.ExtraData = info;
-		cmd.Output = &Rdata->UniformBuffers[s_IdentifierCounter];
+		cmd.CreateUniformBufferCmdDesc.Info = info;
+		cmd.CreateUniformBufferCmdDesc.Output = &Rdata->UniformBuffers[s_IdentifierCounter];
 
 		PushCommand(cmd);
 		s_IdentifierCounter++;
@@ -1155,7 +1150,7 @@ namespace Ainan {
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DestroyUniformBuffer;
-		cmd.UniformBuffer = &Rdata->UniformBuffers[ub.Identifier];
+		cmd.DestroyUniformBufferCmdDesc.Buffer = &Rdata->UniformBuffers[ub.Identifier];
 		Renderer::PushCommand(cmd);
 	}
 
@@ -1172,8 +1167,8 @@ namespace Ainan {
 		cmd.Type = RenderCommandType::CreateFrameBuffer;
 		FrameBufferCreationInfo* info = new FrameBufferCreationInfo;
 		info->Size = size;
-		cmd.ExtraData = info;
-		cmd.Output = &Rdata->FrameBuffers[s_IdentifierCounter];
+		cmd.CreateFrameBufferCmdDesc.Info = info;
+		cmd.CreateFrameBufferCmdDesc.Output = &Rdata->FrameBuffers[s_IdentifierCounter];
 
 		PushCommand(cmd);
 		s_IdentifierCounter++;
@@ -1184,7 +1179,7 @@ namespace Ainan {
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DestroyFrameBuffer;
-		cmd.FrameBuffer = &Rdata->FrameBuffers[fb.Identifier];
+		cmd.DestroyFrameBufferCmdDesc.Buffer = &Rdata->FrameBuffers[fb.Identifier];
 		PushCommand(cmd);
 	}
 
@@ -1241,8 +1236,8 @@ namespace Ainan {
 		}
 		else
 			info->InitialData = nullptr;
-		cmd.ExtraData = info;
-		cmd.Output = &Rdata->Textures[s_IdentifierCounter];
+		cmd.CreateTextureProgramCmdDesc.Info = info;
+		cmd.CreateTextureProgramCmdDesc.Output = &Rdata->Textures[s_IdentifierCounter];
 
 		PushCommand(cmd);
 		s_IdentifierCounter++;
@@ -1253,7 +1248,7 @@ namespace Ainan {
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DestroyTexture;
-		cmd.NewTex = &Rdata->Textures[tex.Identifier];
+		cmd.DestroyTextureCmdDesc.Texture = &Rdata->Textures[tex.Identifier];
 		PushCommand(cmd);
 	}
 
@@ -1270,8 +1265,8 @@ namespace Ainan {
 		ShaderProgramCreationInfo* info = new ShaderProgramCreationInfo;
 		info->vertPath = vertPath;
 		info->fragPath = fragPath;
-		cmd.ExtraData = info;
-		cmd.Output = &Rdata->ShaderPrograms[s_IdentifierCounter];
+		cmd.CreateShaderProgramCmdDesc.Info = info;
+		cmd.CreateShaderProgramCmdDesc.Output = &Rdata->ShaderPrograms[s_IdentifierCounter];
 		
 		PushCommand(cmd);
 		s_IdentifierCounter++;
@@ -1369,11 +1364,11 @@ namespace Ainan {
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DrawIndexedNewWithCustomNumberOfVertices;
-		cmd.VertexBuffer = &Rdata->VertexBuffers[vertexBuffer.Identifier];
-		cmd.IndexBuffer = &Rdata->IndexBuffers[indexBuffer.Identifier];
-		cmd.Shader = &Rdata->ShaderPrograms[shader.Identifier];
-		cmd.DrawingPrimitive = primitive;
-		cmd.Misc1 = indexCount;
+		cmd.DrawIndexedWithCustomNumberOfVerticesCmdDesc.VertexBuffer = &Rdata->VertexBuffers[vertexBuffer.Identifier];
+		cmd.DrawIndexedWithCustomNumberOfVerticesCmdDesc.IndexBuffer = &Rdata->IndexBuffers[indexBuffer.Identifier];
+		cmd.DrawIndexedWithCustomNumberOfVerticesCmdDesc.Shader = &Rdata->ShaderPrograms[shader.Identifier];
+		cmd.DrawIndexedWithCustomNumberOfVerticesCmdDesc.DrawingPrimitive = primitive;
+		cmd.DrawIndexedWithCustomNumberOfVerticesCmdDesc.IndexCount = indexCount;
 
 		Renderer::PushCommand(cmd);
 	}

@@ -9,10 +9,10 @@ namespace Ainan
 		//Misc1 size to be interpreted as glm::vec2, Misc2 is Format and Extradata is a heap allocated array that will be freed by delete[]
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::UpdateTexture;
-		cmd.NewTex = &Renderer::Rdata->Textures[Identifier];
-		glm::vec2 size(image->m_Width, image->m_Height);
-		memcpy(&cmd.Misc1, &size, sizeof(glm::vec2));
-		cmd.Misc2 = (uint64_t)image->Format;
+		cmd.UpdateTextureCmdDesc.Texture = &Renderer::Rdata->Textures[Identifier];
+		cmd.UpdateTextureCmdDesc.Width = image->m_Width;
+		cmd.UpdateTextureCmdDesc.Height = image->m_Height;
+		cmd.UpdateTextureCmdDesc.Format = image->Format;
 		int32_t comp = 0;
 		switch (image->Format)
 		{
@@ -34,8 +34,8 @@ namespace Ainan
 		default:
 			break;
 		}
-		cmd.ExtraData = new uint8_t[size.x * size.y * comp];
-		memcpy(cmd.ExtraData, image->m_Data, sizeof(uint8_t) * size.x * size.y * comp);
+		cmd.UpdateTextureCmdDesc.Data = new uint8_t[image->m_Width * image->m_Height * comp];
+		memcpy(cmd.UpdateTextureCmdDesc.Data, image->m_Data, sizeof(uint8_t) * image->m_Width * image->m_Height * comp);
 
 		Renderer::PushCommand(cmd);
 	}
