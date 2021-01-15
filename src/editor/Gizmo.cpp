@@ -99,12 +99,10 @@ namespace Ainan {
 		layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec4);
 		m_VertexBuffer = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibrary()["GizmoShader"]);
 
-		if(Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+		if(Renderer::Rdata->API == RendererType::OpenGL)
 			m_IndexBuffer = Renderer::CreateIndexBuffer((uint32_t*)c_OpenGLArrowIndecies, sizeof(c_OpenGLArrowIndecies) / sizeof(uint32_t));
 		else
 			m_IndexBuffer = Renderer::CreateIndexBuffer((uint32_t*)c_DirectXArrowIndecies, sizeof(c_DirectXArrowIndecies) / sizeof(uint32_t));
-
-		m_IndexBuffer->Bind();
 
 		m_UniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1,
 			{ 
@@ -112,8 +110,15 @@ namespace Ainan {
 				VertexLayoutElement("u_AspectRatio", 1, ShaderVariableType::Float),
 				VertexLayoutElement("u_OpacityR", 2, ShaderVariableType::Float),
 				VertexLayoutElement("u_OpacityG", 3, ShaderVariableType::Float) 
-			},
-			nullptr);
+			}
+		);
+	}
+
+	Gizmo::~Gizmo()
+	{
+		Renderer::DestroyVertexBuffer(m_VertexBuffer);
+		Renderer::DestroyIndexBuffer(m_IndexBuffer);
+		Renderer::DestroyUniformBuffer(m_UniformBuffer);
 	}
 
 	void Gizmo::Draw(glm::vec2* objectPosition,
@@ -149,8 +154,8 @@ namespace Ainan {
 		//Draw the triangles
 		auto& shader = Renderer::ShaderLibrary()["GizmoShader"];
 
-		shader->BindUniformBuffer(m_UniformBuffer, 1, RenderingStage::VertexShader);
-		m_UniformBuffer->UpdateData(&data);
+		shader.BindUniformBuffer(m_UniformBuffer, 1, RenderingStage::VertexShader);
+		m_UniformBuffer.UpdateData(&data, sizeof(TransformationData));
 
 		Renderer::Draw(m_VertexBuffer, shader, Primitive::Triangles, m_IndexBuffer);
 	}

@@ -11,6 +11,7 @@ namespace Ainan {
 	{
 	public:
 		Sprite();
+		~Sprite();
 
 		virtual void Update(const float deltaTime) override;
 		virtual void Draw() override;
@@ -27,6 +28,6 @@ namespace Ainan {
 
 		std::filesystem::path m_TexturePath; //relative to the environment folder
 	private:
-		std::shared_ptr<Texture> m_Texture;
+		Texture m_Texture;
 	};
 }

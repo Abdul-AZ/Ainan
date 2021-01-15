@@ -4,7 +4,7 @@ namespace Ainan {
 
 	RenderSurface::RenderSurface()
 	{
-		SurfaceFrameBuffer = Renderer::CreateFrameBuffer(Window::FramebufferSize);
+		SurfaceFramebuffer = Renderer::CreateFramebuffer(Window::FramebufferSize);
 
 		float quadVertices[] = { 
 			// positions   // texCoords
@@ -25,35 +25,27 @@ namespace Ainan {
 		Renderer::SetRenderTargetApplicationWindow();
 	}
 
+	RenderSurface::~RenderSurface()
+	{
+		Renderer::DestroyVertexBuffer(m_VertexBuffer);
+		Renderer::DestroyFramebuffer(SurfaceFramebuffer);
+	}
+
 	void RenderSurface::Render()
 	{
 		auto& shader = Renderer::ShaderLibrary()["ImageShader"];
-		shader->BindTexture(SurfaceFrameBuffer, 0, RenderingStage::FragmentShader);
+		shader.BindTexture(SurfaceFramebuffer, 0, RenderingStage::FragmentShader);
 		Renderer::Draw(m_VertexBuffer, shader, Primitive::Triangles, 6);
 	}
 
-	void RenderSurface::Render(std::shared_ptr<ShaderProgram>& shader)
+	void RenderSurface::Render(ShaderProgram shader)
 	{
-		shader->BindTexture(SurfaceFrameBuffer, 0, RenderingStage::FragmentShader);
+		shader.BindTexture(SurfaceFramebuffer, 0, RenderingStage::FragmentShader);
 		Renderer::Draw(m_VertexBuffer, shader, Primitive::Triangles, 6);
-	}
-
-	void RenderSurface::RenderToScreen(const Rectangle& viewport)
-	{
-		//nullptr means we are copying to the default render buffer (which is the one being displayed)
-		SurfaceFrameBuffer->Blit(nullptr, SurfaceFrameBuffer->GetSize(), SurfaceFrameBuffer->GetSize());
-
-		Rectangle screenViewport;
-		screenViewport.X = 0;
-		screenViewport.Y = 0;
-		screenViewport.Width  = (int)Window::FramebufferSize.x;
-		screenViewport.Height = (int)Window::FramebufferSize.y;
-
-		Renderer::SetViewport(viewport);
 	}
 
 	void RenderSurface::SetSize(const glm::vec2& size)
 	{
-		SurfaceFrameBuffer->Resize(size);
+		SurfaceFramebuffer.Resize(size);
 	}
 }

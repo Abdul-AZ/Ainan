@@ -1,26 +1,38 @@
 #pragma once
 
-#include "RendererAPI.h"
+#include "Texture.h"
 
 namespace Ainan {
 
+	enum class RenderingStage : uint32_t
+	{
+		VertexShader,
+		FragmentShader
+	};
+
 	class Texture;
 	class UniformBuffer;
-	class FrameBuffer;
+	class Framebuffer;
+	class UniformBuffer;
+	class Framebuffer;
 
-	//ONLY create this using Renderer::CreateShaderProgram
 	class ShaderProgram
 	{
 	public:
-		virtual void BindUniformBuffer(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage) = 0;
-		virtual void BindTexture(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage) = 0;
-		virtual void BindTexture(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage) = 0;
+		//This is used by the renderer to interact with the abstracted uniform buffer
+		uint32_t Identifier = 0;
 
-	private:
-		virtual void BindUniformBufferUnsafe(std::shared_ptr<UniformBuffer>& buffer, uint32_t slot, RenderingStage stage) = 0;
-		virtual void BindTextureUnsafe(std::shared_ptr<Texture>& texture, uint32_t slot, RenderingStage stage) = 0;
-		virtual void BindTextureUnsafe(std::shared_ptr<FrameBuffer>& framebuffer, uint32_t slot, RenderingStage stage) = 0;
+		void BindUniformBuffer(UniformBuffer buffer, uint32_t slot, RenderingStage stage);
+		void BindTexture(Texture texture, uint32_t slot, RenderingStage stage);
+		void BindTexture(Framebuffer fb, uint32_t slot, RenderingStage stage);
+	};
 
-		friend class Renderer;
+	struct ShaderProgramDataView
+	{
+		uint64_t Identifier = 0;
+		uint64_t Identifier_1 = 0;
+		bool Deleted = false;
+		uint8_t* VertexByteCode = nullptr;
+		uint32_t VertexByteCodeSize = 0;
 	};
 }

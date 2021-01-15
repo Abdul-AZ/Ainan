@@ -49,8 +49,15 @@ namespace Ainan {
 
 		m_TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform",
 			1,
-			{ VertexLayoutElement("u_Model",0, ShaderVariableType::Mat4) },
-			nullptr);
+			{ VertexLayoutElement("u_Model", 0, ShaderVariableType::Mat4) }
+		);
+	}
+
+	Grid::~Grid()
+	{
+		Renderer::DestroyVertexBuffer(m_VertexBuffer);
+		Renderer::DestroyIndexBuffer(m_IndexBuffer);
+		Renderer::DestroyUniformBuffer(m_TransformUniformBuffer);
 	}
 
 	void Grid::Draw(const Camera& camera)
@@ -60,10 +67,9 @@ namespace Ainan {
 		glm::vec2 pos = glm::vec2(std::round(camera.Position.x / m_UnitLength), std::round(camera.Position.y / m_UnitLength)) * m_UnitLength;
 
 		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3{ -pos, 0.0f });
-		m_TransformUniformBuffer->UpdateData(&model);
-		Renderer::WaitUntilRendererIdle();
+		m_TransformUniformBuffer.UpdateData(&model, sizeof(glm::mat4));
 
-		shader->BindUniformBuffer(m_TransformUniformBuffer, 1, RenderingStage::VertexShader);
+		shader.BindUniformBuffer(m_TransformUniformBuffer, 1, RenderingStage::VertexShader);
 		Renderer::Draw(m_VertexBuffer, shader, Primitive::Lines, m_IndexBuffer);
 	}
 }

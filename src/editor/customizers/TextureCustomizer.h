@@ -12,6 +12,7 @@ namespace Ainan {
 	{
 	public:
 		TextureCustomizer();
+		~TextureCustomizer();
 		TextureCustomizer(const TextureCustomizer& customizer);
 		TextureCustomizer operator=(const TextureCustomizer& customizer);
 
@@ -19,7 +20,7 @@ namespace Ainan {
 
 	public:
 		bool UseDefaultTexture = true;
-		std::shared_ptr<Texture> ParticleTexture;
+		Texture ParticleTexture;
 		std::filesystem::path m_TexturePath = ""; //relative to the environment folder
 
 		EXPOSE_CUSTOMIZER_TO_JSON

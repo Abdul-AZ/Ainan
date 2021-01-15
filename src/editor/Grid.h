@@ -11,12 +11,13 @@ namespace Ainan {
 	{
 	public:
 		Grid(float unitLength = 100.0f, int32_t numLinesPerAxis = 51);
+		~Grid();
 		void Draw(const Camera& camera);
 
 	private:
 		float m_UnitLength = 0.0f;
-		std::shared_ptr<VertexBuffer> m_VertexBuffer = nullptr;
-		std::shared_ptr<IndexBuffer> m_IndexBuffer = nullptr;
-		std::shared_ptr<UniformBuffer> m_TransformUniformBuffer = nullptr;
+		VertexBuffer m_VertexBuffer;
+		IndexBuffer m_IndexBuffer;
+		UniformBuffer m_TransformUniformBuffer;
 	};
 }

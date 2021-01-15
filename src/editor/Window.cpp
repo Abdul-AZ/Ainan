@@ -34,11 +34,6 @@ namespace Ainan {
 		if (width == 0 || height == 0)
 		{
 			Window::Minimized = true;
-
-			std::lock_guard lock(Renderer::Rdata->QueueMutex);
-			//clear commands
-			decltype(Renderer::Rdata->CommandBuffer) empty;
-			std::swap(Renderer::Rdata->CommandBuffer, empty);
 		}
 		else
 			Window::Minimized = false;
@@ -62,11 +57,6 @@ namespace Ainan {
 		if (state)
 		{
 			Window::Minimized = true;
-
-			std::lock_guard lock(Renderer::Rdata->QueueMutex);
-			//clear commands
-			decltype(Renderer::Rdata->CommandBuffer) empty;
-			std::swap(Renderer::Rdata->CommandBuffer, empty);
 		}
 		//if window restored
 		else

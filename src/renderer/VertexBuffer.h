@@ -90,22 +90,22 @@ namespace Ainan {
 	class VertexBuffer
 	{
 	public:
-		virtual ~VertexBuffer() {};
-
-		//virtual void SetLayout(const VertexLayout& layout, const std::shared_ptr<ShaderProgram>& shaderProgram) = 0;
+		uint32_t Identifier;
 
 		//NOTE: offset and size are in bytes
 		//offset is the start of the memory location you want to update
-		virtual void UpdateData(int32_t offset, int32_t size, void* data) = 0;
-		virtual uint32_t GetUsedMemory() const = 0;
+		void UpdateData(int32_t offset, int32_t size, void* data);
+		uint32_t GetUsedMemory() const;
+	};
 
-		virtual void Bind() const = 0;
-		virtual void Unbind() const = 0;
-
-	private:
-		virtual void UpdateDataUnsafe(int32_t offset, int32_t size, void* data) = 0;
-
-		friend class Renderer;
+	struct VertexBufferDataView
+	{
+		uint64_t Identifier;
+		uint32_t Size;
+		uint64_t Layout;
+		uint32_t Array; //Used only in OpenGL
+		uint32_t Stride;
+		bool Deleted = false;
 	};
 
 	//returns size in bytes

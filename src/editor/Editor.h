@@ -73,14 +73,14 @@ namespace Ainan {
 
 		EditorState m_State = State_NoEnvLoaded;
 		std::filesystem::path m_EnvironmentFolderPath;
-		std::shared_ptr<Texture> m_PlayButtonTexture;
-		std::shared_ptr<Texture> m_PauseButtonTexture;
-		std::shared_ptr<Texture> m_StopButtonTexture;
-		std::shared_ptr<Texture> m_SpriteIconTexture;
-		std::shared_ptr<Texture> m_LitSpriteIconTexture;
-		std::shared_ptr<Texture> m_ParticleSystemIconTexture;
-		std::shared_ptr<Texture> m_SpotLightIconTexture;
-		std::shared_ptr<Texture> m_RadialLightIconTexture;
+		Texture m_PlayButtonTexture;
+		Texture m_PauseButtonTexture;
+		Texture m_StopButtonTexture;
+		Texture m_SpriteIconTexture;
+		Texture m_LitSpriteIconTexture;
+		Texture m_ParticleSystemIconTexture;
+		Texture m_SpotLightIconTexture;
+		Texture m_RadialLightIconTexture;
 		float m_TimeSincePlayModeStarted = 0.0f;
 		bool m_AddObjectWindowOpen = false;
 		std::string m_AddObjectWindowObjectName = "Example Name";
@@ -108,6 +108,7 @@ namespace Ainan {
 		int32_t m_AverageFPS = 0;
 		uint32_t m_GPUMemAllocated = 0;
 		int32_t m_DrawCalls = 0;
+		uint32_t FrameCounter = 0; //advances by 1 on every update iteration. when it reaches c_ApplicationFramerate, it goes back to 0.
 
 	private:
 		void WorkerThreadLoop();

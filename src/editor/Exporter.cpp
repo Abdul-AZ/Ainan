@@ -24,8 +24,9 @@ namespace Ainan {
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 		m_OutlineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 8, layout, Renderer::ShaderLibrary()["LineShader"], true);
 
-		layout[0] = VertexLayoutElement("u_Color",0, ShaderVariableType::Vec4);
-		m_OutlineUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout, (void*)&c_OutlineColor);
+		layout[0] = VertexLayoutElement("u_Color", 0, ShaderVariableType::Vec4);
+		m_OutlineUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout);
+		m_OutlineUniformBuffer.UpdateData((void*)&c_OutlineColor, sizeof(glm::vec4));
 
 		SetSize();
 		VideoSettings.ExportTargetLocation.m_FileName = "Example Name";
@@ -34,6 +35,14 @@ namespace Ainan {
 		PictureSettings.ExportTargetLocation.m_FileName = "Example Name";
 		PictureSettings.ExportTargetLocation.FileExtension = ".png";
 		PictureSettings.ExportTargetPath = PictureSettings.ExportTargetLocation.GetSelectedSavePath();
+	}
+
+	Exporter::~Exporter()
+	{
+		Renderer::DestroyVertexBuffer(m_OutlineVertexBuffer);
+		Renderer::DestroyUniformBuffer(m_OutlineUniformBuffer);
+		if (m_ExportTargetTexture.IsValid())
+			Renderer::DestroyTexture(m_ExportTargetTexture);
 	}
 
 	void Exporter::ExportIfScheduled(Editor& editor)
@@ -61,10 +70,10 @@ namespace Ainan {
 			m_OutlineVertices[3], m_OutlineVertices[0]  //bottom right to bottom left
 		};
 
-		m_OutlineVertexBuffer->UpdateData(0, sizeof(glm::vec2) * 8, vertices.data());
+		m_OutlineVertexBuffer.UpdateData(0, sizeof(glm::vec2) * 8, vertices.data());
 
 		auto& shader = Renderer::ShaderLibrary()["LineShader"];
-		shader->BindUniformBuffer(m_OutlineUniformBuffer, 1, RenderingStage::FragmentShader);
+		shader.BindUniformBuffer(m_OutlineUniformBuffer, 1, RenderingStage::FragmentShader);
 
 		Renderer::Draw(m_OutlineVertexBuffer, shader, Primitive::Lines,  8);
 	}
@@ -81,7 +90,7 @@ namespace Ainan {
 		for (glm::vec2& vertex : m_OutlineVertices)
 			vertex *= c_GlobalScaleFactor;
 
-		Camera.Update(0.0f, Renderer::GetCurrentViewport());
+		Camera.Update(0.0f, Renderer::Rdata->CurrentViewport);
 		glm::vec2 reversedPos = glm::vec2(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y);
 
 		Camera.SetPosition(reversedPos * c_GlobalScaleFactor);
@@ -92,13 +101,13 @@ namespace Ainan {
 		Camera.Update(0.0f, { 0, 0, (int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
 		SceneDescription desc;
 		desc.SceneCamera = Camera;
-		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
 		desc.Blur = env.BlurEnabled;
 		desc.BlurRadius = env.BlurRadius;
 		Renderer::BeginScene(desc);
 		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
 		m_RenderSurface.SetSize(glm::ivec2(std::round(Camera.ZoomFactor * aspectRatio / 2.0f) * 2.0f, Camera.ZoomFactor));
-		m_RenderSurface.SurfaceFrameBuffer->Bind();
+		m_RenderSurface.SurfaceFramebuffer.Bind();
 		Renderer::ClearScreen();
 
 		for (pEnvironmentObject& obj : env.Objects)
@@ -124,7 +133,7 @@ namespace Ainan {
 	void Exporter::GetImageFromExportSurfaceToRAM()
 	{
 		delete m_ExportTargetImage;
-		m_ExportTargetImage = new Image(m_RenderSurface.SurfaceFrameBuffer->ReadPixels());
+		m_ExportTargetImage = m_RenderSurface.SurfaceFramebuffer.ReadPixels();
 	}
 
 	void Exporter::DisplayGUI()
@@ -317,13 +326,13 @@ namespace Ainan {
 
 		ImGui::NextColumn();
 
-		if (m_ExportTargetTexture)
+		if (m_ExportTargetTexture.IsValid())
 		{
 			ImGui::Text("Preview");
 
 			int scale = 250;
 			ImVec2 size = ImVec2(scale * m_ExportTargetImage->m_Width / m_ExportTargetImage->m_Height, scale);
-			ImGui::Image(m_ExportTargetTexture->GetTextureID(), size);
+			ImGui::Image((void*)m_ExportTargetTexture.GetTextureID(), size);
 		}
 
 		ImGui::End();
@@ -354,7 +363,7 @@ namespace Ainan {
 		DrawEnvToExportSurface(*editor.m_Env);
 		GetImageFromExportSurfaceToRAM();
 
-		if (Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType() == RendererType::OpenGL)
+		if (Renderer::Rdata->API == RendererType::OpenGL)
 			m_ExportTargetImage->FlipHorizontally();
 
 		m_ExportTargetTexture = Renderer::CreateTexture(*m_ExportTargetImage);
@@ -391,6 +400,8 @@ namespace Ainan {
 
 		DrawEnvToExportSurface(*editor.m_Env);
 		GetImageFromExportSurfaceToRAM();
+		if (Renderer::Rdata->API == RendererType::OpenGL)
+			m_ExportTargetImage->FlipHorizontally();
 		const AVPixelFormat fmt = AV_PIX_FMT_YUV420P;
 
 		AVFormatContext* fContext = nullptr;
@@ -463,6 +474,8 @@ namespace Ainan {
 			editor.Update();
 			DrawEnvToExportSurface(*editor.m_Env);
 			GetImageFromExportSurfaceToRAM();
+			if (Renderer::Rdata->API == RendererType::OpenGL)
+				m_ExportTargetImage->FlipHorizontally();
 			updateUI(2, 2, (float)i / totalFrameCount);
 		}
 		av_packet_unref(pkt);

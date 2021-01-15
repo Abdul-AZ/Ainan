@@ -15,6 +15,11 @@ namespace Ainan {
 		m_Texture = Renderer::CreateTexture(img);
 	}
 
+	Sprite::~Sprite()
+	{
+		Renderer::DestroyTexture(m_Texture);
+	}
+
 	void Sprite::Update(const float deltaTime)
 	{
 	}
@@ -35,7 +40,7 @@ namespace Ainan {
 
 		ImGui::Text("Texture: ");
 		ImGui::SameLine();
-		ImGui::Image(m_Texture->GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
+		ImGui::Image((void*)m_Texture.GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 
 		if (ImGui::BeginCombo("##Texture: ", m_TexturePath == "" ? "None" : m_TexturePath.filename().u8string().c_str()))
 		{
@@ -91,8 +96,7 @@ namespace Ainan {
 
 	void Sprite::LoadTextureFromFile(const std::string& path)
 	{
-		m_Texture.reset();
-
+		Renderer::DestroyTexture(m_Texture);
 
 		Image img = Image::LoadFromFile(path);
 

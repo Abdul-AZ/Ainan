@@ -12,6 +12,11 @@ namespace Ainan {
 		UpdateNoiseTex();
 	}
 
+	NoiseCustomizer::~NoiseCustomizer()
+	{
+		Renderer::DestroyTexture(NoisePreviewTexture);
+	}
+
 #define SET_GUI_POS_INPUT() ImGui::SameLine();\
 		ImGui::SetCursorPosX(NOISE_WINDOW_INPUT_GUI_START_X)
 
@@ -130,7 +135,7 @@ namespace Ainan {
 
 				ImGui::Text("Noise Preview: ");
 				SET_GUI_POS_INPUT();
-				ImGui::Image(NoisePreviewTexture->GetTextureID(), ImVec2(128, 128),
+				ImGui::Image((void*)NoisePreviewTexture.GetTextureID(), ImVec2(128, 128),
 					ImVec2(0,0), ImVec2(1,1),ImVec4(1, 1, 1, 1), ImVec4(0.9, 0.9, 0.9, 1));
 			}
 
@@ -200,7 +205,7 @@ namespace Ainan {
 		}
 
 		//send image to the gpu
-		NoisePreviewTexture->SetImage(img);
+		NoisePreviewTexture.SetImage(img);
 	}
 }
 

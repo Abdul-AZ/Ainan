@@ -7,6 +7,12 @@ namespace Ainan {
 	{
 	}
 
+	TextureCustomizer::~TextureCustomizer()
+	{
+		if (ParticleTexture.IsValid())
+			Renderer::DestroyTexture(ParticleTexture);
+	}
+
 	TextureCustomizer::TextureCustomizer(const TextureCustomizer& customizer)
 	{
 		UseDefaultTexture = customizer.UseDefaultTexture;
@@ -46,6 +52,7 @@ namespace Ainan {
 						if (textureFileName != "Default") 
 						{
 							ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(tex.u8string()));
+							Renderer::WaitUntilRendererIdle(); //TEMPORARY FIX 
 							
 							UseDefaultTexture = false;
 							m_TexturePath = tex.lexically_relative(AssetManager::s_EnvironmentDirectory).u8string();
@@ -56,10 +63,11 @@ namespace Ainan {
 				ImGui::EndCombo();
 			}
 
-			if (!UseDefaultTexture) {
+			if (!UseDefaultTexture) 
+			{
 				ImGui::Text("Current Selected Texture");
-				if(ParticleTexture)
-					ImGui::Image(ParticleTexture->GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
+				if (ParticleTexture.IsValid())
+					ImGui::Image((void*)ParticleTexture.GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 			}
 
 			ImGui::TreePop();

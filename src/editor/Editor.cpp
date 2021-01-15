@@ -37,6 +37,15 @@ namespace Ainan
 
 	Editor::~Editor()
 	{
+		Renderer::DestroyTexture(m_PlayButtonTexture);
+		Renderer::DestroyTexture(m_PauseButtonTexture);
+		Renderer::DestroyTexture(m_StopButtonTexture);
+		Renderer::DestroyTexture(m_SpriteIconTexture);
+		Renderer::DestroyTexture(m_LitSpriteIconTexture);
+		Renderer::DestroyTexture(m_ParticleSystemIconTexture);
+		Renderer::DestroyTexture(m_RadialLightIconTexture);
+		Renderer::DestroyTexture(m_SpotLightIconTexture);
+
 		delete m_Env;
 		m_Preferences.SaveToDefaultPath();
 
@@ -51,6 +60,12 @@ namespace Ainan
 
 	void Editor::Update()
 	{
+		FrameCounter++;
+		if (FrameCounter > c_ApplicationFramerate)
+			FrameCounter = 0;
+		if ((FrameCounter % c_ApplicationFramerate) == 0)
+			m_GPUMemAllocated = Renderer::GetUsedGPUMemory();
+
 		if (m_ShouldDeleteEnv)
 		{
 			delete m_Env;
@@ -471,12 +486,12 @@ namespace Ainan
 
 	void Editor::DrawEnvironment(bool drawWorldSpaceUI)
 	{
-		m_RenderSurface.SurfaceFrameBuffer->Bind();
+		m_RenderSurface.SurfaceFramebuffer.Bind();
 		Renderer::ClearScreen();
 
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
-		desc.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -484,7 +499,6 @@ namespace Ainan
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
 			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(Renderer::Rdata->DataMutex);
 			if (obj->Type == RadialLightType)
 			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
@@ -496,8 +510,6 @@ namespace Ainan
 				Renderer::AddSpotLight(light->Position, light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
 			}
 		}
-
-		//m_Background.Draw(*m_Env);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
@@ -513,14 +525,14 @@ namespace Ainan
 		//draw the UI as a different scene on top of the environment scene
 		SceneDescription descUI;
 		descUI.SceneCamera = m_Camera;
-		descUI.SceneDrawTarget = &m_RenderSurface.SurfaceFrameBuffer;
+		descUI.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
 		descUI.Blur = false;
 		descUI.BlurRadius = 0;
 		Renderer::SetBlendMode(RenderingBlendMode::Screen);
 
 		Renderer::BeginScene(descUI);
 
-		m_RenderSurface.SurfaceFrameBuffer->Bind();
+		m_RenderSurface.SurfaceFramebuffer.Bind();
 
 		if (drawWorldSpaceUI)
 		{
@@ -566,10 +578,7 @@ namespace Ainan
 				}
 			}
 
-			Renderer::PushCommand([]()
-				{
-					Renderer::FlushQuadBatch();
-				});
+					//Renderer::FlushQuadBatch();
 
 			for (pEnvironmentObject& obj : m_Env->Objects)
 				if (obj->Selected)
@@ -593,6 +602,7 @@ namespace Ainan
 			m_Exporter.DrawOutline();
 		}
 		Renderer::EndScene();
+		Renderer::WaitUntilRendererIdle();
 		//revert to the scene rendering mode
 		Renderer::SetBlendMode(m_Env->BlendMode);
 	}
@@ -677,7 +687,7 @@ namespace Ainan
 
 		InputManager::DisplayGUI();
 
-		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
+		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFramebuffer);
 	}
 
 	void Editor::OnEnvironmentLoad()
@@ -796,7 +806,7 @@ namespace Ainan
 		//code for displaying each of the control buttons in lambdas so that we can reuse it
 		auto displayPlayButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 playButtonoTint = s_playButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton(m_PlayButtonTexture->GetTextureID(),
+			if (ImGui::ImageButton((void*)m_PlayButtonTexture.GetTextureID(),
 				c_buttonSize,
 				ImVec2(0, 0),
 				ImVec2(1, 1),
@@ -820,7 +830,7 @@ namespace Ainan
 
 		auto displayStopButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 stopButtonoTint = s_stopButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton(m_StopButtonTexture->GetTextureID(),
+			if (ImGui::ImageButton((void*)m_StopButtonTexture.GetTextureID(),
 				ImVec2(50, 50),
 				ImVec2(0, 0),
 				ImVec2(1, 1),
@@ -844,7 +854,7 @@ namespace Ainan
 
 		auto displayPauseButton = [this, &bgColor, &buttonColor, &buttonHoveredColor, &c_buttonSize]() {
 			ImVec4 pauseButtonoTint = s_pauseButtonHovered ? buttonHoveredColor : buttonColor;
-			if (ImGui::ImageButton(m_PauseButtonTexture->GetTextureID(),
+			if (ImGui::ImageButton((void*)m_PauseButtonTexture.GetTextureID(),
 				ImVec2(50, 50),
 				ImVec2(0, 0),
 				ImVec2(1, 1),
@@ -1008,23 +1018,23 @@ namespace Ainan
 				switch (m_Env->Objects[i]->Type)
 				{
 				case SpriteType:
-					icon = m_SpriteIconTexture->GetTextureID();
+					icon = (void*)m_SpriteIconTexture.GetTextureID();
 					break;
 
 				case LitSpriteType:
-					icon = m_LitSpriteIconTexture->GetTextureID();
+					icon = (void*)m_LitSpriteIconTexture.GetTextureID();
 					break;
 
 				case ParticleSystemType:
-					icon = m_ParticleSystemIconTexture->GetTextureID();
+					icon = (void*)m_ParticleSystemIconTexture.GetTextureID();
 					break;
 
 				case RadialLightType:
-					icon = m_RadialLightIconTexture->GetTextureID();
+					icon = (void*)m_RadialLightIconTexture.GetTextureID();
 					break;
 
 				case SpotLightType:
-					icon = m_SpotLightIconTexture->GetTextureID();
+					icon = (void*)m_SpotLightIconTexture.GetTextureID();
 					break;
 				}
 				//display the image in the same line
@@ -1473,7 +1483,7 @@ namespace Ainan
 			{
 				//calculate fps when we dont have uninitilized values
 				if (std::find(m_DeltaTimeHistory.begin(), m_DeltaTimeHistory.end(), 0.0f) == m_DeltaTimeHistory.end())
-					m_AverageFPS = 1.0f / (std::accumulate(m_DeltaTimeHistory.begin(), m_DeltaTimeHistory.end(), 0.0f) / m_DeltaTimeHistory.size());
+					m_AverageFPS = std::round(1.0f / (std::accumulate(m_DeltaTimeHistory.begin(), m_DeltaTimeHistory.end(), 0.0f) / m_DeltaTimeHistory.size()));
 				else
 					m_AverageFPS = 0;
 				frameCounter = 1;
@@ -1495,29 +1505,36 @@ namespace Ainan
 
 			ImGui::Text("Textures: ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->ReservedTextures.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->Textures.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   VBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->ReservedVertexBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->VertexBuffers.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   EBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->ReservedIndexBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->IndexBuffers.size()).c_str());
 
 			ImGui::SameLine();
 			ImGui::Text("   UBO(s): ");
 			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->ReservedUniformBuffers.size()).c_str());
+			ImGui::Text(std::to_string(Renderer::Rdata->UniformBuffers.size()).c_str());
 
+			bool displayTooltip = false;
 			ImGui::SameLine();
 			ImGui::Text("   Used GPU Memory: ");
+			displayTooltip |= ImGui::IsItemHovered();
 			ImGui::SameLine();
 			ImGui::Text(std::to_string(m_GPUMemAllocated / (1024 * 1024)).c_str());
+			displayTooltip |= ImGui::IsItemHovered();
 			ImGui::SameLine();
 			ImGui::Text("Mb");
+			displayTooltip |= ImGui::IsItemHovered();
+
+			if(displayTooltip)
+				ImGui::SetTooltip((std::to_string(m_GPUMemAllocated / (1024)) + " KB").c_str());
 		}
 		break;
 
@@ -1662,7 +1679,7 @@ namespace Ainan
 
 	void Editor::UpdateTitle()
 	{
-		RendererType currentRendererType = Renderer::Rdata->CurrentActiveAPI->GetContext()->GetType();
+		RendererType currentRendererType = Renderer::Rdata->API;
 
 		std::string environmentName = "";
 		if (m_Env)

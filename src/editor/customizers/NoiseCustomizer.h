@@ -11,6 +11,7 @@ namespace Ainan {
 	{
 	public:
 		NoiseCustomizer();
+		~NoiseCustomizer();
 		void DisplayGUI();
 
 		void ApplyNoise(glm::vec2& pos, glm::vec2& velocity, glm::vec2& acceleration, uint32_t index = 0);
@@ -84,7 +85,7 @@ namespace Ainan {
 		}
 
 	public:
-		std::shared_ptr<Texture> NoisePreviewTexture;
+		Texture NoisePreviewTexture;
 
 	private:
 		void UpdateNoiseTex();
