@@ -499,7 +499,6 @@ namespace Ainan
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
 			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(Renderer::Rdata->DataMutex);
 			if (obj->Type == RadialLightType)
 			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
@@ -1484,7 +1483,7 @@ namespace Ainan
 			{
 				//calculate fps when we dont have uninitilized values
 				if (std::find(m_DeltaTimeHistory.begin(), m_DeltaTimeHistory.end(), 0.0f) == m_DeltaTimeHistory.end())
-					m_AverageFPS = 1.0f / (std::accumulate(m_DeltaTimeHistory.begin(), m_DeltaTimeHistory.end(), 0.0f) / m_DeltaTimeHistory.size());
+					m_AverageFPS = std::round(1.0f / (std::accumulate(m_DeltaTimeHistory.begin(), m_DeltaTimeHistory.end(), 0.0f) / m_DeltaTimeHistory.size()));
 				else
 					m_AverageFPS = 0;
 				frameCounter = 1;

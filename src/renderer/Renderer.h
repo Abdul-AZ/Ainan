@@ -3,6 +3,7 @@
 #include "editor/Camera.h"
 
 #include "RenderCommand.h"
+#include "RenderCommandQueue.h"
 #include "RendererAPI.h"
 #include "ShaderProgram.h"
 #include "VertexBuffer.h"
@@ -152,14 +153,7 @@ namespace Ainan {
 			//sync objects
 			std::thread Thread;
 			bool DestroyThread = false;
-			std::mutex DataMutex;
-			std::queue<RenderCommand> CommandBuffer;
-			
-			std::mutex QueueMutex;
-			std::condition_variable cv;
-			std::atomic_bool payload = false;
-			std::condition_variable WorkDoneCV;
-			std::mutex WorkDoneMutex;
+			RenderCommandQueue CommandQueue;
 
 			//GPU objects
 			std::unordered_map<uint32_t, VertexBufferDataView> VertexBuffers;

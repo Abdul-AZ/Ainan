@@ -87,7 +87,6 @@ namespace Ainan {
 
 		//signal and wait for the renderer thread to stop
 		Rdata->DestroyThread = true;
-		Rdata->cv.notify_all();
 		Rdata->Thread.join();
 
 		CleanupDeletedObjects();
@@ -342,31 +341,20 @@ namespace Ainan {
 			"             Version: " + Rdata->CurrentActiveAPI->GetContext()->GetVersionString() +
 			"             Physical Device: " + Rdata->CurrentActiveAPI->GetContext()->GetPhysicalDeviceName());
 
+		auto execCmd = [](const RenderCommand& cmd)
+		{
+			if (cmd.Type == RenderCommandType::CustomCommand)
+				cmd.CustomCommand();
+			else
+				Rdata->CurrentActiveAPI->ExecuteCommand(cmd);
+		};
 		while (true)
 		{
 			if (Rdata->DestroyThread)
 				break;
 			{
-				{
-					std::unique_lock<std::mutex> lock(Rdata->QueueMutex);
-					Rdata->cv.wait(lock, []() { return Rdata->payload == true || Rdata->DestroyThread; });
-				}
-				RenderCommand cmd;
-				while (Rdata->CommandBuffer.size() > 0)
-				{
-					{
-						std::unique_lock lock(Rdata->QueueMutex);
-						cmd = Rdata->CommandBuffer.front();
-						Rdata->CommandBuffer.pop();
-					}
-
-					if (cmd.Type == RenderCommandType::CustomCommand)
-						cmd.CustomCommand();
-					else
-						Rdata->CurrentActiveAPI->ExecuteCommand(cmd);
-				}
-				Rdata->payload = false;
-				Rdata->WorkDoneCV.notify_all();
+				
+				Rdata->CommandQueue.WaitPopAndExecuteAll(execCmd);
 			}
 		}
 	}
@@ -379,13 +367,7 @@ namespace Ainan {
 
 	void Renderer::PushCommand(RenderCommand cmd)
 	{
-		if (Window::Minimized)
-			return;
-
-		std::unique_lock lock(Rdata->QueueMutex);
-		Rdata->CommandBuffer.push(cmd);
-		Rdata->payload = true;
-		Rdata->cv.notify_one();
+		Rdata->CommandQueue.Push(cmd);
 	}
 
 	void Renderer::BeginScene(const SceneDescription& desc)
@@ -453,9 +435,7 @@ namespace Ainan {
 
 	void Renderer::WaitUntilRendererIdle()
 	{
-		using namespace std::chrono;
-		std::unique_lock lock(Rdata->WorkDoneMutex);
-		while (Rdata->payload == true) Rdata->WorkDoneCV.wait_for(lock, 1ms, []() { return Rdata->payload == false; });
+		Rdata->CommandQueue.WaitUntilIdle();
 	}
 
 	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, Texture texture)
@@ -693,7 +673,6 @@ namespace Ainan {
 
 		Renderer::PushCommand(cmd);
 	}
-
 
 	void Renderer::ImGuiEndFrame()
 	{
