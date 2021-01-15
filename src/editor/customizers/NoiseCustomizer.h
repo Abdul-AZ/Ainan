@@ -85,7 +85,7 @@ namespace Ainan {
 		}
 
 	public:
-		TextureNew NoisePreviewTexture;
+		Texture NoisePreviewTexture;
 
 	private:
 		void UpdateNoiseTex();

@@ -97,7 +97,7 @@ namespace Ainan {
 		VertexLayout layout(2);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 		layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec4);
-		m_VertexBuffer = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibraryNew()["GizmoShader"]);
+		m_VertexBuffer = Renderer::CreateVertexBuffer((void*)arrowVertices, sizeof(arrowVertices), layout, Renderer::ShaderLibrary()["GizmoShader"]);
 
 		if(Renderer::Rdata->API == RendererType::OpenGL)
 			m_IndexBuffer = Renderer::CreateIndexBuffer((uint32_t*)c_OpenGLArrowIndecies, sizeof(c_OpenGLArrowIndecies) / sizeof(uint32_t));
@@ -152,7 +152,7 @@ namespace Ainan {
 			HandleInteration(xposNDC, yposNDC, objectPosition, camera, data);
 
 		//Draw the triangles
-		auto& shader = Renderer::ShaderLibraryNew()["GizmoShader"];
+		auto& shader = Renderer::ShaderLibrary()["GizmoShader"];
 
 		shader.BindUniformBuffer(m_UniformBuffer, 1, RenderingStage::VertexShader);
 		m_UniformBuffer.UpdateData(&data, sizeof(TransformationData));

@@ -87,7 +87,7 @@ namespace Ainan {
 	using VertexLayout = std::vector<VertexLayoutElement>;
 	class ShaderProgram;
 
-	class VertexBufferNew
+	class VertexBuffer
 	{
 	public:
 		uint32_t Identifier;
@@ -96,8 +96,6 @@ namespace Ainan {
 		//offset is the start of the memory location you want to update
 		void UpdateData(int32_t offset, int32_t size, void* data);
 		uint32_t GetUsedMemory() const;
-
-		friend class Renderer;
 	};
 
 	struct VertexBufferDataView

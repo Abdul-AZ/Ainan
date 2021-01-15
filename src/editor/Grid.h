@@ -16,8 +16,8 @@ namespace Ainan {
 
 	private:
 		float m_UnitLength = 0.0f;
-		VertexBufferNew m_VertexBuffer;
-		IndexBufferNew m_IndexBuffer;
-		UniformBufferNew m_TransformUniformBuffer;
+		VertexBuffer m_VertexBuffer;
+		IndexBuffer m_IndexBuffer;
+		UniformBuffer m_TransformUniformBuffer;
 	};
 }

@@ -612,7 +612,7 @@ namespace Ainan {
 				break;
 
 			case RenderCommandType::CreateShaderProgram:
-				CreateShaderProgramNew(cmd);
+				CreateShaderProgram(cmd);
 				break;
 
 			case RenderCommandType::DestroyShaderProgram:
@@ -655,32 +655,32 @@ namespace Ainan {
 				DestroyUniformBufferNew(cmd);
 				break;
 
-			case RenderCommandType::CreateFrameBuffer:
-				CreateFrameBufferNew(cmd);
+			case RenderCommandType::CreateFramebuffer:
+				CreateFramebufferNew(cmd);
 				break;
 
-			case RenderCommandType::BindFrameBufferAsTexture:
-				BindFrameBufferAsTextureNew(cmd);
+			case RenderCommandType::BindFramebufferAsTexture:
+				BindFramebufferAsTextureNew(cmd);
 				break;
 
-			case RenderCommandType::BindFrameBufferAsRenderTarget:
-				BindFrameBufferAsRenderTargetNew(cmd);
+			case RenderCommandType::BindFramebufferAsRenderTarget:
+				BindFramebufferAsRenderTargetNew(cmd);
 				break;
 
 			case RenderCommandType::BindBackBufferAsRenderTarget:
-				BindWindowFrameBufferAsRenderTargetNew(cmd);
+				BindWindowFramebufferAsRenderTargetNew(cmd);
 				break;
 
-			case RenderCommandType::ResizeFrameBuffer:
-				ResizeFrameBufferNew(cmd);
+			case RenderCommandType::ResizeFramebuffer:
+				ResizeFramebufferNew(cmd);
 				break;
 
-			case RenderCommandType::ReadFrameBuffer:
-				ReadFrameBufferNew(cmd);
+			case RenderCommandType::ReadFramebuffer:
+				ReadFramebufferNew(cmd);
 				break;
 
-			case RenderCommandType::DestroyFrameBuffer:
-				DestroyFrameBufferNew(cmd);
+			case RenderCommandType::DestroyFramebuffer:
+				DestroyFramebufferNew(cmd);
 				break;
 
 			case RenderCommandType::CreateTexture:
@@ -716,7 +716,7 @@ namespace Ainan {
 			}
 		}
 
-		void D3D11RendererAPI::CreateShaderProgramNew(const RenderCommand& cmd)
+		void D3D11RendererAPI::CreateShaderProgram(const RenderCommand& cmd)
 		{
 			ShaderProgramCreationInfo* info = cmd.CreateShaderProgramCmdDesc.Info;
 			ShaderProgramDataView* output = cmd.CreateShaderProgramCmdDesc.Output;
@@ -988,10 +988,10 @@ namespace Ainan {
 			cmd.DestroyUniformBufferCmdDesc.Buffer->Deleted = true;
 		}
 
-		void D3D11RendererAPI::CreateFrameBufferNew(const RenderCommand& cmd)
+		void D3D11RendererAPI::CreateFramebufferNew(const RenderCommand& cmd)
 		{
-			FrameBufferCreationInfo* info = cmd.CreateFrameBufferCmdDesc.Info;
-			FrameBufferDataView* output = cmd.CreateFrameBufferCmdDesc.Output;
+			FramebufferCreationInfo* info = cmd.CreateFramebufferCmdDesc.Info;
+			FramebufferDataView* output = cmd.CreateFramebufferCmdDesc.Output;
 
 			D3D11_TEXTURE2D_DESC desc{};
 			desc.Width = info->Size.x;
@@ -1032,11 +1032,11 @@ namespace Ainan {
 			delete info;
 		}
 
-		void D3D11RendererAPI::BindFrameBufferAsTextureNew(const RenderCommand& cmd)
+		void D3D11RendererAPI::BindFramebufferAsTextureNew(const RenderCommand& cmd)
 		{
-			uint32_t slot = cmd.BindFrameBufferAsTextureCmdDesc.Slot;
-			FrameBufferDataView* buffer = cmd.BindFrameBufferAsTextureCmdDesc.Buffer;
-			switch (cmd.BindFrameBufferAsTextureCmdDesc.Stage)
+			uint32_t slot = cmd.BindFramebufferAsTextureCmdDesc.Slot;
+			FramebufferDataView* buffer = cmd.BindFramebufferAsTextureCmdDesc.Buffer;
+			switch (cmd.BindFramebufferAsTextureCmdDesc.Stage)
 			{
 			case RenderingStage::VertexShader:
 				Context.DeviceContext->VSSetShaderResources(slot, 1, (ID3D11ShaderResourceView**)&buffer->ResourceIdentifier);
@@ -1050,27 +1050,27 @@ namespace Ainan {
 			}
 		}
 
-		void D3D11RendererAPI::BindFrameBufferAsRenderTargetNew(const RenderCommand& cmd)
+		void D3D11RendererAPI::BindFramebufferAsRenderTargetNew(const RenderCommand& cmd)
 		{
-			Context.DeviceContext->OMSetRenderTargets(1, (ID3D11RenderTargetView**)&cmd.BindFrameBufferAsRenderTargetCmdDesc.Buffer->Identifier, nullptr);
+			Context.DeviceContext->OMSetRenderTargets(1, (ID3D11RenderTargetView**)&cmd.BindFramebufferAsRenderTargetCmdDesc.Buffer->Identifier, nullptr);
 		}
 
-		void D3D11RendererAPI::BindWindowFrameBufferAsRenderTargetNew(const RenderCommand& cmd)
+		void D3D11RendererAPI::BindWindowFramebufferAsRenderTargetNew(const RenderCommand& cmd)
 		{
 			Context.DeviceContext->OMSetRenderTargets(1, &Context.BackbufferView, nullptr);
 		}
 
-		void D3D11RendererAPI::ResizeFrameBufferNew(const RenderCommand& cmd)
+		void D3D11RendererAPI::ResizeFramebufferNew(const RenderCommand& cmd)
 		{
-			((ID3D11RenderTargetView*)cmd.ResizeFrameBufferCmdDesc.Buffer->Identifier)->Release();
-			((ID3D11Texture2D*)cmd.ResizeFrameBufferCmdDesc.Buffer->TextureIdentifier)->Release();
-			((ID3D11ShaderResourceView*)cmd.ResizeFrameBufferCmdDesc.Buffer->ResourceIdentifier)->Release();
+			((ID3D11RenderTargetView*)cmd.ResizeFramebufferCmdDesc.Buffer->Identifier)->Release();
+			((ID3D11Texture2D*)cmd.ResizeFramebufferCmdDesc.Buffer->TextureIdentifier)->Release();
+			((ID3D11ShaderResourceView*)cmd.ResizeFramebufferCmdDesc.Buffer->ResourceIdentifier)->Release();
 
-			cmd.ResizeFrameBufferCmdDesc.Buffer->Size = glm::vec2(cmd.ResizeFrameBufferCmdDesc.Width, cmd.ResizeFrameBufferCmdDesc.Height);
+			cmd.ResizeFramebufferCmdDesc.Buffer->Size = glm::vec2(cmd.ResizeFramebufferCmdDesc.Width, cmd.ResizeFramebufferCmdDesc.Height);
 
 			D3D11_TEXTURE2D_DESC desc{};
-			desc.Width = cmd.ResizeFrameBufferCmdDesc.Buffer->Size.x;
-			desc.Height = cmd.ResizeFrameBufferCmdDesc.Buffer->Size.y;
+			desc.Width = cmd.ResizeFramebufferCmdDesc.Buffer->Size.x;
+			desc.Height = cmd.ResizeFramebufferCmdDesc.Buffer->Size.y;
 			desc.SampleDesc.Count = 1;
 			desc.Usage = D3D11_USAGE_DEFAULT;
 			desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
@@ -1079,30 +1079,30 @@ namespace Ainan {
 			desc.MipLevels = 1;
 			desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
-			ASSERT_D3D_CALL(Context.Device->CreateTexture2D(&desc, nullptr, (ID3D11Texture2D**)&cmd.ResizeFrameBufferCmdDesc.Buffer->TextureIdentifier));
+			ASSERT_D3D_CALL(Context.Device->CreateTexture2D(&desc, nullptr, (ID3D11Texture2D**)&cmd.ResizeFramebufferCmdDesc.Buffer->TextureIdentifier));
 
 			D3D11_SHADER_RESOURCE_VIEW_DESC textureViewDesc{};
 			textureViewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 			textureViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			textureViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			textureViewDesc.Texture2D.MipLevels = 1;
-			ASSERT_D3D_CALL(Context.Device->CreateShaderResourceView((ID3D11Texture2D*)cmd.ResizeFrameBufferCmdDesc.Buffer->TextureIdentifier, &textureViewDesc, (ID3D11ShaderResourceView**)&cmd.ResizeFrameBufferCmdDesc.Buffer->ResourceIdentifier));
+			ASSERT_D3D_CALL(Context.Device->CreateShaderResourceView((ID3D11Texture2D*)cmd.ResizeFramebufferCmdDesc.Buffer->TextureIdentifier, &textureViewDesc, (ID3D11ShaderResourceView**)&cmd.ResizeFramebufferCmdDesc.Buffer->ResourceIdentifier));
 
 
 			D3D11_RENDER_TARGET_VIEW_DESC viewDesc{};
 			viewDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 			viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
-			ASSERT_D3D_CALL(Context.Device->CreateRenderTargetView((ID3D11Texture2D*)cmd.ResizeFrameBufferCmdDesc.Buffer->TextureIdentifier, &viewDesc, (ID3D11RenderTargetView**)&cmd.ResizeFrameBufferCmdDesc.Buffer->Identifier));
+			ASSERT_D3D_CALL(Context.Device->CreateRenderTargetView((ID3D11Texture2D*)cmd.ResizeFramebufferCmdDesc.Buffer->TextureIdentifier, &viewDesc, (ID3D11RenderTargetView**)&cmd.ResizeFramebufferCmdDesc.Buffer->Identifier));
 		}
 
-		void D3D11RendererAPI::ReadFrameBufferNew(const RenderCommand& cmd)
+		void D3D11RendererAPI::ReadFramebufferNew(const RenderCommand& cmd)
 		{
-			Image* img = cmd.ReadFrameBufferCmdDesc.Output;
-			glm::vec2 bottomLeftPixel = { cmd.ReadFrameBufferCmdDesc.BottomLeftX, cmd.ReadFrameBufferCmdDesc.BottomLeftY };
-			glm::vec2 topRightPixel = { cmd.ReadFrameBufferCmdDesc.TopRightX, cmd.ReadFrameBufferCmdDesc.TopRightY };
+			Image* img = cmd.ReadFramebufferCmdDesc.Output;
+			glm::vec2 bottomLeftPixel = { cmd.ReadFramebufferCmdDesc.BottomLeftX, cmd.ReadFramebufferCmdDesc.BottomLeftY };
+			glm::vec2 topRightPixel = { cmd.ReadFramebufferCmdDesc.TopRightX, cmd.ReadFramebufferCmdDesc.TopRightY };
 
-			topRightPixel = cmd.ReadFrameBufferCmdDesc.Buffer->Size;
+			topRightPixel = cmd.ReadFramebufferCmdDesc.Buffer->Size;
 
 			//create a staging texture
 			ID3D11Texture2D* stagingTexture = nullptr;
@@ -1121,7 +1121,7 @@ namespace Ainan {
 			ASSERT_D3D_CALL(Context.Device->CreateTexture2D(&desc, nullptr, &stagingTexture));
 
 			//TODO support cpying parts of the framebuffer and not just all of it
-			Context.DeviceContext->CopyResource(stagingTexture, (ID3D11Resource*)cmd.ReadFrameBufferCmdDesc.Buffer->TextureIdentifier);
+			Context.DeviceContext->CopyResource(stagingTexture, (ID3D11Resource*)cmd.ReadFramebufferCmdDesc.Buffer->TextureIdentifier);
 
 			D3D11_MAPPED_SUBRESOURCE resource{};
 
@@ -1148,13 +1148,13 @@ namespace Ainan {
 			stagingTexture->Release();
 		}
 
-		void D3D11RendererAPI::DestroyFrameBufferNew(const RenderCommand& cmd)
+		void D3D11RendererAPI::DestroyFramebufferNew(const RenderCommand& cmd)
 		{
-			((ID3D11SamplerState*)cmd.DestroyFrameBufferCmdDesc.Buffer->SamplerIdentifier)->Release();
-			((ID3D11ShaderResourceView*)cmd.DestroyFrameBufferCmdDesc.Buffer->ResourceIdentifier)->Release();
-			((ID3D11RenderTargetView*)cmd.DestroyFrameBufferCmdDesc.Buffer->Identifier)->Release();
-			((ID3D11Texture2D*)cmd.DestroyFrameBufferCmdDesc.Buffer->TextureIdentifier)->Release();
-			cmd.DestroyFrameBufferCmdDesc.Buffer->Deleted = true;
+			((ID3D11SamplerState*)cmd.DestroyFramebufferCmdDesc.Buffer->SamplerIdentifier)->Release();
+			((ID3D11ShaderResourceView*)cmd.DestroyFramebufferCmdDesc.Buffer->ResourceIdentifier)->Release();
+			((ID3D11RenderTargetView*)cmd.DestroyFramebufferCmdDesc.Buffer->Identifier)->Release();
+			((ID3D11Texture2D*)cmd.DestroyFramebufferCmdDesc.Buffer->TextureIdentifier)->Release();
+			cmd.DestroyFramebufferCmdDesc.Buffer->Deleted = true;
 		}
 
 		void D3D11RendererAPI::CreateTextureNew(const RenderCommand& cmd)

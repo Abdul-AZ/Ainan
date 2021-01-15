@@ -43,7 +43,7 @@ namespace Ainan {
 		int32_t m_HeightRatio = 9;
 
 		Image* m_ExportTargetImage = nullptr;
-		TextureNew m_ExportTargetTexture;
+		Texture m_ExportTargetTexture;
 
 		Camera Camera;
 		RenderSurface m_RenderSurface;
@@ -81,8 +81,8 @@ namespace Ainan {
 
 		bool m_DrawExportCamera = false;
 		std::array<glm::vec2, 4> m_OutlineVertices;
-		VertexBufferNew m_OutlineVertexBuffer;
-		UniformBufferNew m_OutlineUniformBuffer;
+		VertexBuffer m_OutlineVertexBuffer;
+		UniformBuffer m_OutlineUniformBuffer;
 		ExportMode m_Mode = ExportMode::Picture;
 
 		std::string GetModeString(ExportMode mode)

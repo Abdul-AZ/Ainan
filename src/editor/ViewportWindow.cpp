@@ -5,7 +5,7 @@
 
 namespace Ainan {
 
-	void ViewportWindow::DisplayGUI(FrameBufferNew fb)
+	void ViewportWindow::DisplayGUI(Framebuffer fb)
 	{
 		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 

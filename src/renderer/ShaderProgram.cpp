@@ -1,12 +1,12 @@
 #include "ShaderProgram.h"
 
 #include "UniformBuffer.h"
-#include "FrameBuffer.h"
+#include "Framebuffer.h"
 #include "Renderer.h"
 
 namespace Ainan
 {
-	void ShaderProgramNew::BindUniformBuffer(UniformBufferNew buffer, uint32_t slot, RenderingStage stage)
+	void ShaderProgram::BindUniformBuffer(UniformBuffer buffer, uint32_t slot, RenderingStage stage)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::BindUniformBuffer;
@@ -17,7 +17,7 @@ namespace Ainan
 		Renderer::PushCommand(cmd);
 	}
 
-	void ShaderProgramNew::BindTexture(TextureNew texture, uint32_t slot, RenderingStage stage)
+	void ShaderProgram::BindTexture(Texture texture, uint32_t slot, RenderingStage stage)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::BindTexture;
@@ -28,13 +28,13 @@ namespace Ainan
 		Renderer::PushCommand(cmd);
 	}
 
-	void ShaderProgramNew::BindTexture(FrameBufferNew fb, uint32_t slot, RenderingStage stage)
+	void ShaderProgram::BindTexture(Framebuffer fb, uint32_t slot, RenderingStage stage)
 	{
 		RenderCommand cmd;
-		cmd.Type = RenderCommandType::BindFrameBufferAsTexture;
-		cmd.BindFrameBufferAsTextureCmdDesc.Buffer = &Renderer::Rdata->FrameBuffers[fb.Identifier];
-		cmd.BindFrameBufferAsTextureCmdDesc.Slot = slot;
-		cmd.BindFrameBufferAsTextureCmdDesc.Stage = stage;
+		cmd.Type = RenderCommandType::BindFramebufferAsTexture;
+		cmd.BindFramebufferAsTextureCmdDesc.Buffer = &Renderer::Rdata->Framebuffers[fb.Identifier];
+		cmd.BindFramebufferAsTextureCmdDesc.Slot = slot;
+		cmd.BindFramebufferAsTextureCmdDesc.Stage = stage;
 
 		Renderer::PushCommand(cmd);
 	}

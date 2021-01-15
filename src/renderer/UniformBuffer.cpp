@@ -5,7 +5,7 @@
 
 namespace Ainan
 {
-	void UniformBufferNew::UpdateData(void* data, uint32_t packedDataSizeofBuffer)
+	void UniformBuffer::UpdateData(void* data, uint32_t packedDataSizeofBuffer)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::UpdateUniformBuffer;

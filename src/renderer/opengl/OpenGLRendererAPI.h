@@ -68,8 +68,8 @@ namespace Ainan {
 
 			virtual void ExecuteCommand(RenderCommand cmd) override;
 			void DrawIndexedWithNewAPI(const RenderCommand& cmd);
-			void CreateFrameBuffer(const RenderCommand& cmd);
-			void CreateShaderProgramNew(const RenderCommand& cmd);
+			void CreateFramebuffer(const RenderCommand& cmd);
+			void CreateShaderProgram(const RenderCommand& cmd);
 			void CreateUniformBuffer(const RenderCommand& cmd);
 			void DestroyUniformBuffer(const RenderCommand& cmd);
 			void CreateIndexBuffer(const RenderCommand& cmd);
@@ -80,8 +80,8 @@ namespace Ainan {
 			void DestroyIndexBuffer(const RenderCommand& cmd);
 			void UpdateVertexBufferNew(const RenderCommand& cmd);
 			void DrawIndexedWithCustomNumberOfVertices(const RenderCommand& cmd);
-			void ReadFrameBuffer(const RenderCommand& cmd);
-			void DestroyFrameBufferNew(const RenderCommand& cmd);
+			void ReadFramebuffer(const RenderCommand& cmd);
+			void DestroyFramebufferNew(const RenderCommand& cmd);
 			void CreateTexture(const RenderCommand& cmd);
 			void UpdateTextureNew(const RenderCommand& cmd);
 			void DestroyTexture(const RenderCommand& cmd);

@@ -210,7 +210,7 @@ namespace Ainan {
 				break;
 
 			case RenderCommandType::CreateShaderProgram:
-				CreateShaderProgramNew(cmd);
+				CreateShaderProgram(cmd);
 				break;
 			
 			case RenderCommandType::DestroyShaderProgram:
@@ -234,21 +234,21 @@ namespace Ainan {
 				DestroyIndexBuffer(cmd);
 				break;
 
-			case RenderCommandType::CreateFrameBuffer:
-				CreateFrameBuffer(cmd);
+			case RenderCommandType::CreateFramebuffer:
+				CreateFramebuffer(cmd);
 				break;
 
-			case RenderCommandType::BindFrameBufferAsTexture:
-				glActiveTexture(GL_TEXTURE0 + cmd.BindFrameBufferAsTextureCmdDesc.Slot);
-				glBindTexture(GL_TEXTURE_2D, cmd.BindFrameBufferAsTextureCmdDesc.Buffer->TextureIdentifier);
+			case RenderCommandType::BindFramebufferAsTexture:
+				glActiveTexture(GL_TEXTURE0 + cmd.BindFramebufferAsTextureCmdDesc.Slot);
+				glBindTexture(GL_TEXTURE_2D, cmd.BindFramebufferAsTextureCmdDesc.Buffer->TextureIdentifier);
 				break;
 
-			case RenderCommandType::ReadFrameBuffer:
-				ReadFrameBuffer(cmd);
+			case RenderCommandType::ReadFramebuffer:
+				ReadFramebuffer(cmd);
 				break;
 
-			case RenderCommandType::DestroyFrameBuffer:
-				DestroyFrameBufferNew(cmd);
+			case RenderCommandType::DestroyFramebuffer:
+				DestroyFramebufferNew(cmd);
 				break;
 
 			case RenderCommandType::CreateTexture:
@@ -284,14 +284,14 @@ namespace Ainan {
 				glBindTexture(GL_TEXTURE_2D, (uint32_t)cmd.BindTextureProgramCmdDesc.Texture->Identifier);
 				break;
 
-			case RenderCommandType::ResizeFrameBuffer:
-				glBindTexture(GL_TEXTURE_2D, cmd.ResizeFrameBufferCmdDesc.Buffer->TextureIdentifier);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, cmd.ResizeFrameBufferCmdDesc.Width, cmd.ResizeFrameBufferCmdDesc.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+			case RenderCommandType::ResizeFramebuffer:
+				glBindTexture(GL_TEXTURE_2D, cmd.ResizeFramebufferCmdDesc.Buffer->TextureIdentifier);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, cmd.ResizeFramebufferCmdDesc.Width, cmd.ResizeFramebufferCmdDesc.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 				glBindTexture(GL_TEXTURE_2D, 0);
 				break;
 
-			case RenderCommandType::BindFrameBufferAsRenderTarget:
-				glBindFramebuffer(GL_FRAMEBUFFER, cmd.BindFrameBufferAsRenderTargetCmdDesc.Buffer->Identifier);
+			case RenderCommandType::BindFramebufferAsRenderTarget:
+				glBindFramebuffer(GL_FRAMEBUFFER, cmd.BindFramebufferAsRenderTargetCmdDesc.Buffer->Identifier);
 				break;
 
 			case RenderCommandType::BindBackBufferAsRenderTarget:
@@ -313,10 +313,10 @@ namespace Ainan {
 			glUseProgram(0);
 		}
 
-		void OpenGLRendererAPI::CreateFrameBuffer(const RenderCommand& cmd)
+		void OpenGLRendererAPI::CreateFramebuffer(const RenderCommand& cmd)
 		{
-			FrameBufferCreationInfo* info = cmd.CreateFrameBufferCmdDesc.Info;
-			FrameBufferDataView* output = cmd.CreateFrameBufferCmdDesc.Output;
+			FramebufferCreationInfo* info = cmd.CreateFramebufferCmdDesc.Info;
+			FramebufferDataView* output = cmd.CreateFramebufferCmdDesc.Output;
 			
 			uint32_t bufferHandle, textureHandle;
 			glGenFramebuffers(1, &bufferHandle);
@@ -339,7 +339,7 @@ namespace Ainan {
 			delete info;
 		}
 
-		void OpenGLRendererAPI::CreateShaderProgramNew(const RenderCommand& cmd)
+		void OpenGLRendererAPI::CreateShaderProgram(const RenderCommand& cmd)
 		{
 			ShaderProgramCreationInfo* info = cmd.CreateShaderProgramCmdDesc.Info;
 			ShaderProgramDataView* output = cmd.CreateShaderProgramCmdDesc.Output;
@@ -569,12 +569,12 @@ namespace Ainan {
 				cmd.DrawIndexedWithCustomNumberOfVerticesCmdDesc.IndexCount, GL_UNSIGNED_INT, nullptr);
 		}
 
-		void OpenGLRendererAPI::ReadFrameBuffer(const RenderCommand& cmd)
+		void OpenGLRendererAPI::ReadFramebuffer(const RenderCommand& cmd)
 		{
-			Image* img = cmd.ReadFrameBufferCmdDesc.Output;
-			FrameBufferDataView* buffer = cmd.ReadFrameBufferCmdDesc.Buffer;
-			glm::vec2 bottomLeftPixel = { cmd.ReadFrameBufferCmdDesc.BottomLeftX, cmd.ReadFrameBufferCmdDesc.BottomLeftY };
-			glm::vec2 topRightPixel = { cmd.ReadFrameBufferCmdDesc.TopRightX, cmd.ReadFrameBufferCmdDesc.TopRightY };
+			Image* img = cmd.ReadFramebufferCmdDesc.Output;
+			FramebufferDataView* buffer = cmd.ReadFramebufferCmdDesc.Buffer;
+			glm::vec2 bottomLeftPixel = { cmd.ReadFramebufferCmdDesc.BottomLeftX, cmd.ReadFramebufferCmdDesc.BottomLeftY };
+			glm::vec2 topRightPixel = { cmd.ReadFramebufferCmdDesc.TopRightX, cmd.ReadFramebufferCmdDesc.TopRightY };
 
 			img->m_Width = (uint32_t)buffer->Size.x;
 			img->m_Height = (uint32_t)buffer->Size.y;
@@ -593,13 +593,13 @@ namespace Ainan {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 
-		void OpenGLRendererAPI::DestroyFrameBufferNew(const RenderCommand& cmd)
+		void OpenGLRendererAPI::DestroyFramebufferNew(const RenderCommand& cmd)
 		{
-			uint32_t buffer = cmd.DestroyFrameBufferCmdDesc.Buffer->Identifier;
-			uint32_t texture = cmd.DestroyFrameBufferCmdDesc.Buffer->TextureIdentifier;
+			uint32_t buffer = cmd.DestroyFramebufferCmdDesc.Buffer->Identifier;
+			uint32_t texture = cmd.DestroyFramebufferCmdDesc.Buffer->TextureIdentifier;
 			glDeleteFramebuffers(1, &buffer);
 			glDeleteTextures(1, &texture);
-			cmd.DestroyFrameBufferCmdDesc.Buffer->Deleted = true;
+			cmd.DestroyFramebufferCmdDesc.Buffer->Deleted = true;
 		}
 
 		void OpenGLRendererAPI::CreateTexture(const RenderCommand& cmd)

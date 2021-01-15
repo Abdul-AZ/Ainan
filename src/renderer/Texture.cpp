@@ -4,7 +4,7 @@
 
 namespace Ainan
 {
-	void TextureNew::SetImage(std::shared_ptr<Image> image)
+	void Texture::SetImage(std::shared_ptr<Image> image)
 	{
 		//Misc1 size to be interpreted as glm::vec2, Misc2 is Format and Extradata is a heap allocated array that will be freed by delete[]
 		RenderCommand cmd;
@@ -40,7 +40,7 @@ namespace Ainan
 		Renderer::PushCommand(cmd);
 	}
 
-	uint64_t TextureNew::GetTextureID()
+	uint64_t Texture::GetTextureID()
 	{
 		auto& data = Renderer::Rdata->Textures[Identifier];
 		if (data.Sampler == std::numeric_limits<uint64_t>::max())

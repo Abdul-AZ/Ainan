@@ -5,7 +5,7 @@
 
 namespace Ainan
 {
-	void VertexBufferNew::UpdateData(int32_t offset, int32_t size, void* data)
+	void VertexBuffer::UpdateData(int32_t offset, int32_t size, void* data)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::UpdateVertexBuffer;
@@ -18,7 +18,7 @@ namespace Ainan
 		Renderer::PushCommand(cmd);
 	}
 
-	uint32_t VertexBufferNew::GetUsedMemory() const
+	uint32_t VertexBuffer::GetUsedMemory() const
 	{
 		return Renderer::Rdata->VertexBuffers[Identifier].Size;
 	}

@@ -8,7 +8,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Texture.h"
-#include "FrameBuffer.h"
+#include "Framebuffer.h"
 #include "Rectangle.h"
 #include "UniformBuffer.h"
 
@@ -40,7 +40,7 @@ namespace Ainan {
 	struct SceneDescription
 	{
 		Camera SceneCamera = {};								   //Required
-		FrameBufferNew SceneDrawTarget;							   //Required
+		Framebuffer SceneDrawTarget;							   //Required
 		bool Blur = false;										   //Required
 		float BlurRadius = 0.0f;								   //Required if Blur == true
 
@@ -85,15 +85,15 @@ namespace Ainan {
 		static void WaitUntilRendererIdle();
 
 		//position is in world coordinates
-		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, TextureNew texture);
-		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, TextureNew texture);
-		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int32_t count, TextureNew texture);
+		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, Texture texture);
+		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, Texture texture);
+		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int32_t count, Texture texture);
 
-		static void Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, int32_t vertexCount);
+		static void Draw(VertexBuffer vertexBuffer, ShaderProgram shader, Primitive primitive, int32_t vertexCount);
 
-		static void Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, IndexBufferNew indexBuffer, uint32_t indexCount);
+		static void Draw(VertexBuffer vertexBuffer, ShaderProgram shader, Primitive primitive, IndexBuffer indexBuffer, uint32_t indexCount);
 
-		static void Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, IndexBufferNew indexBuffer);
+		static void Draw(VertexBuffer vertexBuffer, ShaderProgram shader, Primitive primitive, IndexBuffer indexBuffer);
 
 		static void ImGuiNewFrame();
 		static void ImGuiEndFrame();
@@ -115,28 +115,28 @@ namespace Ainan {
 
 		static void SetRenderTargetApplicationWindow();
 
-		static VertexBufferNew CreateVertexBuffer(void* data, uint32_t size,
-			const VertexLayout& layout, ShaderProgramNew shaderProgram,
+		static VertexBuffer CreateVertexBuffer(void* data, uint32_t size,
+			const VertexLayout& layout, ShaderProgram shaderProgram,
 			bool dynamic = false);
-		static void DestroyVertexBuffer(VertexBufferNew vb);
+		static void DestroyVertexBuffer(VertexBuffer vb);
 
 		//data should ALWAYS a uint32_t array
-		static IndexBufferNew CreateIndexBuffer(uint32_t* data, uint32_t count);
-		static void DestroyIndexBuffer(IndexBufferNew ib);
+		static IndexBuffer CreateIndexBuffer(uint32_t* data, uint32_t count);
+		static void DestroyIndexBuffer(IndexBuffer ib);
 
-		static UniformBufferNew CreateUniformBuffer(const std::string& name, uint32_t reg, const VertexLayout& layout);
-		static void DestroyUniformBuffer(UniformBufferNew ub);
+		static UniformBuffer CreateUniformBuffer(const std::string& name, uint32_t reg, const VertexLayout& layout);
+		static void DestroyUniformBuffer(UniformBuffer ub);
 
 		//manually create a shader program (mostly used for testing new shaders)
 		//to properly add shaders add them to the CompileOnInit list in the cpp file and access them from the ShaderLibrary member
-		static ShaderProgramNew CreateShaderProgramNew(const std::string& vertPath, const std::string& fragPath);
+		static ShaderProgram CreateShaderProgram(const std::string& vertPath, const std::string& fragPath);
 
-		static FrameBufferNew CreateFrameBuffer(const glm::vec2& size);
-		static void DestroyFrameBuffer(FrameBufferNew fb);
+		static Framebuffer CreateFramebuffer(const glm::vec2& size);
+		static void DestroyFramebuffer(Framebuffer fb);
 
-		static TextureNew CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
-		static TextureNew CreateTexture(Image& img);
-		static void DestroyTexture(TextureNew tex);
+		static Texture CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
+		static Texture CreateTexture(Image& img);
+		static void DestroyTexture(Texture tex);
 
 		static void FlushQuadBatch();
 
@@ -166,19 +166,19 @@ namespace Ainan {
 			std::unordered_map<uint32_t, IndexBufferDataView> IndexBuffers;
 			std::unordered_map<uint32_t, UniformBufferDataView> UniformBuffers;
 			std::unordered_map<uint32_t, ShaderProgramDataView> ShaderPrograms;
-			std::unordered_map<uint32_t, FrameBufferDataView> FrameBuffers;
+			std::unordered_map<uint32_t, FramebufferDataView> Framebuffers;
 			std::unordered_map<uint32_t, TextureDataView> Textures;
 
 			//scene data
 			RendererAPI* CurrentActiveAPI = nullptr;
 			SceneDescription CurrentSceneDescription = {};
-			std::unordered_map<std::string, ShaderProgramNew> ShaderLibraryNew;
-			UniformBufferNew SceneUniformbufferNew;
+			std::unordered_map<std::string, ShaderProgram> ShaderLibrary;
+			UniformBuffer SceneUniformBuffer;
 			RenderingBlendMode m_CurrentBlendMode = RenderingBlendMode::Additive;
 			Rectangle CurrentViewport = { 0, 0, 0, 0 };
 
 			//SceneUniformBuffer
-			struct SceneUniformBuffer
+			struct SceneUniformBufferData
 			{
 				glm::mat4 CurrentViewProjection = glm::mat4(1.0f);
 
@@ -195,24 +195,24 @@ namespace Ainan {
 				std::array<float, c_MaxSpotLightCount> SpotLightOuterCutoffs;
 				std::array<float, c_MaxSpotLightCount> SpotLightIntensities;
 			};
-			SceneUniformBuffer SceneBuffer;
+			SceneUniformBufferData SceneBufferData;
 			int32_t RadialLightSubmissionCount = 0;
 			int32_t SpotLightSubmissionCount = 0;
 
 			//batch renderer data
-			VertexBufferNew QuadBatchVertexBuffer;
-			IndexBufferNew QuadBatchIndexBuffer;
+			VertexBuffer QuadBatchVertexBuffer;
+			IndexBuffer QuadBatchIndexBuffer;
 			QuadVertex* QuadBatchVertexBufferDataOrigin = nullptr;
 			QuadVertex* QuadBatchVertexBufferDataPtr = nullptr;
 			//first one is reserved for blank white texture, so we have c_MaxQuadTexturesPerBatch - 1 textures in total
-			TextureNew WhiteTexture;
-			std::array<TextureNew, c_MaxQuadTexturesPerBatch> QuadBatchTextures;
+			Texture WhiteTexture;
+			std::array<Texture, c_MaxQuadTexturesPerBatch> QuadBatchTextures;
 			uint32_t QuadBatchTextureSlotsUsed = 0;
 
 			//Postprocessing data
-			FrameBufferNew BlurFrameBuffer;
-			VertexBufferNew BlurVertexBuffer;
-			UniformBufferNew BlurUniformBuffer;
+			Framebuffer BlurFramebuffer;
+			VertexBuffer BlurVertexBuffer;
+			UniformBuffer BlurUniformBuffer;
 
 			//profiling data
 			uint32_t NumberOfDrawCallsLastScene = 0;
@@ -222,7 +222,7 @@ namespace Ainan {
 
 		static RendererData* Rdata;
 
-		static decltype(Rdata->ShaderLibraryNew)& ShaderLibraryNew() { return Rdata->ShaderLibraryNew; }
+		static decltype(Rdata->ShaderLibrary)& ShaderLibrary() { return Rdata->ShaderLibrary; }
 
 	private:
 		static void InternalInit(RendererType api);
@@ -230,7 +230,7 @@ namespace Ainan {
 		static void InternalTerminate();
 		static void InitImGuiRendering();
 		static void DrawImGui(ImDrawData* drawData);
-		static void Blur(FrameBufferNew target, float radius);
+		static void Blur(Framebuffer target, float radius);
 		static void CleanupDeletedObjects();
 	};
 

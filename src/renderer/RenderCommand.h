@@ -1,10 +1,9 @@
 #pragma once
 
-//TEMP
 #include "VertexBuffer.h"
 #include "ShaderProgram.h"
 #include "IndexBuffer.h"
-#include "FrameBuffer.h"
+#include "Framebuffer.h"
 #include "Texture.h"
 #include "UniformBuffer.h"
 
@@ -34,13 +33,13 @@ namespace Ainan {
 		UpdateUniformBuffer,
 		DestroyUniformBuffer,
 
-		CreateFrameBuffer,
-		BindFrameBufferAsTexture,
-		BindFrameBufferAsRenderTarget, 
+		CreateFramebuffer,
+		BindFramebufferAsTexture,
+		BindFramebufferAsRenderTarget, 
 		BindBackBufferAsRenderTarget,
-		ResizeFrameBuffer,
-		ReadFrameBuffer,
-		DestroyFrameBuffer, 
+		ResizeFramebuffer,
+		ReadFramebuffer,
+		DestroyFramebuffer, 
 
 		CreateTexture,
 		BindTexture,
@@ -90,7 +89,7 @@ namespace Ainan {
 		uint32_t Count;
 	};
 
-	struct FrameBufferCreationInfo
+	struct FramebufferCreationInfo
 	{
 		glm::vec2 Size;
 	};
@@ -113,7 +112,7 @@ namespace Ainan {
 	class VertexBuffer;
 	class ShaderProgram;
 	class IndexBuffer;
-	class FrameBuffer;
+	class Framebuffer;
 	class Texture;
 	class UniformBuffer;
 
@@ -242,39 +241,39 @@ namespace Ainan {
 
 			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//framebuffer commands
-			struct CreateFrameBufferCmdDescStruct
+			struct CreateFramebufferCmdDescStruct
 			{
 				//create with new, memory is handled internally
-				FrameBufferCreationInfo* Info;
-				FrameBufferDataView* Output;
-			} CreateFrameBufferCmdDesc;
+				FramebufferCreationInfo* Info;
+				FramebufferDataView* Output;
+			} CreateFramebufferCmdDesc;
 			
-			struct BindFrameBufferAsTextureCmdDescStruct
+			struct BindFramebufferAsTextureCmdDescStruct
 			{
-				FrameBufferDataView* Buffer;
+				FramebufferDataView* Buffer;
 				RenderingStage Stage;
 				uint32_t Slot; //This corrosponds to the slot/index in the shader
-			} BindFrameBufferAsTextureCmdDesc;
+			} BindFramebufferAsTextureCmdDesc;
 			
-			struct BindFrameBufferAsRenderTargetCmdDescStruct
+			struct BindFramebufferAsRenderTargetCmdDescStruct
 			{
-				FrameBufferDataView* Buffer;
-			} BindFrameBufferAsRenderTargetCmdDesc;
+				FramebufferDataView* Buffer;
+			} BindFramebufferAsRenderTargetCmdDesc;
 
 			struct BindBackBufferAsRenderTargetCmdDescStruct
 			{
 			} BindBackBufferAsRenderTargetCmdDesc;
 			
-			struct ResizeFrameBufferCmdDescStruct
+			struct ResizeFramebufferCmdDescStruct
 			{
-				FrameBufferDataView* Buffer;
+				FramebufferDataView* Buffer;
 				uint32_t Width;
 				uint32_t Height;
-			} ResizeFrameBufferCmdDesc;
+			} ResizeFramebufferCmdDesc;
 			
-			struct ReadFrameBufferCmdDescStruct
+			struct ReadFramebufferCmdDescStruct
 			{
-				FrameBufferDataView* Buffer;
+				FramebufferDataView* Buffer;
 				Image* Output;
 
 				//rectangular area that is read from
@@ -283,12 +282,12 @@ namespace Ainan {
 				uint32_t BottomLeftY;
 				uint32_t TopRightX;
 				uint32_t TopRightY;
-			} ReadFrameBufferCmdDesc;
+			} ReadFramebufferCmdDesc;
 
-			struct DestroyFrameBufferCmdDescStruct
+			struct DestroyFramebufferCmdDescStruct
 			{
-				FrameBufferDataView* Buffer;
-			} DestroyFrameBufferCmdDesc;
+				FramebufferDataView* Buffer;
+			} DestroyFramebufferCmdDesc;
 
 			/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//texture commands

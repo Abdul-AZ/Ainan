@@ -53,7 +53,7 @@ set(SOURCES_LIST
     "renderer/ShaderProgram.h"    "renderer/ShaderProgram.cpp"
     "renderer/Texture.h"          "renderer/Texture.cpp"
     "renderer/Rectangle.h"
-    "renderer/FrameBuffer.h"      "renderer/FrameBuffer.cpp"
+    "renderer/Framebuffer.h"      "renderer/Framebuffer.cpp"
     "renderer/Image.h"            "renderer/Image.cpp"
     "renderer/RenderSurface.h"    "renderer/RenderSurface.cpp"
 

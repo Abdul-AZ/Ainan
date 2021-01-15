@@ -1,7 +1,7 @@
 #include "ParticleSystem.h"
 
 namespace Ainan {
-	static TextureNew DefaultTexture;
+	static Texture DefaultTexture;
 	static int s_DefaultTextureUserCount = 0;
 
 	ParticleSystem::ParticleSystem()

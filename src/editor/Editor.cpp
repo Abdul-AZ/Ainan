@@ -486,12 +486,12 @@ namespace Ainan
 
 	void Editor::DrawEnvironment(bool drawWorldSpaceUI)
 	{
-		m_RenderSurface.SurfaceFrameBuffer.Bind();
+		m_RenderSurface.SurfaceFramebuffer.Bind();
 		Renderer::ClearScreen();
 
 		SceneDescription desc;
 		desc.SceneCamera = m_Camera;
-		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
@@ -526,14 +526,14 @@ namespace Ainan
 		//draw the UI as a different scene on top of the environment scene
 		SceneDescription descUI;
 		descUI.SceneCamera = m_Camera;
-		descUI.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
+		descUI.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
 		descUI.Blur = false;
 		descUI.BlurRadius = 0;
 		Renderer::SetBlendMode(RenderingBlendMode::Screen);
 
 		Renderer::BeginScene(descUI);
 
-		m_RenderSurface.SurfaceFrameBuffer.Bind();
+		m_RenderSurface.SurfaceFramebuffer.Bind();
 
 		if (drawWorldSpaceUI)
 		{
@@ -688,7 +688,7 @@ namespace Ainan
 
 		InputManager::DisplayGUI();
 
-		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFrameBuffer);
+		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFramebuffer);
 	}
 
 	void Editor::OnEnvironmentLoad()

@@ -26,8 +26,8 @@ namespace Ainan {
 			float MaterialQuadraticCoefficient = 0.02f;
 		};
 
-		VertexBufferNew m_VertexBuffer;
-		UniformBufferNew m_UniformBuffer;
+		VertexBuffer m_VertexBuffer;
+		UniformBuffer m_UniformBuffer;
 		glm::vec2 m_Position = glm::vec2(0.0f, 0.0f);
 		LitSpriteUniformBuffer m_UniformBufferData;
 		float m_Scale = 0.25f;

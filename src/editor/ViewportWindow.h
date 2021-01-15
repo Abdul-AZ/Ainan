@@ -2,14 +2,14 @@
 
 #include "renderer/Rectangle.h"
 #include "editor/Window.h"
-#include "renderer/FrameBuffer.h"
+#include "renderer/Framebuffer.h"
 
 namespace Ainan {
 
 	class ViewportWindow
 	{
 	public:
-		void DisplayGUI(FrameBufferNew fb);
+		void DisplayGUI(Framebuffer fb);
 
 	public:
 		Rectangle RenderViewport = {0, 0, 0, 0};

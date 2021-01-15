@@ -43,7 +43,7 @@ namespace Ainan {
 		m_VertexBuffer = Renderer::CreateVertexBuffer(vertices.data(),
 			(uint32_t)sizeof(glm::vec2) * vertices.size(),
 			{ VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2) },
-			Renderer::ShaderLibraryNew()["LineShader"]);
+			Renderer::ShaderLibrary()["LineShader"]);
 
 		m_IndexBuffer = Renderer::CreateIndexBuffer(indecies.data(), (uint32_t)indecies.size());
 
@@ -62,7 +62,7 @@ namespace Ainan {
 
 	void Grid::Draw(const Camera& camera)
 	{
-		auto& shader = Renderer::ShaderLibraryNew()["GridShader"];
+		auto& shader = Renderer::ShaderLibrary()["GridShader"];
 
 		glm::vec2 pos = glm::vec2(std::round(camera.Position.x / m_UnitLength), std::round(camera.Position.y / m_UnitLength)) * m_UnitLength;
 

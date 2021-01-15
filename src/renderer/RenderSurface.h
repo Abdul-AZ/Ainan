@@ -13,13 +13,13 @@ namespace Ainan {
 		RenderSurface operator=(const RenderSurface&) = delete;
 
 		void Render();
-		void Render(ShaderProgramNew shader);
+		void Render(ShaderProgram shader);
 
 		void SetSize(const glm::vec2& size);
 	public:
-		FrameBufferNew SurfaceFrameBuffer;
+		Framebuffer SurfaceFramebuffer;
 	
 	private:
-		VertexBufferNew m_VertexBuffer;
+		VertexBuffer m_VertexBuffer;
 	};
 }

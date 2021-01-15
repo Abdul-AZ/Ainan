@@ -1,56 +1,56 @@
-#include "FrameBuffer.h"
+#include "Framebuffer.h"
 
 #include "Renderer.h"
 
 namespace Ainan
 {
-    void FrameBufferNew::Resize(const glm::vec2& newSize)
+    void Framebuffer::Resize(const glm::vec2& newSize)
     {
         RenderCommand cmd;
-        cmd.Type = RenderCommandType::ResizeFrameBuffer;
-        cmd.ResizeFrameBufferCmdDesc.Width = newSize.x;
-        cmd.ResizeFrameBufferCmdDesc.Height = newSize.y;
-        Renderer::Rdata->FrameBuffers[Identifier].Size = newSize;
-        cmd.ResizeFrameBufferCmdDesc.Buffer = &Renderer::Rdata->FrameBuffers[Identifier];
+        cmd.Type = RenderCommandType::ResizeFramebuffer;
+        cmd.ResizeFramebufferCmdDesc.Width = newSize.x;
+        cmd.ResizeFramebufferCmdDesc.Height = newSize.y;
+        Renderer::Rdata->Framebuffers[Identifier].Size = newSize;
+        cmd.ResizeFramebufferCmdDesc.Buffer = &Renderer::Rdata->Framebuffers[Identifier];
 
         Renderer::PushCommand(cmd);
     }
 
-    void* FrameBufferNew::GetTextureID()
+    void* Framebuffer::GetTextureID()
     {
         //TODO clean this
         if(Renderer::Rdata->API == RendererType::D3D11)
-            return (void*)Renderer::Rdata->FrameBuffers[Identifier].ResourceIdentifier;
+            return (void*)Renderer::Rdata->Framebuffers[Identifier].ResourceIdentifier;
 
-        return (void*)Renderer::Rdata->FrameBuffers[Identifier].TextureIdentifier;
+        return (void*)Renderer::Rdata->Framebuffers[Identifier].TextureIdentifier;
     }
 
-    glm::vec2 FrameBufferNew::GetSize() const
+    glm::vec2 Framebuffer::GetSize() const
     {
-        return Renderer::Rdata->FrameBuffers[Identifier].Size;
+        return Renderer::Rdata->Framebuffers[Identifier].Size;
     }
 
-    Image* FrameBufferNew::ReadPixels(glm::vec2 bottomLeftPixel, glm::vec2 topRightPixel)
+    Image* Framebuffer::ReadPixels(glm::vec2 bottomLeftPixel, glm::vec2 topRightPixel)
     {
         RenderCommand cmd;
-        cmd.Type = RenderCommandType::ReadFrameBuffer;
-        cmd.ReadFrameBufferCmdDesc.Buffer = &Renderer::Rdata->FrameBuffers[Identifier];
-        cmd.ReadFrameBufferCmdDesc.Output = new Image;
-        cmd.ReadFrameBufferCmdDesc.BottomLeftX = bottomLeftPixel.x;
-        cmd.ReadFrameBufferCmdDesc.BottomLeftY = bottomLeftPixel.y;
-        cmd.ReadFrameBufferCmdDesc.TopRightX = topRightPixel.x;
-        cmd.ReadFrameBufferCmdDesc.TopRightY = topRightPixel.y;
+        cmd.Type = RenderCommandType::ReadFramebuffer;
+        cmd.ReadFramebufferCmdDesc.Buffer = &Renderer::Rdata->Framebuffers[Identifier];
+        cmd.ReadFramebufferCmdDesc.Output = new Image;
+        cmd.ReadFramebufferCmdDesc.BottomLeftX = bottomLeftPixel.x;
+        cmd.ReadFramebufferCmdDesc.BottomLeftY = bottomLeftPixel.y;
+        cmd.ReadFramebufferCmdDesc.TopRightX = topRightPixel.x;
+        cmd.ReadFramebufferCmdDesc.TopRightY = topRightPixel.y;
 
         Renderer::PushCommand(cmd);
         Renderer::WaitUntilRendererIdle();
-        return (Image*)cmd.ReadFrameBufferCmdDesc.Output;
+        return (Image*)cmd.ReadFramebufferCmdDesc.Output;
     }
 
-    void FrameBufferNew::Bind() const
+    void Framebuffer::Bind() const
     {
         RenderCommand cmd;
-        cmd.Type = RenderCommandType::BindFrameBufferAsRenderTarget;
-        cmd.BindFrameBufferAsRenderTargetCmdDesc.Buffer = &Renderer::Rdata->FrameBuffers[Identifier];
+        cmd.Type = RenderCommandType::BindFramebufferAsRenderTarget;
+        cmd.BindFramebufferAsRenderTargetCmdDesc.Buffer = &Renderer::Rdata->Framebuffers[Identifier];
 
         Renderer::PushCommand(cmd);
     }

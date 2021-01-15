@@ -73,14 +73,14 @@ namespace Ainan {
 
 		EditorState m_State = State_NoEnvLoaded;
 		std::filesystem::path m_EnvironmentFolderPath;
-		TextureNew m_PlayButtonTexture;
-		TextureNew m_PauseButtonTexture;
-		TextureNew m_StopButtonTexture;
-		TextureNew m_SpriteIconTexture;
-		TextureNew m_LitSpriteIconTexture;
-		TextureNew m_ParticleSystemIconTexture;
-		TextureNew m_SpotLightIconTexture;
-		TextureNew m_RadialLightIconTexture;
+		Texture m_PlayButtonTexture;
+		Texture m_PauseButtonTexture;
+		Texture m_StopButtonTexture;
+		Texture m_SpriteIconTexture;
+		Texture m_LitSpriteIconTexture;
+		Texture m_ParticleSystemIconTexture;
+		Texture m_SpotLightIconTexture;
+		Texture m_RadialLightIconTexture;
 		float m_TimeSincePlayModeStarted = 0.0f;
 		bool m_AddObjectWindowOpen = false;
 		std::string m_AddObjectWindowObjectName = "Example Name";

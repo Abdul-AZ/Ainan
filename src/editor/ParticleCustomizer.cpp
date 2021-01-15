@@ -7,7 +7,7 @@ namespace Ainan {
 	{
 		VertexLayout layout(1);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
-		m_LineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibraryNew()["LineShader"], true);
+		m_LineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibrary()["LineShader"], true);
 
 		glm::vec2 vertices[c_CircleVertexCount];
 		uint32_t indecies[c_CircleVertexCount * 2 - 2];
@@ -29,7 +29,7 @@ namespace Ainan {
 		vertices[c_CircleVertexCount - 1] = vertices[0];
 
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
-		m_CircleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * c_CircleVertexCount, layout, Renderer::ShaderLibraryNew()["CircleOutlineShader"]);
+		m_CircleVertexBuffer = Renderer::CreateVertexBuffer(vertices, sizeof(glm::vec2) * c_CircleVertexCount, layout, Renderer::ShaderLibrary()["CircleOutlineShader"]);
 
 		m_CircleIndexBuffer = Renderer::CreateIndexBuffer(indecies, c_CircleVertexCount * 2 - 2);
 
@@ -289,7 +289,7 @@ namespace Ainan {
 
 			m_LineVertexBuffer.UpdateData(0, sizeof(glm::vec2) * 2, vertices.data());
 
-			auto& shader = Renderer::ShaderLibraryNew()["LineShader"];
+			auto& shader = Renderer::ShaderLibrary()["LineShader"];
 			shader.BindUniformBuffer(m_SpawnAreaColorUniformBuffer, 1, RenderingStage::FragmentShader);
 
 			Renderer::Draw(m_LineVertexBuffer, shader, Primitive::Lines, 2);
@@ -300,7 +300,7 @@ namespace Ainan {
 			model = glm::translate(model, glm::vec3(m_SpawnPosition.x * c_GlobalScaleFactor, m_SpawnPosition.y * c_GlobalScaleFactor, 0.0f));
 			model = glm::scale(model, glm::vec3(m_CircleRadius * c_GlobalScaleFactor, m_CircleRadius * c_GlobalScaleFactor, m_CircleRadius * c_GlobalScaleFactor));
 
-			auto& shader = Renderer::ShaderLibraryNew()["CircleOutlineShader"];
+			auto& shader = Renderer::ShaderLibrary()["CircleOutlineShader"];
 
 			shader.BindUniformBuffer(m_CircleTransformUniformBuffer, 1, RenderingStage::VertexShader);
 			m_CircleTransformUniformBuffer.UpdateData(&model, sizeof(glm::mat4));

@@ -22,7 +22,7 @@ namespace Ainan {
 
 		VertexLayout layout(1);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
-		m_OutlineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 8, layout, Renderer::ShaderLibraryNew()["LineShader"], true);
+		m_OutlineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 8, layout, Renderer::ShaderLibrary()["LineShader"], true);
 
 		layout[0] = VertexLayoutElement("u_Color", 0, ShaderVariableType::Vec4);
 		m_OutlineUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout);
@@ -72,7 +72,7 @@ namespace Ainan {
 
 		m_OutlineVertexBuffer.UpdateData(0, sizeof(glm::vec2) * 8, vertices.data());
 
-		auto& shader = Renderer::ShaderLibraryNew()["LineShader"];
+		auto& shader = Renderer::ShaderLibrary()["LineShader"];
 		shader.BindUniformBuffer(m_OutlineUniformBuffer, 1, RenderingStage::FragmentShader);
 
 		Renderer::Draw(m_OutlineVertexBuffer, shader, Primitive::Lines,  8);
@@ -101,13 +101,13 @@ namespace Ainan {
 		Camera.Update(0.0f, { 0, 0, (int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
 		SceneDescription desc;
 		desc.SceneCamera = Camera;
-		desc.SceneDrawTarget = m_RenderSurface.SurfaceFrameBuffer;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
 		desc.Blur = env.BlurEnabled;
 		desc.BlurRadius = env.BlurRadius;
 		Renderer::BeginScene(desc);
 		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
 		m_RenderSurface.SetSize(glm::ivec2(std::round(Camera.ZoomFactor * aspectRatio / 2.0f) * 2.0f, Camera.ZoomFactor));
-		m_RenderSurface.SurfaceFrameBuffer.Bind();
+		m_RenderSurface.SurfaceFramebuffer.Bind();
 		Renderer::ClearScreen();
 
 		for (pEnvironmentObject& obj : env.Objects)
@@ -133,7 +133,7 @@ namespace Ainan {
 	void Exporter::GetImageFromExportSurfaceToRAM()
 	{
 		delete m_ExportTargetImage;
-		m_ExportTargetImage = m_RenderSurface.SurfaceFrameBuffer.ReadPixels();
+		m_ExportTargetImage = m_RenderSurface.SurfaceFramebuffer.ReadPixels();
 	}
 
 	void Exporter::DisplayGUI()

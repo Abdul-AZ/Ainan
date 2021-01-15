@@ -70,13 +70,13 @@ namespace Ainan {
 		DestroyVertexBuffer(Rdata->QuadBatchVertexBuffer);
 		DestroyVertexBuffer(Rdata->BlurVertexBuffer);
 		DestroyIndexBuffer(Rdata->QuadBatchIndexBuffer);
-		DestroyUniformBuffer(Rdata->SceneUniformbufferNew);
+		DestroyUniformBuffer(Rdata->SceneUniformBuffer);
 		DestroyUniformBuffer(Rdata->BlurUniformBuffer);
 		DestroyTexture(Rdata->WhiteTexture);
-		DestroyFrameBuffer(Rdata->BlurFrameBuffer);
+		DestroyFramebuffer(Rdata->BlurFramebuffer);
 
 		//free the shader library
-		for (auto shader : Rdata->ShaderLibraryNew)
+		for (auto shader : Rdata->ShaderLibrary)
 		{
 			RenderCommand cmd;
 			cmd.Type = RenderCommandType::DestroyShaderProgram;
@@ -101,8 +101,8 @@ namespace Ainan {
 			AINAN_LOG_FATAL("Memory Leak: " + std::to_string(Rdata->IndexBuffers.size()) + " index buffers were not freed");
 		if (Rdata->UniformBuffers.size() > 0)
 			AINAN_LOG_FATAL("Memory Leak: " + std::to_string(Rdata->UniformBuffers.size()) + " uniform buffers were not freed");
-		if (Rdata->FrameBuffers.size() > 0)
-			AINAN_LOG_FATAL("Memory Leak: " + std::to_string(Rdata->FrameBuffers.size()) + " frame buffers were not freed");
+		if (Rdata->Framebuffers.size() > 0)
+			AINAN_LOG_FATAL("Memory Leak: " + std::to_string(Rdata->Framebuffers.size()) + " frame buffers were not freed");
 		if (Rdata->Textures.size() > 0)
 			AINAN_LOG_FATAL("Memory Leak: " + std::to_string(Rdata->Textures.size()) + " textures were not freed");
 
@@ -161,7 +161,7 @@ namespace Ainan {
 		}
 
 		{
-			auto& fbuffers = Rdata->FrameBuffers;
+			auto& fbuffers = Rdata->Framebuffers;
 			auto it = fbuffers.begin();
 			while (it != fbuffers.end())
 			{
@@ -190,7 +190,7 @@ namespace Ainan {
 		//load shaders
 		for (auto& shaderInfo : CompileOnInit)
 		{
-			Rdata->ShaderLibraryNew[shaderInfo.Name] = CreateShaderProgramNew(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
+			Rdata->ShaderLibrary[shaderInfo.Name] = CreateShaderProgram(shaderInfo.VertexCodePath, shaderInfo.FragmentCodePath);
 		}
 
 		//setup batch renderer
@@ -201,7 +201,7 @@ namespace Ainan {
 			layout[2] = VertexLayoutElement("TEXCOORD", 0, ShaderVariableType::Float);
 			layout[3] = VertexLayoutElement("TEXCOORD", 1, ShaderVariableType::Vec2);
 
-			Rdata->QuadBatchVertexBuffer = CreateVertexBuffer(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, Rdata->ShaderLibraryNew["QuadBatchShader"], true);
+			Rdata->QuadBatchVertexBuffer = CreateVertexBuffer(nullptr, c_MaxQuadVerticesPerBatch * sizeof(QuadVertex), layout, Rdata->ShaderLibrary["QuadBatchShader"], true);
 		}
 
 		const int32_t indexCount = c_MaxQuadsPerBatch * 6;
@@ -238,7 +238,7 @@ namespace Ainan {
 		Rdata->QuadBatchTextureSlotsUsed = 1;
 
 		//setup postprocessing
-		Rdata->BlurFrameBuffer = CreateFrameBuffer(Window::FramebufferSize);
+		Rdata->BlurFramebuffer = CreateFramebuffer(Window::FramebufferSize);
 
 		{
 			std::array<std::pair<glm::vec2, glm::vec2>, 6> quadVertices;
@@ -278,7 +278,7 @@ namespace Ainan {
 			VertexLayout layout(2);
 			layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
 			layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec2);
-			Rdata->BlurVertexBuffer = CreateVertexBuffer(quadVertices.data(), sizeof(quadVertices), layout, Rdata->ShaderLibraryNew["BlurShader"]);
+			Rdata->BlurVertexBuffer = CreateVertexBuffer(quadVertices.data(), sizeof(quadVertices), layout, Rdata->ShaderLibrary["BlurShader"]);
 		}
 
 		{
@@ -289,7 +289,7 @@ namespace Ainan {
 				VertexLayoutElement("u_Radius",0, ShaderVariableType::Float)
 			};
 			Rdata->BlurUniformBuffer = CreateUniformBuffer("BlurData", 1, layout);
-			Rdata->ShaderLibraryNew["BlurShader"].BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
+			Rdata->ShaderLibrary["BlurShader"].BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 		}
 
 		{
@@ -309,12 +309,12 @@ namespace Ainan {
 				VertexLayoutElement("SpotLightIntensity",  0, ShaderVariableType::FloatArray, c_MaxSpotLightCount)
 			};
 
-			Rdata->SceneUniformbufferNew = CreateUniformBuffer("FrameData", 0, layout);
+			Rdata->SceneUniformBuffer = CreateUniformBuffer("FrameData", 0, layout);
 
-			for (auto& shaderTuple : Rdata->ShaderLibraryNew)
+			for (auto& shaderTuple : Rdata->ShaderLibrary)
 			{
-				shaderTuple.second.BindUniformBuffer(Rdata->SceneUniformbufferNew, 0, RenderingStage::VertexShader);
-				shaderTuple.second.BindUniformBuffer(Rdata->SceneUniformbufferNew, 0, RenderingStage::FragmentShader);
+				shaderTuple.second.BindUniformBuffer(Rdata->SceneUniformBuffer, 0, RenderingStage::VertexShader);
+				shaderTuple.second.BindUniformBuffer(Rdata->SceneUniformBuffer, 0, RenderingStage::FragmentShader);
 			}
 		}
 
@@ -391,11 +391,11 @@ namespace Ainan {
 	void Renderer::BeginScene(const SceneDescription& desc)
 	{
 		Rdata->CurrentSceneDescription = desc;
-		Rdata->SceneBuffer.CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
+		Rdata->SceneBufferData.CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
 		Rdata->CurrentNumberOfDrawCalls = 0;
 		Rdata->RadialLightSubmissionCount = 0;
 		Rdata->SpotLightSubmissionCount = 0;
-		Rdata->SceneUniformbufferNew.UpdateData(&Rdata->SceneBuffer, sizeof(RendererData::SceneUniformBuffer));
+		Rdata->SceneUniformBuffer.UpdateData(&Rdata->SceneBufferData, sizeof(RendererData::SceneUniformBufferData));
 
 		Rdata->CurrentSceneDescription.SceneDrawTarget.Bind();
 	}
@@ -403,7 +403,7 @@ namespace Ainan {
 	void Renderer::AddRadialLight(const glm::vec2& pos, const glm::vec4& color, float intensity)
 	{
 		auto& i = Rdata->RadialLightSubmissionCount;
-		auto& buffer = Rdata->SceneBuffer;
+		auto& buffer = Rdata->SceneBufferData;
 
 		buffer.RadialLightPositions[i] = c_GlobalScaleFactor * pos;
 		buffer.RadialLightColors[i] = color;
@@ -414,7 +414,7 @@ namespace Ainan {
 	void Renderer::AddSpotLight(const glm::vec2& pos, const glm::vec4 color, float angle, float innerCutoff, float outerCutoff, float intensity)
 	{
 		auto& i = Rdata->SpotLightSubmissionCount;
-		auto& buffer = Rdata->SceneBuffer;
+		auto& buffer = Rdata->SceneBufferData;
 
 		buffer.SpotLightPositions[i] = c_GlobalScaleFactor * pos;
 		buffer.SpotLightColors[i] = color;
@@ -425,7 +425,7 @@ namespace Ainan {
 		i++;
 	}
 
-	void Renderer::Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, int32_t vertexCount)
+	void Renderer::Draw(VertexBuffer vertexBuffer, ShaderProgram shader, Primitive primitive, int32_t vertexCount)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DrawNew;
@@ -458,7 +458,7 @@ namespace Ainan {
 		while (Rdata->payload == true) Rdata->WorkDoneCV.wait_for(lock, 1ms, []() { return Rdata->payload == false; });
 	}
 
-	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, TextureNew texture)
+	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, Texture texture)
 	{
 		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
 			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
@@ -514,7 +514,7 @@ namespace Ainan {
 		Rdata->QuadBatchVertexBufferDataPtr++;
 	}
 
-	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, TextureNew texture)
+	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, Texture texture)
 	{
 		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
 			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
@@ -579,7 +579,7 @@ namespace Ainan {
 		Rdata->QuadBatchVertexBufferDataPtr++;
 	}
 
-	void Renderer::DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, TextureNew texture)
+	void Renderer::DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int count, Texture texture)
 	{
 		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > count * 4 ||
 			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
@@ -681,7 +681,7 @@ namespace Ainan {
 		ImGui::NewFrame();
 	}
 
-	void Renderer::Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, IndexBufferNew indexBuffer)
+	void Renderer::Draw(VertexBuffer vertexBuffer, ShaderProgram shader, Primitive primitive, IndexBuffer indexBuffer)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DrawIndexedNew;
@@ -783,7 +783,7 @@ namespace Ainan {
 		PushCommand(cmd);
 	}
 
-	void Renderer::Blur(FrameBufferNew target, float radius)
+	void Renderer::Blur(Framebuffer target, float radius)
 	{
 		Rectangle lastViewport = Rdata->CurrentViewport;
 		RenderingBlendMode lastBlendMode = Rdata->m_CurrentBlendMode;
@@ -793,14 +793,14 @@ namespace Ainan {
 		Rectangle viewport;
 		viewport.X = 0;
 		viewport.Y = 0;
-		viewport.Width = (int)Renderer::Rdata->FrameBuffers[target.Identifier].Size.x;
-		viewport.Height = (int)Renderer::Rdata->FrameBuffers[target.Identifier].Size.y;
+		viewport.Width = (int)Renderer::Rdata->Framebuffers[target.Identifier].Size.x;
+		viewport.Height = (int)Renderer::Rdata->Framebuffers[target.Identifier].Size.y;
 		
 		SetViewport(viewport);
-		auto& shader = Rdata->ShaderLibraryNew["BlurShader"];
+		auto& shader = Rdata->ShaderLibrary["BlurShader"];
 		shader.BindUniformBuffer(Rdata->BlurUniformBuffer, 1, RenderingStage::FragmentShader);
 		
-		auto resolution = Renderer::Rdata->FrameBuffers[target.Identifier].Size;
+		auto resolution = Renderer::Rdata->Framebuffers[target.Identifier].Size;
 		//make a buffer for all the uniform data
 		uint8_t bufferData[20];
 		glm::vec2 horizonatlDirection = glm::vec2(1.0f, 0.0f);
@@ -813,9 +813,9 @@ namespace Ainan {
 		Rdata->BlurUniformBuffer.UpdateData(bufferData, sizeof(bufferData));
 		
 		//Horizontal blur
-		Rdata->BlurFrameBuffer.Resize(Renderer::Rdata->FrameBuffers[target.Identifier].Size);
+		Rdata->BlurFramebuffer.Resize(Renderer::Rdata->Framebuffers[target.Identifier].Size);
 		
-		Rdata->BlurFrameBuffer.Bind();
+		Rdata->BlurFramebuffer.Bind();
 		ClearScreen();
 		
 		//do the horizontal blur to the surface we revieved and put the result in tempSurface
@@ -831,7 +831,7 @@ namespace Ainan {
 		ClearScreen();
 		
 		//do the vertical blur to the tempSurface and put the result in the buffer we recieved
-		shader.BindTexture(Rdata->BlurFrameBuffer, 0, RenderingStage::FragmentShader);
+		shader.BindTexture(Rdata->BlurFramebuffer, 0, RenderingStage::FragmentShader);
 		Draw(Rdata->BlurVertexBuffer, shader, Primitive::Triangles, 6);
 		
 		SetViewport(lastViewport);
@@ -1051,7 +1051,7 @@ namespace Ainan {
 		PushCommand(cmd);
 	}
 
-	void Renderer::DestroyVertexBuffer(VertexBufferNew vb)
+	void Renderer::DestroyVertexBuffer(VertexBuffer vb)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DestroyVertexBuffer;
@@ -1059,10 +1059,10 @@ namespace Ainan {
 		Renderer::PushCommand(cmd);
 	}
 
-	IndexBufferNew Renderer::CreateIndexBuffer(uint32_t* data, uint32_t count)
+	IndexBuffer Renderer::CreateIndexBuffer(uint32_t* data, uint32_t count)
 	{
 		static uint32_t s_IdentifierCounter = 1;
-		IndexBufferNew bufferHandle;
+		IndexBuffer bufferHandle;
 		bufferHandle.Identifier = s_IdentifierCounter;
 		IndexBufferDataView view;
 		view.Count = count;
@@ -1083,7 +1083,7 @@ namespace Ainan {
 		return bufferHandle;
 	}
 
-	void Renderer::DestroyIndexBuffer(IndexBufferNew ib)
+	void Renderer::DestroyIndexBuffer(IndexBuffer ib)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DestroyIndexBuffer;
@@ -1091,10 +1091,10 @@ namespace Ainan {
 		Renderer::PushCommand(cmd);
 	}
 
-	VertexBufferNew Renderer::CreateVertexBuffer(void* data, uint32_t size, const VertexLayout& layout, ShaderProgramNew shaderProgram, bool dynamic)
+	VertexBuffer Renderer::CreateVertexBuffer(void* data, uint32_t size, const VertexLayout& layout, ShaderProgram shaderProgram, bool dynamic)
 	{
 		static uint32_t s_IdentifierCounter = 1;
-		VertexBufferNew bufferHandle;
+		VertexBuffer bufferHandle;
 		bufferHandle.Identifier = s_IdentifierCounter;
 		VertexBufferDataView view;
 		view.Size = size;
@@ -1122,11 +1122,11 @@ namespace Ainan {
 		return bufferHandle;
 	}
 
-	UniformBufferNew Renderer::CreateUniformBuffer(const std::string& name, uint32_t reg,
+	UniformBuffer Renderer::CreateUniformBuffer(const std::string& name, uint32_t reg,
 		const VertexLayout& layout)
 	{
 		static uint32_t s_IdentifierCounter = 1;
-		UniformBufferNew bufferHandle;
+		UniformBuffer bufferHandle;
 		bufferHandle.Identifier = s_IdentifierCounter;
 		UniformBufferDataView view;
 		view.Name = name;
@@ -1146,7 +1146,7 @@ namespace Ainan {
 		return bufferHandle;
 	}
 
-	void Renderer::DestroyUniformBuffer(UniformBufferNew ub)
+	void Renderer::DestroyUniformBuffer(UniformBuffer ub)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DestroyUniformBuffer;
@@ -1154,36 +1154,36 @@ namespace Ainan {
 		Renderer::PushCommand(cmd);
 	}
 
-	FrameBufferNew Renderer::CreateFrameBuffer(const glm::vec2& size)
+	Framebuffer Renderer::CreateFramebuffer(const glm::vec2& size)
 	{
 		static uint32_t s_IdentifierCounter = 1;
-		FrameBufferNew bufferHandle;
+		Framebuffer bufferHandle;
 		bufferHandle.Identifier = s_IdentifierCounter;
-		FrameBufferDataView view;
+		FramebufferDataView view;
 		view.Size = size;
-		Rdata->FrameBuffers[s_IdentifierCounter] = view;
+		Rdata->Framebuffers[s_IdentifierCounter] = view;
 
 		RenderCommand cmd;
-		cmd.Type = RenderCommandType::CreateFrameBuffer;
-		FrameBufferCreationInfo* info = new FrameBufferCreationInfo;
+		cmd.Type = RenderCommandType::CreateFramebuffer;
+		FramebufferCreationInfo* info = new FramebufferCreationInfo;
 		info->Size = size;
-		cmd.CreateFrameBufferCmdDesc.Info = info;
-		cmd.CreateFrameBufferCmdDesc.Output = &Rdata->FrameBuffers[s_IdentifierCounter];
+		cmd.CreateFramebufferCmdDesc.Info = info;
+		cmd.CreateFramebufferCmdDesc.Output = &Rdata->Framebuffers[s_IdentifierCounter];
 
 		PushCommand(cmd);
 		s_IdentifierCounter++;
 		return bufferHandle;
 	}
 
-	void Renderer::DestroyFrameBuffer(FrameBufferNew fb)
+	void Renderer::DestroyFramebuffer(Framebuffer fb)
 	{
 		RenderCommand cmd;
-		cmd.Type = RenderCommandType::DestroyFrameBuffer;
-		cmd.DestroyFrameBufferCmdDesc.Buffer = &Rdata->FrameBuffers[fb.Identifier];
+		cmd.Type = RenderCommandType::DestroyFramebuffer;
+		cmd.DestroyFramebufferCmdDesc.Buffer = &Rdata->Framebuffers[fb.Identifier];
 		PushCommand(cmd);
 	}
 
-	TextureNew Renderer::CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data)
+	Texture Renderer::CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data)
 	{
 		Image img;
 		img.m_Width = size.x;
@@ -1193,10 +1193,10 @@ namespace Ainan {
 		return CreateTexture(img);
 	}
 
-	TextureNew Renderer::CreateTexture(Image& img)
+	Texture Renderer::CreateTexture(Image& img)
 	{
 		static uint32_t s_IdentifierCounter = 1;
-		TextureNew textureHandle;
+		Texture textureHandle;
 		textureHandle.Identifier = s_IdentifierCounter;
 		TextureDataView view;
 		view.Format = img.Format;
@@ -1244,7 +1244,7 @@ namespace Ainan {
 		return textureHandle;
 	}
 
-	void Renderer::DestroyTexture(TextureNew tex)
+	void Renderer::DestroyTexture(Texture tex)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DestroyTexture;
@@ -1252,10 +1252,10 @@ namespace Ainan {
 		PushCommand(cmd);
 	}
 
-	ShaderProgramNew Renderer::CreateShaderProgramNew(const std::string& vertPath, const std::string& fragPath)
+	ShaderProgram Renderer::CreateShaderProgram(const std::string& vertPath, const std::string& fragPath)
 	{
 		static uint32_t s_IdentifierCounter = 1;
-		ShaderProgramNew programHandle;
+		ShaderProgram programHandle;
 		programHandle.Identifier = s_IdentifierCounter;
 		ShaderProgramDataView view;
 		Rdata->ShaderPrograms[s_IdentifierCounter] = view;
@@ -1360,7 +1360,7 @@ namespace Ainan {
 		return quadVertices;
 	}
 
-	void Renderer::Draw(VertexBufferNew vertexBuffer, ShaderProgramNew shader, Primitive primitive, IndexBufferNew indexBuffer, uint32_t indexCount)
+	void Renderer::Draw(VertexBuffer vertexBuffer, ShaderProgram shader, Primitive primitive, IndexBuffer indexBuffer, uint32_t indexCount)
 	{
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::DrawIndexedNewWithCustomNumberOfVertices;
@@ -1376,7 +1376,7 @@ namespace Ainan {
 	void Renderer::FlushQuadBatch()
 	{
 		for (size_t i = 0; i < Rdata->QuadBatchTextureSlotsUsed; i++)
-			Rdata->ShaderLibraryNew["QuadBatchShader"].BindTexture(Rdata->QuadBatchTextures[i], i, RenderingStage::FragmentShader);
+			Rdata->ShaderLibrary["QuadBatchShader"].BindTexture(Rdata->QuadBatchTextures[i], i, RenderingStage::FragmentShader);
 
 		int32_t numVertices = (Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin);
 
@@ -1384,7 +1384,7 @@ namespace Ainan {
 			numVertices * sizeof(QuadVertex),
 			Rdata->QuadBatchVertexBufferDataOrigin);
 
-		Draw(Rdata->QuadBatchVertexBuffer, Rdata->ShaderLibraryNew["QuadBatchShader"], Primitive::Triangles, Rdata->QuadBatchIndexBuffer, (numVertices * 3) / 2);
+		Draw(Rdata->QuadBatchVertexBuffer, Rdata->ShaderLibrary["QuadBatchShader"], Primitive::Triangles, Rdata->QuadBatchIndexBuffer, (numVertices * 3) / 2);
 
 		Rdata->CurrentNumberOfDrawCalls++;
 
