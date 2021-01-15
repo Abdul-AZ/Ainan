@@ -10,7 +10,6 @@ namespace Ainan {
 		void Push(const RenderCommand& cmd);
 		void WaitUntilIdle();
 		
-		//returns false and sets cmd to nullptr if there is nothing to return
 		void WaitPopAndExecuteAll(std::function<void(const RenderCommand&)> func);
 
 	private:
