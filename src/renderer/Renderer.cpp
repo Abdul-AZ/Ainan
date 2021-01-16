@@ -236,6 +236,9 @@ namespace Ainan {
 		Rdata->QuadBatchTextures[0].SetImage(img);
 		Rdata->QuadBatchTextureSlotsUsed = 1;
 
+		for (size_t i = 0; i < c_MaxQuadTexturesPerBatch; i++)
+			Rdata->ShaderLibrary["QuadBatchShader"].BindTexture(Rdata->WhiteTexture, i, RenderingStage::FragmentShader);
+
 		//setup postprocessing
 		Rdata->BlurFramebuffer = CreateFramebuffer(Window::FramebufferSize);
 
