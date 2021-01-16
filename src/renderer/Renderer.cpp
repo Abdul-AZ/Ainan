@@ -734,23 +734,24 @@ namespace Ainan {
 		WaitUntilRendererIdle();
 		CleanupDeletedObjects();
 
-		bool running = true;
-		while (running) 
-		{
-			double time = glfwGetTime();
-			LastFrameDeltaTime = time - LastFrameFinishTime;
+		//deal with excess frame time
 
-			if (LastFrameDeltaTime >= c_ApplicationMaxFramePeriod)
-			{
-				LastFrameFinishTime = time;
-				break;
-			}
+		//in seconds
+		double currentDeltaTime = glfwGetTime() - LastFrameFinishTime;
+		while (currentDeltaTime < c_ApplicationMaxFramePeriod)
+		{
+			//in ms
+			int sleepTime = (c_ApplicationMaxFramePeriod - currentDeltaTime) * 1000;
+			//if more than 2ms then sleep
+			if (sleepTime > 2)
+				std::this_thread::sleep_for(std::chrono::milliseconds((int)(sleepTime) - 2));
+			//otherwise keep yielding so that we aren't late for the next frame
 			else
-			{
-				int32_t sleepTime = (c_ApplicationMaxFramePeriod - LastFrameDeltaTime) * 1000000 - 750;
-				std::this_thread::sleep_for(std::chrono::microseconds(sleepTime));
-			}
+				std::this_thread::yield();
+			currentDeltaTime = glfwGetTime() - LastFrameFinishTime;
 		}
+		LastFrameDeltaTime = glfwGetTime() - LastFrameFinishTime;
+		LastFrameFinishTime = glfwGetTime();
 	}
 
 	void Renderer::RecreateSwapchain(const glm::vec2& newSwapchainSize)

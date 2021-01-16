@@ -46,6 +46,8 @@ namespace Ainan {
 
 	void RenderSurface::SetSize(const glm::vec2& size)
 	{
+		if (size.x == 0 || size.y == 0)
+			return;
 		SurfaceFramebuffer.Resize(size);
 	}
 }
