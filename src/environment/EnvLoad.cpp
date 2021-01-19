@@ -105,6 +105,7 @@ namespace Ainan {
 		ps->Customizer.m_CircleRadius = data[id + "CircleRadius"].get<float>();
 
 		//Scale data
+		ps->Customizer.m_ScaleCustomizer.m_RandomScale = data[id + "IsStartingScaleRandom"].get<bool>();
 		ps->Customizer.m_ScaleCustomizer.m_MinScale = data[id + "MinScale"].get<float>();
 		ps->Customizer.m_ScaleCustomizer.m_MaxScale = data[id + "MaxScale"].get<float>();
 		ps->Customizer.m_ScaleCustomizer.m_DefinedScale = data[id + "DefinedScale"].get<float>();

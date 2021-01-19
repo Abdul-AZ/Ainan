@@ -26,7 +26,7 @@ namespace Ainan {
 
 	void Sprite::Draw()
 	{
-		Renderer::DrawQuad(Position * c_GlobalScaleFactor, Tint, Scale * c_GlobalScaleFactor, -Rotation * PI / 180.0f, m_Texture);
+		Renderer::DrawQuad(Position, Tint, Scale, -Rotation * PI / 180.0f, m_Texture);
 	}
 
 	void Sprite::DisplayGUI()
@@ -68,20 +68,19 @@ namespace Ainan {
 		}
 
 
-
 		ImGui::Spacing();
 
 		ImGui::Text("Position: ");
 		ImGui::SameLine();
-		ImGui::DragFloat2("##Position: ", &Position.x, 0.01f);
+		ImGui::DragFloat2("##Position: ", &Position.x, c_ObjectPositionDragControlSpeed);
 
 		ImGui::Text("Scale: ");
 		ImGui::SameLine();
-		ImGui::DragFloat("##Scale: ", &Scale, 0.01f);
+		ImGui::DragFloat("##Scale: ", &Scale, c_ObjectScaleDragControlSpeed);
 
-		ImGui::Text("Rotate: ");
+		ImGui::Text("Rotation: ");
 		ImGui::SameLine();
-		ImGui::DragFloat("##Rotate: ", &Rotation);
+		ImGui::DragFloat("##Rotation: ", &Rotation, c_ObjectRotationDragControlSpeed);
 		Rotation = std::clamp(Rotation, 0.0f, 360.0f);
 
 		ImGui::Text("Tint: ");

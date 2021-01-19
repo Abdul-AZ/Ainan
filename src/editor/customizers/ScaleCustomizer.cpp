@@ -1,5 +1,7 @@
 #include "ScaleCustomizer.h"
 
+#include "environment/EnvironmentObjectInterface.h"
+
 namespace Ainan {
 
 	void ScaleCustomizer::DisplayGUI()
@@ -18,17 +20,17 @@ namespace Ainan {
 			{
 				ImGui::Text("Minimum Scale: ");
 				ImGui::SameLine();
-				ImGui::DragFloat("##Minimum Scale: ", &m_MinScale, 0.1f);
+				ImGui::DragFloat("##Minimum Scale: ", &m_MinScale, c_ObjectScaleDragControlSpeed);
 
 				ImGui::Text("Maximum Scale: ");
 				ImGui::SameLine();
-				ImGui::DragFloat("##Maximum Scale: ", &m_MaxScale, 0.1f);
+				ImGui::DragFloat("##Maximum Scale: ", &m_MaxScale, c_ObjectScaleDragControlSpeed);
 			}
 			else
 			{
 				ImGui::Text("Scale: ");
 				ImGui::SameLine();
-				ImGui::DragFloat("##Scale: ", &m_DefinedScale, 0.1f);
+				ImGui::DragFloat("##Scale: ", &m_DefinedScale, c_ObjectScaleDragControlSpeed);
 			}
 
 			//to make sure scale doesn't go negative

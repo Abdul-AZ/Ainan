@@ -13,6 +13,10 @@ namespace Ainan {
 		LitSpriteType
 	};
 
+	const float c_ObjectPositionDragControlSpeed = 0.1f;
+	const float c_ObjectScaleDragControlSpeed = 0.01f;
+	const float c_ObjectRotationDragControlSpeed = 1.0f;
+
 	EnvironmentObjectType StringToEnvironmentObjectType(const std::string& type);
 	std::string EnvironmentObjectTypeToString(EnvironmentObjectType type);
 

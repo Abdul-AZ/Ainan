@@ -5,7 +5,6 @@
 
 namespace Ainan {
 
-	const float c_GlobalScaleFactor = 1000.0f;
 	const int32_t c_StartMenuWidth = 450;
 	const int32_t c_StartMenuHeight = 350;
 	const int32_t c_CreateEnvironmentWindowWidth = 700;

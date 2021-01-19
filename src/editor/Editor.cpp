@@ -4,7 +4,7 @@ namespace Ainan
 {
 	Editor::Editor():
 		m_LoadEnvironmentBrowser(STARTING_BROWSER_DIRECTORY, "Load Environment"),
-		m_Grid(200.0f),
+		m_Grid(1.0f),
 		m_Preferences(EditorPreferences::LoadFromDefaultPath())
 	{
 		m_LoadEnvironmentBrowser.Filter.push_back(".env");
@@ -489,13 +489,6 @@ namespace Ainan
 		m_RenderSurface.SurfaceFramebuffer.Bind();
 		Renderer::ClearScreen();
 
-		SceneDescription desc;
-		desc.SceneCamera = m_Camera;
-		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
-		desc.Blur = m_Env->BlurEnabled;
-		desc.BlurRadius = m_Env->BlurRadius;
-		Renderer::BeginScene(desc);
-
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
 			auto mutexPtr = obj->GetMutex();
@@ -510,6 +503,13 @@ namespace Ainan
 				Renderer::AddSpotLight(light->Position, light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
 			}
 		}
+
+		SceneDescription desc;
+		desc.SceneCamera = m_Camera;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
+		desc.Blur = m_Env->BlurEnabled;
+		desc.BlurRadius = m_Env->BlurRadius;
+		Renderer::BeginScene(desc);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
@@ -545,8 +545,8 @@ namespace Ainan
 				auto mutexPtr = obj->GetMutex();
 				std::lock_guard lock(*mutexPtr);
 
-				const float scale = 50.0f;
-				const glm::vec2 position = *obj->GetPositionRef() * c_GlobalScaleFactor - glm::vec2(scale, scale) / 2.0f;
+				const float scale = 0.1f;
+				const glm::vec2 position = *obj->GetPositionRef() - glm::vec2(scale, scale) / 2.0f;
 				const glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 				switch (obj->Type)
@@ -1207,7 +1207,6 @@ namespace Ainan
 	void Editor::FocusCameraOnObject(EnvironmentObjectInterface& object)
 	{
 		glm::vec2 pos = *object.GetPositionRef();
-		pos *= -c_GlobalScaleFactor;
 
 		m_Camera.SetPosition(pos);
 	}
@@ -1310,8 +1309,8 @@ namespace Ainan
 
 			messageString << std::fixed << std::setprecision(2);
 			messageString << "Moving Camera to Coordinates :";
-			messageString << "(" << -m_Camera.Position.x / c_GlobalScaleFactor;
-			messageString << ", " << -m_Camera.Position.y / c_GlobalScaleFactor << ")";
+			messageString << "(" << -m_Camera.Position.x;
+			messageString << ", " << -m_Camera.Position.y << ")";
 
 			m_AppStatusWindow.SetText(messageString.str());
 		};
@@ -1383,7 +1382,7 @@ namespace Ainan
 					return;
 
 				//change zoom factor
-				m_Camera.ZoomFactor -= yoffset * 30;
+				m_Camera.ZoomFactor -= yoffset * 2.0f;
 				//clamp zoom factor
 				m_Camera.ZoomFactor = std::clamp(m_Camera.ZoomFactor, c_CameraZoomFactorMin, c_CameraZoomFactorMax);
 

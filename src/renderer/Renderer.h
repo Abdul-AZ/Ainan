@@ -44,27 +44,6 @@ namespace Ainan {
 		Framebuffer SceneDrawTarget;							   //Required
 		bool Blur = false;										   //Required
 		float BlurRadius = 0.0f;								   //Required if Blur == true
-
-		void AddRadialLight(const glm::vec2 position, const glm::vec4 color, float intensity)
-		{
-			RadialLightPositions[NumRadialLightsUsed] = position;
-			RadialLightColors[NumRadialLightsUsed] = color;
-			RadialLightIntensities[NumRadialLightsUsed] = intensity;
-			NumRadialLightsUsed++;
-		}
-
-		void ClearLightingData()
-		{
-			NumRadialLightsUsed = 0;
-			memset(RadialLightPositions.data(), 0, sizeof(RadialLightPositions));
-			memset(RadialLightColors.data(), 0, sizeof(RadialLightColors));
-			memset(RadialLightIntensities.data(), 0, sizeof(RadialLightIntensities));
-		}
-		
-		int32_t NumRadialLightsUsed = 0;
-		std::array<glm::vec2, c_MaxRadialLightCount> RadialLightPositions;
-		std::array<glm::vec4, c_MaxRadialLightCount> RadialLightColors;
-		std::array<float, c_MaxRadialLightCount> RadialLightIntensities;
 	};
 
 	//this class is completely api agnostic, meaning NO gl calls, NO direct3D calls etc

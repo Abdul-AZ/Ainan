@@ -24,18 +24,18 @@ namespace Ainan {
 
 		//starting velocity data
 		bool m_RandomVelocity = true;
-		glm::vec2 m_MinVelocity = { -100, -100 };
-		glm::vec2 m_MaxVelocity = { 100, 100 };
-		glm::vec2 m_DefinedVelocity = { 100, -100 };
+		glm::vec2 m_MinVelocity = { -1, -1 };
+		glm::vec2 m_MaxVelocity = { 1, 1 };
+		glm::vec2 m_DefinedVelocity = { 1, -1 };
 		//-------------------------------------
 
 		//velocity limit data
-		float m_MinNormalVelocityLimit = 10.0f;
-		float m_MaxNormalVelocityLimit = 200.0f;
+		float m_MinNormalVelocityLimit = 0.1f;
+		float m_MaxNormalVelocityLimit = 20.0f;
 
 		//DO NOT change the order of these, because we use ImGui DragFloat2 to display them
-		glm::vec2 m_MinPerAxisVelocityLimit = { -100.0f, -100.0f };
-		glm::vec2 m_MaxPerAxisVelocityLimit = { 100.0f, 100.0f };
+		glm::vec2 m_MinPerAxisVelocityLimit = { -1.0f, -1.0f };
+		glm::vec2 m_MaxPerAxisVelocityLimit = { 1.0f, 1.0f };
 		//-------------------------------------
 
 		//random number generator

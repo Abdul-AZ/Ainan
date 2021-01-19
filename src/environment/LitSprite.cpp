@@ -44,19 +44,23 @@ namespace Ainan {
 
 		const float spacing = 175.0f;
 
+		ImGui::Text("Position: ");
+		ImGui::SameLine();
+		ImGui::DragFloat("##Scale: ", &m_Position.x, c_ObjectPositionDragControlSpeed);
+
+		ImGui::Text("Scale: ");
+		ImGui::SameLine();
+		ImGui::DragFloat("##Scale: ", &m_Scale, c_ObjectScaleDragControlSpeed);
+
+		ImGui::Text("Rotation: ");
+		ImGui::SameLine();
+		ImGui::DragFloat("##Rotation: ", &m_Rotation, c_ObjectRotationDragControlSpeed);
+		m_Rotation = std::clamp(m_Rotation, 0.0f, 360.0f);
+
 		ImGui::Text("Color/Tint: ");
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(spacing);
 		ImGui::ColorEdit4("##Color/Tint: ", &m_UniformBufferData.Tint.r);
-
-		ImGui::Text("Scale: ");
-		ImGui::SameLine();
-		ImGui::DragFloat("##Scale: ", &m_Scale, 0.01f);
-
-		ImGui::Text("Rotate: ");
-		ImGui::SameLine();
-		ImGui::DragFloat("##Rotate: ", &m_Rotation);
-		m_Rotation = std::clamp(m_Rotation, 0.0f, 360.0f);
 
 		ImGui::Text("Base Light: ");
 		ImGui::SameLine();
@@ -89,9 +93,9 @@ namespace Ainan {
 	{
 		auto& model = m_UniformBufferData.ModelMatrix;
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(m_Position.x, m_Position.y, 0.0f) * c_GlobalScaleFactor);
-		model = glm::rotate(model, glm::radians(m_Rotation), glm::vec3(0, 0, 1.0f));
-		model = glm::scale(model, glm::vec3(m_Scale, m_Scale, m_Scale) * c_GlobalScaleFactor);
+		model = glm::translate(model, glm::vec3(m_Position.x, m_Position.y, 0.0f));
+		model = glm::rotate(model, glm::radians(90.0f - m_Rotation), glm::vec3(0, 0, 1.0f));
+		model = glm::scale(model, glm::vec3(m_Scale, m_Scale, m_Scale));
 		
 		m_UniformBuffer.UpdateData(&m_UniformBufferData, sizeof(LitSpriteUniformBuffer));
 

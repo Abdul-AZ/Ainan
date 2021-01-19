@@ -12,9 +12,9 @@ namespace Ainan {
 		CentreIsBottomLeft
 	};
 
-	const float c_CameraZoomFactorDefault = 1000.0f;
-	const float c_CameraZoomFactorMin = 100.0f;
-	const float c_CameraZoomFactorMax = 2000.0f;
+	const float c_CameraZoomFactorDefault = 10.0f;
+	const float c_CameraZoomFactorMin = 1.0f;
+	const float c_CameraZoomFactorMax = 100.0f;
 
 	class Camera
 	{

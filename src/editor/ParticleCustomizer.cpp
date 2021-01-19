@@ -1,5 +1,7 @@
 #include "ParticleCustomizer.h"
 
+#include "environment/EnvironmentObjectInterface.h"
+
 namespace Ainan {
 
 	ParticleCustomizer::ParticleCustomizer() :
@@ -151,7 +153,7 @@ namespace Ainan {
 
 				ImGui::Text("Starting Position:");
 				ImGui::SameLine();
-				ImGui::DragFloat2("##Starting Position:", &m_SpawnPosition.x, 0.001f);
+				ImGui::DragFloat2("##Starting Position:", &m_SpawnPosition.x, c_ObjectPositionDragControlSpeed);
 
 				ImGui::TreePop();
 			}
@@ -219,8 +221,7 @@ namespace Ainan {
 		{
 		case SpawnMode::SpawnOnPoint: 
 		{
-			glm::vec2 spawnPosition = { m_SpawnPosition.x * c_GlobalScaleFactor, m_SpawnPosition.y * c_GlobalScaleFactor };
-			particleDesc.Position = spawnPosition;
+			particleDesc.Position = m_SpawnPosition;
 			break;
 		}
 
@@ -232,7 +233,7 @@ namespace Ainan {
 			float x = m_SpawnPosition.x + t * m_LineLength * cos(glm::radians(m_LineAngle));
 			float y = m_SpawnPosition.x + t * m_LineLength * sin(glm::radians(m_LineAngle));
 
-			particleDesc.Position = glm::vec2(x, y) * c_GlobalScaleFactor;
+			particleDesc.Position = glm::vec2(x, y);
 			break;
 		}
 
@@ -242,8 +243,8 @@ namespace Ainan {
 			std::uniform_real_distribution<float> dest(0.0f, 2.0f * 3.14159f);
 			float angle = dest(mt);
 
-			float x = m_SpawnPosition.x * c_GlobalScaleFactor + m_CircleRadius * cos(angle) * c_GlobalScaleFactor;
-			float y = m_SpawnPosition.y * c_GlobalScaleFactor + m_CircleRadius * sin(angle) * c_GlobalScaleFactor;
+			float x = m_SpawnPosition.x + m_CircleRadius * cos(angle);
+			float y = m_SpawnPosition.y + m_CircleRadius * sin(angle);
 
 			particleDesc.Position = glm::vec2(x, y);
 			break;
@@ -255,7 +256,6 @@ namespace Ainan {
 			float r = m_CircleRadius * sqrt(dest(mt));
 			float theta = dest(mt) * 2 * PI; //in radians
 			particleDesc.Position = glm::vec2(m_SpawnPosition.x + r * cos(theta), m_SpawnPosition.y + r * sin(theta));
-			particleDesc.Position *= c_GlobalScaleFactor;
 			break;
 		}
 		}
@@ -284,8 +284,8 @@ namespace Ainan {
 			glm::vec2 offset = m_LineLength * glm::vec2(cos(glm::radians(m_LineAngle)), sin(glm::radians(m_LineAngle)));
 
 			std::array<glm::vec2, 2> vertices;
-			vertices[0] = (m_SpawnPosition + offset) * c_GlobalScaleFactor;
-			vertices[1] = (m_SpawnPosition - offset) * c_GlobalScaleFactor;
+			vertices[0] = (m_SpawnPosition + offset);
+			vertices[1] = (m_SpawnPosition - offset);
 
 			m_LineVertexBuffer.UpdateData(0, sizeof(glm::vec2) * 2, vertices.data());
 
@@ -297,8 +297,8 @@ namespace Ainan {
 		else if (Mode == SpawnMode::SpawnOnCircle || Mode == SpawnMode::SpawnInsideCircle)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(m_SpawnPosition.x * c_GlobalScaleFactor, m_SpawnPosition.y * c_GlobalScaleFactor, 0.0f));
-			model = glm::scale(model, glm::vec3(m_CircleRadius * c_GlobalScaleFactor, m_CircleRadius * c_GlobalScaleFactor, m_CircleRadius * c_GlobalScaleFactor));
+			model = glm::translate(model, glm::vec3(m_SpawnPosition.x, m_SpawnPosition.y, 0.0f));
+			model = glm::scale(model, glm::vec3(m_CircleRadius, m_CircleRadius, m_CircleRadius));
 
 			auto& shader = Renderer::ShaderLibrary()["CircleOutlineShader"];
 

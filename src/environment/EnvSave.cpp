@@ -94,6 +94,7 @@ namespace Ainan {
 		j[id + "CircleRadius"] = ps.Customizer.m_CircleRadius;
 
 		//Scale data
+		j[id + "IsStartingScaleRandom"] = ps.Customizer.m_ScaleCustomizer.m_RandomScale;
 		j[id + "MinScale"] = ps.Customizer.m_ScaleCustomizer.m_MinScale;
 		j[id + "MaxScale"] = ps.Customizer.m_ScaleCustomizer.m_MaxScale;
 		j[id + "DefinedScale"] = ps.Customizer.m_ScaleCustomizer.m_DefinedScale;

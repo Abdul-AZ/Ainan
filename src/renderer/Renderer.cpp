@@ -375,6 +375,7 @@ namespace Ainan {
 
 	void Renderer::BeginScene(const SceneDescription& desc)
 	{
+		//clear previous frame's lights
 		Rdata->CurrentSceneDescription = desc;
 		Rdata->SceneBufferData.CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
 		Rdata->CurrentNumberOfDrawCalls = 0;
@@ -390,7 +391,7 @@ namespace Ainan {
 		auto& i = Rdata->RadialLightSubmissionCount;
 		auto& buffer = Rdata->SceneBufferData;
 
-		buffer.RadialLightPositions[i] = c_GlobalScaleFactor * pos;
+		buffer.RadialLightPositions[i] = pos;
 		buffer.RadialLightColors[i] = color;
 		buffer.RadialLightIntensities[i] = intensity;
 		i++;
@@ -401,7 +402,7 @@ namespace Ainan {
 		auto& i = Rdata->SpotLightSubmissionCount;
 		auto& buffer = Rdata->SceneBufferData;
 
-		buffer.SpotLightPositions[i] = c_GlobalScaleFactor * pos;
+		buffer.SpotLightPositions[i] = pos;
 		buffer.SpotLightColors[i] = color;
 		buffer.SpotLightIntensities[i] = intensity;
 		buffer.SpotLightAngles[i] =	      glm::radians(angle);
@@ -433,6 +434,7 @@ namespace Ainan {
 		}
 
 		memset(&Rdata->CurrentSceneDescription, 0, sizeof(SceneDescription));
+		memset(&Rdata->SceneBufferData, 0, sizeof(Renderer::RendererData::SceneUniformBufferData));
 		Rdata->NumberOfDrawCallsLastScene = Rdata->CurrentNumberOfDrawCalls;
 	}
 

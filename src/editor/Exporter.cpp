@@ -81,34 +81,21 @@ namespace Ainan {
 	void Exporter::SetSize()
 	{
 		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
-		glm::vec2 size = glm::vec2(Camera.ZoomFactor * aspectRatio, Camera.ZoomFactor) / c_GlobalScaleFactor;
+		glm::vec2 size = glm::vec2(Camera.ZoomFactor * aspectRatio, Camera.ZoomFactor);
 		m_OutlineVertices[0] = m_ExportCameraPosition - (size / 2.0f); //bottom left
 		m_OutlineVertices[1] = m_ExportCameraPosition + glm::vec2(-size.x, size.y) / 2.0f; //top left
 		m_OutlineVertices[2] = m_ExportCameraPosition + (size / 2.0f);     //top right
 		m_OutlineVertices[3] = m_ExportCameraPosition + glm::vec2(size.x, -size.y) / 2.0f; //bottom right
 
-		for (glm::vec2& vertex : m_OutlineVertices)
-			vertex *= c_GlobalScaleFactor;
-
 		Camera.Update(0.0f, Renderer::Rdata->CurrentViewport);
 		glm::vec2 reversedPos = glm::vec2(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y);
 
-		Camera.SetPosition(reversedPos * c_GlobalScaleFactor);
+		Camera.SetPosition(reversedPos);
 	}
 
 	void Exporter::DrawEnvToExportSurface(Environment& env)
 	{
 		Camera.Update(0.0f, { 0, 0, (int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
-		SceneDescription desc;
-		desc.SceneCamera = Camera;
-		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
-		desc.Blur = env.BlurEnabled;
-		desc.BlurRadius = env.BlurRadius;
-		Renderer::BeginScene(desc);
-		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
-		m_RenderSurface.SetSize(glm::ivec2(std::round(Camera.ZoomFactor * aspectRatio / 2.0f) * 2.0f, Camera.ZoomFactor));
-		m_RenderSurface.SurfaceFramebuffer.Bind();
-		Renderer::ClearScreen();
 
 		for (pEnvironmentObject& obj : env.Objects)
 		{
@@ -124,6 +111,16 @@ namespace Ainan {
 			}
 		}
 
+		SceneDescription desc;
+		desc.SceneCamera = Camera;
+		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
+		desc.Blur = env.BlurEnabled;
+		desc.BlurRadius = env.BlurRadius;
+		Renderer::BeginScene(desc);
+		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
+		m_RenderSurface.SetSize(glm::ivec2(std::round(Camera.ZoomFactor * aspectRatio / 2.0f) * 2.0f, Camera.ZoomFactor));
+		m_RenderSurface.SurfaceFramebuffer.Bind();
+		Renderer::ClearScreen();
 		for (pEnvironmentObject& obj : env.Objects)
 			obj->Draw();
 

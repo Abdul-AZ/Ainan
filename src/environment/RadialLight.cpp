@@ -22,7 +22,7 @@ namespace Ainan {
 		ImGui::Text("Position: ");
 		ImGui::SameLine();
 		float xPos = ImGui::GetCursorPosX();
-		ImGui::DragFloat2("##Position: ", &Position.x, 0.001f);
+		ImGui::DragFloat2("##Position: ", &Position.x, c_ObjectPositionDragControlSpeed);
 
 		ImGui::Text("Color: ");
 		ImGui::SameLine();

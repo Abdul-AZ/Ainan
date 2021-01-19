@@ -15,7 +15,7 @@ namespace Ainan {
 		glm::vec2 Position = glm::vec2(0.0f, 0.0f);
 		glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-		float Intensity = 50.0f;
+		float Intensity = 1.0f;
 		float Angle = 0.0f; //in degrees
 		float InnerCutoff = 30.0f; //in degrees
 		float OuterCutoff = 40.0f; //in degrees
