@@ -679,9 +679,10 @@ namespace Ainan {
 		Renderer::PushCommand(cmd);
 	}
 
-	void Renderer::ImGuiEndFrame()
+	void Renderer::ImGuiEndFrame(bool redraw)
 	{
-		Rdata->CurrentActiveAPI->ImGuiEndFrame();
+		ImGui::Render();
+		Rdata->CurrentActiveAPI->ImGuiEndFrame(redraw);
 	}
 
 	uint32_t Renderer::GetUsedGPUMemory()

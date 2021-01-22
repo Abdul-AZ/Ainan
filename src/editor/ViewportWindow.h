@@ -9,6 +9,7 @@ namespace Ainan {
 	class ViewportWindow
 	{
 	public:
+		ViewportWindow();
 		void DisplayGUI(Framebuffer fb);
 
 	public:
@@ -20,5 +21,8 @@ namespace Ainan {
 		glm::vec2 WindowPosition = glm::vec2(0.0f, 0.0f);
 		glm::vec2 WindowSize = glm::vec2(0.0f, 0.0f);
 		glm::vec2 WindowContentRegionSize = glm::vec2(0.0f, 0.0f);
+
+		ImDrawList DrawEnvImGuiCmd;
+		ImDrawList* pDrawEnvImGuiCmd;
 	};
 }

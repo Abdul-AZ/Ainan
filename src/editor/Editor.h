@@ -54,6 +54,9 @@ namespace Ainan {
 		void Draw();
 
 	private:
+		int32_t m_RedrawUI = 1;
+		bool m_RedrawEnv = true;
+
 		Environment* m_Env = nullptr;
 		EditorPreferences m_Preferences;
 		Camera m_Camera;

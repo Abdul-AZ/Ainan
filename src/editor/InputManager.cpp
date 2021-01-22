@@ -14,6 +14,9 @@ namespace Ainan {
 	std::vector<std::function<void(int32_t, int32_t, int32_t, int32_t)>> InputManager::m_GlobalKeyHandlers;
 	std::vector<std::function<void(uint32_t)>> InputManager::m_GlobalCharacterKeyHandler;
 	int32_t InputManager::m_ModsDown = 0;
+	glm::vec2 InputManager::m_OldMousePos(0.0f);
+	glm::vec2 InputManager::MousePos(0.0f);
+	glm::vec2 InputManager::MouseDelta(0.0f);
 
 	static void scroll_callback(GLFWwindow* window, double x, double y) 
 	{
@@ -254,6 +257,9 @@ namespace Ainan {
 				{
 					double mouse_x, mouse_y;
 					glfwGetCursorPos(window, &mouse_x, &mouse_y);
+					MousePos = glm::vec2(mouse_x, mouse_y);
+					MouseDelta = MousePos - m_OldMousePos;
+					m_OldMousePos = MousePos;
 					if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 					{
 						// Multi-viewport mode: mouse position in OS absolute coordinates (io.MousePos is (0,0) when the mouse is on the upper-left of the primary monitor)
@@ -271,7 +277,6 @@ namespace Ainan {
 					io.MouseDown[i] |= glfwGetMouseButton(window, i) != 0;
 			}
 		}
-
 	}
 
 	void InputManager::DisplayGUI()

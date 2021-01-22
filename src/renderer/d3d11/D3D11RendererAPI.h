@@ -25,7 +25,7 @@ namespace Ainan {
 			virtual RendererContext* GetContext() override { return &Context; };
 			virtual void SetBlendMode(RenderingBlendMode blendMode) override;
 			virtual void ImGuiNewFrame() override;
-			virtual void ImGuiEndFrame() override;
+			virtual void ImGuiEndFrame(bool redraw) override;
 
 		private:
 			void ClearScreen();

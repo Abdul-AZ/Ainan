@@ -38,6 +38,8 @@ namespace Ainan {
 		static std::vector<std::function<void(uint32_t)>> m_GlobalCharacterKeyHandler;
 		static std::array<bool, 5> MouseButtonPressed;
 		static int32_t m_ModsDown;
+		static glm::vec2 MousePos;
+		static glm::vec2 MouseDelta;
 
 		//the key(int) is key code from glfw example : GLFW_KEY_A.
 		//the value(int) has the following values, GLFW_PRESS, GLFW_REPEAT and GLFW_RELEASE.
@@ -46,5 +48,7 @@ namespace Ainan {
 		static std::vector<RegisteredKey> m_SpecificKeyHandler;
 		static std::vector<RegisteredKey> m_SpecificMouseKeyHandler;
 		static std::array<GLFWcursor*, ImGuiMouseCursor_COUNT> m_MouseCursors;
+	private:
+		static glm::vec2 m_OldMousePos;
 	};
 }

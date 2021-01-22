@@ -570,12 +570,11 @@ namespace Ainan {
 			Renderer::WaitUntilRendererIdle();
 		}
 
-		void D3D11RendererAPI::ImGuiEndFrame()
+		void D3D11RendererAPI::ImGuiEndFrame(bool redraw)
 		{
-			ImGui::Render();
-			ImGuiIO& io = ImGui::GetIO(); (void)io;
-
 			ImGui::UpdatePlatformWindows();
+			if (!redraw)
+				return;
 
 			auto func2 = [this]()
 			{

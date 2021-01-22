@@ -60,6 +60,42 @@ namespace Ainan
 
 	void Editor::Update()
 	{
+		auto io = ImGui::GetIO();
+
+		bool mouseClicked = false;
+		bool mouseReleased = false;
+		for (size_t i = 0; i < 5; i++)
+		{
+			if (io.MouseClicked[i])
+			{
+				mouseClicked = true;
+				break;
+			}
+			if (io.MouseReleased[i])
+			{
+				mouseReleased = true;
+				break;
+			}
+		}
+
+		bool keyPressed = false;
+		for (size_t i = 0; i < sizeof(io.KeysDown) / sizeof(io.KeysDown[0]) ; i++)
+		{
+			if (io.KeysDown[i])
+			{
+				//keyPressed = true;
+				break;
+			}
+		}
+
+		if (InputManager::MouseDelta.x != 0 || InputManager::MouseDelta.y != 0 || (io.MouseWheel != 0) || mouseClicked || mouseReleased || keyPressed)
+		{
+			m_RedrawUI = 3;
+
+			if (mouseClicked)
+				AINAN_LOG_INFO("Yes");
+		}
+
 		FrameCounter++;
 		if (FrameCounter > c_ApplicationFramerate)
 			FrameCounter = 0;
@@ -104,7 +140,7 @@ namespace Ainan
 		case State_NoEnvLoaded:
 			DrawHomeWindow();
 			return;
-		
+
 		case State_CreateEnv:
 			DrawEnvironmentCreationWindow();
 			return;
@@ -124,7 +160,35 @@ namespace Ainan
 		ImGuiWrapper::BeginGlobalDocking(true);
 		DrawUI();
 		ImGuiWrapper::EndGlobalDocking();
-		Renderer::ImGuiEndFrame();
+
+		if (m_RedrawUI > 0)
+		{
+			m_RedrawUI--;
+			Renderer::ImGuiEndFrame(true);
+		}
+		else
+		{
+			Renderer::ImGuiEndFrame(false);
+
+			//draw environment only and not ImGui
+			if (m_State == State_PlayMode)
+			{
+
+				ImVec2 displayPos = ImGui::GetDrawData()->DisplayPos;
+				ImVec2 displaySize = ImGui::GetDrawData()->DisplaySize;
+				ImVec2 fbScale = ImGui::GetDrawData()->FramebufferScale;
+				Renderer::PushCommand([this, displayPos, displaySize, fbScale]()
+					{
+						ImDrawData data;
+						data.DisplayPos = displayPos;
+						data.DisplaySize = displaySize;
+						data.FramebufferScale = fbScale;
+						data.CmdListsCount = 1;
+						data.CmdLists = &m_ViewportWindow.pDrawEnvImGuiCmd;
+						Renderer::Rdata->CurrentActiveAPI->DrawImGui(&data);
+					});
+			}
+		}
 	}
 
 	void Editor::WorkerThreadLoop()
@@ -340,7 +404,13 @@ namespace Ainan
 			});
 
 		ImGuiWrapper::EndGlobalDocking();
-		Renderer::ImGuiEndFrame();
+		if (m_RedrawUI > 0)
+		{
+			m_RedrawUI--;
+			Renderer::ImGuiEndFrame(true);
+		}
+		else
+			Renderer::ImGuiEndFrame(false);
 	}
 
 	void Editor::DrawEnvironmentCreationWindow()
@@ -481,7 +551,13 @@ namespace Ainan
 			});
 
 		ImGuiWrapper::EndGlobalDocking();
-		Renderer::ImGuiEndFrame();
+		if (m_RedrawUI > 0)
+		{
+			m_RedrawUI--;
+			Renderer::ImGuiEndFrame(true);
+		}
+		else
+			Renderer::ImGuiEndFrame(false);
 	}
 
 	void Editor::DrawEnvironment(bool drawWorldSpaceUI)

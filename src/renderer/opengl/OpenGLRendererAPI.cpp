@@ -837,9 +837,8 @@ namespace Ainan {
 			Renderer::WaitUntilRendererIdle();
 		}
 
-		void OpenGLRendererAPI::ImGuiEndFrame()
+		void OpenGLRendererAPI::ImGuiEndFrame(bool redraw)
 		{
-			ImGui::Render();
 			auto func = []()
 			{
 				glfwMakeContextCurrent(nullptr);
@@ -850,6 +849,8 @@ namespace Ainan {
 			glfwMakeContextCurrent(Window::Ptr);
 			ImGui::UpdatePlatformWindows();
 			glfwMakeContextCurrent(nullptr);
+			if (!redraw)
+				return;
 
 			ImGui::RenderPlatformWindowsDefault();
 			auto func2 = [this]()

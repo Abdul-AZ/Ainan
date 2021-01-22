@@ -5,6 +5,11 @@
 
 namespace Ainan {
 
+	ViewportWindow::ViewportWindow() :
+		DrawEnvImGuiCmd(nullptr)
+	{
+	}
+
 	void ViewportWindow::DisplayGUI(Framebuffer fb)
 	{
 		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
@@ -43,6 +48,9 @@ namespace Ainan {
 
 		ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(), ImVec2(Window::Size.x, Window::Size.y), ImGui::ColorConvertFloat4ToU32(ImVec4(0, 0, 0, 1)));
 		ImGui::Image(fb.GetTextureID(), ImVec2(RenderViewport.Width, RenderViewport.Height), uv0, uv1);
+
+		DrawEnvImGuiCmd = *ImGui::GetWindowDrawList();
+		pDrawEnvImGuiCmd = &DrawEnvImGuiCmd;
 
 		IsHovered = ImGui::IsWindowHovered();
 		IsFocused = ImGui::IsWindowFocused();

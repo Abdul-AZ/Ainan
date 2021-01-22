@@ -76,7 +76,7 @@ namespace Ainan {
 		static void Draw(VertexBuffer vertexBuffer, ShaderProgram shader, Primitive primitive, IndexBuffer indexBuffer);
 
 		static void ImGuiNewFrame();
-		static void ImGuiEndFrame();
+		static void ImGuiEndFrame(bool redraw);
 
 		static uint32_t GetUsedGPUMemory();
 

@@ -385,7 +385,7 @@ namespace Ainan {
 			DisplayProgressBarWindow(operationIndex, operationCount, fraction);
 			editor.DrawUI();
 			ImGuiWrapper::EndGlobalDocking();
-			Renderer::ImGuiEndFrame();
+			Renderer::ImGuiEndFrame(true);
 			Renderer::Present();
 		};
 
