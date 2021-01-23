@@ -48,6 +48,8 @@ namespace Ainan {
 	{
 		if (size.x == 0 || size.y == 0)
 			return;
-		SurfaceFramebuffer.Resize(size);
+
+		if(size != SurfaceFramebuffer.GetSize())
+			SurfaceFramebuffer.Resize(size);
 	}
 }
