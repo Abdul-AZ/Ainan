@@ -129,11 +129,18 @@ namespace Ainan {
 			swapchainDesc.Windowed = 1;
 			swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 			swapchainDesc.Flags = 0;
+
+			int32_t deviceType = 0;
+
+#ifndef NDEBUG
+			deviceType = D3D11_CREATE_DEVICE_DEBUG;
+#endif // 
+
 			ASSERT_D3D_CALL(D3D11CreateDeviceAndSwapChain(
 				0,
 				D3D_DRIVER_TYPE_HARDWARE,
 				0,
-				D3D11_CREATE_DEVICE_DEBUG,
+				deviceType,
 				0,
 				0,
 				D3D11_SDK_VERSION,
@@ -1611,6 +1618,7 @@ namespace Ainan {
 				{
 					ImGuiViewportDataDx11* data = (ImGuiViewportDataDx11*)viewport->RendererUserData;
 					data->SwapChain->Present(1, 0);
+					g_pd3dDeviceContext->OMSetRenderTargets(1, &data->RTView, 0);
 				};
 				platform_io.Renderer_SwapBuffers = swapBuffersFunc;
 			}
