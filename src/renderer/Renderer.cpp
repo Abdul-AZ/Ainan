@@ -740,22 +740,6 @@ namespace Ainan {
 		WaitUntilRendererIdle();
 		CleanupDeletedObjects();
 
-		//deal with excess frame time
-
-		//in seconds
-		double currentDeltaTime = glfwGetTime() - LastFrameFinishTime;
-		while (currentDeltaTime < c_ApplicationMaxFramePeriod)
-		{
-			//in ms
-			int sleepTime = (c_ApplicationMaxFramePeriod - currentDeltaTime) * 1000;
-			//if more than 2ms then sleep
-			if (sleepTime > 2)
-				std::this_thread::sleep_for(std::chrono::milliseconds((int)(sleepTime) - 2));
-			//otherwise keep yielding so that we aren't late for the next frame
-			else
-				std::this_thread::yield();
-			currentDeltaTime = glfwGetTime() - LastFrameFinishTime;
-		}
 		LastFrameDeltaTime = glfwGetTime() - LastFrameFinishTime;
 		LastFrameFinishTime = glfwGetTime();
 	}

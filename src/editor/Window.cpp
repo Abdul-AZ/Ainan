@@ -102,6 +102,12 @@ namespace Ainan {
 		glfwSetFramebufferSizeCallback(Ptr, framebuffer_size_callback);
 		glfwSetWindowPosCallback(Ptr, window_pos_callback);
 		glfwSetWindowIconifyCallback(Ptr, window_iconify_callback);
+		if (api == RendererType::OpenGL)
+		{
+			glfwMakeContextCurrent(Ptr);
+			glfwSwapInterval(1);
+			glfwMakeContextCurrent(0);
+		}
 	}
 
 	void Window::HandleWindowEvents()

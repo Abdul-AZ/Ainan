@@ -91,9 +91,6 @@ namespace Ainan
 		if (InputManager::MouseDelta.x != 0 || InputManager::MouseDelta.y != 0 || (io.MouseWheel != 0) || mouseClicked || mouseReleased || keyPressed)
 		{
 			m_RedrawUI = 3;
-
-			if (mouseClicked)
-				AINAN_LOG_INFO("Yes");
 		}
 
 		FrameCounter++;

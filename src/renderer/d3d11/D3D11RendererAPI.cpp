@@ -127,7 +127,7 @@ namespace Ainan {
 			swapchainDesc.BufferCount = 2;
 			swapchainDesc.OutputWindow = glfwGetWin32Window(Window::Ptr);
 			swapchainDesc.Windowed = 1;
-			swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+			swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 			swapchainDesc.Flags = 0;
 			ASSERT_D3D_CALL(D3D11CreateDeviceAndSwapChain(
 				0,
@@ -1359,10 +1359,10 @@ namespace Ainan {
 					sd.SampleDesc.Count = 1;
 					sd.SampleDesc.Quality = 0;
 					sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-					sd.BufferCount = 1;
+					sd.BufferCount = 2;
 					sd.OutputWindow = hwnd;
 					sd.Windowed = TRUE;
-					sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+					sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 					sd.Flags = 0;
 
 					IM_ASSERT(data->SwapChain == NULL && data->RTView == NULL);
@@ -1610,7 +1610,7 @@ namespace Ainan {
 				auto swapBuffersFunc = [](ImGuiViewport* viewport, void* render_arg)
 				{
 					ImGuiViewportDataDx11* data = (ImGuiViewportDataDx11*)viewport->RendererUserData;
-					data->SwapChain->Present(0, 0); // Present without vsync
+					data->SwapChain->Present(1, 0);
 				};
 				platform_io.Renderer_SwapBuffers = swapBuffersFunc;
 			}

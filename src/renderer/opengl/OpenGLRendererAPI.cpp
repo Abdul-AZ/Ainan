@@ -497,9 +497,9 @@ namespace Ainan {
 			glBindVertexArray(arrayHandle);
 
 			//create buffer
+			glBindVertexArray(arrayHandle);
 			glGenBuffers(1, &bufferHandle);
 			glBindBuffer(GL_ARRAY_BUFFER, bufferHandle);
-			glBindVertexArray(arrayHandle);
 			if (info->Dynamic)
 				glBufferData(GL_ARRAY_BUFFER, info->Size, info->InitialData, GL_DYNAMIC_DRAW);
 			else
@@ -850,7 +850,15 @@ namespace Ainan {
 			ImGui::UpdatePlatformWindows();
 			glfwMakeContextCurrent(nullptr);
 			if (!redraw)
+			{
+				auto func2 = [this]()
+				{
+					glfwMakeContextCurrent(Window::Ptr);
+				};
+				Renderer::PushCommand(func2);
+				Renderer::WaitUntilRendererIdle();
 				return;
+			}
 
 			ImGui::RenderPlatformWindowsDefault();
 			auto func2 = [this]()
