@@ -68,12 +68,12 @@ namespace Ainan
 		{
 			if (io.MouseClicked[i])
 			{
-				mouseClicked = true;
+				//mouseClicked = true;
 				break;
 			}
 			if (io.MouseReleased[i])
 			{
-				mouseReleased = true;
+				//mouseReleased = true;
 				break;
 			}
 		}
@@ -174,14 +174,18 @@ namespace Ainan
 				ImVec2 displayPos = ImGui::GetDrawData()->DisplayPos;
 				ImVec2 displaySize = ImGui::GetDrawData()->DisplaySize;
 				ImVec2 fbScale = ImGui::GetDrawData()->FramebufferScale;
-				Renderer::PushCommand([this, displayPos, displaySize, fbScale]()
+				auto& windowsAboveViewport = Renderer::Rdata->WindowsAboveViewport;
+				Renderer::PushCommand([this, displayPos, displaySize, fbScale, windowsAboveViewport]()
 					{
+						auto list = windowsAboveViewport;
+						list.insert(list.begin(), m_ViewportWindow.pDrawEnvImGuiCmd);
+
 						ImDrawData data;
 						data.DisplayPos = displayPos;
 						data.DisplaySize = displaySize;
 						data.FramebufferScale = fbScale;
-						data.CmdListsCount = 1;
-						data.CmdLists = &m_ViewportWindow.pDrawEnvImGuiCmd;
+						data.CmdListsCount = list.size();
+						data.CmdLists = list.data();
 						Renderer::Rdata->CurrentActiveAPI->DrawImGui(&data);
 					});
 			}
@@ -747,6 +751,7 @@ namespace Ainan
 			}
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 
 		m_Exporter.DisplayGUI();
@@ -991,6 +996,7 @@ namespace Ainan
 		if (ImGui::Button("Export"))
 			m_Exporter.OpenExporterWindow();
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 
@@ -1157,6 +1163,7 @@ namespace Ainan
 
 			ImGui::ListBoxFooter();
 		}
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 
 		if (!m_AddObjectWindowOpen)
@@ -1214,6 +1221,7 @@ namespace Ainan
 			m_AddObjectWindowOpen = false;
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 
@@ -1493,7 +1501,7 @@ namespace Ainan
 		if (!m_ProfilerWindowOpen)
 			return;
 
-		ImGui::Begin("Profiler");
+		ImGui::Begin("Profiler", nullptr);
 
 		ImVec4 activeColor = { 0.6f,0.6f,0.6f,1.0f };
 		ImVec4 inactiveColor = { 0.2f,0.2f,0.2f,1.0f };
@@ -1669,6 +1677,7 @@ namespace Ainan
 		break;
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 
@@ -1746,6 +1755,7 @@ namespace Ainan
 		if (ImGui::IsItemHovered())
 			ImGui::SetTooltip("Backend will change only when the app is restarted");
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 

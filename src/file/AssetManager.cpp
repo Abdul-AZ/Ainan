@@ -1,5 +1,7 @@
 #include "AssetManager.h"
 
+#include "renderer/Renderer.h"
+
 namespace Ainan 
 {
 	std::filesystem::path AssetManager::s_EnvironmentDirectory = "";
@@ -49,6 +51,7 @@ namespace Ainan
 			ImGui::ListBoxFooter();
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 

@@ -1,5 +1,7 @@
 #include "SpotLight.h"
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 
 	SpotLight::SpotLight()
@@ -50,6 +52,7 @@ namespace Ainan {
 		ImGui::SetCursorPosX(xPos);
 		ImGui::DragFloat("##Intensity: ", &Intensity, 5.0f, 0.1f, 10000.0f);
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 
 		ImGui::PopID();

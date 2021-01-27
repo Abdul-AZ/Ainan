@@ -210,6 +210,7 @@ namespace Ainan {
 		m_ScaleCustomizer.DisplayGUI();
 		m_ForceCustomizer.DisplayGUI();
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 

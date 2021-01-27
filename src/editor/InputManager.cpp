@@ -1,6 +1,8 @@
 #include "InputManager.h"
 #include <GLFW/glfw3.h>
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 
 	bool InputManager::ControlsWindowOpen = false;
@@ -310,6 +312,7 @@ namespace Ainan {
 			ImGui::Separator();
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 

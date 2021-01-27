@@ -87,7 +87,7 @@ namespace Ainan {
 		ImGui::SameLine();
 		ImGui::ColorEdit4("##Tint: ", &Tint.r);
 		
-
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 
 		ImGui::PopID();

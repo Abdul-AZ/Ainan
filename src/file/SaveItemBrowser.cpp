@@ -1,5 +1,7 @@
 #include "SaveItemBrowser.h"
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 
 	namespace fs = std::filesystem;
@@ -110,6 +112,7 @@ namespace Ainan {
 			ImGui::TextColored(ImVec4(0.8f, 0.0f, 0.0f, 1.0f), "Do not include file format!");
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 
 		//Handle OnCloseWindow if the new window state is false and the last one is true

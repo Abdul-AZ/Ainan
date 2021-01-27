@@ -61,7 +61,7 @@ namespace Ainan {
 		static void AddRadialLight(const glm::vec2& pos, const glm::vec4& color, float intensity);
 		static void AddSpotLight(const glm::vec2& pos, const glm::vec4 color, float angle, float innerCutoff, float outerCutoff, float intensity);
 		static void EndScene();
-
+		
 		static void WaitUntilRendererIdle();
 
 		//position is in world coordinates
@@ -76,6 +76,7 @@ namespace Ainan {
 		static void Draw(VertexBuffer vertexBuffer, ShaderProgram shader, Primitive primitive, IndexBuffer indexBuffer);
 
 		static void ImGuiNewFrame();
+		static void RegisterWindowThatCanCoverViewport();
 		static void ImGuiEndFrame(bool redraw);
 
 		static uint32_t GetUsedGPUMemory();
@@ -141,6 +142,9 @@ namespace Ainan {
 			std::unordered_map<uint32_t, ShaderProgramDataView> ShaderPrograms;
 			std::unordered_map<uint32_t, FramebufferDataView> Framebuffers;
 			std::unordered_map<uint32_t, TextureDataView> Textures;
+
+			//windows that will be redrawn when the environment is drawn but not the ui
+			std::vector<ImDrawList*> WindowsAboveViewport;
 
 			//scene data
 			RendererAPI* CurrentActiveAPI = nullptr;

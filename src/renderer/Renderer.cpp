@@ -664,6 +664,15 @@ namespace Ainan {
 		Rdata->Time = current_time;
 
 		ImGui::NewFrame();
+		Rdata->WindowsAboveViewport.clear();
+	}
+
+	void Renderer::RegisterWindowThatCanCoverViewport()
+	{
+		if (ImGui::GetCurrentWindow()->Viewport == ImGui::GetMainViewport() && ImGui::IsWindowDocked() == false)
+		{
+			Rdata->WindowsAboveViewport.push_back(ImGui::GetWindowDrawList());
+		}
 	}
 
 	void Renderer::Draw(VertexBuffer vertexBuffer, ShaderProgram shader, Primitive primitive, IndexBuffer indexBuffer)

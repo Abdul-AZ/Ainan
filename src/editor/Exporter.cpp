@@ -228,6 +228,7 @@ namespace Ainan {
 				m_ExporterScheduled = true;
 			}
 
+			Renderer::RegisterWindowThatCanCoverViewport();
 			ImGui::End();
 
 			PictureSettings.ExportTargetLocation.DisplayGUI([this](const std::string& path)
@@ -332,6 +333,7 @@ namespace Ainan {
 			ImGui::Image((void*)m_ExportTargetTexture.GetTextureID(), size);
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 
@@ -342,6 +344,7 @@ namespace Ainan {
 		ImGui::Begin("Exporting...", 0, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize);
 		ImGui::Text("Operation %i of %i", operationNum, operationCount);
 		ImGui::ProgressBar(fraction, ImVec2(-1,-1));
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 
