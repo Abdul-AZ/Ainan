@@ -15,6 +15,7 @@ namespace Ainan {
 	const float c_CameraZoomFactorDefault = 10.0f;
 	const float c_CameraZoomFactorMin = 1.0f;
 	const float c_CameraZoomFactorMax = 100.0f;
+	const float c_CameraMoveSpeedFactor = 0.5f;
 
 	class Camera
 	{

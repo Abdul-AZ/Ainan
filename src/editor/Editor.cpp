@@ -68,12 +68,12 @@ namespace Ainan
 		{
 			if (io.MouseClicked[i])
 			{
-				//mouseClicked = true;
+				mouseClicked = true;
 				break;
 			}
 			if (io.MouseReleased[i])
 			{
-				//mouseReleased = true;
+				mouseReleased = true;
 				break;
 			}
 		}
@@ -83,7 +83,7 @@ namespace Ainan
 		{
 			if (io.KeysDown[i])
 			{
-				//keyPressed = true;
+				keyPressed = true;
 				break;
 			}
 		}
@@ -199,7 +199,8 @@ namespace Ainan
 		{
 			{
 				std::unique_lock<std::mutex> lock(mutex);
-				StartUpdating.wait(lock);
+				using namespace std::chrono_literals;
+				StartUpdating.wait_for(lock, 3ms);
 			}
 
 			if (DestroyThreads)
@@ -273,7 +274,8 @@ namespace Ainan
 		{
 			static std::mutex mutex;
 			std::unique_lock<std::mutex> lock(mutex);
-			FinishedUpdating.wait(lock);
+			using namespace std::chrono_literals;
+			FinishedUpdating.wait_for(lock, 3ms);
 		}
 
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
@@ -596,7 +598,6 @@ namespace Ainan
 		}
 
 		Renderer::EndScene();
-		Renderer::WaitUntilRendererIdle();
 		m_DrawCalls = Renderer::Rdata->NumberOfDrawCallsLastScene;
 
 		//draw the UI as a different scene on top of the environment scene
@@ -679,7 +680,6 @@ namespace Ainan
 			m_Exporter.DrawOutline();
 		}
 		Renderer::EndScene();
-		Renderer::WaitUntilRendererIdle();
 		//revert to the scene rendering mode
 		Renderer::SetBlendMode(m_Env->BlendMode);
 	}
@@ -1404,7 +1404,7 @@ namespace Ainan
 					return;
 
 				//move the camera's position
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -m_Camera.ZoomFactor / 100.0f));
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -m_Camera.ZoomFactor) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 
 				//display text in the bottom right of the screen stating the new position of the camera
 				displayCameraPosFunc();
@@ -1417,7 +1417,7 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, m_Camera.ZoomFactor / 100.0f));
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, m_Camera.ZoomFactor) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1426,7 +1426,7 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(-m_Camera.ZoomFactor / 100.0f, 0.0f));
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(-m_Camera.ZoomFactor, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1435,7 +1435,7 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(m_Camera.ZoomFactor / 100.0f, 0.0f));
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(m_Camera.ZoomFactor, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);

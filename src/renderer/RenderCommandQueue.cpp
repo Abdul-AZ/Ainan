@@ -12,13 +12,15 @@ namespace Ainan {
 	void RenderCommandQueue::WaitUntilIdle()
 	{
 		std::unique_lock<std::mutex> lock(m_Mutex);
-		m_WorkDoneCV.wait(lock, [this]() { return m_InternalQueue.empty() && (m_Busy == false); });
+        using namespace std::chrono_literals;
+		m_WorkDoneCV.wait_for(lock, 500ms, [this]() { return m_InternalQueue.empty() && (m_Busy == false); });
 	}
 
 	void RenderCommandQueue::WaitPopAndExecuteAll(std::function<void(const RenderCommand&)> func)
 	{
         std::unique_lock<std::mutex> latch(m_Mutex);
-        m_WorkAvailableCV.wait(latch, [this]() { return !m_InternalQueue.empty(); });
+        using namespace std::chrono_literals;
+        m_WorkAvailableCV.wait_for(latch, 20ms, [this]() { return !m_InternalQueue.empty(); });
         while (!m_InternalQueue.empty())
         {
             // got work. set busy.
