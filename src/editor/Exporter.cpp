@@ -95,7 +95,7 @@ namespace Ainan {
 
 	void Exporter::DrawEnvToExportSurface(Environment& env)
 	{
-		Camera.Update(0.0f, { 0, 0, (int)Window::FramebufferSize.x,(int)Window::FramebufferSize.y });
+		Camera.Update(0.0f, { 0, 0, 16, 9 });
 
 		for (pEnvironmentObject& obj : env.Objects)
 		{
@@ -118,7 +118,9 @@ namespace Ainan {
 		desc.BlurRadius = env.BlurRadius;
 		Renderer::BeginScene(desc);
 		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
-		m_RenderSurface.SetSize(glm::ivec2(std::round(Camera.ZoomFactor * aspectRatio / 2.0f) * 2.0f, Camera.ZoomFactor));
+		float width = 1920;
+		float height = width / aspectRatio;
+		m_RenderSurface.SetSize(glm::ivec2(width, std::round(height / 2.0f) * 2.0f));
 		m_RenderSurface.SurfaceFramebuffer.Bind();
 		Renderer::ClearScreen();
 		for (pEnvironmentObject& obj : env.Objects)
@@ -366,6 +368,8 @@ namespace Ainan {
 		if (Renderer::Rdata->API == RendererType::OpenGL)
 			m_ExportTargetImage->FlipHorizontally();
 
+		if (m_ExportTargetTexture.IsValid())
+			Renderer::DestroyTexture(m_ExportTargetTexture);
 		m_ExportTargetTexture = Renderer::CreateTexture(*m_ExportTargetImage);
 
 		m_FinalizePictureExportWindowOpen = true;
