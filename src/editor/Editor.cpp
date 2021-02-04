@@ -1498,10 +1498,11 @@ namespace Ainan
 
 	void Editor::DisplayProfilerGUI()
 	{
-		if (!m_ProfilerWindowOpen)
+		if (!m_ProfilerWindowOpen || m_State != State_PlayMode)
 			return;
 
-		ImGui::Begin("Profiler", nullptr);
+		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
+		ImGui::Begin("Profiler", &m_ProfilerWindowOpen, ImGuiWindowFlags_NoDocking);
 
 		ImVec4 activeColor = { 0.6f,0.6f,0.6f,1.0f };
 		ImVec4 inactiveColor = { 0.2f,0.2f,0.2f,1.0f };
