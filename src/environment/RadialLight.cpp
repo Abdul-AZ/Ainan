@@ -1,5 +1,7 @@
 #include "RadialLight.h"
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 
 	RadialLight::RadialLight()
@@ -36,6 +38,7 @@ namespace Ainan {
 		ImGui::SetCursorPosX(xPos);
 		ImGui::DragFloat("##Intensity: ", &Intensity, 0.1f);;
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 		
 		ImGui::PopID();

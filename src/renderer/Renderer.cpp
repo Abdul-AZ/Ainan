@@ -664,6 +664,15 @@ namespace Ainan {
 		Rdata->Time = current_time;
 
 		ImGui::NewFrame();
+		Rdata->WindowsAboveViewport.clear();
+	}
+
+	void Renderer::RegisterWindowThatCanCoverViewport()
+	{
+		if (ImGui::GetCurrentWindow()->Viewport == ImGui::GetMainViewport() && ImGui::IsWindowDocked() == false)
+		{
+			Rdata->WindowsAboveViewport.push_back(ImGui::GetWindowDrawList());
+		}
 	}
 
 	void Renderer::Draw(VertexBuffer vertexBuffer, ShaderProgram shader, Primitive primitive, IndexBuffer indexBuffer)
@@ -679,9 +688,10 @@ namespace Ainan {
 		Renderer::PushCommand(cmd);
 	}
 
-	void Renderer::ImGuiEndFrame()
+	void Renderer::ImGuiEndFrame(bool redraw)
 	{
-		Rdata->CurrentActiveAPI->ImGuiEndFrame();
+		ImGui::Render();
+		Rdata->CurrentActiveAPI->ImGuiEndFrame(redraw);
 	}
 
 	uint32_t Renderer::GetUsedGPUMemory()
@@ -739,22 +749,6 @@ namespace Ainan {
 		WaitUntilRendererIdle();
 		CleanupDeletedObjects();
 
-		//deal with excess frame time
-
-		//in seconds
-		double currentDeltaTime = glfwGetTime() - LastFrameFinishTime;
-		while (currentDeltaTime < c_ApplicationMaxFramePeriod)
-		{
-			//in ms
-			int sleepTime = (c_ApplicationMaxFramePeriod - currentDeltaTime) * 1000;
-			//if more than 2ms then sleep
-			if (sleepTime > 2)
-				std::this_thread::sleep_for(std::chrono::milliseconds((int)(sleepTime) - 2));
-			//otherwise keep yielding so that we aren't late for the next frame
-			else
-				std::this_thread::yield();
-			currentDeltaTime = glfwGetTime() - LastFrameFinishTime;
-		}
 		LastFrameDeltaTime = glfwGetTime() - LastFrameFinishTime;
 		LastFrameFinishTime = glfwGetTime();
 	}

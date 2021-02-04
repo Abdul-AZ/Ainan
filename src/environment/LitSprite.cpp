@@ -84,6 +84,7 @@ namespace Ainan {
 		ImGui::SetCursorPosX(spacing);
 		ImGui::DragFloat("##Quadratic Coefficient: ", &m_UniformBufferData.MaterialQuadraticCoefficient, 0.00001f);
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 
 		ImGui::PopID();

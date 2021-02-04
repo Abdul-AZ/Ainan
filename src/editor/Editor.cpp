@@ -60,6 +60,39 @@ namespace Ainan
 
 	void Editor::Update()
 	{
+		auto io = ImGui::GetIO();
+
+		bool mouseClicked = false;
+		bool mouseReleased = false;
+		for (size_t i = 0; i < 5; i++)
+		{
+			if (io.MouseClicked[i])
+			{
+				mouseClicked = true;
+				break;
+			}
+			if (io.MouseReleased[i])
+			{
+				mouseReleased = true;
+				break;
+			}
+		}
+
+		bool keyPressed = false;
+		for (size_t i = 0; i < sizeof(io.KeysDown) / sizeof(io.KeysDown[0]) ; i++)
+		{
+			if (io.KeysDown[i])
+			{
+				keyPressed = true;
+				break;
+			}
+		}
+
+		if (InputManager::MouseDelta.x != 0 || InputManager::MouseDelta.y != 0 || (io.MouseWheel != 0) || mouseClicked || mouseReleased || keyPressed)
+		{
+			m_RedrawUI = 3;
+		}
+
 		FrameCounter++;
 		if (FrameCounter > c_ApplicationFramerate)
 			FrameCounter = 0;
@@ -104,7 +137,7 @@ namespace Ainan
 		case State_NoEnvLoaded:
 			DrawHomeWindow();
 			return;
-		
+
 		case State_CreateEnv:
 			DrawEnvironmentCreationWindow();
 			return;
@@ -124,7 +157,39 @@ namespace Ainan
 		ImGuiWrapper::BeginGlobalDocking(true);
 		DrawUI();
 		ImGuiWrapper::EndGlobalDocking();
-		Renderer::ImGuiEndFrame();
+
+		if (m_RedrawUI > 0)
+		{
+			m_RedrawUI--;
+			Renderer::ImGuiEndFrame(true);
+		}
+		else
+		{
+			Renderer::ImGuiEndFrame(false);
+
+			//draw environment only and not ImGui
+			if (m_State == State_PlayMode)
+			{
+
+				ImVec2 displayPos = ImGui::GetDrawData()->DisplayPos;
+				ImVec2 displaySize = ImGui::GetDrawData()->DisplaySize;
+				ImVec2 fbScale = ImGui::GetDrawData()->FramebufferScale;
+				auto& windowsAboveViewport = Renderer::Rdata->WindowsAboveViewport;
+				Renderer::PushCommand([this, displayPos, displaySize, fbScale, windowsAboveViewport]()
+					{
+						auto list = windowsAboveViewport;
+						list.insert(list.begin(), m_ViewportWindow.pDrawEnvImGuiCmd);
+
+						ImDrawData data;
+						data.DisplayPos = displayPos;
+						data.DisplaySize = displaySize;
+						data.FramebufferScale = fbScale;
+						data.CmdListsCount = list.size();
+						data.CmdLists = list.data();
+						Renderer::Rdata->CurrentActiveAPI->DrawImGui(&data);
+					});
+			}
+		}
 	}
 
 	void Editor::WorkerThreadLoop()
@@ -134,7 +199,8 @@ namespace Ainan
 		{
 			{
 				std::unique_lock<std::mutex> lock(mutex);
-				StartUpdating.wait(lock);
+				using namespace std::chrono_literals;
+				StartUpdating.wait_for(lock, 3ms);
 			}
 
 			if (DestroyThreads)
@@ -208,7 +274,8 @@ namespace Ainan
 		{
 			static std::mutex mutex;
 			std::unique_lock<std::mutex> lock(mutex);
-			FinishedUpdating.wait(lock);
+			using namespace std::chrono_literals;
+			FinishedUpdating.wait_for(lock, 3ms);
 		}
 
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
@@ -340,7 +407,13 @@ namespace Ainan
 			});
 
 		ImGuiWrapper::EndGlobalDocking();
-		Renderer::ImGuiEndFrame();
+		if (m_RedrawUI > 0)
+		{
+			m_RedrawUI--;
+			Renderer::ImGuiEndFrame(true);
+		}
+		else
+			Renderer::ImGuiEndFrame(false);
 	}
 
 	void Editor::DrawEnvironmentCreationWindow()
@@ -481,7 +554,13 @@ namespace Ainan
 			});
 
 		ImGuiWrapper::EndGlobalDocking();
-		Renderer::ImGuiEndFrame();
+		if (m_RedrawUI > 0)
+		{
+			m_RedrawUI--;
+			Renderer::ImGuiEndFrame(true);
+		}
+		else
+			Renderer::ImGuiEndFrame(false);
 	}
 
 	void Editor::DrawEnvironment(bool drawWorldSpaceUI)
@@ -519,7 +598,6 @@ namespace Ainan
 		}
 
 		Renderer::EndScene();
-		Renderer::WaitUntilRendererIdle();
 		m_DrawCalls = Renderer::Rdata->NumberOfDrawCallsLastScene;
 
 		//draw the UI as a different scene on top of the environment scene
@@ -602,7 +680,6 @@ namespace Ainan
 			m_Exporter.DrawOutline();
 		}
 		Renderer::EndScene();
-		Renderer::WaitUntilRendererIdle();
 		//revert to the scene rendering mode
 		Renderer::SetBlendMode(m_Env->BlendMode);
 	}
@@ -674,6 +751,7 @@ namespace Ainan
 			}
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 
 		m_Exporter.DisplayGUI();
@@ -918,6 +996,7 @@ namespace Ainan
 		if (ImGui::Button("Export"))
 			m_Exporter.OpenExporterWindow();
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 
@@ -1084,6 +1163,7 @@ namespace Ainan
 
 			ImGui::ListBoxFooter();
 		}
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 
 		if (!m_AddObjectWindowOpen)
@@ -1141,6 +1221,7 @@ namespace Ainan
 			m_AddObjectWindowOpen = false;
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 
@@ -1323,7 +1404,7 @@ namespace Ainan
 					return;
 
 				//move the camera's position
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -m_Camera.ZoomFactor / 100.0f));
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -m_Camera.ZoomFactor) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 
 				//display text in the bottom right of the screen stating the new position of the camera
 				displayCameraPosFunc();
@@ -1336,7 +1417,7 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, m_Camera.ZoomFactor / 100.0f));
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, m_Camera.ZoomFactor) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1345,7 +1426,7 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(-m_Camera.ZoomFactor / 100.0f, 0.0f));
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(-m_Camera.ZoomFactor, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1354,7 +1435,7 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(m_Camera.ZoomFactor / 100.0f, 0.0f));
+				m_Camera.SetPosition(m_Camera.Position + glm::vec2(m_Camera.ZoomFactor, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1417,10 +1498,11 @@ namespace Ainan
 
 	void Editor::DisplayProfilerGUI()
 	{
-		if (!m_ProfilerWindowOpen)
+		if (!m_ProfilerWindowOpen || m_State != State_PlayMode)
 			return;
 
-		ImGui::Begin("Profiler");
+		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
+		ImGui::Begin("Profiler", &m_ProfilerWindowOpen, ImGuiWindowFlags_NoDocking);
 
 		ImVec4 activeColor = { 0.6f,0.6f,0.6f,1.0f };
 		ImVec4 inactiveColor = { 0.2f,0.2f,0.2f,1.0f };
@@ -1596,6 +1678,7 @@ namespace Ainan
 		break;
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 
@@ -1673,6 +1756,7 @@ namespace Ainan
 		if (ImGui::IsItemHovered())
 			ImGui::SetTooltip("Backend will change only when the app is restarted");
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
 

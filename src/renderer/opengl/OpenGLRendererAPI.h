@@ -42,7 +42,7 @@ namespace Ainan {
 			virtual void InitImGui() override;
 			virtual void TerminateImGui() override;
 			virtual void ImGuiNewFrame() override;
-			virtual void ImGuiEndFrame() override;
+			virtual void ImGuiEndFrame(bool redraw) override;
 			virtual void DrawImGui(ImDrawData* drawData) override;
 
 			virtual RendererContext* GetContext() override { return &Context; };

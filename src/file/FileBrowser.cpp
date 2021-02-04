@@ -1,5 +1,7 @@
 #include "FileBrowser.h"
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 
 	namespace fs = std::filesystem;
@@ -108,6 +110,7 @@ namespace Ainan {
 			m_WindowOpen = false;
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 
 		//Handle OnCloseWindow if the new window state is false and the last one is true

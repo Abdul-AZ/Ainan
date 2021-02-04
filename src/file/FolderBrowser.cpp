@@ -1,5 +1,7 @@
 #include "FolderBrowser.h"
 
+#include "renderer/Renderer.h"
+
 namespace Ainan {
 
 	namespace fs = std::filesystem;
@@ -67,6 +69,7 @@ namespace Ainan {
 			WindowOpen = false;
 		}
 
+		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 
 		ImGui::PopID();
