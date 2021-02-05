@@ -5,7 +5,9 @@ namespace Ainan {
 	Camera::Camera(CameraMode mode) :
 		m_Mode(mode), 
 		ViewMatrix(glm::mat4(1.0f))
-	{}
+	{
+		SetPosition(Position);
+	}
 
 	void Camera::Update(float deltaTime, const Rectangle& viewport)
 	{
@@ -13,35 +15,39 @@ namespace Ainan {
 
 		switch (m_Mode)
 		{
-		case Ainan::CameraMode::CentreIsMidPoint:
+		case CameraMode::CentreIsMidPoint:
 			ProjectionMatrix = glm::ortho(
 				-ZoomFactor * aspectRatio / 2.0f,  //left
 				 ZoomFactor * aspectRatio / 2.0f,  //right
 				-ZoomFactor / 2.0f,                //bottom
-				 ZoomFactor / 2.0f                 //top
-				);
+				 ZoomFactor / 2.0f,                //top
+				 c_CameraNearClip,
+				 c_CameraFarClip
+				 );
 			break;
 
-		case Ainan::CameraMode::CentreIsBottomLeft:
+		case CameraMode::CentreIsBottomLeft:
 			ProjectionMatrix = glm::ortho(
 				0.0f,							   //left
 				ZoomFactor * aspectRatio,		   //right
 				0.0f,							   //bottom
-				ZoomFactor);					   //top
+				ZoomFactor,  					   //top
+				c_CameraFarClip,
+				c_CameraFarClip
+				);
 			break;
 		}
 	}
 
-	void Camera::SetPosition(const glm::vec2& newPos)
+	void Camera::SetPosition(const glm::vec3& newPos)
 	{
 		Position = newPos;
-		ViewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(Position.x, Position.y, 0.0f));
+		ViewMatrix = glm::translate(glm::mat4(1.0f), -Position);
 	}
 
 	glm::vec2 Camera::WorldSpaceToViewportNDC(glm::vec2 pos) const
 	{
-		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(Position.x, Position.y, 0.0f));
-		glm::vec4 result = ProjectionMatrix * view * glm::vec4(pos.x, pos.y, 0.0f, 1.0f);
+		glm::vec4 result = ProjectionMatrix * ViewMatrix * glm::vec4(pos.x, pos.y, 0.0f, 1.0f);
 
 		return glm::vec2(result.x, result.y);
 	}

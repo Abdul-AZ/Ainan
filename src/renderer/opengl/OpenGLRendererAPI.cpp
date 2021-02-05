@@ -128,6 +128,7 @@ namespace Ainan {
 			glDebugMessageCallback(&opengl_debug_message_callback, nullptr);
 #endif // DEBUG
 			glEnable(GL_BLEND);
+			glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
 			SingletonInstance = this;
 			Context.OpenGLVersion = std::string((const char*)glGetString(GL_VERSION)).substr(0, 5);
 			Context.PhysicalDeviceName = (const char*)glGetString(GL_RENDERER);
@@ -177,7 +178,7 @@ namespace Ainan {
 			switch (cmd.Type)
 			{
 			case RenderCommandType::Clear:
-				glClear(GL_COLOR_BUFFER_BIT);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				break;
 
 			case RenderCommandType::Present:
@@ -330,7 +331,6 @@ namespace Ainan {
 
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, info->Size.x, info->Size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureHandle, 0);
-
 			glBindTexture(GL_TEXTURE_2D, 0);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

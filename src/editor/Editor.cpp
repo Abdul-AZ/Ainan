@@ -1285,11 +1285,12 @@ namespace Ainan
 			m_Env->Objects[m_Env->Objects.size() - 1]->m_Name += "-copy";
 		}
 	}
+
 	void Editor::FocusCameraOnObject(EnvironmentObjectInterface& object)
 	{
 		glm::vec2 pos = *object.GetPositionRef();
 
-		m_Camera.SetPosition(pos);
+		m_Camera.SetPosition(glm::vec3(pos, m_Camera.Position.z));
 	}
 
 	void Editor::AddEnvironmentObject(EnvironmentObjectType type, const std::string& name)
@@ -1390,8 +1391,9 @@ namespace Ainan
 
 			messageString << std::fixed << std::setprecision(2);
 			messageString << "Moving Camera to Coordinates :";
-			messageString << "(" << -m_Camera.Position.x;
-			messageString << ", " << -m_Camera.Position.y << ")";
+			messageString << "(" <<   m_Camera.Position.x;
+			messageString << ", " <<  m_Camera.Position.y;
+			messageString << ", " <<  m_Camera.Position.z << ")";
 
 			m_AppStatusWindow.SetText(messageString.str());
 		};
@@ -1404,7 +1406,7 @@ namespace Ainan
 					return;
 
 				//move the camera's position
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, -m_Camera.ZoomFactor) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
+				m_Camera.SetPosition(m_Camera.Position + glm::vec3(0.0f, m_Camera.ZoomFactor, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 
 				//display text in the bottom right of the screen stating the new position of the camera
 				displayCameraPosFunc();
@@ -1417,7 +1419,7 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(0.0f, m_Camera.ZoomFactor) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
+				m_Camera.SetPosition(m_Camera.Position - glm::vec3(0.0f, m_Camera.ZoomFactor, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1426,7 +1428,7 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(-m_Camera.ZoomFactor, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
+				m_Camera.SetPosition(m_Camera.Position + glm::vec3(m_Camera.ZoomFactor, 0.0f, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1435,7 +1437,7 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position + glm::vec2(m_Camera.ZoomFactor, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
+				m_Camera.SetPosition(m_Camera.Position - glm::vec3(m_Camera.ZoomFactor, 0.0f, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);

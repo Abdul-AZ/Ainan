@@ -16,6 +16,8 @@ namespace Ainan {
 	const float c_CameraZoomFactorMin = 1.0f;
 	const float c_CameraZoomFactorMax = 100.0f;
 	const float c_CameraMoveSpeedFactor = 0.5f;
+	const float c_CameraNearClip = 0.0f;
+	const float c_CameraFarClip = 1000.0f;
 
 	class Camera
 	{
@@ -24,14 +26,14 @@ namespace Ainan {
 
 		//this only sets the camera size to the screen size
 		void Update(float deltaTime, const Rectangle& viewport);
-		void SetPosition(const glm::vec2& newPos);
+		void SetPosition(const glm::vec3& newPos);
 
 		//returns the position in Normalized Dvice Coordinates relative to the viewport window and NOT the monitor
 		glm::vec2 WorldSpaceToViewportNDC(glm::vec2 pos) const;
 		glm::vec2 ViewportNDCToWorldSpace(glm::vec2 pos) const;
 
 	public:
-		glm::vec2 Position = glm::vec2(0.0f, 0.0f);
+		glm::vec3 Position = glm::vec3(0.0f, 0.0f, -10.0f);
 		glm::mat4 ViewMatrix;
 		glm::mat4 ProjectionMatrix;
 		float ZoomFactor = c_CameraZoomFactorDefault;

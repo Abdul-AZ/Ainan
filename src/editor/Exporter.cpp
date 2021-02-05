@@ -88,7 +88,7 @@ namespace Ainan {
 		m_OutlineVertices[3] = m_ExportCameraPosition + glm::vec2(size.x, -size.y) / 2.0f; //bottom right
 
 		Camera.Update(0.0f, Renderer::Rdata->CurrentViewport);
-		glm::vec2 reversedPos = glm::vec2(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y);
+		glm::vec3 reversedPos = glm::vec3(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y, Camera.Position.z);
 
 		Camera.SetPosition(reversedPos);
 	}
