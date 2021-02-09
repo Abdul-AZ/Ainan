@@ -2,8 +2,8 @@
 
 namespace Ainan {
 
-	Camera::Camera(CameraMode mode) :
-		m_Mode(mode), 
+	Camera::Camera(ProjectionMode mode) :
+		Mode(mode), 
 		ViewMatrix(glm::mat4(1.0f))
 	{
 		SetPosition(Position);
@@ -13,9 +13,9 @@ namespace Ainan {
 	{
 		float aspectRatio = (float)viewport.Width / viewport.Height;
 
-		switch (m_Mode)
+		switch (Mode)
 		{
-		case CameraMode::CentreIsMidPoint:
+		case ProjectionMode::Orthographic:
 			ProjectionMatrix = glm::ortho(
 				-ZoomFactor * aspectRatio / 2.0f,  //left
 				 ZoomFactor * aspectRatio / 2.0f,  //right
@@ -26,15 +26,8 @@ namespace Ainan {
 				 );
 			break;
 
-		case CameraMode::CentreIsBottomLeft:
-			ProjectionMatrix = glm::ortho(
-				0.0f,							   //left
-				ZoomFactor * aspectRatio,		   //right
-				0.0f,							   //bottom
-				ZoomFactor,  					   //top
-				c_CameraFarClip,
-				c_CameraFarClip
-				);
+		case ProjectionMode::Perspective:
+			ProjectionMatrix = glm::perspective(glm::radians((float)60), aspectRatio, c_CameraNearClip, c_CameraFarClip);
 			break;
 		}
 	}
@@ -42,7 +35,12 @@ namespace Ainan {
 	void Camera::SetPosition(const glm::vec3& newPos)
 	{
 		Position = newPos;
-		ViewMatrix = glm::translate(glm::mat4(1.0f), -Position);
+		CalculateMatrices();
+	}
+
+	void Camera::CalculateMatrices()
+	{
+		ViewMatrix = glm::lookAt(Position, Position + CameraForward, CameraUp);
 	}
 
 	glm::vec2 Camera::WorldSpaceToViewportNDC(glm::vec2 pos) const

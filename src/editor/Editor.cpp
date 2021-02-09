@@ -996,6 +996,11 @@ namespace Ainan
 		if (ImGui::Button("Export"))
 			m_Exporter.OpenExporterWindow();
 
+		ImGui::SameLine(ImGui::GetWindowSize().x - 250);
+		ImGui::RadioButton("Orthographic", (int32_t*)&m_Camera.Mode, (int32_t)ProjectionMode::Orthographic);
+		ImGui::SameLine();
+		ImGui::RadioButton("Perspective", (int32_t*)&m_Camera.Mode, (int32_t)ProjectionMode::Perspective);
+
 		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
 	}
@@ -1381,6 +1386,13 @@ namespace Ainan
 						ps->ClearParticles();
 					}
 				}
+
+				//reset camera
+				m_Camera.Position = c_CameraStartingPosition;
+				m_Camera.CameraForward = c_CameraStartingForwardDirection;
+				CameraPitch = 0.0f;
+				CameraYaw = 90.0f;
+				m_Camera.CalculateMatrices();
 			});
 
 		//shortcut cut to use in all the mapped buttons
@@ -1406,7 +1418,14 @@ namespace Ainan
 					return;
 
 				//move the camera's position
-				m_Camera.SetPosition(m_Camera.Position + glm::vec3(0.0f, m_Camera.ZoomFactor, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
+				if (m_Camera.Mode == ProjectionMode::Orthographic)
+				{
+					glm::vec3 cameraRight = glm::normalize(glm::cross(m_Camera.CameraUp, m_Camera.CameraForward));
+					glm::vec3 cameraUp = glm::cross(m_Camera.CameraForward, cameraRight);
+					m_Camera.SetPosition(m_Camera.Position + cameraUp * m_Camera.ZoomFactor * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor);
+				}
+				else
+					m_Camera.SetPosition(m_Camera.Position + m_Camera.CameraForward * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
 
 				//display text in the bottom right of the screen stating the new position of the camera
 				displayCameraPosFunc();
@@ -1419,7 +1438,15 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position - glm::vec3(0.0f, m_Camera.ZoomFactor, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
+				if (m_Camera.Mode == ProjectionMode::Orthographic)
+				{
+					glm::vec3 cameraRight = glm::normalize(glm::cross(m_Camera.CameraUp, m_Camera.CameraForward));
+					glm::vec3 cameraDown = -glm::cross(m_Camera.CameraForward, cameraRight);
+
+					m_Camera.SetPosition(m_Camera.Position + cameraDown * m_Camera.ZoomFactor * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor);
+				}
+				else
+					m_Camera.SetPosition(m_Camera.Position - m_Camera.CameraForward * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1428,7 +1455,14 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position + glm::vec3(m_Camera.ZoomFactor, 0.0f, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
+				glm::vec3 cameraRight = glm::normalize(glm::cross(m_Camera.CameraUp, m_Camera.CameraForward));
+
+				if (m_Camera.Mode == ProjectionMode::Orthographic)
+					m_Camera.SetPosition(m_Camera.Position + cameraRight * m_Camera.ZoomFactor * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor);
+				else
+				{
+					m_Camera.SetPosition(m_Camera.Position + cameraRight * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
+				}
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1437,7 +1471,14 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				m_Camera.SetPosition(m_Camera.Position - glm::vec3(m_Camera.ZoomFactor, 0.0f, 0.0f) * (float)LastFrameDeltaTime * c_CameraMoveSpeedFactor);
+				glm::vec3 cameraLeft = -glm::normalize(glm::cross(m_Camera.CameraUp, m_Camera.CameraForward));
+
+				if (m_Camera.Mode == ProjectionMode::Orthographic)
+					m_Camera.SetPosition(m_Camera.Position + cameraLeft * m_Camera.ZoomFactor * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor);
+				else
+				{
+					m_Camera.SetPosition(m_Camera.Position + cameraLeft * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
+				}
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1461,7 +1502,7 @@ namespace Ainan
 		InputManager::m_ScrollHandlers.push_back([this](double xoffset, double yoffset)
 			{
 				//we don't want to zoom if the focus is not set on the viewport
-				if (m_ViewportWindow.IsHovered == false || m_ViewportWindow.IsFocused == false)
+				if (m_ViewportWindow.IsHovered == false || m_ViewportWindow.IsFocused == false || m_Camera.Mode == ProjectionMode::Perspective)
 					return;
 
 				//change zoom factor
@@ -1479,12 +1520,13 @@ namespace Ainan
 				m_AppStatusWindow.SetText(stream.str());
 			});
 
-
 		InputManager::RegisterMouseKey(GLFW_MOUSE_BUTTON_MIDDLE, "Change Camera Zoom to Default", [this](int32_t mods)
 			{
 				//we don't want to zoom if the focus is not set on the viewport
 				if (m_ViewportWindow.IsHovered == false)
 					return;
+
+				Window::SetMouseVisibility(false);
 
 				m_Camera.ZoomFactor = c_CameraZoomFactorDefault;
 				//display the new zoom factor in the bottom left of the screen
@@ -1495,6 +1537,24 @@ namespace Ainan
 				stream << "%%";
 
 				m_AppStatusWindow.SetText(stream.str());
+			});
+
+		InputManager::RegisterMouseKey(GLFW_MOUSE_BUTTON_RIGHT, "Hold to rotate camera while in Perspective mode", [this](int32_t mods)
+			{
+				if (m_ViewportWindow.IsHovered && m_Camera.Mode == ProjectionMode::Perspective && (InputManager::MouseDelta.x != 0 || InputManager::MouseDelta.y != 0))
+				{
+					CameraYaw -= LastFrameDeltaTime * InputManager::MouseDelta.x * 50.f;
+					CameraPitch -= LastFrameDeltaTime * InputManager::MouseDelta.y * 50.f;
+					if (CameraPitch > 89.0f)
+						CameraPitch = 89.0f;
+
+					glm::vec3 direction;
+					direction.x = cos(glm::radians(CameraYaw)) * cos(glm::radians(CameraPitch));
+					direction.y = sin(glm::radians(CameraPitch));
+					direction.z = sin(glm::radians(CameraYaw)) * cos(glm::radians(CameraPitch));
+					m_Camera.CameraForward = glm::normalize(direction);
+					m_Camera.CalculateMatrices();
+				}
 			});
 	}
 

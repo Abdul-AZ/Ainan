@@ -60,6 +60,8 @@ namespace Ainan {
 		Environment* m_Env = nullptr;
 		EditorPreferences m_Preferences;
 		Camera m_Camera;
+		float CameraPitch = 0;
+		float CameraYaw = 90.0f;
 		ViewportWindow m_ViewportWindow;
 		AppStatusWindow m_AppStatusWindow;
 		Exporter m_Exporter;

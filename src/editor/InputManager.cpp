@@ -262,18 +262,11 @@ namespace Ainan {
 					MousePos = glm::vec2(mouse_x, mouse_y);
 					MouseDelta = MousePos - m_OldMousePos;
 					m_OldMousePos = MousePos;
-					if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-					{
-						// Multi-viewport mode: mouse position in OS absolute coordinates (io.MousePos is (0,0) when the mouse is on the upper-left of the primary monitor)
-						int window_x, window_y;
-						glfwGetWindowPos(window, &window_x, &window_y);
-						io.MousePos = ImVec2((float)mouse_x + window_x, (float)mouse_y + window_y);
-					}
-					else
-					{
-						// Single viewport mode: mouse position in client window coordinates (io.MousePos is (0,0) when the mouse is on the upper-left corner of the app window)
-						io.MousePos = ImVec2((float)mouse_x, (float)mouse_y);
-					}
+
+					// Multi-viewport mode: mouse position in OS absolute coordinates (io.MousePos is (0,0) when the mouse is on the upper-left of the primary monitor)
+					int window_x, window_y;
+					glfwGetWindowPos(window, &window_x, &window_y);
+					io.MousePos = ImVec2((float)mouse_x + window_x, (float)mouse_y + window_y);
 				}
 				for (int i = 0; i < IM_ARRAYSIZE(io.MouseDown); i++)
 					io.MouseDown[i] |= glfwGetMouseButton(window, i) != 0;

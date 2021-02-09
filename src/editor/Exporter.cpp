@@ -15,7 +15,7 @@ namespace Ainan {
 
 	//TODO use environment directory instead of default
 	Exporter::Exporter() :
-		Camera(CameraMode::CentreIsMidPoint)
+		Camera(ProjectionMode::Orthographic)
 	{
 		memset(m_OutlineVertices.data(), 0, m_OutlineVertices.size() * sizeof(glm::vec2));
 
