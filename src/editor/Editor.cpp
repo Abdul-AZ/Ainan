@@ -1526,8 +1526,6 @@ namespace Ainan
 				if (m_ViewportWindow.IsHovered == false)
 					return;
 
-				Window::SetMouseVisibility(false);
-
 				m_Camera.ZoomFactor = c_CameraZoomFactorDefault;
 				//display the new zoom factor in the bottom left of the screen
 				std::stringstream stream;
