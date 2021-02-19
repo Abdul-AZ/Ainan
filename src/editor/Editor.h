@@ -15,6 +15,7 @@
 #include "file/FolderBrowser.h"
 #include "EditorPreferences.h"
 #include "environment/RadialLight.h"
+#include "ImGuizmo.h"
 
 namespace Ainan {
 	bool SaveEnvironment(const Environment& env, std::string path);
@@ -66,7 +67,6 @@ namespace Ainan {
 		AppStatusWindow m_AppStatusWindow;
 		Exporter m_Exporter;
 		RenderSurface m_RenderSurface;
-		Gizmo m_Gizmo;
 		Grid m_Grid;
 
 		bool m_EnvironmentControlsWindowOpen = true;
@@ -93,6 +93,7 @@ namespace Ainan {
 		std::clock_t m_TimeStart = 0, m_TimeEnd = 0;
 		std::array<float, 120> m_DeltaTimeHistory;
 		Profiler m_ActiveProfiler = Profiler::RenderingProfiler;
+		ImGuizmo::OPERATION m_GizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
 
 		float m_SimulationSpeedFactor = 1.0f;
 		std::string m_EnvironmentCreateFolderPath;

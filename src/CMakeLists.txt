@@ -11,7 +11,6 @@ set(SOURCES_LIST
     "editor/EditorPreferences.h"       "editor/EditorPreferences.cpp"
     "editor/EditorStyles.h"            "editor/EditorStyles.cpp"
     "editor/Exporter.h"                "editor/Exporter.cpp"
-    "editor/Gizmo.h"                   "editor/Gizmo.cpp"
     "editor/Grid.h"                    "editor/Grid.cpp"
     "editor/ImGuiWrapper.h"            "editor/ImGuiWrapper.cpp"
     "editor/InputManager.h"            "editor/InputManager.cpp"
@@ -73,6 +72,8 @@ set(IMGUI_SOURCE_FILES
     "../submodules/imgui/imgui_widgets.cpp"
     "../submodules/imgui/misc/cpp/imgui_stdlib.cpp"
     "../submodules/imgui/imgui_internal.h"
+
+    "../submodules/ImGuizmo/ImGuizmo.cpp"
     )
 
 list(APPEND DEFINITIONS_LIST
@@ -144,6 +145,7 @@ set(INCLUDE_LIST
     "../submodules/imgui/misc/cpp" 
     "../submodules/glm" 
     "../submodules/spdlog/include"
+    "../submodules/ImGuizmo"
     "vendor"
     )
 

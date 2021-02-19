@@ -29,11 +29,11 @@ namespace Ainan {
 		virtual void Update(const float deltaTime) {};
 		virtual void Draw() {};
 		virtual void DisplayGUI() {};
-		virtual glm::vec2* GetPositionRef() { return nullptr; };
 		virtual std::shared_ptr<std::mutex> GetMutex() { return ObjectMutex; };
 
 		virtual ~EnvironmentObjectInterface() {};
 
+		glm::mat4 Model = glm::mat4(1.0f);
 		std::string m_Name;
 		bool EditorOpen = false;
 		bool RenameTextOpen = false;

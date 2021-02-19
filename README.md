@@ -30,6 +30,7 @@ Also, feel free to contact me through Email.
 # Libraries used
 * [GLFW](https://www.glfw.org/)
 * [Dear ImGui](https://github.com/ocornut/imgui)
+* [ImGuizmo](https://github.com/CedricGuillemet/ImGuizmo)
 * [glad](https://github.com/Dav1dde/glad)
 * [stb](https://github.com/nothings/stb)
 * [GLM](https://github.com/g-truc/glm)

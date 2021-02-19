@@ -11,7 +11,6 @@ namespace Ainan {
 		LitSprite();
 		~LitSprite();
 
-		virtual glm::vec2* GetPositionRef() override { return &m_Position; };
 		virtual void DisplayGUI() override;
 		virtual void Draw() override;
 

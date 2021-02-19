@@ -1,7 +1,7 @@
 #include "Renderer.h"
 
 #include "opengl/OpenGLRendererAPI.h"
-
+#include "ImGuizmo.h"
 #include <GLFW/glfw3.h>
 
 #ifdef PLATFORM_WINDOWS
@@ -664,6 +664,7 @@ namespace Ainan {
 		Rdata->Time = current_time;
 
 		ImGui::NewFrame();
+		ImGuizmo::BeginFrame();
 		Rdata->WindowsAboveViewport.clear();
 	}
 

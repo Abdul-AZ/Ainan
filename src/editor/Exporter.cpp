@@ -102,12 +102,12 @@ namespace Ainan {
 			if (obj->Type == RadialLightType)
 			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				Renderer::AddRadialLight(light->Position, light->Color, light->Intensity);
+				Renderer::AddRadialLight(light->Model[3], light->Color, light->Intensity);
 			}
 			else if (obj->Type == SpotLightType)
 			{
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				Renderer::AddSpotLight(light->Position, light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
+				Renderer::AddSpotLight(light->Model[3], light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
 			}
 		}
 

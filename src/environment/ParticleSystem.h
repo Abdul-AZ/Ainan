@@ -4,7 +4,6 @@
 #include "editor/Window.h"
 #include "editor/Camera.h"
 #include "editor/ParticleCustomizer.h"
-#include "editor/Gizmo.h"
 #include "renderer/ShaderProgram.h"
 #include "renderer/Renderer.h"
 
@@ -25,7 +24,6 @@ namespace Ainan {
 		void ClearParticles();
 		void DisplayGUI() override;
 
-		glm::vec2* GetPositionRef() override { return &Customizer.m_SpawnPosition; };
 		ParticleSystem(const ParticleSystem& Psystem);
 		ParticleSystem operator=(const ParticleSystem& Psystem);
 

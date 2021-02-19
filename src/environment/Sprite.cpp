@@ -26,7 +26,7 @@ namespace Ainan {
 
 	void Sprite::Draw()
 	{
-		Renderer::DrawQuad(Position, Tint, Scale, -Rotation * PI / 180.0f, m_Texture);
+		Renderer::DrawQuad(Model[3], Tint, Scale, -Rotation * PI / 180.0f, m_Texture);
 	}
 
 	void Sprite::DisplayGUI()
@@ -72,7 +72,7 @@ namespace Ainan {
 
 		ImGui::Text("Position: ");
 		ImGui::SameLine();
-		ImGui::DragFloat2("##Position: ", &Position.x, c_ObjectPositionDragControlSpeed);
+		ImGui::DragFloat2("##Position: ", &Model[3][0], c_ObjectPositionDragControlSpeed);
 
 		ImGui::Text("Scale: ");
 		ImGui::SameLine();

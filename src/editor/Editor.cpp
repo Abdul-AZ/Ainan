@@ -571,15 +571,16 @@ namespace Ainan
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
 			auto mutexPtr = obj->GetMutex();
+
 			if (obj->Type == RadialLightType)
 			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				Renderer::AddRadialLight(light->Position, light->Color, light->Intensity);
+				Renderer::AddRadialLight(light->Model[3], light->Color, light->Intensity);
 			}
 			else if (obj->Type == SpotLightType) 
 			{
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				Renderer::AddSpotLight(light->Position, light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
+				Renderer::AddSpotLight(light->Model[3], light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
 			}
 		}
 
@@ -624,7 +625,7 @@ namespace Ainan
 				std::lock_guard lock(*mutexPtr);
 
 				const float scale = 0.1f;
-				const glm::vec2 position = *obj->GetPositionRef() - glm::vec2(scale, scale) / 2.0f;
+				const glm::vec2 position = glm::vec2(obj->Model[3]) - glm::vec2(scale, scale) / 2.0f;
 				const glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 				switch (obj->Type)
@@ -656,24 +657,23 @@ namespace Ainan
 				}
 			}
 
-					//Renderer::FlushQuadBatch();
-
 			for (pEnvironmentObject& obj : m_Env->Objects)
 				if (obj->Selected)
 				{
 					Renderer::SetBlendMode(RenderingBlendMode::Overlay);
 					//draw object position gizmo
-					m_Gizmo.Draw(obj->GetPositionRef(), m_ViewportWindow, m_Camera);
+
+					//m_Gizmo.Draw(obj->GetPositionRef(), m_ViewportWindow, m_Camera);
 
 					//if particle system needs to edit a force target (a world point), use a gimzo for it
 					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
 					{
 						auto ps = static_cast<ParticleSystem*>(obj.get());
-						if (ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "")
-							if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce)
-								m_Gizmo.Draw(&ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target,
-									m_ViewportWindow,
-									m_Camera);
+						if (ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "");
+						if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce);
+								//m_Gizmo.Draw(&ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target,
+									//m_ViewportWindow,
+									//m_Camera);
 					}
 				}
 
@@ -734,6 +734,35 @@ namespace Ainan
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(100.0f);
 		ImGui::Checkbox("##Show Grid", &m_ShowGrid);
+		if (m_ShowGrid)
+		{
+			ImGui::Text("Grid Orientation");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(100.0f);
+
+			if (ImGui::BeginCombo("##Grid Orientation", Grid::GridPlaneToStr(m_Grid.Orientation)))
+			{
+				{
+					bool selected = m_Grid.Orientation == Grid::XY;
+					if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XY), &selected))
+						m_Grid.Orientation = Grid::XY;
+				}
+
+				{
+					bool selected = m_Grid.Orientation == Grid::XZ;
+					if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XZ), &selected))
+						m_Grid.Orientation = Grid::XZ;
+				}
+
+				{
+					bool selected = m_Grid.Orientation == Grid::YZ;
+					if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::YZ), &selected))
+						m_Grid.Orientation = Grid::YZ;
+				}
+
+				ImGui::EndCombo();
+			}
+		}
 
 		ImGui::Text("Blur");
 		ImGui::SameLine();
@@ -766,6 +795,30 @@ namespace Ainan
 		InputManager::DisplayGUI();
 
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFramebuffer);
+
+		static glm::mat4 cube(1.0f);
+		if (m_Camera.Mode == ProjectionMode::Orthographic)
+			ImGuizmo::SetOrthographic(true);
+		else
+			ImGuizmo::SetOrthographic(false);
+		ImGuizmo::AllowAxisFlip(false);
+		ImGuizmo::SetRect(m_ViewportWindow.WindowPosition.x, m_ViewportWindow.WindowPosition.y, m_ViewportWindow.WindowSize.x, m_ViewportWindow.WindowSize.y);
+
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuizmo::SetDrawlist(ImGui::GetOverlayDrawList());
+
+		if (m_State == EditorState::State_EditorMode)
+		{
+			for (auto& obj : m_Env->Objects)
+			{
+				if (obj->Selected)
+				{
+					ImGuizmo::Manipulate(glm::value_ptr(m_Camera.ViewMatrix), glm::value_ptr(m_Camera.ProjectionMatrix),
+						m_GizmoOperation, ImGuizmo::MODE::WORLD, glm::value_ptr(obj->Model));
+					break;
+				}
+			}
+		}
 	}
 
 	void Editor::OnEnvironmentLoad()
@@ -1293,9 +1346,7 @@ namespace Ainan
 
 	void Editor::FocusCameraOnObject(EnvironmentObjectInterface& object)
 	{
-		glm::vec2 pos = *object.GetPositionRef();
-
-		m_Camera.SetPosition(glm::vec3(pos, m_Camera.Position.z));
+		m_Camera.SetPosition(glm::vec3(object.Model[3][0], object.Model[3][1], m_Camera.Position.z));
 	}
 
 	void Editor::AddEnvironmentObject(EnvironmentObjectType type, const std::string& name)
@@ -1374,8 +1425,26 @@ namespace Ainan
 				}
 			});
 
-		InputManager::RegisterKey(GLFW_KEY_SPACE, "Clear All Particles", [this](int32_t mods)
+		InputManager::RegisterKey(GLFW_KEY_Z, "Set Gizmo to Translate Mode", [this](int32_t mods)
 			{
+				m_GizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
+			});
+
+		InputManager::RegisterKey(GLFW_KEY_X, "Set Gizmo to Roation Mode", [this](int32_t mods)
+			{
+				m_GizmoOperation = ImGuizmo::OPERATION::ROTATE;
+			});
+
+		InputManager::RegisterKey(GLFW_KEY_C, "Set Gizmo to Scale Mode", [this](int32_t mods)
+			{
+				m_GizmoOperation = ImGuizmo::OPERATION::SCALE;
+			});
+
+		InputManager::RegisterKey(GLFW_KEY_R, "Clear All Particles", [this](int32_t mods)
+			{
+				if ((mods & GLFW_MOD_CONTROL) == false)
+					return;
+
 				for (pEnvironmentObject& obj : m_Env->Objects)
 				{
 					auto mutexPtr = obj->GetMutex();
@@ -1411,7 +1480,7 @@ namespace Ainan
 		};
 
 		//map WASD keys to move the camera in the environment
-		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera Up", [this, displayCameraPosFunc](int32_t mods)
+		InputManager::RegisterKey(GLFW_KEY_W, "Move Camera", [this, displayCameraPosFunc](int32_t mods)
 			{
 				//we don't want to zoom if the focus is not set on the viewport or if a mod key like CONTROL is down
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
@@ -1434,7 +1503,7 @@ namespace Ainan
 				GLFW_REPEAT);
 
 		//the rest are the same with only a diffrent move direction, that is why they arent commented
-		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera Down", [this, displayCameraPosFunc](int32_t mods)
+		InputManager::RegisterKey(GLFW_KEY_S, "Move Camera", [this, displayCameraPosFunc](int32_t mods)
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
@@ -1451,7 +1520,7 @@ namespace Ainan
 			},
 			GLFW_REPEAT);
 
-		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera To The Right", [this, displayCameraPosFunc](int32_t mods)
+		InputManager::RegisterKey(GLFW_KEY_D, "Move Camera", [this, displayCameraPosFunc](int32_t mods)
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
@@ -1467,7 +1536,7 @@ namespace Ainan
 			},
 			GLFW_REPEAT);
 
-		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera To The Left", [this, displayCameraPosFunc](int32_t mods)
+		InputManager::RegisterKey(GLFW_KEY_A, "Move Camera", [this, displayCameraPosFunc](int32_t mods)
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
@@ -1479,6 +1548,34 @@ namespace Ainan
 				{
 					m_Camera.SetPosition(m_Camera.Position + cameraLeft * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
 				}
+				displayCameraPosFunc();
+			},
+			GLFW_REPEAT);
+
+		InputManager::RegisterKey(GLFW_KEY_SPACE, "Move Camera", [this, displayCameraPosFunc](int32_t mods)
+			{
+				if (m_ViewportWindow.IsFocused == false || mods != 0)
+					return;
+
+				if (m_Camera.Mode != ProjectionMode::Perspective)
+					return;
+
+				m_Camera.SetPosition(m_Camera.Position + glm::vec3(0.0f, 1.0f, 0.0f) * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
+
+				displayCameraPosFunc();
+			},
+			GLFW_REPEAT);
+
+		InputManager::RegisterKey(GLFW_KEY_LEFT_SHIFT, "Move Camera", [this, displayCameraPosFunc](int32_t mods)
+			{
+				if (m_ViewportWindow.IsFocused == false)
+					return;
+
+				if (m_Camera.Mode != ProjectionMode::Perspective)
+					return;
+
+				m_Camera.SetPosition(m_Camera.Position + glm::vec3(0.0f, -1.0f, 0.0f) * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
+
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);

@@ -64,9 +64,29 @@ namespace Ainan {
 	{
 		auto& shader = Renderer::ShaderLibrary()["GridShader"];
 
-		glm::vec2 pos = glm::vec2(std::round(camera.Position.x / m_UnitLength), std::round(camera.Position.y / m_UnitLength)) * m_UnitLength;
+		glm::mat4 model(1.0f);
+		glm::vec3 pos(0.0f);
 
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3{ -pos, 0.0f });
+		switch (Orientation)
+		{
+		case XY:
+			pos = glm::vec3(std::round(camera.Position.x / m_UnitLength), std::round(camera.Position.y / m_UnitLength), 0.0f) * m_UnitLength;
+			model = glm::translate(model, pos);
+			break;
+
+		case XZ:
+			pos = glm::vec3(std::round(camera.Position.x / m_UnitLength), 0.0f, std::round(camera.Position.z / m_UnitLength)) * m_UnitLength;
+			model = glm::translate(model, pos);
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			break;
+
+		case YZ:
+			pos = glm::vec3(0.0f, std::round(camera.Position.y / m_UnitLength), std::round(camera.Position.z / m_UnitLength)) * m_UnitLength;
+			model = glm::translate(model, pos);
+			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+			break;
+		}
+		
 		m_TransformUniformBuffer.UpdateData(&model, sizeof(glm::mat4));
 
 		shader.BindUniformBuffer(m_TransformUniformBuffer, 1, RenderingStage::VertexShader);

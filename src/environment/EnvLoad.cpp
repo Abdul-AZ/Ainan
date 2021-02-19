@@ -11,6 +11,7 @@ using json = nlohmann::json;
 #define JSON_ARRAY_TO_VEC4(arr) glm::vec4(arr[0], arr[1], arr[2], arr[3])
 #define JSON_ARRAY_TO_VEC3(arr) glm::vec3(arr[0], arr[1], arr[2])
 #define JSON_ARRAY_TO_VEC2(arr) glm::vec2(arr[0], arr[1])
+#define JSON_ARRAY_TO_MAT4(arr) glm::make_mat4(arr.data());
 
 namespace Ainan {
 
@@ -181,7 +182,7 @@ namespace Ainan {
 
 		//populate with data
 		light->m_Name = data[id + "Name"].get <std::string>();
-		light->Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
+		light->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
 		light->Color = JSON_ARRAY_TO_VEC4(data[id + "Color"].get<std::vector<float>>());
 		light->Intensity = data[id + "Intensity"].get<float>();
 
@@ -197,7 +198,7 @@ namespace Ainan {
 
 		//populate with data
 		light->m_Name = data[id + "Name"].get <std::string>();
-		light->Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
+		light->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
 		light->Color = JSON_ARRAY_TO_VEC4(data[id + "Color"].get<std::vector<float>>());
 		light->OuterCutoff = data[id + "OuterCutoff"].get<float>();
 		light->InnerCutoff = data[id + "InnerCutoff"].get<float>();
@@ -215,7 +216,7 @@ namespace Ainan {
 
 		//populate with data
 		sprite->m_Name = data[id + "Name"].get<std::string>();
-		sprite->Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
+		sprite->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
 		sprite->Scale = data[id + "Scale"].get<float>();
 		sprite->Rotation = data[id + "Rotation"].get<float>();
 		sprite->Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
@@ -234,6 +235,7 @@ namespace Ainan {
 
 		//populate with data
 		sprite->m_Name = data[id + "Name"].get<std::string>();
+		sprite->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
 		sprite->m_Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
 		sprite->m_UniformBufferData.Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
 		sprite->m_Scale = data[id + "Scale"].get<float>();
@@ -251,3 +253,4 @@ namespace Ainan {
 #undef JSON_ARRAY_TO_VEC4
 #undef JSON_ARRAY_TO_VEC3
 #undef JSON_ARRAY_TO_VEC2
+#undef JSON_ARRAY_TO_MAT4

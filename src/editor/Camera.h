@@ -17,7 +17,7 @@ namespace Ainan {
 	const float c_CameraZoomFactorMax = 100.0f;
 	const float c_CameraOrthoMoveSpeedFactor = 0.5f;
 	const float c_CameraPerspMoveSpeedFactor = 10.0f;
-	const float c_CameraNearClip = 0.0f;
+	const float c_CameraNearClip = 0.1f;
 	const float c_CameraFarClip = 1000.0f;
 	const glm::vec3 c_CameraStartingPosition = glm::vec3(0.0f, 0.0f, -10.0f);
 	const glm::vec3 c_CameraStartingForwardDirection = glm::vec3(0.0f, 0.0f, 1.0f);

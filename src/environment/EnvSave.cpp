@@ -12,6 +12,11 @@ using json = nlohmann::json;
 #define VEC4_TO_JSON_ARRAY(vec) { vec.x, vec.y, vec.z, vec.w }
 #define VEC3_TO_JSON_ARRAY(vec) { vec.x, vec.y, vec.z }
 #define VEC2_TO_JSON_ARRAY(vec) { vec.x, vec.y }
+#define MAT4_TO_JSON_ARRAY(mat) { \
+*(glm::value_ptr(mat) + 0), *(glm::value_ptr(mat) + 1), *(glm::value_ptr(mat) + 2), *(glm::value_ptr(mat) + 3),\
+*(glm::value_ptr(mat) + 4), *(glm::value_ptr(mat) + 5), *(glm::value_ptr(mat) + 6), *(glm::value_ptr(mat) + 7),\
+*(glm::value_ptr(mat) + 8), *(glm::value_ptr(mat) + 9), *(glm::value_ptr(mat) + 10), *(glm::value_ptr(mat) + 11),\
+*(glm::value_ptr(mat) + 12), *(glm::value_ptr(mat) + 13), *(glm::value_ptr(mat) + 14), *(glm::value_ptr(mat) + 15) }
 
 namespace Ainan {
 
@@ -158,7 +163,7 @@ namespace Ainan {
 
 		j[id + "Type"] = EnvironmentObjectTypeToString(RadialLightType);
 		j[id + "Name"] = light.m_Name;
-		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
+		j[id + "Model"] = MAT4_TO_JSON_ARRAY(light.Model);
 		j[id + "Color"] = VEC4_TO_JSON_ARRAY(light.Color);
 		j[id + "Intensity"] = light.Intensity;
 	}
@@ -169,7 +174,7 @@ namespace Ainan {
 
 		j[id + "Type"] = EnvironmentObjectTypeToString(SpotLightType);
 		j[id + "Name"] = light.m_Name;
-		j[id + "Position"] = VEC2_TO_JSON_ARRAY(light.Position);
+		j[id + "Model"] = MAT4_TO_JSON_ARRAY(light.Model);
 		j[id + "Color"] = VEC4_TO_JSON_ARRAY(light.Color);
 		j[id + "OuterCutoff"] = light.OuterCutoff;
 		j[id + "InnerCutoff"] = light.InnerCutoff;
@@ -182,7 +187,7 @@ namespace Ainan {
 
 		j[id + "Type"] = EnvironmentObjectTypeToString(SpriteType);
 		j[id + "Name"] = sprite.m_Name;
-		j[id + "Position"] = VEC2_TO_JSON_ARRAY(sprite.Position);
+		j[id + "Model"] = MAT4_TO_JSON_ARRAY(sprite.Model);
 		j[id + "Scale"] = sprite.Scale;
 		j[id + "Rotation"] = sprite.Rotation;
 		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.Tint);
@@ -195,6 +200,7 @@ namespace Ainan {
 
 		j[id + "Type"] = EnvironmentObjectTypeToString(LitSpriteType);
 		j[id + "Name"] = sprite.m_Name;
+		j[id + "Model"] = MAT4_TO_JSON_ARRAY(sprite.Model);
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(sprite.m_Position);
 		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.m_UniformBufferData.Tint);
 		j[id + "Scale"] = sprite.m_Scale;
@@ -210,3 +216,4 @@ namespace Ainan {
 #undef VEC4_TO_JSON_ARRAY
 #undef VEC3_TO_JSON_ARRAY
 #undef VEC2_TO_JSON_ARRAY
+#undef MAT4_TO_JSON_ARRAY
