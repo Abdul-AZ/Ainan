@@ -49,11 +49,11 @@ namespace Ainan {
 
 		static GridPlane StrToGridPlane(const char* str)
 		{
-			if (str == "X-Y")
+			if (strcmp(str, "X-Y") == 0)
 				return XY;
-			else if (str == "X-Z")
+			else if (strcmp(str, "X-Z") == 0)
 				return XZ;
-			else if (str == "Y-Z")
+			else if (strcmp(str, "Y-Z") == 0)
 				return YZ;
 
 			AINAN_LOG_ERROR("Inavlid Grid Orientation");

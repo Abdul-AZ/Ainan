@@ -26,7 +26,22 @@ namespace Ainan {
 
 	void Sprite::Draw()
 	{
-		Renderer::DrawQuad(Model[3], Tint, Scale, -Rotation * PI / 180.0f, m_Texture);
+		glm::vec3 scale;
+		glm::quat rotation;
+		glm::vec3 translation;
+		glm::vec3 skew;
+		glm::vec4 perspective;
+		glm::decompose(Model, scale, rotation, translation, skew, perspective);
+
+		//workaround for having one scale value
+		Model = glm::scale(Model, (1.0f / scale));
+		float scaleAverage = (scale.x + scale.y + scale.z) / 3.0f;
+		Model = glm::scale(Model, glm::vec3(scaleAverage));
+
+		if (Space == OBJ_SPACE_2D)
+		{
+			Renderer::DrawQuad(translation, Tint, scaleAverage, glm::eulerAngles(rotation).z, m_Texture);
+		}
 	}
 
 	void Sprite::DisplayGUI()
@@ -37,6 +52,23 @@ namespace Ainan {
 		ImGui::PushID(this);
 
 		ImGui::Begin((m_Name + "##" + std::to_string(ImGui::GetID(this))).c_str(), &EditorOpen, ImGuiWindowFlags_NoSavedSettings);
+
+		if (ImGui::BeginCombo("##Space: ", ObjSpaceToStr(Space)))
+		{
+			{
+				bool selected = Space == OBJ_SPACE_2D;
+				if (ImGui::Selectable(ObjSpaceToStr(OBJ_SPACE_2D), &selected))
+					Space = OBJ_SPACE_2D;
+			}
+
+			{
+				bool selected = Space == OBJ_SPACE_3D;
+				if (ImGui::Selectable(ObjSpaceToStr(OBJ_SPACE_3D), &selected))
+					Space = OBJ_SPACE_3D;
+			}
+
+			ImGui::EndCombo();
+		}
 
 		ImGui::Text("Texture: ");
 		ImGui::SameLine();
@@ -67,8 +99,14 @@ namespace Ainan {
 			ImGui::EndCombo();
 		}
 
-
 		ImGui::Spacing();
+
+		glm::vec3 scale;
+		glm::quat rotation;
+		glm::vec3 translation;
+		glm::vec3 skew;
+		glm::vec4 perspective;
+		glm::decompose(Model, scale, rotation, translation, skew, perspective);
 
 		ImGui::Text("Position: ");
 		ImGui::SameLine();
@@ -76,12 +114,24 @@ namespace Ainan {
 
 		ImGui::Text("Scale: ");
 		ImGui::SameLine();
-		ImGui::DragFloat("##Scale: ", &Scale, c_ObjectScaleDragControlSpeed);
+		float scaleAverage = (scale.x + scale.y + scale.z) / 3.0f;
+		if (ImGui::DragFloat("##Scale: ", &scaleAverage, c_ObjectScaleDragControlSpeed))
+		{
+			Model = glm::scale(Model, (1.0f / scale));
+			Model = glm::scale(Model, glm::vec3(scaleAverage));
+		}
 
 		ImGui::Text("Rotation: ");
 		ImGui::SameLine();
-		ImGui::DragFloat("##Rotation: ", &Rotation, c_ObjectRotationDragControlSpeed);
-		Rotation = std::clamp(Rotation, 0.0f, 360.0f);
+		float rotEular = glm::eulerAngles(rotation).z * 180.0f / PI;
+		if (ImGui::DragFloat("##Rotation: ", &rotEular, c_ObjectRotationDragControlSpeed))
+		{
+			//reconstruct model with new rotation
+			Model = glm::mat4(1.0f);
+			Model = glm::translate(Model, translation);
+			Model = glm::rotate(Model, rotEular * PI / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+			Model = glm::scale(Model, scale);
+		}
 
 		ImGui::Text("Tint: ");
 		ImGui::SameLine();
@@ -91,6 +141,26 @@ namespace Ainan {
 		ImGui::End();
 
 		ImGui::PopID();
+	}
+
+	int32_t Sprite::GetAllowedGizmoOperation(ImGuizmo::OPERATION operation)
+	{
+		if (Space == OBJ_SPACE_2D)
+		{
+			if (operation == ImGuizmo::OPERATION::TRANSLATE)
+				return ImGuizmo::OPERATION::TRANSLATE_X | ImGuizmo::OPERATION::TRANSLATE_Y;
+			else if (operation == ImGuizmo::OPERATION::ROTATE)
+				return ImGuizmo::OPERATION::ROTATE_Z;
+			else if (operation == ImGuizmo::OPERATION::SCALE)
+				return ImGuizmo::OPERATION::SCALE_X | ImGuizmo::OPERATION::SCALE_Y;
+		}
+		else if (Space == OBJ_SPACE_3D)
+		{
+			return operation;
+		}
+
+		AINAN_LOG_ERROR("Invalid Gizmo Operation Given");
+		return -1;
 	}
 
 	void Sprite::LoadTextureFromFile(const std::string& path)
@@ -104,5 +174,4 @@ namespace Ainan {
 
 		m_Texture = Renderer::CreateTexture(img);
 	}
-
 }

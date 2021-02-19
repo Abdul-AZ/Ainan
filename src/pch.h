@@ -29,6 +29,7 @@
 #include <imgui_impl_opengl3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 #define STARTING_BROWSER_DIRECTORY "C:\\"
 #define PI 3.14159f

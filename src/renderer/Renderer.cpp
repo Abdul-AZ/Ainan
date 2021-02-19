@@ -405,7 +405,7 @@ namespace Ainan {
 		buffer.SpotLightPositions[i] = pos;
 		buffer.SpotLightColors[i] = color;
 		buffer.SpotLightIntensities[i] = intensity;
-		buffer.SpotLightAngles[i] =	      glm::radians(angle);
+		buffer.SpotLightAngles[i] =	angle;
 		buffer.SpotLightInnerCutoffs[i] = glm::radians(innerCutoff);
 		buffer.SpotLightOuterCutoffs[i] = glm::radians(outerCutoff);
 		i++;

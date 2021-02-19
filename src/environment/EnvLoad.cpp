@@ -217,9 +217,8 @@ namespace Ainan {
 		//populate with data
 		sprite->m_Name = data[id + "Name"].get<std::string>();
 		sprite->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
-		sprite->Scale = data[id + "Scale"].get<float>();
-		sprite->Rotation = data[id + "Rotation"].get<float>();
 		sprite->Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
+		sprite->Space = StrToObjSpace(data[id + "Space"].get<std::string>().c_str());
 		sprite->m_TexturePath = data[id + "TexturePath"].get<std::string>();
 		if(sprite->m_TexturePath != "")
 			sprite->LoadTextureFromFile(AssetManager::s_EnvironmentDirectory.u8string() + "\\" + sprite->m_TexturePath.u8string());
@@ -238,8 +237,6 @@ namespace Ainan {
 		sprite->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
 		sprite->m_Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
 		sprite->m_UniformBufferData.Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
-		sprite->m_Scale = data[id + "Scale"].get<float>();
-		sprite->m_Rotation = data[id + "Rotation"].get<float>();
 		sprite->m_UniformBufferData.BaseLight = data[id + "BaseLight"].get<float>();
 		sprite->m_UniformBufferData.MaterialConstantCoefficient = data[id + "MaterialConstantCoefficient"].get<float>();
 		sprite->m_UniformBufferData.MaterialLinearCoefficient = data[id + "MaterialLinearCoefficient"].get<float>();

@@ -580,7 +580,13 @@ namespace Ainan
 			else if (obj->Type == SpotLightType) 
 			{
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				Renderer::AddSpotLight(light->Model[3], light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
+				glm::vec3 scale;
+				glm::quat rotation;
+				glm::vec3 translation;
+				glm::vec3 skew;
+				glm::vec4 perspective;
+				glm::decompose(light->Model, scale, rotation, translation, skew, perspective);
+				Renderer::AddSpotLight(light->Model[3], light->Color, glm::eulerAngles(rotation).z, light->InnerCutoff, light->OuterCutoff, light->Intensity);
 			}
 		}
 
@@ -801,7 +807,6 @@ namespace Ainan
 			ImGuizmo::SetOrthographic(true);
 		else
 			ImGuizmo::SetOrthographic(false);
-		ImGuizmo::AllowAxisFlip(false);
 		ImGuizmo::SetRect(m_ViewportWindow.WindowPosition.x, m_ViewportWindow.WindowPosition.y, m_ViewportWindow.WindowSize.x, m_ViewportWindow.WindowSize.y);
 
 		ImGuiIO& io = ImGui::GetIO();
@@ -814,7 +819,7 @@ namespace Ainan
 				if (obj->Selected)
 				{
 					ImGuizmo::Manipulate(glm::value_ptr(m_Camera.ViewMatrix), glm::value_ptr(m_Camera.ProjectionMatrix),
-						m_GizmoOperation, ImGuizmo::MODE::WORLD, glm::value_ptr(obj->Model));
+						(ImGuizmo::OPERATION)obj->GetAllowedGizmoOperation(m_GizmoOperation), ImGuizmo::MODE::WORLD, glm::value_ptr(obj->Model));
 					break;
 				}
 			}

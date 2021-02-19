@@ -49,4 +49,32 @@ namespace Ainan {
 		AINAN_LOG_ERROR("Invalid object type string");
 		return "";
 	}
+
+	const char* ObjSpaceToStr(ObjSpace space)
+	{
+		switch (space)
+		{
+		case OBJ_SPACE_2D:
+			return "2D";
+			break;
+
+		case OBJ_SPACE_3D:
+			return "3D";
+			break;
+		}
+
+		AINAN_LOG_ERROR("Invalid Object Space Requested");
+		return "";
+	}
+
+	ObjSpace StrToObjSpace(const char* str)
+	{
+		if (strcmp(str, "2D") == 0)
+			return OBJ_SPACE_2D;
+		else if (strcmp(str, "3D") == 0)
+			return OBJ_SPACE_3D;
+
+		AINAN_LOG_ERROR("Invalid Object Space Requested");
+		return OBJ_SPACE_2D;
+	}
 }

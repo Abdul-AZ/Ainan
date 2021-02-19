@@ -13,6 +13,7 @@ namespace Ainan {
 
 		virtual void DisplayGUI() override;
 		virtual void Draw() override;
+		int32_t GetAllowedGizmoOperation(ImGuizmo::OPERATION operation) override;
 
 	public: //TODO make it private
 		struct LitSpriteUniformBuffer 
@@ -29,8 +30,7 @@ namespace Ainan {
 		UniformBuffer m_UniformBuffer;
 		glm::vec2 m_Position = glm::vec2(0.0f, 0.0f);
 		LitSpriteUniformBuffer m_UniformBufferData;
-		float m_Scale = 0.25f;
-		float m_Rotation = 0.0f; //in degrees
+		ObjSpace Space = OBJ_SPACE_2D;
 	};
 
 }

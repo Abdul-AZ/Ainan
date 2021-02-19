@@ -188,8 +188,7 @@ namespace Ainan {
 		j[id + "Type"] = EnvironmentObjectTypeToString(SpriteType);
 		j[id + "Name"] = sprite.m_Name;
 		j[id + "Model"] = MAT4_TO_JSON_ARRAY(sprite.Model);
-		j[id + "Scale"] = sprite.Scale;
-		j[id + "Rotation"] = sprite.Rotation;
+		j[id + "Space"] = ObjSpaceToStr(sprite.Space);
 		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.Tint);
 		j[id + "TexturePath"] = sprite.m_TexturePath.u8string();
 	}
@@ -203,8 +202,6 @@ namespace Ainan {
 		j[id + "Model"] = MAT4_TO_JSON_ARRAY(sprite.Model);
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(sprite.m_Position);
 		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.m_UniformBufferData.Tint);
-		j[id + "Scale"] = sprite.m_Scale;
-		j[id + "Rotation"] = sprite.m_Rotation;
 		j[id + "BaseLight"] = sprite.m_UniformBufferData.BaseLight;
 		j[id + "MaterialConstantCoefficient"] = sprite.m_UniformBufferData.MaterialConstantCoefficient;
 		j[id + "MaterialLinearCoefficient"] = sprite.m_UniformBufferData.MaterialLinearCoefficient;

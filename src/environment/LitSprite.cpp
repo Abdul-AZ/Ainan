@@ -44,18 +44,37 @@ namespace Ainan {
 
 		const float spacing = 175.0f;
 
+		glm::vec3 scale;
+		glm::quat rotation;
+		glm::vec3 translation;
+		glm::vec3 skew;
+		glm::vec4 perspective;
+		glm::decompose(Model, scale, rotation, translation, skew, perspective);
+
 		ImGui::Text("Position: ");
 		ImGui::SameLine();
 		ImGui::DragFloat("##Scale: ", &m_Position.x, c_ObjectPositionDragControlSpeed);
 
 		ImGui::Text("Scale: ");
 		ImGui::SameLine();
-		ImGui::DragFloat("##Scale: ", &m_Scale, c_ObjectScaleDragControlSpeed);
+		float scaleAverage = (scale.x + scale.y + scale.z) / 3.0f;
+		if (ImGui::DragFloat("##Scale: ", &scaleAverage, c_ObjectScaleDragControlSpeed))
+		{
+			Model = glm::scale(Model, (1.0f / scale));
+			Model = glm::scale(Model, glm::vec3(scaleAverage));
+		}
 
 		ImGui::Text("Rotation: ");
 		ImGui::SameLine();
-		ImGui::DragFloat("##Rotation: ", &m_Rotation, c_ObjectRotationDragControlSpeed);
-		m_Rotation = std::clamp(m_Rotation, 0.0f, 360.0f);
+		float rotEular = glm::eulerAngles(rotation).z * 180.0f / PI;
+		if (ImGui::DragFloat("##Rotation: ", &rotEular, c_ObjectRotationDragControlSpeed))
+		{
+			//reconstruct model with new rotation
+			Model = glm::mat4(1.0f);
+			Model = glm::translate(Model, translation);
+			Model = glm::rotate(Model, rotEular * PI / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+			Model = glm::scale(Model, scale);
+		}
 
 		ImGui::Text("Color/Tint: ");
 		ImGui::SameLine();
@@ -92,12 +111,20 @@ namespace Ainan {
 
 	void LitSprite::Draw()
 	{
-		auto& model = m_UniformBufferData.ModelMatrix;
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(m_Position.x, m_Position.y, 0.0f));
-		model = glm::rotate(model, glm::radians(90.0f - m_Rotation), glm::vec3(0, 0, 1.0f));
-		model = glm::scale(model, glm::vec3(m_Scale, m_Scale, m_Scale));
-		
+		glm::vec3 scale;
+		glm::quat rotation;
+		glm::vec3 translation;
+		glm::vec3 skew;
+		glm::vec4 perspective;
+		glm::decompose(Model, scale, rotation, translation, skew, perspective);
+
+		//workaround for having one scale value
+		Model = glm::scale(Model, (1.0f / scale));
+		float scaleAverage = (scale.x + scale.y + scale.z) / 3.0f;
+		Model = glm::scale(Model, glm::vec3(scaleAverage));
+
+		m_UniformBufferData.ModelMatrix = Model;
+
 		m_UniformBuffer.UpdateData(&m_UniformBufferData, sizeof(LitSpriteUniformBuffer));
 
 		uint32_t identifier = Renderer::Rdata->UniformBuffers[m_UniformBuffer.Identifier].Identifier;
@@ -109,5 +136,25 @@ namespace Ainan {
 		shader.BindUniformBuffer(m_UniformBuffer, 1, RenderingStage::FragmentShader);
 
 		Renderer::Draw(m_VertexBuffer, shader, Primitive::Triangles, 6);
+	}
+
+	int32_t LitSprite::GetAllowedGizmoOperation(ImGuizmo::OPERATION operation)
+	{
+		if (Space == OBJ_SPACE_2D)
+		{
+			if (operation == ImGuizmo::OPERATION::TRANSLATE)
+				return ImGuizmo::OPERATION::TRANSLATE_X | ImGuizmo::OPERATION::TRANSLATE_Y;
+			else if (operation == ImGuizmo::OPERATION::ROTATE)
+				return ImGuizmo::OPERATION::ROTATE_Z;
+			else if (operation == ImGuizmo::OPERATION::SCALE)
+				return ImGuizmo::OPERATION::SCALE_X | ImGuizmo::OPERATION::SCALE_Y;
+		}
+		else if (Space == OBJ_SPACE_3D)
+		{
+			return operation;
+		}
+
+		AINAN_LOG_ERROR("Invalid Gizmo Operation Given");
+		return -1;
 	}
 }

@@ -43,4 +43,22 @@ namespace Ainan {
 		
 		ImGui::PopID();
 	}
+
+	int32_t RadialLight::GetAllowedGizmoOperation(ImGuizmo::OPERATION operation)
+	{
+		if (Space == OBJ_SPACE_2D)
+		{
+			if (operation == ImGuizmo::OPERATION::TRANSLATE)
+				return ImGuizmo::OPERATION::TRANSLATE_X | ImGuizmo::OPERATION::TRANSLATE_Y;
+			else if (operation == ImGuizmo::OPERATION::ROTATE || operation == ImGuizmo::OPERATION::SCALE)
+				return ImGuizmo::OPERATION::BOUNDS; //work around for not allowing any operation
+		}
+		else if (Space == OBJ_SPACE_3D)
+		{
+			return operation;
+		}
+
+		AINAN_LOG_ERROR("Invalid Gizmo Operation Given");
+		return -1;
+	}
 }

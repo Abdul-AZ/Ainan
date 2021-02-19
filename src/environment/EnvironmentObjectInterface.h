@@ -1,6 +1,7 @@
 #pragma once
 
 #include "editor/Camera.h"
+#include "ImGuizmo.h"
 
 namespace Ainan {
 
@@ -32,6 +33,7 @@ namespace Ainan {
 		virtual std::shared_ptr<std::mutex> GetMutex() { return ObjectMutex; };
 
 		virtual ~EnvironmentObjectInterface() {};
+		virtual int32_t GetAllowedGizmoOperation(ImGuizmo::OPERATION requestedOperation) { return requestedOperation; }
 
 		glm::mat4 Model = glm::mat4(1.0f);
 		std::string m_Name;
@@ -48,6 +50,15 @@ namespace Ainan {
 	private:
 		std::shared_ptr<std::mutex> ObjectMutex;
 	};
+
+	enum ObjSpace
+	{
+		OBJ_SPACE_2D,
+		OBJ_SPACE_3D
+	};
+
+	const char* ObjSpaceToStr(ObjSpace space);
+	ObjSpace StrToObjSpace(const char* str);
 
 	using pEnvironmentObject = std::unique_ptr<EnvironmentObjectInterface>;
 }

@@ -107,7 +107,13 @@ namespace Ainan {
 			else if (obj->Type == SpotLightType)
 			{
 				SpotLight* light = static_cast<SpotLight*>(obj.get());
-				Renderer::AddSpotLight(light->Model[3], light->Color, light->Angle, light->InnerCutoff, light->OuterCutoff, light->Intensity);
+				glm::vec3 scale;
+				glm::quat rotation;
+				glm::vec3 translation;
+				glm::vec3 skew;
+				glm::vec4 perspective;
+				glm::decompose(light->Model, scale, rotation, translation, skew, perspective);
+				Renderer::AddSpotLight(light->Model[3], light->Color, glm::eulerAngles(rotation).z, light->InnerCutoff, light->OuterCutoff, light->Intensity);
 			}
 		}
 
