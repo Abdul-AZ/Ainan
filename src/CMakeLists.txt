@@ -146,6 +146,7 @@ set(INCLUDE_LIST
     "../submodules/glm" 
     "../submodules/spdlog/include"
     "../submodules/ImGuizmo"
+    "../submodules/assimp/include/assimp"
     "vendor"
     )
 
