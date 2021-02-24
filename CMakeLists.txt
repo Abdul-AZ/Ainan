@@ -35,19 +35,20 @@ include("shaders/CMakeLists.txt")
 
 ##setup spdlog
 set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
 add_subdirectory_with_folder(spdlog "submodules/spdlog")
 list(APPEND STATIC_LIBRARIES spdlog)
 
 ##setup assimp
-#set(ASSIMP_INSTALL OFF)
-#set(ASSIMP_BUILD_TESTS OFF)
-#set(ASSIMP_BUILD_SHARED_LIBS OFF)
-#set(ASSIMP_BUILD_TESTS OFF)
-#set(ASSIMP_NO_EXPORT ON)
-#set(ASSIMP_BUILD_DRACO OFF)
-#set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
-#add_subdirectory_with_folder(assimp "submodules/assimp")
-#list(APPEND STATIC_LIBRARIES assimp)
+set(ASSIMP_INSTALL OFF)
+set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_BUILD_SHARED_LIBS OFF)
+set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_NO_EXPORT ON)
+set(ASSIMP_BUILD_DRACO OFF)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+add_subdirectory_with_folder(assimp "submodules/assimp")
+list(APPEND STATIC_LIBRARIES assimp)
 
 #link with ffmpeg
 if(WIN32)
