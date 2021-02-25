@@ -9,7 +9,7 @@ namespace Ainan {
 	public:
 		SpotLight();
 
-		void DisplayGUI() override;
+		void DisplayGuiControls() override;
 		int32_t GetAllowedGizmoOperation(ImGuizmo::OPERATION operation) override;
 
 		glm::vec4 Color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);

@@ -15,7 +15,7 @@ namespace Ainan {
 
 		virtual void Update(const float deltaTime) override;
 		virtual void Draw() override;
-		virtual void DisplayGUI() override;
+		virtual void DisplayGuiControls() override;
 		int32_t GetAllowedGizmoOperation(ImGuizmo::OPERATION operation) override;
 
 		void LoadTextureFromFile(const std::string& path);

@@ -10,16 +10,8 @@ namespace Ainan {
 		m_Name = "Spot Light";
 	}
 
-	void SpotLight::DisplayGUI()
+	void SpotLight::DisplayGuiControls()
 	{
-		if (!EditorOpen)
-			return;
-
-		ImGui::PushID(this);
-
-		ImGui::SetNextWindowSizeConstraints(ImVec2(350.0f, 250.0f), ImVec2(std::numeric_limits<float>().max(), std::numeric_limits<float>().max()));
-
-		ImGui::Begin((m_Name + "##" + std::to_string(ImGui::GetID(this))).c_str(), &EditorOpen, ImGuiWindowFlags_NoSavedSettings);
 		const float xPos = 100.0f;
 
 		glm::vec3 scale;
@@ -66,11 +58,6 @@ namespace Ainan {
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(xPos);
 		ImGui::DragFloat("##Intensity: ", &Intensity, 5.0f, 0.1f, 10000.0f);
-
-		Renderer::RegisterWindowThatCanCoverViewport();
-		ImGui::End();
-
-		ImGui::PopID();
 	}
 
 	int32_t SpotLight::GetAllowedGizmoOperation(ImGuizmo::OPERATION operation)

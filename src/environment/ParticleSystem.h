@@ -22,7 +22,7 @@ namespace Ainan {
 		void SpawnAllParticlesOnQue(const float& deltaTime);
 		void SpawnParticle(const ParticleDescription& particle);
 		void ClearParticles();
-		void DisplayGUI() override;
+		void DisplayGuiControls() override;
 		int32_t GetAllowedGizmoOperation(ImGuizmo::OPERATION operation) override;
 
 		ParticleSystem(const ParticleSystem& Psystem);

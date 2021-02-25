@@ -6,7 +6,6 @@ namespace Ainan {
 	{
 		Type = SpriteType;
 		m_Name = "Sprite";
-		EditorOpen = false;
 
 		Image img = Image::LoadFromFile("res/CheckerBoard.png");
 
@@ -44,15 +43,8 @@ namespace Ainan {
 		}
 	}
 
-	void Sprite::DisplayGUI()
+	void Sprite::DisplayGuiControls()
 	{
-		if (!EditorOpen)
-			return;
-
-		ImGui::PushID(this);
-
-		ImGui::Begin((m_Name + "##" + std::to_string(ImGui::GetID(this))).c_str(), &EditorOpen, ImGuiWindowFlags_NoSavedSettings);
-
 		if (ImGui::BeginCombo("##Space: ", ObjSpaceToStr(Space)))
 		{
 			{
@@ -136,11 +128,6 @@ namespace Ainan {
 		ImGui::Text("Tint: ");
 		ImGui::SameLine();
 		ImGui::ColorEdit4("##Tint: ", &Tint.r);
-		
-		Renderer::RegisterWindowThatCanCoverViewport();
-		ImGui::End();
-
-		ImGui::PopID();
 	}
 
 	int32_t Sprite::GetAllowedGizmoOperation(ImGuizmo::OPERATION operation)

@@ -683,113 +683,107 @@ namespace Ainan
 		DisplayObjectInspecterGUI();
 		DisplayProfilerGUI();
 		DisplayPreferencesGUI();
+		DisplayPropertiesGUI();
 		m_AppStatusWindow.DisplayGUI();
 
 		//Settings window
-		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
-
-		if (ImGui::TreeNode("Blend Settings:"))
+		if (m_EnvironmentSettingsWindowOpen)
 		{
-			ImGui::Text("Mode");
-			ImGui::SameLine();
-			if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
+			ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
+
+			if (ImGui::TreeNode("Blend Settings:"))
 			{
-				{
-					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
-					if (ImGui::Selectable("Additive", &is_Active)) {
-
-						ImGui::SetItemDefaultFocus();
-						m_Env->BlendMode = RenderingBlendMode::Additive;
-
-						Renderer::SetBlendMode(m_Env->BlendMode);
-					}
-				}
-
-				{
-					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
-					if (ImGui::Selectable("Screen", &is_Active)) {
-
-						ImGui::SetItemDefaultFocus();
-						m_Env->BlendMode = RenderingBlendMode::Screen;
-
-						Renderer::SetBlendMode(m_Env->BlendMode);
-					}
-				}
-				ImGui::EndCombo();
-
-			}
-
-			ImGui::TreePop();
-		}
-		ImGui::Text("Show Object Icons");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(125.0f);
-		ImGui::Checkbox("##Show Object Icons", &m_ShowObjectIcons);
-
-		ImGui::Text("Show Grid");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(100.0f);
-		ImGui::Checkbox("##Show Grid", &m_ShowGrid);
-		if (m_ShowGrid)
-		{
-			ImGui::Text("Grid Orientation");
-			ImGui::SameLine();
-			ImGui::SetCursorPosX(100.0f);
-
-			if (ImGui::BeginCombo("##Grid Orientation", Grid::GridPlaneToStr(m_Grid.Orientation)))
-			{
-				{
-					bool selected = m_Grid.Orientation == Grid::XY;
-					if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XY), &selected))
-						m_Grid.Orientation = Grid::XY;
-				}
-
-				{
-					bool selected = m_Grid.Orientation == Grid::XZ;
-					if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XZ), &selected))
-						m_Grid.Orientation = Grid::XZ;
-				}
-
-				{
-					bool selected = m_Grid.Orientation == Grid::YZ;
-					if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::YZ), &selected))
-						m_Grid.Orientation = Grid::YZ;
-				}
-
-				ImGui::EndCombo();
-			}
-		}
-
-		ImGui::Text("Blur");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(100.0f);
-		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
-
-		if (m_Env->BlurEnabled) {
-			if (ImGui::TreeNode("Blur Settings: ")) {
-
-				ImGui::Text("Blur Radius: ");
+				ImGui::Text("Mode");
 				ImGui::SameLine();
-				ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
+				if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
+				{
+					{
+						bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
+						if (ImGui::Selectable("Additive", &is_Active)) {
+
+							ImGui::SetItemDefaultFocus();
+							m_Env->BlendMode = RenderingBlendMode::Additive;
+
+							Renderer::SetBlendMode(m_Env->BlendMode);
+						}
+					}
+
+					{
+						bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
+						if (ImGui::Selectable("Screen", &is_Active)) {
+
+							ImGui::SetItemDefaultFocus();
+							m_Env->BlendMode = RenderingBlendMode::Screen;
+
+							Renderer::SetBlendMode(m_Env->BlendMode);
+						}
+					}
+					ImGui::EndCombo();
+
+				}
 
 				ImGui::TreePop();
 			}
-		}
+			ImGui::Text("Show Object Icons");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(125.0f);
+			ImGui::Checkbox("##Show Object Icons", &m_ShowObjectIcons);
 
-		Renderer::RegisterWindowThatCanCoverViewport();
-		ImGui::End();
+			ImGui::Text("Show Grid");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(100.0f);
+			ImGui::Checkbox("##Show Grid", &m_ShowGrid);
+			if (m_ShowGrid)
+			{
+				ImGui::Text("Grid Orientation");
+				ImGui::SameLine();
+				ImGui::SetCursorPosX(100.0f);
+
+				if (ImGui::BeginCombo("##Grid Orientation", Grid::GridPlaneToStr(m_Grid.Orientation)))
+				{
+					{
+						bool selected = m_Grid.Orientation == Grid::XY;
+						if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XY), &selected))
+							m_Grid.Orientation = Grid::XY;
+					}
+
+					{
+						bool selected = m_Grid.Orientation == Grid::XZ;
+						if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XZ), &selected))
+							m_Grid.Orientation = Grid::XZ;
+					}
+
+					{
+						bool selected = m_Grid.Orientation == Grid::YZ;
+						if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::YZ), &selected))
+							m_Grid.Orientation = Grid::YZ;
+					}
+
+					ImGui::EndCombo();
+				}
+			}
+
+			ImGui::Text("Blur");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(100.0f);
+			ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
+
+			if (m_Env->BlurEnabled)
+			{
+				if (ImGui::TreeNode("Blur Settings: "))
+				{
+					ImGui::Text("Blur Radius: ");
+					ImGui::SameLine();
+					ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
+
+					ImGui::TreePop();
+				}
+			}
+			ImGui::End();
+		}
 
 		m_Exporter.DisplayGUI();
-
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			obj->DisplayGUI();
-		}
-
 		InputManager::DisplayGUI();
-
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFramebuffer);
 
 		static glm::mat4 cube(1.0f);
@@ -873,7 +867,7 @@ namespace Ainan
 
 			if (ImGui::BeginMenu("Edit")) {
 
-				if (ImGui::MenuItem("Clear Particle Systems"))
+				if (ImGui::MenuItem("Delete All Objects"))
 					m_Env->Objects.clear();
 
 
@@ -882,12 +876,12 @@ namespace Ainan
 
 			if (ImGui::BeginMenu("Window")) 
 			{
-
+				ImGui::MenuItem("Properties", nullptr, &m_PropertiesWindowOpen);
 				ImGui::MenuItem("Environment Controls", nullptr, &m_EnvironmentControlsWindowOpen);
 				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
-				ImGui::MenuItem("General Settings", nullptr, &m_EnvironmentSettingsWindowOpen);
+				ImGui::MenuItem("Settings", nullptr, &m_EnvironmentSettingsWindowOpen);
 				ImGui::MenuItem("Profiler", nullptr, &m_ProfilerWindowOpen);
-				ImGui::MenuItem("ExportMode Settings", nullptr, &m_Exporter.SettingsWindowOpen);
+				ImGui::MenuItem("Exporter", nullptr, &m_Exporter.m_ExporterWindowOpen);
 
 				ImGui::EndMenu();
 			}
@@ -1053,6 +1047,38 @@ namespace Ainan
 		ImGui::End();
 	}
 
+	void Editor::DisplayPropertiesGUI()
+	{
+		if (m_PropertiesWindowOpen == false)
+			return;
+
+		ImGui::Begin("Properties", &m_PropertiesWindowOpen);
+
+		//find selected object
+		pEnvironmentObject* selectedObj = nullptr;
+		for (auto& obj : m_Env->Objects)
+		{
+			if (obj->Selected)
+			{
+				selectedObj = &obj;
+				break;
+			}
+		}
+
+		//render controls if there is an object selected
+		if (selectedObj != nullptr)
+		{
+			ImGui::Text(selectedObj->get()->m_Name.c_str());
+			ImGui::SameLine(ImGui::GetWindowSize().x - 100);
+			ImGui::Text(EnvironmentObjectTypeToString(selectedObj->get()->Type).c_str());
+			ImGui::Separator();
+			ImGui::Spacing();
+			selectedObj->get()->DisplayGuiControls();
+		}
+
+		ImGui::End();
+	}
+
 	void Editor::Stop()
 	{
 		m_State = State_EditorMode;
@@ -1123,9 +1149,6 @@ namespace Ainan
 				//show menu when right clicking
 				if (ImGui::BeginPopupContextItem("Object Popup"))
 				{
-					if (ImGui::Selectable("Edit"))
-						m_Env->Objects[i]->EditorOpen = !m_Env->Objects[i]->EditorOpen;
-
 					if (ImGui::Selectable("Delete")) {
 						m_Env->Objects[i]->ToBeDeleted = true;
 					}
@@ -1184,26 +1207,6 @@ namespace Ainan
 				ImGui::SameLine();
 				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetItemRectSize().y / 4.0f);
 				ImGui::Text(m_Env->Objects[i]->m_Name.c_str());
-
-				//display particle system buttons only if it is selected
-				if (m_Env->Objects[i]->Selected)
-				{
-					if (ImGui::Button("Edit"))
-						m_Env->Objects[i]->EditorOpen = !m_Env->Objects[i]->EditorOpen;
-
-					ImGui::SameLine();
-					if (ImGui::Button("Delete"))
-						m_Env->Objects[i]->ToBeDeleted = true;
-
-					ImGui::SameLine();
-					if (ImGui::Button("Rename"))
-						m_Env->Objects[i]->RenameTextOpen = !m_Env->Objects[i]->RenameTextOpen;
-
-					ImGui::SameLine();
-
-					if (ImGui::Button("Find"))
-						FocusCameraOnObject(*m_Env->Objects[i]);
-				}
 
 				ImGui::Spacing();
 

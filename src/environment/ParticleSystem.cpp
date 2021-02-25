@@ -200,7 +200,6 @@ namespace Ainan {
 		//copy other variables
 		m_Particles = Psystem.m_Particles;
 		m_Name = Psystem.m_Name;
-		EditorOpen = Psystem.EditorOpen;
 		RenameTextOpen = Psystem.RenameTextOpen;
 	}
 
@@ -210,11 +209,10 @@ namespace Ainan {
 		return ParticleSystem(Psystem);
 	}
 
-	void ParticleSystem::DisplayGUI()
+	void ParticleSystem::DisplayGuiControls()
 	{
 		ImGui::PushID(this);
-		if (EditorOpen)
-			Customizer.DisplayGUI(m_Name, EditorOpen);
+		Customizer.DisplayGUI(m_Name);
 		ImGui::PopID();
 	}
 

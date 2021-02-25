@@ -10,17 +10,8 @@ namespace Ainan {
 		m_Name = "Radial Light";
 	}
 
-	void RadialLight::DisplayGUI()
+	void RadialLight::DisplayGuiControls()
 	{
-		if (!EditorOpen)
-			return;
-
-		ImGui::PushID(this);
-
-		ImGui::SetNextWindowSizeConstraints(ImVec2(300.0f, 200.0f), ImVec2(std::numeric_limits<float>().max(), std::numeric_limits<float>().max()));
-
-		ImGui::Begin((m_Name + "##" + std::to_string(ImGui::GetID(this))).c_str(), &EditorOpen, ImGuiWindowFlags_NoSavedSettings);
-
 		ImGui::Text("Position: ");
 		ImGui::SameLine();
 		float xPos = ImGui::GetCursorPosX();
@@ -37,11 +28,6 @@ namespace Ainan {
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(xPos);
 		ImGui::DragFloat("##Intensity: ", &Intensity, 0.1f);;
-
-		Renderer::RegisterWindowThatCanCoverViewport();
-		ImGui::End();
-		
-		ImGui::PopID();
 	}
 
 	int32_t RadialLight::GetAllowedGizmoOperation(ImGuizmo::OPERATION operation)

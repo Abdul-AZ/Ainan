@@ -30,7 +30,7 @@ namespace Ainan {
 		//this function does no graphics works (no OpenGL calls)
 		virtual void Update(const float deltaTime) {};
 		virtual void Draw() {};
-		virtual void DisplayGUI() {};
+		virtual void DisplayGuiControls() {};
 		virtual std::shared_ptr<std::mutex> GetMutex() { return ObjectMutex; };
 
 		virtual ~EnvironmentObjectInterface() {};
@@ -38,7 +38,6 @@ namespace Ainan {
 
 		glm::mat4 Model = glm::mat4(1.0f);
 		std::string m_Name;
-		bool EditorOpen = false;
 		bool RenameTextOpen = false;
 		bool Selected = false;
 		int Order = 0; //this should ONLY be used and edited by the Environment class and NOT be used by inherited classes.

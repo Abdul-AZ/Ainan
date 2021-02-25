@@ -11,7 +11,7 @@ namespace Ainan {
 		LitSprite();
 		~LitSprite();
 
-		virtual void DisplayGUI() override;
+		virtual void DisplayGuiControls() override;
 		virtual void Draw() override;
 		int32_t GetAllowedGizmoOperation(ImGuizmo::OPERATION operation) override;
 

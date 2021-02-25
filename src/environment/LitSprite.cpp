@@ -33,15 +33,8 @@ namespace Ainan {
 		Renderer::DestroyUniformBuffer(m_UniformBuffer);
 	}
 
-	void LitSprite::DisplayGUI()
+	void LitSprite::DisplayGuiControls()
 	{
-		if (!EditorOpen)
-			return;
-
-		ImGui::PushID(this);
-
-		ImGui::Begin((m_Name + "##" + std::to_string(ImGui::GetID(this))).c_str(), &EditorOpen, ImGuiWindowFlags_NoSavedSettings);
-
 		const float spacing = 175.0f;
 
 		glm::vec3 scale;
@@ -102,11 +95,6 @@ namespace Ainan {
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(spacing);
 		ImGui::DragFloat("##Quadratic Coefficient: ", &m_UniformBufferData.MaterialQuadraticCoefficient, 0.00001f);
-
-		Renderer::RegisterWindowThatCanCoverViewport();
-		ImGui::End();
-
-		ImGui::PopID();
 	}
 
 	void LitSprite::Draw()

@@ -69,6 +69,7 @@ namespace Ainan {
 		RenderSurface m_RenderSurface;
 		Grid m_Grid;
 
+		bool m_PropertiesWindowOpen = true;
 		bool m_EnvironmentControlsWindowOpen = true;
 		bool m_ObjectInspectorWindowOpen = true;
 		bool m_ProfilerWindowOpen = true;
@@ -137,6 +138,7 @@ namespace Ainan {
 		void OnEnvironmentDestroy();
 		void DisplayMainMenuBarGUI();
 		void DisplayEnvironmentControlsGUI();
+		void DisplayPropertiesGUI();
 		void Stop();
 		void Pause();
 		void Resume();

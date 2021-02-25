@@ -13,12 +13,10 @@ extern "C"
 
 namespace Ainan {
 
-	//TODO use environment directory instead of default
 	Exporter::Exporter() :
 		Camera(ProjectionMode::Orthographic)
 	{
 		memset(m_OutlineVertices.data(), 0, m_OutlineVertices.size() * sizeof(glm::vec2));
-
 
 		VertexLayout layout(1);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);

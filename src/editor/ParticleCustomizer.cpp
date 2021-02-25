@@ -88,11 +88,8 @@ namespace Ainan {
 		}
 	}
 
-	void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowOpen)
+	void ParticleCustomizer::DisplayGUI(const std::string& windowName)
 	{
-		ImGui::SetNextWindowSizeConstraints(ImVec2(575.0f, 500.0f), ImVec2(std::numeric_limits<float>().max(), std::numeric_limits<float>().max()));
-		ImGui::Begin((windowName.size() > 0) ? (windowName + "##" +  std::to_string(ImGui::GetID(this))).c_str() : "No Name", &windowOpen, ImGuiWindowFlags_NoSavedSettings);
-
 		ImGui::Text("Spawn\n Mode");
 		ImGui::SameLine();
 		if (ImGui::BeginCombo("##Spawn Mode", GetModeAsText(Mode).c_str())) 
@@ -209,9 +206,6 @@ namespace Ainan {
 		m_LifetimeCustomizer.DisplayGUI();
 		m_ScaleCustomizer.DisplayGUI();
 		m_ForceCustomizer.DisplayGUI();
-
-		Renderer::RegisterWindowThatCanCoverViewport();
-		ImGui::End();
 	}
 
 	ParticleDescription ParticleCustomizer::GetParticleDescription()
