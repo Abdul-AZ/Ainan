@@ -9,12 +9,12 @@
 #include "environment/ParticleSystem.h"
 #include "environment/Sprite.h"
 #include "environment/LitSprite.h"
+#include "environment/Mesh.h"
 #include "environment/RadialLight.h"
 #include "environment/SpotLight.h"
 #include "Exporter.h"
 #include "file/FolderBrowser.h"
 #include "EditorPreferences.h"
-#include "environment/RadialLight.h"
 #include "ImGuizmo.h"
 
 namespace Ainan {
@@ -75,6 +75,7 @@ namespace Ainan {
 		bool m_EnvironmentSettingsWindowOpen = true;
 		bool m_PreferencesWindowOpen = false;
 		bool m_ShowGrid = true;
+		bool m_ShowObjectIcons = true;
 
 		EditorState m_State = State_NoEnvLoaded;
 		std::filesystem::path m_EnvironmentFolderPath;
@@ -83,6 +84,7 @@ namespace Ainan {
 		Texture m_StopButtonTexture;
 		Texture m_SpriteIconTexture;
 		Texture m_LitSpriteIconTexture;
+		Texture m_MeshIconTexture;
 		Texture m_ParticleSystemIconTexture;
 		Texture m_SpotLightIconTexture;
 		Texture m_RadialLightIconTexture;

@@ -16,10 +16,11 @@ using json = nlohmann::json;
 namespace Ainan {
 
 	static void ParticleSystemFromJson(Environment* env, json& data, std::string id);
-	static void RadialLightFromJson(Environment* env, json& data, std::string id);
-	static void SpotLightFromJson(Environment* env, json& data, std::string id);
 	static void SpriteFromJson(Environment* env,json& data, std::string id);
 	static void LitSpriteFromJson(Environment* env,json& data, std::string id);
+	static void MeshFromJson(Environment* env,json& data, std::string id);
+	static void RadialLightFromJson(Environment* env, json& data, std::string id);
+	static void SpotLightFromJson(Environment* env, json& data, std::string id);
 	static void SettingsFromJson(Environment* env, json& data);
 
 	Environment* LoadEnvironment(const std::string& path)
@@ -245,6 +246,12 @@ namespace Ainan {
 		pEnvironmentObject obj((EnvironmentObjectInterface*)(sprite.release()));
 		env->Objects.push_back(std::move(obj));
 	}
+
+	void MeshFromJson(Environment* env, json& data, std::string id)
+	{
+		//TODO
+	}
+
 }
 
 #undef JSON_ARRAY_TO_VEC4

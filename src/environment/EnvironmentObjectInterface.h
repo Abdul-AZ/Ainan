@@ -7,6 +7,7 @@ namespace Ainan {
 
 	enum EnvironmentObjectType 
 	{
+		MeshType,
 		ParticleSystemType,
 		RadialLightType,
 		SpotLightType,

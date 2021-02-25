@@ -123,13 +123,13 @@ namespace Ainan {
 
 		ImGui::Text("Rotation: ");
 		ImGui::SameLine();
-		float rotEular = glm::eulerAngles(rotation).z * 180.0f / PI;
+		float rotEular = glm::eulerAngles(rotation).z * 180.0f / glm::pi<float>();
 		if (ImGui::DragFloat("##Rotation: ", &rotEular, c_ObjectRotationDragControlSpeed))
 		{
 			//reconstruct model with new rotation
 			Model = glm::mat4(1.0f);
 			Model = glm::translate(Model, translation);
-			Model = glm::rotate(Model, rotEular * PI / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+			Model = glm::rotate(Model, rotEular * glm::pi<float>() / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 			Model = glm::scale(Model, scale);
 		}
 

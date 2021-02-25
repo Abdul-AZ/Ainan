@@ -36,6 +36,7 @@ set(SOURCES_LIST
     "environment/RadialLight.h"                "environment/RadialLight.cpp"
     "environment/SpotLight.h"                  "environment/SpotLight.cpp"
     "environment/Sprite.h"                     "environment/Sprite.cpp"
+    "environment/Mesh.h"                       "environment/Mesh.cpp"
 
     "file/AssetManager.h"     "file/AssetManager.cpp"
     "file/FileBrowser.h"      "file/FileBrowser.cpp"

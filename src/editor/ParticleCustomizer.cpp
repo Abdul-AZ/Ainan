@@ -19,8 +19,8 @@ namespace Ainan {
 		for (int32_t i = 0; i < c_CircleVertexCount; i++)
 		{
 			float angle = i * degreesBetweenVertices;
-			vertices[i].x = (float)cos(angle * (PI / 180.0));
-			vertices[i].y = (float)sin(angle * (PI / 180.0));
+			vertices[i].x = (float)cos(angle * (glm::pi<float>() / 180.0));
+			vertices[i].y = (float)sin(angle * (glm::pi<float>() / 180.0));
 
 			if (i == c_CircleVertexCount - 1)
 				continue;
@@ -255,7 +255,7 @@ namespace Ainan {
 		{
 			std::uniform_real_distribution<float> dest(0.0f, 1.0f);
 			float r = m_CircleRadius * sqrt(dest(mt));
-			float theta = dest(mt) * 2 * PI; //in radians
+			float theta = dest(mt) * 2 * glm::pi<float>(); //in radians
 			particleDesc.Position = glm::vec2(m_SpawnPosition.x + r * cos(theta), m_SpawnPosition.y + r * sin(theta));
 			break;
 		}

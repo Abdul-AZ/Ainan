@@ -6,6 +6,7 @@
 #include "RadialLight.h"
 #include "SpotLight.h"
 #include "LitSprite.h"
+#include "Mesh.h"
 
 using json = nlohmann::json;
 
@@ -26,6 +27,7 @@ namespace Ainan {
 	static void toJson(json& j, const SpotLight& light, size_t objectOrder);
 	static void toJson(json& j, const Sprite& sprite, size_t objectOrder);
 	static void toJson(json& j, const LitSprite& sprite, size_t objectOrder);
+	static void toJson(json& j, const Mesh& sprite, size_t objectOrder);
 
 	bool SaveEnvironment(const Environment& env, std::string path)
 	{
@@ -82,7 +84,7 @@ namespace Ainan {
 		else
 			AINAN_LOG_FATAL("Cannot save environment.")
 
-		return true;
+			return true;
 	}
 
 	void toJson(json& j, const ParticleSystem& ps, size_t objectOrder)
@@ -208,6 +210,10 @@ namespace Ainan {
 		j[id + "MaterialQuadraticCoefficient"] = sprite.m_UniformBufferData.MaterialQuadraticCoefficient;
 	}
 
+	static void toJson(json& j, const Mesh& sprite, size_t objectOrder)
+	{
+		//TODO
+	}
 }
 
 #undef VEC4_TO_JSON_ARRAY

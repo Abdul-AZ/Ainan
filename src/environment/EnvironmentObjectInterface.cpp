@@ -11,15 +11,17 @@ namespace Ainan {
 	{
 		if (type == "Particle System")
 			return ParticleSystemType;
-		else if (type == "Radial Light")
-			return RadialLightType;
-		else if (type == "Spot Light")
-			return SpotLightType;
 		else if (type == "Sprite")
 			return SpriteType;
 		else if (type == "Lit Sprite")
 			return LitSpriteType;
-
+		else if (type == "Mesh")
+			return MeshType;
+		else if (type == "Radial Light")
+			return RadialLightType;
+		else if (type == "Spot Light")
+			return SpotLightType;
+		
 		//we should never reach here
 		AINAN_LOG_ERROR("Invalid object type enum");
 		return ParticleSystemType;
@@ -32,17 +34,20 @@ namespace Ainan {
 		case ParticleSystemType:
 			return "Particle System";
 
-		case RadialLightType:
-			return "Radial Light";
-
-		case SpotLightType:
-			return "Spot Light";
-
 		case SpriteType:
 			return "Sprite";
 
 		case LitSpriteType:
 			return "Lit Sprite";
+
+		case MeshType:
+			return "Mesh";
+
+		case RadialLightType:
+			return "Radial Light";
+
+		case SpotLightType:
+			return "Spot Light";
 		}
 
 		//we should never reach here

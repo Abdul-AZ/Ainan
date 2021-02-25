@@ -19,6 +19,7 @@ namespace Ainan
 		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png"));
 		m_SpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Sprite.png", TextureFormat::RGBA));
 		m_LitSpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/LitSprite.png", TextureFormat::RGBA));
+		m_MeshIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Mesh.png", TextureFormat::RGBA));
 		m_ParticleSystemIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/ParticleSystem.png", TextureFormat::RGBA));
 		m_RadialLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/RadialLight.png", TextureFormat::RGBA));
 		m_SpotLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
@@ -42,6 +43,7 @@ namespace Ainan
 		Renderer::DestroyTexture(m_StopButtonTexture);
 		Renderer::DestroyTexture(m_SpriteIconTexture);
 		Renderer::DestroyTexture(m_LitSpriteIconTexture);
+		Renderer::DestroyTexture(m_MeshIconTexture);
 		Renderer::DestroyTexture(m_ParticleSystemIconTexture);
 		Renderer::DestroyTexture(m_RadialLightIconTexture);
 		Renderer::DestroyTexture(m_SpotLightIconTexture);
@@ -624,64 +626,47 @@ namespace Ainan
 			if (m_ShowGrid)
 				m_Grid.Draw(m_Camera);
 
-			//Render world space gui here because we need camera information for that
-			for (pEnvironmentObject& obj : m_Env->Objects)
+			if (m_ShowObjectIcons)
 			{
-				auto mutexPtr = obj->GetMutex();
-				std::lock_guard lock(*mutexPtr);
-
-				const float scale = 0.1f;
-				const glm::vec2 position = glm::vec2(obj->Model[3]) - glm::vec2(scale, scale) / 2.0f;
-				const glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-				switch (obj->Type)
+				for (pEnvironmentObject& obj : m_Env->Objects)
 				{
-				case ParticleSystemType:
-					Renderer::DrawQuad(position, color, scale, m_ParticleSystemIconTexture);
-					if (obj->Selected)
+					const float scale = 0.1f;
+					const glm::vec2 position = glm::vec2(obj->Model[3]) - glm::vec2(scale, scale) / 2.0f;
+					const glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+					switch (obj->Type)
 					{
-						ParticleSystem* ps = (ParticleSystem*)obj.get();
-						ps->Customizer.DrawWorldSpaceUI();
+					case ParticleSystemType:
+						Renderer::DrawQuad(position, color, scale, m_ParticleSystemIconTexture);
+						if (obj->Selected)
+						{
+							ParticleSystem* ps = (ParticleSystem*)obj.get();
+							ps->Customizer.DrawWorldSpaceUI();
+						}
+						break;
+
+					case RadialLightType:
+						Renderer::DrawQuad(position, color, scale, m_RadialLightIconTexture);
+						break;
+
+					case SpotLightType:
+						Renderer::DrawQuad(position, color, scale, m_SpotLightIconTexture);
+						break;
+
+					case SpriteType:
+						Renderer::DrawQuad(position, color, scale, m_SpriteIconTexture);
+						break;
+
+					case LitSpriteType:
+						Renderer::DrawQuad(position, color, scale, m_LitSpriteIconTexture);
+						break;
+
+					case MeshType:
+						Renderer::DrawQuad(position, color, scale, m_MeshIconTexture);
+						break;
 					}
-					break;
-
-				case RadialLightType:
-					Renderer::DrawQuad(position, color, scale, m_RadialLightIconTexture);
-					break;
-
-				case SpotLightType:
-					Renderer::DrawQuad(position, color, scale, m_SpotLightIconTexture);
-					break;
-
-				case SpriteType:
-					Renderer::DrawQuad(position, color, scale, m_SpriteIconTexture);
-					break;
-
-				case LitSpriteType:
-					Renderer::DrawQuad(position, color, scale, m_LitSpriteIconTexture);
-					break;
 				}
 			}
-
-			for (pEnvironmentObject& obj : m_Env->Objects)
-				if (obj->Selected)
-				{
-					Renderer::SetBlendMode(RenderingBlendMode::Overlay);
-					//draw object position gizmo
-
-					//m_Gizmo.Draw(obj->GetPositionRef(), m_ViewportWindow, m_Camera);
-
-					//if particle system needs to edit a force target (a world point), use a gimzo for it
-					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
-					{
-						auto ps = static_cast<ParticleSystem*>(obj.get());
-						if (ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "");
-						if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce);
-								//m_Gizmo.Draw(&ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target,
-									//m_ViewportWindow,
-									//m_Camera);
-					}
-				}
 
 			m_Exporter.DrawOutline();
 		}
@@ -736,6 +721,11 @@ namespace Ainan
 
 			ImGui::TreePop();
 		}
+		ImGui::Text("Show Object Icons");
+		ImGui::SameLine();
+		ImGui::SetCursorPosX(125.0f);
+		ImGui::Checkbox("##Show Object Icons", &m_ShowObjectIcons);
+
 		ImGui::Text("Show Grid");
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(100.0f);
@@ -1178,6 +1168,10 @@ namespace Ainan
 				case SpotLightType:
 					icon = (void*)m_SpotLightIconTexture.GetTextureID();
 					break;
+
+				case MeshType:
+					icon = (void*)m_MeshIconTexture.GetTextureID();
+					break;
 				}
 				//display the image in the same line
 				ImGui::SameLine();
@@ -1259,6 +1253,12 @@ namespace Ainan
 				bool selected = m_AddObjectWindowObjectType == LitSpriteType;
 				if (ImGui::Selectable(EnvironmentObjectTypeToString(LitSpriteType).c_str(), &selected))
 					m_AddObjectWindowObjectType = LitSpriteType;
+			}
+
+			{
+				bool selected = m_AddObjectWindowObjectType == MeshType;
+				if (ImGui::Selectable(EnvironmentObjectTypeToString(MeshType).c_str(), &selected))
+					m_AddObjectWindowObjectType = MeshType;
 			}
 
 			{
@@ -1366,36 +1366,43 @@ namespace Ainan
 		{
 			auto ps = std::make_unique<ParticleSystem>();
 			obj.reset(((EnvironmentObjectInterface*)(ps.release())));
+			break;
 		}
-		break;
-
-		case RadialLightType:
-		{
-			auto light = std::make_unique<RadialLight>();
-			obj.reset(((EnvironmentObjectInterface*)(light.release())));
-		}
-		break;
-
-		case SpotLightType:
-		{
-			auto light = std::make_unique<SpotLight>();
-			obj.reset(((EnvironmentObjectInterface*)(light.release())));
-		}
-		break;
 
 		case SpriteType:
 		{
 			auto sprite = std::make_unique<Sprite>();
 			obj.reset(((EnvironmentObjectInterface*)(sprite.release())));
+			break;
 		}
-		break;
+
+		case MeshType:
+		{
+			auto mesh = std::make_unique<Mesh>();
+			obj.reset(((EnvironmentObjectInterface*)(mesh.release())));
+			break;
+		}
 
 		case LitSpriteType:
 		{
 			auto sprite = std::make_unique<LitSprite>();
 			obj.reset(((EnvironmentObjectInterface*)(sprite.release())));
+			break;
 		}
-		break;
+
+		case RadialLightType:
+		{
+			auto light = std::make_unique<RadialLight>();
+			obj.reset(((EnvironmentObjectInterface*)(light.release())));
+			break;
+		}
+
+		case SpotLightType:
+		{
+			auto light = std::make_unique<SpotLight>();
+			obj.reset(((EnvironmentObjectInterface*)(light.release())));
+			break;
+		}
 		}
 
 		obj->m_Name = name;
