@@ -7,7 +7,7 @@ namespace Ainan {
 
 	enum EnvironmentObjectType 
 	{
-		MeshType,
+		ModelType,
 		ParticleSystemType,
 		RadialLightType,
 		SpotLightType,
@@ -36,7 +36,7 @@ namespace Ainan {
 		virtual ~EnvironmentObjectInterface() {};
 		virtual int32_t GetAllowedGizmoOperation(ImGuizmo::OPERATION requestedOperation) { return requestedOperation; }
 
-		glm::mat4 Model = glm::mat4(1.0f);
+		glm::mat4 ModelMatrix = glm::mat4(1.0f);
 		std::string m_Name;
 		bool RenameTextOpen = false;
 		bool Selected = false;

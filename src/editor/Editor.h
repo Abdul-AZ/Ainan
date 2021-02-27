@@ -9,7 +9,7 @@
 #include "environment/ParticleSystem.h"
 #include "environment/Sprite.h"
 #include "environment/LitSprite.h"
-#include "environment/Mesh.h"
+#include "environment/Model.h"
 #include "environment/RadialLight.h"
 #include "environment/SpotLight.h"
 #include "Exporter.h"

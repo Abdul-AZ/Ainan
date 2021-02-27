@@ -15,7 +15,7 @@ namespace Ainan {
 		ImGui::Text("Position: ");
 		ImGui::SameLine();
 		float xPos = ImGui::GetCursorPosX();
-		ImGui::DragFloat2("##Position: ", &Model[3][0], c_ObjectPositionDragControlSpeed);
+		ImGui::DragFloat2("##Position: ", &ModelMatrix[3][0], c_ObjectPositionDragControlSpeed);
 
 		ImGui::Text("Color: ");
 		ImGui::SameLine();

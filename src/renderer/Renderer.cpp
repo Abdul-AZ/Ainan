@@ -42,7 +42,8 @@ namespace Ainan {
 		{ "GridShader"          , "shaders/Grid"          , "shaders/Grid"           },
 		{ "ImageShader"         , "shaders/Image"         , "shaders/Image"          },
 		{ "QuadBatchShader"     , "shaders/QuadBatch"     , "shaders/QuadBatch"      },
-		{ "LitSpriteShader"     , "shaders/LitSprite"     , "shaders/LitSprite"      }
+		{ "LitSpriteShader"     , "shaders/LitSprite"     , "shaders/LitSprite"      },
+		{ "3DAmbientShader"     , "shaders/3DAmbient"     , "shaders/3DAmbient"      }
 	};
 
 	void Renderer::Init(RendererType api)

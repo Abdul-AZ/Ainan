@@ -19,7 +19,7 @@ namespace Ainan
 		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png"));
 		m_SpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Sprite.png", TextureFormat::RGBA));
 		m_LitSpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/LitSprite.png", TextureFormat::RGBA));
-		m_MeshIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Mesh.png", TextureFormat::RGBA));
+		m_MeshIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Model.png", TextureFormat::RGBA));
 		m_ParticleSystemIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/ParticleSystem.png", TextureFormat::RGBA));
 		m_RadialLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/RadialLight.png", TextureFormat::RGBA));
 		m_SpotLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
@@ -577,7 +577,7 @@ namespace Ainan
 			if (obj->Type == RadialLightType)
 			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				Renderer::AddRadialLight(light->Model[3], light->Color, light->Intensity);
+				Renderer::AddRadialLight(light->ModelMatrix[3], light->Color, light->Intensity);
 			}
 			else if (obj->Type == SpotLightType) 
 			{
@@ -587,8 +587,8 @@ namespace Ainan
 				glm::vec3 translation;
 				glm::vec3 skew;
 				glm::vec4 perspective;
-				glm::decompose(light->Model, scale, rotation, translation, skew, perspective);
-				Renderer::AddSpotLight(light->Model[3], light->Color, glm::eulerAngles(rotation).z, light->InnerCutoff, light->OuterCutoff, light->Intensity);
+				glm::decompose(light->ModelMatrix, scale, rotation, translation, skew, perspective);
+				Renderer::AddSpotLight(light->ModelMatrix[3], light->Color, glm::eulerAngles(rotation).z, light->InnerCutoff, light->OuterCutoff, light->Intensity);
 			}
 		}
 
@@ -631,7 +631,7 @@ namespace Ainan
 				for (pEnvironmentObject& obj : m_Env->Objects)
 				{
 					const float scale = 0.1f;
-					const glm::vec2 position = glm::vec2(obj->Model[3]) - glm::vec2(scale, scale) / 2.0f;
+					const glm::vec2 position = glm::vec2(obj->ModelMatrix[3]) - glm::vec2(scale, scale) / 2.0f;
 					const glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 					switch (obj->Type)
@@ -661,7 +661,7 @@ namespace Ainan
 						Renderer::DrawQuad(position, color, scale, m_LitSpriteIconTexture);
 						break;
 
-					case MeshType:
+					case ModelType:
 						Renderer::DrawQuad(position, color, scale, m_MeshIconTexture);
 						break;
 					}
@@ -803,7 +803,7 @@ namespace Ainan
 				if (obj->Selected)
 				{
 					ImGuizmo::Manipulate(glm::value_ptr(m_Camera.ViewMatrix), glm::value_ptr(m_Camera.ProjectionMatrix),
-						(ImGuizmo::OPERATION)obj->GetAllowedGizmoOperation(m_GizmoOperation), ImGuizmo::MODE::WORLD, glm::value_ptr(obj->Model));
+						(ImGuizmo::OPERATION)obj->GetAllowedGizmoOperation(m_GizmoOperation), ImGuizmo::MODE::WORLD, glm::value_ptr(obj->ModelMatrix));
 					break;
 				}
 			}
@@ -1192,7 +1192,7 @@ namespace Ainan
 					icon = (void*)m_SpotLightIconTexture.GetTextureID();
 					break;
 
-				case MeshType:
+				case ModelType:
 					icon = (void*)m_MeshIconTexture.GetTextureID();
 					break;
 				}
@@ -1259,9 +1259,9 @@ namespace Ainan
 			}
 
 			{
-				bool selected = m_AddObjectWindowObjectType == MeshType;
-				if (ImGui::Selectable(EnvironmentObjectTypeToString(MeshType).c_str(), &selected))
-					m_AddObjectWindowObjectType = MeshType;
+				bool selected = m_AddObjectWindowObjectType == ModelType;
+				if (ImGui::Selectable(EnvironmentObjectTypeToString(ModelType).c_str(), &selected))
+					m_AddObjectWindowObjectType = ModelType;
 			}
 
 			{
@@ -1354,7 +1354,7 @@ namespace Ainan
 
 	void Editor::FocusCameraOnObject(EnvironmentObjectInterface& object)
 	{
-		m_Camera.SetPosition(glm::vec3(object.Model[3][0], object.Model[3][1], m_Camera.Position.z));
+		m_Camera.SetPosition(glm::vec3(object.ModelMatrix[3][0], object.ModelMatrix[3][1], m_Camera.Position.z));
 	}
 
 	void Editor::AddEnvironmentObject(EnvironmentObjectType type, const std::string& name)
@@ -1379,9 +1379,9 @@ namespace Ainan
 			break;
 		}
 
-		case MeshType:
+		case ModelType:
 		{
-			auto mesh = std::make_unique<Mesh>();
+			auto mesh = std::make_unique<Model>();
 			obj.reset(((EnvironmentObjectInterface*)(mesh.release())));
 			break;
 		}

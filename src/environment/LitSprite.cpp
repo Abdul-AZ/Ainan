@@ -42,7 +42,7 @@ namespace Ainan {
 		glm::vec3 translation;
 		glm::vec3 skew;
 		glm::vec4 perspective;
-		glm::decompose(Model, scale, rotation, translation, skew, perspective);
+		glm::decompose(ModelMatrix, scale, rotation, translation, skew, perspective);
 
 		ImGui::Text("Position: ");
 		ImGui::SameLine();
@@ -53,8 +53,8 @@ namespace Ainan {
 		float scaleAverage = (scale.x + scale.y + scale.z) / 3.0f;
 		if (ImGui::DragFloat("##Scale: ", &scaleAverage, c_ObjectScaleDragControlSpeed))
 		{
-			Model = glm::scale(Model, (1.0f / scale));
-			Model = glm::scale(Model, glm::vec3(scaleAverage));
+			ModelMatrix = glm::scale(ModelMatrix, (1.0f / scale));
+			ModelMatrix = glm::scale(ModelMatrix, glm::vec3(scaleAverage));
 		}
 
 		ImGui::Text("Rotation: ");
@@ -63,10 +63,10 @@ namespace Ainan {
 		if (ImGui::DragFloat("##Rotation: ", &rotEular, c_ObjectRotationDragControlSpeed))
 		{
 			//reconstruct model with new rotation
-			Model = glm::mat4(1.0f);
-			Model = glm::translate(Model, translation);
-			Model = glm::rotate(Model, rotEular * glm::pi<float>() / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-			Model = glm::scale(Model, scale);
+			ModelMatrix = glm::mat4(1.0f);
+			ModelMatrix = glm::translate(ModelMatrix, translation);
+			ModelMatrix = glm::rotate(ModelMatrix, rotEular * glm::pi<float>() / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+			ModelMatrix = glm::scale(ModelMatrix, scale);
 		}
 
 		ImGui::Text("Color/Tint: ");
@@ -104,14 +104,14 @@ namespace Ainan {
 		glm::vec3 translation;
 		glm::vec3 skew;
 		glm::vec4 perspective;
-		glm::decompose(Model, scale, rotation, translation, skew, perspective);
+		glm::decompose(ModelMatrix, scale, rotation, translation, skew, perspective);
 
 		//workaround for having one scale value
-		Model = glm::scale(Model, (1.0f / scale));
+		ModelMatrix = glm::scale(ModelMatrix, (1.0f / scale));
 		float scaleAverage = (scale.x + scale.y + scale.z) / 3.0f;
-		Model = glm::scale(Model, glm::vec3(scaleAverage));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(scaleAverage));
 
-		m_UniformBufferData.ModelMatrix = Model;
+		m_UniformBufferData.ModelMatrix = ModelMatrix;
 
 		m_UniformBuffer.UpdateData(&m_UniformBufferData, sizeof(LitSpriteUniformBuffer));
 

@@ -85,19 +85,19 @@ namespace Ainan {
 		{
 			switch (format)
 			{
-			case Ainan::TextureFormat::RGBA:
+			case TextureFormat::RGBA:
 				return DXGI_FORMAT_R8G8B8A8_UNORM;
 
-			case Ainan::TextureFormat::RGB:
+			case TextureFormat::RGB:
 				assert(false, "Format not supported");
 
-			case Ainan::TextureFormat::RG:
+			case TextureFormat::RG:
 				return DXGI_FORMAT_R8G8_UNORM;
 
-			case Ainan::TextureFormat::R:
+			case TextureFormat::R:
 				return DXGI_FORMAT_R8_UNORM;
 
-			case Ainan::TextureFormat::Unspecified:
+			case TextureFormat::Unspecified:
 				return DXGI_FORMAT_UNKNOWN;
 
 			default:
@@ -774,6 +774,8 @@ namespace Ainan {
 		{
 			VertexBufferCreationInfo* info = cmd.CreateVertexBufferCmdDesc.Info;
 			VertexBufferDataView* output = cmd.CreateVertexBufferCmdDesc.Output;
+			if (info->Shader->VertexByteCode == nullptr)
+				AINAN_LOG_FATAL("No valid shader passed to vertex buffer creation");
 
 			output->Stride = 0;
 			uint32_t Memory = info->Size;

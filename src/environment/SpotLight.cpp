@@ -19,12 +19,12 @@ namespace Ainan {
 		glm::vec3 translation;
 		glm::vec3 skew;
 		glm::vec4 perspective;
-		glm::decompose(Model, scale, rotation, translation, skew, perspective);
+		glm::decompose(ModelMatrix, scale, rotation, translation, skew, perspective);
 
 		ImGui::Text("Position: ");
 		ImGui::SameLine();
 		ImGui::SetCursorPosX(xPos);
-		ImGui::DragFloat2("##Position: ", &Model[3][0], c_ObjectPositionDragControlSpeed);
+		ImGui::DragFloat2("##Position: ", &ModelMatrix[3][0], c_ObjectPositionDragControlSpeed);
 
 		ImGui::Text("Color: ");
 		ImGui::SameLine();
@@ -38,10 +38,10 @@ namespace Ainan {
 		if(ImGui::DragFloat("##Angle: ", &rotEular, 1.0f, -180.0f, 180.0f));
 		{
 			//reconstruct model with new rotation
-			Model = glm::mat4(1.0f);
-			Model = glm::translate(Model, translation);
-			Model = glm::rotate(Model, rotEular * glm::pi<float>() / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-			Model = glm::scale(Model, scale);
+			ModelMatrix = glm::mat4(1.0f);
+			ModelMatrix = glm::translate(ModelMatrix, translation);
+			ModelMatrix = glm::rotate(ModelMatrix, rotEular * glm::pi<float>() / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
+			ModelMatrix = glm::scale(ModelMatrix, scale);
 		}
 
 		ImGui::Text("Inner Cutoff: ");

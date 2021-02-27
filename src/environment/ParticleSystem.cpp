@@ -41,7 +41,7 @@ namespace Ainan {
 
 	void ParticleSystem::Update(const float deltaTime)
 	{
-		Customizer.m_SpawnPosition = Model[3];
+		Customizer.m_SpawnPosition = ModelMatrix[3];
 		SpawnAllParticlesOnQue(deltaTime);
 
 		ActiveParticleCount = 0;

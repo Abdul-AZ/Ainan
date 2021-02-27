@@ -6,7 +6,7 @@
 #include "RadialLight.h"
 #include "SpotLight.h"
 #include "LitSprite.h"
-#include "Mesh.h"
+#include "Model.h"
 
 using json = nlohmann::json;
 
@@ -27,7 +27,7 @@ namespace Ainan {
 	static void toJson(json& j, const SpotLight& light, size_t objectOrder);
 	static void toJson(json& j, const Sprite& sprite, size_t objectOrder);
 	static void toJson(json& j, const LitSprite& sprite, size_t objectOrder);
-	static void toJson(json& j, const Mesh& sprite, size_t objectOrder);
+	static void toJson(json& j, const Model& model, size_t objectOrder);
 
 	bool SaveEnvironment(const Environment& env, std::string path)
 	{
@@ -165,7 +165,7 @@ namespace Ainan {
 
 		j[id + "Type"] = EnvironmentObjectTypeToString(RadialLightType);
 		j[id + "Name"] = light.m_Name;
-		j[id + "Model"] = MAT4_TO_JSON_ARRAY(light.Model);
+		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(light.ModelMatrix);
 		j[id + "Color"] = VEC4_TO_JSON_ARRAY(light.Color);
 		j[id + "Intensity"] = light.Intensity;
 	}
@@ -176,7 +176,7 @@ namespace Ainan {
 
 		j[id + "Type"] = EnvironmentObjectTypeToString(SpotLightType);
 		j[id + "Name"] = light.m_Name;
-		j[id + "Model"] = MAT4_TO_JSON_ARRAY(light.Model);
+		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(light.ModelMatrix);
 		j[id + "Color"] = VEC4_TO_JSON_ARRAY(light.Color);
 		j[id + "OuterCutoff"] = light.OuterCutoff;
 		j[id + "InnerCutoff"] = light.InnerCutoff;
@@ -189,7 +189,7 @@ namespace Ainan {
 
 		j[id + "Type"] = EnvironmentObjectTypeToString(SpriteType);
 		j[id + "Name"] = sprite.m_Name;
-		j[id + "Model"] = MAT4_TO_JSON_ARRAY(sprite.Model);
+		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(sprite.ModelMatrix);
 		j[id + "Space"] = ObjSpaceToStr(sprite.Space);
 		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.Tint);
 		j[id + "TexturePath"] = sprite.m_TexturePath.u8string();
@@ -201,7 +201,7 @@ namespace Ainan {
 
 		j[id + "Type"] = EnvironmentObjectTypeToString(LitSpriteType);
 		j[id + "Name"] = sprite.m_Name;
-		j[id + "Model"] = MAT4_TO_JSON_ARRAY(sprite.Model);
+		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(sprite.ModelMatrix);
 		j[id + "Position"] = VEC2_TO_JSON_ARRAY(sprite.m_Position);
 		j[id + "Tint"] = VEC4_TO_JSON_ARRAY(sprite.m_UniformBufferData.Tint);
 		j[id + "BaseLight"] = sprite.m_UniformBufferData.BaseLight;
@@ -210,7 +210,7 @@ namespace Ainan {
 		j[id + "MaterialQuadraticCoefficient"] = sprite.m_UniformBufferData.MaterialQuadraticCoefficient;
 	}
 
-	static void toJson(json& j, const Mesh& sprite, size_t objectOrder)
+	static void toJson(json& j, const Model& model, size_t objectOrder)
 	{
 		//TODO
 	}

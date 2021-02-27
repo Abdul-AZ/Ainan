@@ -183,7 +183,7 @@ namespace Ainan {
 
 		//populate with data
 		light->m_Name = data[id + "Name"].get <std::string>();
-		light->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
+		light->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		light->Color = JSON_ARRAY_TO_VEC4(data[id + "Color"].get<std::vector<float>>());
 		light->Intensity = data[id + "Intensity"].get<float>();
 
@@ -199,7 +199,7 @@ namespace Ainan {
 
 		//populate with data
 		light->m_Name = data[id + "Name"].get <std::string>();
-		light->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
+		light->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		light->Color = JSON_ARRAY_TO_VEC4(data[id + "Color"].get<std::vector<float>>());
 		light->OuterCutoff = data[id + "OuterCutoff"].get<float>();
 		light->InnerCutoff = data[id + "InnerCutoff"].get<float>();
@@ -217,7 +217,7 @@ namespace Ainan {
 
 		//populate with data
 		sprite->m_Name = data[id + "Name"].get<std::string>();
-		sprite->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
+		sprite->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		sprite->Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
 		sprite->Space = StrToObjSpace(data[id + "Space"].get<std::string>().c_str());
 		sprite->m_TexturePath = data[id + "TexturePath"].get<std::string>();
@@ -235,7 +235,7 @@ namespace Ainan {
 
 		//populate with data
 		sprite->m_Name = data[id + "Name"].get<std::string>();
-		sprite->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
+		sprite->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		sprite->m_Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
 		sprite->m_UniformBufferData.Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
 		sprite->m_UniformBufferData.BaseLight = data[id + "BaseLight"].get<float>();

@@ -15,8 +15,8 @@ namespace Ainan {
 			return SpriteType;
 		else if (type == "Lit Sprite")
 			return LitSpriteType;
-		else if (type == "Mesh")
-			return MeshType;
+		else if (type == "Model")
+			return ModelType;
 		else if (type == "Radial Light")
 			return RadialLightType;
 		else if (type == "Spot Light")
@@ -40,8 +40,8 @@ namespace Ainan {
 		case LitSpriteType:
 			return "Lit Sprite";
 
-		case MeshType:
-			return "Mesh";
+		case ModelType:
+			return "Model";
 
 		case RadialLightType:
 			return "Radial Light";
