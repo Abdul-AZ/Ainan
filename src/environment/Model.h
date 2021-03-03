@@ -2,6 +2,7 @@
 
 #include "EnvironmentObjectInterface.h"
 #include "renderer/Renderer.h"
+#include "file/AssetManager.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -29,7 +30,15 @@ namespace Ainan {
 		Model();
 		~Model();
 
+		void DisplayGuiControls() override;
+
+		void LoadModel(std::filesystem::path path);
+		void FreeModel();
 		void Draw() override;
+		std::vector<Model::MeshTexture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+
+	public:
+		std::filesystem::path CurrentModelPath;
 
 	private:
 		// mesh data

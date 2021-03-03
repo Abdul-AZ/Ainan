@@ -64,6 +64,10 @@ namespace Ainan {
 				toJson(data, *(LitSprite*)env.Objects[i].get(), i);
 				break;
 
+			case ModelType:
+				toJson(data, *(Model*)env.Objects[i].get(), i);
+				break;
+
 			default: //this means we have a type that we haven't implemented how to save it
 				AINAN_LOG_FATAL("Invalid object type enum");
 				break;
@@ -212,7 +216,12 @@ namespace Ainan {
 
 	static void toJson(json& j, const Model& model, size_t objectOrder)
 	{
-		//TODO
+		std::string id = "obj" + std::to_string(objectOrder) + "_";
+
+		j[id + "Type"] = EnvironmentObjectTypeToString(ModelType);
+		j[id + "Name"] = model.m_Name;
+		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(model.ModelMatrix);
+		j[id + "ModelPath"] = model.CurrentModelPath.u8string();
 	}
 }
 

@@ -5,6 +5,7 @@
 #include "json/json.hpp"
 #include "Sprite.h"
 #include "LitSprite.h"
+#include "Model.h"
 
 using json = nlohmann::json;
 
@@ -18,7 +19,7 @@ namespace Ainan {
 	static void ParticleSystemFromJson(Environment* env, json& data, std::string id);
 	static void SpriteFromJson(Environment* env,json& data, std::string id);
 	static void LitSpriteFromJson(Environment* env,json& data, std::string id);
-	static void MeshFromJson(Environment* env,json& data, std::string id);
+	static void ModelFromJson(Environment* env,json& data, std::string id);
 	static void RadialLightFromJson(Environment* env, json& data, std::string id);
 	static void SpotLightFromJson(Environment* env, json& data, std::string id);
 	static void SettingsFromJson(Environment* env, json& data);
@@ -29,7 +30,7 @@ namespace Ainan {
 
 		//we are assuming the .env file is in environment's top folder
 		AssetManager::Init(std::filesystem::path(path).parent_path());
-		
+
 		try 
 		{
 			data = json::parse(AssetManager::ReadEntireTextFile(path));
@@ -75,6 +76,10 @@ namespace Ainan {
 
 			case LitSpriteType:
 				LitSpriteFromJson(env, data, id);
+				break;
+
+			case ModelType:
+				ModelFromJson(env, data, id);
 				break;
 
 			default:
@@ -247,11 +252,21 @@ namespace Ainan {
 		env->Objects.push_back(std::move(obj));
 	}
 
-	void MeshFromJson(Environment* env, json& data, std::string id)
+	void ModelFromJson(Environment* env, json& data, std::string id)
 	{
-		//TODO
-	}
+		//create model
+		std::unique_ptr<Model> model = std::make_unique<Model>();
 
+		//populate with data
+		model->m_Name = data[id + "Name"].get<std::string>();
+		model->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
+		model->CurrentModelPath = data[id + "ModelPath"].get<std::string>();
+		if (model->CurrentModelPath != "")
+			model->LoadModel(model->CurrentModelPath);
+
+		pEnvironmentObject obj((EnvironmentObjectInterface*)(model.release()));
+		env->Objects.push_back(std::move(obj));
+	}
 }
 
 #undef JSON_ARRAY_TO_VEC4

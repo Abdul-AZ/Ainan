@@ -68,14 +68,13 @@ namespace Ainan {
 
 		if (ImGui::BeginCombo("##Texture: ", m_TexturePath == "" ? "None" : m_TexturePath.filename().u8string().c_str()))
 		{
-			auto textures = AssetManager::GetAll2DTextures();
 			bool selected = false;
 			if (ImGui::Selectable("None", &selected))
 			{
 				LoadTextureFromFile("res/CheckerBoard.png");
 				m_TexturePath = "";
 			}
-			for (auto& tex : textures)
+			for (auto& tex : AssetManager::Images)
 			{
 				std::string textureFileName = std::filesystem::path(tex).filename().u8string();
 				if (ImGui::Selectable(textureFileName.c_str(), &selected))
@@ -154,10 +153,7 @@ namespace Ainan {
 	{
 		Renderer::DestroyTexture(m_Texture);
 
-		Image img = Image::LoadFromFile(path);
-
-		if (img.Format == TextureFormat::R)
-			Image::GrayScaleToRGB(img);
+		Image img = Image::LoadFromFile(path, TextureFormat::RGBA);
 
 		m_Texture = Renderer::CreateTexture(img);
 	}

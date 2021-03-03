@@ -37,14 +37,13 @@ namespace Ainan {
 			ImGui::SameLine();
 			if (ImGui::BeginCombo("##Texture: ", UseDefaultTexture ? "Default" : m_TexturePath.filename().u8string().c_str()))
 			{
-				auto textures = AssetManager::GetAll2DTextures();
 				bool selected = false;
 				if (ImGui::Selectable("Default", &selected))
 				{
 					UseDefaultTexture = true;
 					m_TexturePath = "";
 				}
-				for (auto& tex : textures) 
+				for (auto& tex : AssetManager::Images) 
 				{
 					std::string textureFileName = std::filesystem::path(tex).filename().u8string();
 					if (ImGui::Selectable(textureFileName.c_str(), &selected))

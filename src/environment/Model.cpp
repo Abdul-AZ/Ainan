@@ -8,20 +8,68 @@ namespace Ainan {
 	Model::Model()
 	{
 		Type = ModelType;
+		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1,
+			{ VertexLayoutElement("u_Model", 0, ShaderVariableType::Mat4) }
+		);
+	}
 
-		scene = importer.ReadFile("res/3D/Avocado.gltf", aiProcess_Triangulate);
+	void Model::DisplayGuiControls()
+	{
+		ImGui::Text("Asset: ");
+		ImGui::SameLine();
+		if (ImGui::BeginCombo("##Asset", CurrentModelPath == "" ? "None" : CurrentModelPath.filename().u8string().c_str()))
+		{
+			if (CurrentModelPath != "")
+			{
+				bool selected = false;
+
+				if (ImGui::Selectable("None", &selected))
+				{
+					FreeModel();
+					CurrentModelPath = "";
+				}
+			}
+
+			for (auto& path : AssetManager::Models)
+			{
+				bool selected = path == CurrentModelPath;
+				std::string textureFileName = std::filesystem::path(path).filename().u8string();
+
+				if (ImGui::Selectable(textureFileName.c_str(), &selected))
+				{
+					LoadModel(path);
+				}
+			}
+
+			ImGui::EndCombo();
+		}
+	}
+
+	void Model::LoadModel(std::filesystem::path path)
+	{
+		if (CurrentModelPath != "")
+			FreeModel();
+
+		if(path.is_absolute())
+			CurrentModelPath = path.lexically_relative(AssetManager::s_EnvironmentDirectory);
+		scene = importer.ReadFile(AssetManager::s_EnvironmentDirectory.u8string() + '/' + CurrentModelPath.u8string(), aiProcess_Triangulate);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			AINAN_LOG_ERROR("Couldn't Load Model");
 			AINAN_LOG_ERROR(importer.GetErrorString());
+			CurrentModelPath = "";
 			return;
 		}
 
 		ProcessNode(scene->mRootNode, scene);
-		TransformUniformBuffer = Renderer::CreateUniformBuffer("ObjectTransform", 1,
-			{ VertexLayoutElement("u_Model", 0, ShaderVariableType::Mat4) }
-		);
+	}
+
+	void Model::FreeModel()
+	{
+		for (auto& mesh : m_Meshes)
+			mesh.DeleteMesh();
+		m_Meshes.clear();
 	}
 
 	void Model::ProcessNode(aiNode* node, const aiScene* scene)
@@ -39,7 +87,7 @@ namespace Ainan {
 		}
 	}
 
-	std::vector<Model::MeshTexture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
+	std::vector<Model::MeshTexture> Model::LoadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
 	{
 		std::vector<Model::MeshTexture> textures;
 		for (uint32_t i = 0; i < mat->GetTextureCount(type); i++)
@@ -47,7 +95,7 @@ namespace Ainan {
 			aiString str;
 			mat->GetTexture(type, i, &str);
 			Model::MeshTexture texture;
-			texture.tex = Renderer::CreateTexture(Image::LoadFromFile(std::string("res/3D/") + str.C_Str(), TextureFormat::RGBA));
+			texture.tex = Renderer::CreateTexture(Image::LoadFromFile(AssetManager::s_EnvironmentDirectory.u8string() + '/' + CurrentModelPath.parent_path().u8string() + '/' + str.C_Str(), TextureFormat::RGBA));
 			texture.Type = typeName;
 			textures.push_back(texture);
 		}
@@ -88,11 +136,11 @@ namespace Ainan {
 		if (mesh->mMaterialIndex >= 0)
 		{
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-			std::vector<MeshTexture> diffuseMaps = loadMaterialTextures(material,
+			std::vector<MeshTexture> diffuseMaps = LoadMaterialTextures(material,
 				aiTextureType_DIFFUSE, "texture_diffuse");
 			ainanMesh.Textures.insert(ainanMesh.Textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-			std::vector<MeshTexture> specularMaps = loadMaterialTextures(material,
-				aiTextureType_SPECULAR, "texture_specular");
+			std::vector<MeshTexture> specularMaps = LoadMaterialTextures(material,
+				aiTextureType_SPECULAR, "texture_specular" );
 			ainanMesh.Textures.insert(ainanMesh.Textures.end(), specularMaps.begin(), specularMaps.end());
 		}
 
@@ -109,8 +157,10 @@ namespace Ainan {
 
 		m_VertexBuffer = Renderer::CreateVertexBuffer(Vertices.data(), Vertices.size() * sizeof(MeshVertex), layout,
 			Renderer::ShaderLibrary()["3DAmbientShader"], false);
+		Vertices.clear();
 
 		m_IndexBuffer = Renderer::CreateIndexBuffer(Indices.data(), Indices.size());
+		Indices.clear();
 	}
 
 	void Model::Mesh::DeleteMesh()
@@ -126,8 +176,8 @@ namespace Ainan {
 
 	Model::~Model()
 	{
-		for (auto& mesh : m_Meshes)
-			mesh.DeleteMesh();
+		if(CurrentModelPath != "")
+			FreeModel();
 		Renderer::DestroyUniformBuffer(TransformUniformBuffer);
 	}
 

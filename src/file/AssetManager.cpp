@@ -2,15 +2,36 @@
 
 #include "renderer/Renderer.h"
 
+#include "assimp/Importer.hpp"
+
 namespace Ainan 
 {
 	std::filesystem::path AssetManager::s_EnvironmentDirectory = "";
 	std::filesystem::path AssetManager::s_CurrentDirectory = "";
+	std::vector<std::filesystem::path> AssetManager::Images;
+	std::vector<std::filesystem::path> AssetManager::Models;
 
 	void AssetManager::Init(const std::filesystem::path& environmentDirectory)
 	{
 		s_EnvironmentDirectory = environmentDirectory;
 		s_CurrentDirectory = environmentDirectory;
+
+		Assimp::Importer importer;
+
+		//store all image and model paths in a sepearat containers
+		for (const auto& entry : std::filesystem::recursive_directory_iterator(s_EnvironmentDirectory))
+		{
+			//check if the files format contains any of the supported image formats(jpg, bmp and png)
+			if (entry.path().filename().u8string().find(".jpg") != std::string::npos ||
+				entry.path().filename().u8string().find(".jpeg") != std::string::npos ||
+				entry.path().filename().u8string().find(".bmp") != std::string::npos ||
+				entry.path().filename().u8string().find(".png") != std::string::npos)
+				Images.push_back(entry.path());
+
+			//check if the file is a 3D model
+			if (importer.IsExtensionSupported(entry.path().extension().u8string()))
+				Models.push_back(entry.path());
+		}
 	}
 
 	void AssetManager::Terminate()
@@ -18,7 +39,9 @@ namespace Ainan
 		//check if asset manager is terminated without being initilized
 		assert(s_EnvironmentDirectory != "");
 
-		s_EnvironmentDirectory = "";
+		s_EnvironmentDirectory = ""; 
+		AssetManager::Images.clear();
+		AssetManager::Models.clear();
 	}
 
 	void AssetManager::DisplayGUI()
@@ -53,22 +76,6 @@ namespace Ainan
 
 		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
-	}
-
-	std::vector<std::filesystem::path> AssetManager::GetAll2DTextures()
-	{
-		std::vector<std::filesystem::path> result;
-		for (const auto& entry : std::filesystem::recursive_directory_iterator(s_EnvironmentDirectory)) 
-		{
-			//check if the files format contains any of the supported image formats(jpg, bmp and png)
-			if(entry.path().filename().u8string().find(".jpg") != std::string::npos ||
-				entry.path().filename().u8string().find(".jpeg") != std::string::npos ||
-				entry.path().filename().u8string().find(".bmp") != std::string::npos ||
-				entry.path().filename().u8string().find(".png") != std::string::npos)
-				result.push_back(entry.path());
-		}
-
-		return result;
 	}
 
 	std::string AssetManager::ReadEntireTextFile(const std::string& path)

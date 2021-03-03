@@ -538,10 +538,11 @@ namespace Ainan
 				m_Env->Name = m_EnvironmentCreateName;
 
 				if (m_IncludeStarterAssets)
-					std::filesystem::copy("res\\StarterAssets", m_EnvironmentCreateFolderPath + "\\StarterAssets");
+					std::filesystem::copy("res\\StarterAssets", m_EnvironmentCreateFolderPath + "\\StarterAssets", std::filesystem::copy_options::recursive);
 				m_EnvironmentFolderPath = m_EnvironmentCreateFolderPath;
 
 				m_State = State_EditorMode;
+				AssetManager::Init(m_EnvironmentFolderPath.u8string());
 				OnEnvironmentLoad();
 			}
 		}
@@ -812,8 +813,6 @@ namespace Ainan
 
 	void Editor::OnEnvironmentLoad()
 	{
-		AssetManager::Init(m_EnvironmentFolderPath.u8string());
-
 		if (m_Preferences.WindowMaximized)
 			Window::Maximize();
 		else
