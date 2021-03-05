@@ -5,6 +5,7 @@ namespace Ainan {
 	LitSprite::LitSprite()
 	{
 		Type = LitSpriteType;
+		Space = OBJ_SPACE_2D;
 		auto vertices = Renderer::GetQuadVertices();
 
 		VertexLayout vertexBufferlayout = 
@@ -35,66 +36,41 @@ namespace Ainan {
 
 	void LitSprite::DisplayGuiControls()
 	{
-		const float spacing = 175.0f;
+		DisplayTransformationControls();
 
-		glm::vec3 scale;
-		glm::quat rotation;
-		glm::vec3 translation;
-		glm::vec3 skew;
-		glm::vec4 perspective;
-		glm::decompose(ModelMatrix, scale, rotation, translation, skew, perspective);
-
-		ImGui::Text("Position: ");
-		ImGui::SameLine();
-		ImGui::DragFloat("##Scale: ", &m_Position.x, c_ObjectPositionDragControlSpeed);
-
-		ImGui::Text("Scale: ");
-		ImGui::SameLine();
-		float scaleAverage = (scale.x + scale.y + scale.z) / 3.0f;
-		if (ImGui::DragFloat("##Scale: ", &scaleAverage, c_ObjectScaleDragControlSpeed))
-		{
-			ModelMatrix = glm::scale(ModelMatrix, (1.0f / scale));
-			ModelMatrix = glm::scale(ModelMatrix, glm::vec3(scaleAverage));
-		}
-
-		ImGui::Text("Rotation: ");
-		ImGui::SameLine();
-		float rotEular = glm::eulerAngles(rotation).z * 180.0f / glm::pi<float>();
-		if (ImGui::DragFloat("##Rotation: ", &rotEular, c_ObjectRotationDragControlSpeed))
-		{
-			//reconstruct model with new rotation
-			ModelMatrix = glm::mat4(1.0f);
-			ModelMatrix = glm::translate(ModelMatrix, translation);
-			ModelMatrix = glm::rotate(ModelMatrix, rotEular * glm::pi<float>() / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-			ModelMatrix = glm::scale(ModelMatrix, scale);
-		}
-
+		ImGui::NextColumn();
 		ImGui::Text("Color/Tint: ");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(spacing);
+		ImGui::NextColumn();
 		ImGui::ColorEdit4("##Color/Tint: ", &m_UniformBufferData.Tint.r);
 
+		ImGui::NextColumn();
 		ImGui::Text("Base Light: ");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(spacing);
+		ImGui::NextColumn();
 		ImGui::SliderFloat("##Base Light: ", &m_UniformBufferData.BaseLight, 0.0f, 1.0f);
 
-		ImGui::Text("Material: ");
+		ImGui::NextColumn();
+		if(ImGui::TreeNode("Material"))
+		{
+			auto spacing = ImGui::GetCursorPosY();
+			ImGui::Text("Constant Coefficient: ");
+			
+			ImGui::NextColumn();
+			ImGui::SetCursorPosY(spacing);
+			ImGui::Spacing();
+			ImGui::DragFloat("##Constant Coefficient: ", &m_UniformBufferData.MaterialConstantCoefficient, 0.01f);
 
-		ImGui::Text("Constant Coefficient: ");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(spacing);
-		ImGui::DragFloat("##Constant Coefficient: ", &m_UniformBufferData.MaterialConstantCoefficient, 0.01f);
+			ImGui::NextColumn();
+			ImGui::Text("Linear Coefficient: ");
+			ImGui::NextColumn();
+			ImGui::DragFloat("##Linear Coefficient: ", &m_UniformBufferData.MaterialLinearCoefficient, 0.0001f);
 
-		ImGui::Text("Linear Coefficient: ");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(spacing);
-		ImGui::DragFloat("##Linear Coefficient: ", &m_UniformBufferData.MaterialLinearCoefficient, 0.0001f);
+			ImGui::NextColumn();
+			ImGui::Text("Quadratic Coefficient: ");
+			ImGui::NextColumn();
+			ImGui::DragFloat("##Quadratic Coefficient: ", &m_UniformBufferData.MaterialQuadraticCoefficient, 0.00001f);
 
-		ImGui::Text("Quadratic Coefficient: ");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(spacing);
-		ImGui::DragFloat("##Quadratic Coefficient: ", &m_UniformBufferData.MaterialQuadraticCoefficient, 0.00001f);
+			ImGui::TreePop();
+		}
 	}
 
 	void LitSprite::Draw()

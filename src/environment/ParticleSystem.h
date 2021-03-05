@@ -55,7 +55,6 @@ namespace Ainan {
 		std::vector<float> m_ParticleDrawScaleBuffer;
 		std::vector<glm::vec4> m_ParticleDrawColorBuffer;
 		size_t m_ParticleDrawCount = 0;
-		ObjSpace Space = OBJ_SPACE_2D;
 
 		ParticlesData m_Particles;
 	};

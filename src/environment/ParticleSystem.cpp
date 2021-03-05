@@ -7,6 +7,7 @@ namespace Ainan {
 	ParticleSystem::ParticleSystem()
 	{
 		Type = EnvironmentObjectType::ParticleSystemType;
+		Space = OBJ_SPACE_2D;
 
 		m_Name = "Particle System";
 
@@ -211,9 +212,8 @@ namespace Ainan {
 
 	void ParticleSystem::DisplayGuiControls()
 	{
-		ImGui::PushID(this);
+		DisplayTransformationControls();
 		Customizer.DisplayGUI(m_Name);
-		ImGui::PopID();
 	}
 
 	int32_t ParticleSystem::GetAllowedGizmoOperation(ImGuizmo::OPERATION operation)

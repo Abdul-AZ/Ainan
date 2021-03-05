@@ -15,8 +15,10 @@ namespace Ainan {
 
 	void Model::DisplayGuiControls()
 	{
+		DisplayTransformationControls();
+		ImGui::NextColumn();
 		ImGui::Text("Asset: ");
-		ImGui::SameLine();
+		ImGui::NextColumn();
 		if (ImGui::BeginCombo("##Asset", CurrentModelPath == "" ? "None" : CurrentModelPath.filename().u8string().c_str()))
 		{
 			if (CurrentModelPath != "")
@@ -44,8 +46,9 @@ namespace Ainan {
 			ImGui::EndCombo();
 		}
 
+		ImGui::NextColumn();
 		ImGui::Text("Flip UVs: ");
-		ImGui::SameLine();
+		ImGui::NextColumn();
 		if (ImGui::Checkbox("##Flip UVs: ", &FlipUVs))
 		{
 			//reload model on uv flip change

@@ -22,7 +22,6 @@ namespace Ainan {
 
 	public:
 		glm::vec4 Tint = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		ObjSpace Space = OBJ_SPACE_2D;
 
 		std::filesystem::path m_TexturePath; //relative to the environment folder
 	private:

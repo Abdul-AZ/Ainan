@@ -7,26 +7,22 @@ namespace Ainan {
 	RadialLight::RadialLight()
 	{
 		Type = EnvironmentObjectType::RadialLightType;
+		Space = OBJ_SPACE_2D;
 		m_Name = "Radial Light";
 	}
 
 	void RadialLight::DisplayGuiControls()
 	{
-		ImGui::Text("Position: ");
-		ImGui::SameLine();
-		float xPos = ImGui::GetCursorPosX();
-		ImGui::DragFloat2("##Position: ", &ModelMatrix[3][0], c_ObjectPositionDragControlSpeed);
+		DisplayTransformationControls();
 
+		ImGui::NextColumn();
 		ImGui::Text("Color: ");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(xPos);
+		ImGui::NextColumn();
 		ImGui::ColorEdit4("##Color: ", &Color.r);
 
-		ImGui::Spacing();
-
+		ImGui::NextColumn();
 		ImGui::Text("Intensity: ");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(xPos);
+		ImGui::NextColumn();
 		ImGui::DragFloat("##Intensity: ", &Intensity, 0.1f);;
 	}
 

@@ -1072,7 +1072,9 @@ namespace Ainan
 			ImGui::Text(EnvironmentObjectTypeToString(selectedObj->get()->Type).c_str());
 			ImGui::Separator();
 			ImGui::Spacing();
+			ImGui::BeginColumns("Controls", 2);
 			selectedObj->get()->DisplayGuiControls();
+			ImGui::EndColumns();
 		}
 
 		ImGui::End();

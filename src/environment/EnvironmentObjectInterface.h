@@ -22,6 +22,12 @@ namespace Ainan {
 	EnvironmentObjectType StringToEnvironmentObjectType(const std::string& type);
 	std::string EnvironmentObjectTypeToString(EnvironmentObjectType type);
 
+	enum ObjSpace
+	{
+		OBJ_SPACE_2D,
+		OBJ_SPACE_3D
+	};
+
 	class EnvironmentObjectInterface
 	{
 	public:
@@ -37,6 +43,7 @@ namespace Ainan {
 		virtual int32_t GetAllowedGizmoOperation(ImGuizmo::OPERATION requestedOperation) { return requestedOperation; }
 
 		glm::mat4 ModelMatrix = glm::mat4(1.0f);
+		ObjSpace Space = OBJ_SPACE_3D;
 		std::string m_Name;
 		bool RenameTextOpen = false;
 		bool Selected = false;
@@ -47,14 +54,11 @@ namespace Ainan {
 
 		EnvironmentObjectType Type;
 
+	protected:
+		void DisplayTransformationControls();
+
 	private:
 		std::shared_ptr<std::mutex> ObjectMutex;
-	};
-
-	enum ObjSpace
-	{
-		OBJ_SPACE_2D,
-		OBJ_SPACE_3D
 	};
 
 	const char* ObjSpaceToStr(ObjSpace space);

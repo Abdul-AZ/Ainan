@@ -30,11 +30,14 @@ namespace Ainan {
 
 	void TextureCustomizer::DisplayGUI()
 	{
-		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		ImGui::NextColumn();
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
 		if (ImGui::TreeNode("Texture"))
 		{
+			auto spacing = ImGui::GetCursorPosY();
 			ImGui::Text("Texture: ");
-			ImGui::SameLine();
+			ImGui::NextColumn();
+			ImGui::SetCursorPosY(spacing);
 			if (ImGui::BeginCombo("##Texture: ", UseDefaultTexture ? "Default" : m_TexturePath.filename().u8string().c_str()))
 			{
 				bool selected = false;
@@ -64,11 +67,14 @@ namespace Ainan {
 
 			if (!UseDefaultTexture) 
 			{
-				ImGui::Text("Current Selected Texture");
+				ImGui::NextColumn();
+				ImGui::Text("Texture Preview: ");
+				ImGui::NextColumn();
 				if (ParticleTexture.IsValid())
 					ImGui::Image((void*)ParticleTexture.GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 			}
 
+			ImGui::NextColumn();
 			ImGui::TreePop();
 		}
 	}

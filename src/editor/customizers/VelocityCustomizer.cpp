@@ -38,15 +38,16 @@ namespace Ainan {
 
 	void VelocityCustomizer::DisplayGUI()
 	{
-		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
 		if (ImGui::TreeNode("Velocity"))
 		{
-
 			ImGui::Text("Starting Velocity");
-
+			auto spacing = ImGui::GetCursorPosY();
 			ImGui::Text("Random Between 2 Numbers");
-			ImGui::SameLine();
+			ImGui::NextColumn();
+			ImGui::SetCursorPosY(spacing);
 			ImGui::Checkbox("##Random Between 2 Numbers", &m_RandomVelocity);
+			ImGui::NextColumn();
 
 			if (m_RandomVelocity)
 			{
@@ -57,30 +58,25 @@ namespace Ainan {
 					m_MaxVelocity.y = m_MinVelocity.y;
 
 				ImGui::Text("Minimum Velocity: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				float xPos = ImGui::GetCursorPosX();
 				ImGui::DragFloat2("##Minimum Velocity : ", &m_MinVelocity.x);
-
+				ImGui::NextColumn();
 				ImGui::Text("Maximum Velocity: ");
-				ImGui::SameLine();
-				ImGui::SetCursorPosX(xPos);
+				ImGui::NextColumn();
 				ImGui::DragFloat2("##Maximum Velocity : ", &m_MaxVelocity.x);
+				ImGui::NextColumn();
 			}
 			else
 			{
 				ImGui::Text("Velocity: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat2("##Velocity: ", &m_DefinedVelocity.x);
+				ImGui::NextColumn();
 			}
 
-
-			ImGui::Spacing();
-			ImGui::Spacing();
-			ImGui::Spacing();
-			ImGui::Spacing();
-
 			ImGui::Text("Velocity Limit");
-			ImGui::SameLine();
+			ImGui::NextColumn();
 			if (ImGui::BeginCombo("##Velocity Limit", LimitTypeToString(CurrentVelocityLimitType).c_str()))
 			{
 				{
@@ -112,12 +108,14 @@ namespace Ainan {
 
 			if (CurrentVelocityLimitType == NormalLimit)
 			{
+				ImGui::NextColumn();
 				ImGui::Text("Minimum Velocity\n Length: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Minimum Velocity\n Length: ", &m_MinNormalVelocityLimit);
 
+				ImGui::NextColumn();
 				ImGui::Text("Maximum Velocity\n Length: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Maximum Velocity\n Length: ", &m_MaxNormalVelocityLimit);
 
 				//clamp eveything so that the maximum is always bigger than the minimum and the opposite
@@ -126,12 +124,14 @@ namespace Ainan {
 			}
 			else if (CurrentVelocityLimitType == PerAxisLimit)
 			{
+				ImGui::NextColumn();
 				ImGui::Text("Minimum Velocity: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat2("##Minimum Velocity: ", &m_MinPerAxisVelocityLimit.x);
 
+				ImGui::NextColumn();
 				ImGui::Text("Maximum Velocity: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat2("##Maximum Velocity: ", &m_MaxPerAxisVelocityLimit.x);
 
 				//clamp eveything so that the maximum is always bigger than the minimum and the opposite
@@ -141,6 +141,7 @@ namespace Ainan {
 				m_MaxPerAxisVelocityLimit.y = std::clamp(m_MaxPerAxisVelocityLimit.y, m_MinPerAxisVelocityLimit.y, 100000.0f);
 			}
 
+			ImGui::NextColumn();
 			ImGui::TreePop();
 		}
 	}

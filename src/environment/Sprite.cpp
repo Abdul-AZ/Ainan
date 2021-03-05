@@ -5,6 +5,7 @@ namespace Ainan {
 	Sprite::Sprite()
 	{
 		Type = SpriteType;
+		Space = OBJ_SPACE_2D;
 		m_Name = "Sprite";
 
 		Image img = Image::LoadFromFile("res/CheckerBoard.png");
@@ -45,6 +46,11 @@ namespace Ainan {
 
 	void Sprite::DisplayGuiControls()
 	{
+		DisplayTransformationControls();
+
+		ImGui::NextColumn();
+		ImGui::Text("Space: ");
+		ImGui::NextColumn();
 		if (ImGui::BeginCombo("##Space: ", ObjSpaceToStr(Space)))
 		{
 			{
@@ -62,9 +68,9 @@ namespace Ainan {
 			ImGui::EndCombo();
 		}
 
+		ImGui::NextColumn();
 		ImGui::Text("Texture: ");
-		ImGui::SameLine();
-		ImGui::Image((void*)m_Texture.GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
+		ImGui::NextColumn();
 
 		if (ImGui::BeginCombo("##Texture: ", m_TexturePath == "" ? "None" : m_TexturePath.filename().u8string().c_str()))
 		{
@@ -90,42 +96,14 @@ namespace Ainan {
 			ImGui::EndCombo();
 		}
 
-		ImGui::Spacing();
+		ImGui::NextColumn();
+		ImGui::Text("Texture Preview: ");
+		ImGui::NextColumn();
+		ImGui::Image((void*)m_Texture.GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 
-		glm::vec3 scale;
-		glm::quat rotation;
-		glm::vec3 translation;
-		glm::vec3 skew;
-		glm::vec4 perspective;
-		glm::decompose(ModelMatrix, scale, rotation, translation, skew, perspective);
-
-		ImGui::Text("Position: ");
-		ImGui::SameLine();
-		ImGui::DragFloat2("##Position: ", &ModelMatrix[3][0], c_ObjectPositionDragControlSpeed);
-
-		ImGui::Text("Scale: ");
-		ImGui::SameLine();
-		float scaleAverage = (scale.x + scale.y + scale.z) / 3.0f;
-		if (ImGui::DragFloat("##Scale: ", &scaleAverage, c_ObjectScaleDragControlSpeed))
-		{
-			ModelMatrix = glm::scale(ModelMatrix, (1.0f / scale));
-			ModelMatrix = glm::scale(ModelMatrix, glm::vec3(scaleAverage));
-		}
-
-		ImGui::Text("Rotation: ");
-		ImGui::SameLine();
-		float rotEular = glm::eulerAngles(rotation).z * 180.0f / glm::pi<float>();
-		if (ImGui::DragFloat("##Rotation: ", &rotEular, c_ObjectRotationDragControlSpeed))
-		{
-			//reconstruct model with new rotation
-			ModelMatrix = glm::mat4(1.0f);
-			ModelMatrix = glm::translate(ModelMatrix, translation);
-			ModelMatrix = glm::rotate(ModelMatrix, rotEular * glm::pi<float>() / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-			ModelMatrix = glm::scale(ModelMatrix, scale);
-		}
-
+		ImGui::NextColumn();
 		ImGui::Text("Tint: ");
-		ImGui::SameLine();
+		ImGui::NextColumn();
 		ImGui::ColorEdit4("##Tint: ", &Tint.r);
 	}
 
