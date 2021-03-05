@@ -222,6 +222,7 @@ namespace Ainan {
 		j[id + "Name"] = model.m_Name;
 		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(model.ModelMatrix);
 		j[id + "ModelPath"] = model.CurrentModelPath.u8string();
+		j[id + "FlipUVs"] = model.FlipUVs;
 	}
 }
 

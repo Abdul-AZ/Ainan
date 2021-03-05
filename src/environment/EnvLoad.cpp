@@ -261,6 +261,7 @@ namespace Ainan {
 		model->m_Name = data[id + "Name"].get<std::string>();
 		model->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		model->CurrentModelPath = data[id + "ModelPath"].get<std::string>();
+		model->FlipUVs = data[id + "FlipUVs"].get<bool>();
 		if (model->CurrentModelPath != "")
 			model->LoadModel(model->CurrentModelPath);
 

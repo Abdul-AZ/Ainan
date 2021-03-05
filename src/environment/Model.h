@@ -39,6 +39,7 @@ namespace Ainan {
 
 	public:
 		std::filesystem::path CurrentModelPath;
+		bool FlipUVs = false;
 
 	private:
 		// mesh data

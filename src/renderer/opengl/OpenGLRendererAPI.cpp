@@ -128,7 +128,16 @@ namespace Ainan {
 			glDebugMessageCallback(&opengl_debug_message_callback, nullptr);
 #endif // DEBUG
 			glEnable(GL_BLEND);
+			glEnable(GL_MULTISAMPLE);
+
+			//enable backface culling
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+			glFrontFace(GL_CW);
+
+			//change the default depth clip values in window coordinates from {-1, 1} to {0, 1} 
 			glClipControl(GL_LOWER_LEFT, GL_ZERO_TO_ONE);
+
 			SingletonInstance = this;
 			Context.OpenGLVersion = std::string((const char*)glGetString(GL_VERSION)).substr(0, 5);
 			Context.PhysicalDeviceName = (const char*)glGetString(GL_RENDERER);

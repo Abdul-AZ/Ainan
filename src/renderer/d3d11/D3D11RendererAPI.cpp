@@ -160,6 +160,15 @@ namespace Ainan {
 			viewport.Height = Window::FramebufferSize.y;
 			SetViewport(viewport);
 
+			//configure the rasterizer
+			D3D11_RASTERIZER_DESC rasterizerDesc{};
+			rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+			rasterizerDesc.CullMode = D3D11_CULL_BACK;
+			rasterizerDesc.FrontCounterClockwise = false;
+			rasterizerDesc.DepthClipEnable = true;
+			rasterizerDesc.MultisampleEnable = true;
+			Context.Device->CreateRasterizerState(&rasterizerDesc, &Context.RasterizerState);
+			Context.DeviceContext->RSSetState(Context.RasterizerState);
 
 			D3D11_RENDER_TARGET_BLEND_DESC additiveBlendDesc{};
 			additiveBlendDesc.BlendEnable = true;
@@ -293,6 +302,7 @@ namespace Ainan {
 			AdditiveBlendMode->Release();
 			ScreenBlendMode->Release();
 			OverlayBlendMode->Release();
+			Context.RasterizerState->Release();
 			Context.BackbufferView->Release();
 			Context.Backbuffer->Release();
 			Context.Swapchain->Release();

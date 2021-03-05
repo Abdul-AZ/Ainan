@@ -43,6 +43,14 @@ namespace Ainan {
 
 			ImGui::EndCombo();
 		}
+
+		ImGui::Text("Flip UVs: ");
+		ImGui::SameLine();
+		if (ImGui::Checkbox("##Flip UVs: ", &FlipUVs))
+		{
+			//reload model on uv flip change
+			LoadModel(CurrentModelPath);
+		}
 	}
 
 	void Model::LoadModel(std::filesystem::path path)
@@ -52,7 +60,10 @@ namespace Ainan {
 
 		if(path.is_absolute())
 			CurrentModelPath = path.lexically_relative(AssetManager::s_EnvironmentDirectory);
-		scene = importer.ReadFile(AssetManager::s_EnvironmentDirectory.u8string() + '/' + CurrentModelPath.u8string(), aiProcess_Triangulate);
+		uint32_t flags = aiProcess_Triangulate;
+		if (FlipUVs)
+			flags |= aiProcess_FlipUVs;
+		scene = importer.ReadFile(AssetManager::s_EnvironmentDirectory.u8string() + '/' + CurrentModelPath.u8string(), flags);
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
