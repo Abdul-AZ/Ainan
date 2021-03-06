@@ -7,6 +7,7 @@ namespace Ainan {
 	ParticleSystem::ParticleSystem()
 	{
 		Type = EnvironmentObjectType::ParticleSystemType;
+		Space = OBJ_SPACE_2D;
 
 		m_Name = "Particle System";
 
@@ -41,7 +42,7 @@ namespace Ainan {
 
 	void ParticleSystem::Update(const float deltaTime)
 	{
-		Customizer.m_SpawnPosition = Model[3];
+		Customizer.m_SpawnPosition = ModelMatrix[3];
 		SpawnAllParticlesOnQue(deltaTime);
 
 		ActiveParticleCount = 0;
@@ -200,7 +201,6 @@ namespace Ainan {
 		//copy other variables
 		m_Particles = Psystem.m_Particles;
 		m_Name = Psystem.m_Name;
-		EditorOpen = Psystem.EditorOpen;
 		RenameTextOpen = Psystem.RenameTextOpen;
 	}
 
@@ -210,12 +210,10 @@ namespace Ainan {
 		return ParticleSystem(Psystem);
 	}
 
-	void ParticleSystem::DisplayGUI()
+	void ParticleSystem::DisplayGuiControls()
 	{
-		ImGui::PushID(this);
-		if (EditorOpen)
-			Customizer.DisplayGUI(m_Name, EditorOpen);
-		ImGui::PopID();
+		DisplayTransformationControls();
+		Customizer.DisplayGUI(m_Name);
 	}
 
 	int32_t ParticleSystem::GetAllowedGizmoOperation(ImGuizmo::OPERATION operation)

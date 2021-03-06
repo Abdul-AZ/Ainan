@@ -9,12 +9,12 @@
 #include "environment/ParticleSystem.h"
 #include "environment/Sprite.h"
 #include "environment/LitSprite.h"
+#include "environment/Model.h"
 #include "environment/RadialLight.h"
 #include "environment/SpotLight.h"
 #include "Exporter.h"
 #include "file/FolderBrowser.h"
 #include "EditorPreferences.h"
-#include "environment/RadialLight.h"
 #include "ImGuizmo.h"
 
 namespace Ainan {
@@ -69,12 +69,14 @@ namespace Ainan {
 		RenderSurface m_RenderSurface;
 		Grid m_Grid;
 
+		bool m_PropertiesWindowOpen = true;
 		bool m_EnvironmentControlsWindowOpen = true;
 		bool m_ObjectInspectorWindowOpen = true;
 		bool m_ProfilerWindowOpen = true;
 		bool m_EnvironmentSettingsWindowOpen = true;
 		bool m_PreferencesWindowOpen = false;
 		bool m_ShowGrid = true;
+		bool m_ShowObjectIcons = true;
 
 		EditorState m_State = State_NoEnvLoaded;
 		std::filesystem::path m_EnvironmentFolderPath;
@@ -83,6 +85,7 @@ namespace Ainan {
 		Texture m_StopButtonTexture;
 		Texture m_SpriteIconTexture;
 		Texture m_LitSpriteIconTexture;
+		Texture m_MeshIconTexture;
 		Texture m_ParticleSystemIconTexture;
 		Texture m_SpotLightIconTexture;
 		Texture m_RadialLightIconTexture;
@@ -135,6 +138,7 @@ namespace Ainan {
 		void OnEnvironmentDestroy();
 		void DisplayMainMenuBarGUI();
 		void DisplayEnvironmentControlsGUI();
+		void DisplayPropertiesGUI();
 		void Stop();
 		void Pause();
 		void Resume();

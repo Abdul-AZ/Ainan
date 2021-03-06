@@ -5,6 +5,7 @@
 #include "json/json.hpp"
 #include "Sprite.h"
 #include "LitSprite.h"
+#include "Model.h"
 
 using json = nlohmann::json;
 
@@ -16,10 +17,11 @@ using json = nlohmann::json;
 namespace Ainan {
 
 	static void ParticleSystemFromJson(Environment* env, json& data, std::string id);
-	static void RadialLightFromJson(Environment* env, json& data, std::string id);
-	static void SpotLightFromJson(Environment* env, json& data, std::string id);
 	static void SpriteFromJson(Environment* env,json& data, std::string id);
 	static void LitSpriteFromJson(Environment* env,json& data, std::string id);
+	static void ModelFromJson(Environment* env,json& data, std::string id);
+	static void RadialLightFromJson(Environment* env, json& data, std::string id);
+	static void SpotLightFromJson(Environment* env, json& data, std::string id);
 	static void SettingsFromJson(Environment* env, json& data);
 
 	Environment* LoadEnvironment(const std::string& path)
@@ -28,7 +30,7 @@ namespace Ainan {
 
 		//we are assuming the .env file is in environment's top folder
 		AssetManager::Init(std::filesystem::path(path).parent_path());
-		
+
 		try 
 		{
 			data = json::parse(AssetManager::ReadEntireTextFile(path));
@@ -74,6 +76,10 @@ namespace Ainan {
 
 			case LitSpriteType:
 				LitSpriteFromJson(env, data, id);
+				break;
+
+			case ModelType:
+				ModelFromJson(env, data, id);
 				break;
 
 			default:
@@ -182,7 +188,7 @@ namespace Ainan {
 
 		//populate with data
 		light->m_Name = data[id + "Name"].get <std::string>();
-		light->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
+		light->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		light->Color = JSON_ARRAY_TO_VEC4(data[id + "Color"].get<std::vector<float>>());
 		light->Intensity = data[id + "Intensity"].get<float>();
 
@@ -198,7 +204,7 @@ namespace Ainan {
 
 		//populate with data
 		light->m_Name = data[id + "Name"].get <std::string>();
-		light->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
+		light->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		light->Color = JSON_ARRAY_TO_VEC4(data[id + "Color"].get<std::vector<float>>());
 		light->OuterCutoff = data[id + "OuterCutoff"].get<float>();
 		light->InnerCutoff = data[id + "InnerCutoff"].get<float>();
@@ -216,7 +222,7 @@ namespace Ainan {
 
 		//populate with data
 		sprite->m_Name = data[id + "Name"].get<std::string>();
-		sprite->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
+		sprite->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		sprite->Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
 		sprite->Space = StrToObjSpace(data[id + "Space"].get<std::string>().c_str());
 		sprite->m_TexturePath = data[id + "TexturePath"].get<std::string>();
@@ -234,7 +240,7 @@ namespace Ainan {
 
 		//populate with data
 		sprite->m_Name = data[id + "Name"].get<std::string>();
-		sprite->Model = JSON_ARRAY_TO_MAT4(data[id + "Model"].get<std::vector<float>>());
+		sprite->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		sprite->m_Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
 		sprite->m_UniformBufferData.Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
 		sprite->m_UniformBufferData.BaseLight = data[id + "BaseLight"].get<float>();
@@ -243,6 +249,23 @@ namespace Ainan {
 		sprite->m_UniformBufferData.MaterialQuadraticCoefficient = data[id + "MaterialQuadraticCoefficient"].get<float>();
 
 		pEnvironmentObject obj((EnvironmentObjectInterface*)(sprite.release()));
+		env->Objects.push_back(std::move(obj));
+	}
+
+	void ModelFromJson(Environment* env, json& data, std::string id)
+	{
+		//create model
+		std::unique_ptr<Model> model = std::make_unique<Model>();
+
+		//populate with data
+		model->m_Name = data[id + "Name"].get<std::string>();
+		model->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
+		model->CurrentModelPath = data[id + "ModelPath"].get<std::string>();
+		model->FlipUVs = data[id + "FlipUVs"].get<bool>();
+		if (model->CurrentModelPath != "")
+			model->LoadModel(model->CurrentModelPath);
+
+		pEnvironmentObject obj((EnvironmentObjectInterface*)(model.release()));
 		env->Objects.push_back(std::move(obj));
 	}
 }

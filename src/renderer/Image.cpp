@@ -53,6 +53,9 @@ namespace Ainan {
 		else
 			image.m_Data = stbi_load(pathAndName.c_str(), &image.m_Width, &image.m_Height, &comp, 0);
 
+		if (image.m_Data == nullptr)
+			AINAN_LOG_FATAL("Could not load image");
+
 		if (desiredFormat != TextureFormat::Unspecified)
 			image.Format = desiredFormat;
 		else 

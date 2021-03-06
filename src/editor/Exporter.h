@@ -35,7 +35,7 @@ namespace Ainan {
 		void ExportVideo(Editor& editor);
 
 	public:
-		bool SettingsWindowOpen = true;
+		bool m_ExporterWindowOpen = false;
 		bool CurrentlyExporting = false;
 
 		glm::vec2 m_ExportCameraPosition = { 0.0f,0.0f };
@@ -75,7 +75,6 @@ namespace Ainan {
 		void DisplayProgressBarWindow(int32_t operationNum, int32_t operationCount, float fraction);
 
 	private:
-		bool m_ExporterWindowOpen = false;
 		bool m_ExporterScheduled = false;
 		bool m_FinalizePictureExportWindowOpen = false;
 

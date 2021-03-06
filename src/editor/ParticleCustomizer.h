@@ -41,7 +41,7 @@ namespace Ainan {
 		ParticleCustomizer();
 		~ParticleCustomizer();
 
-		void DisplayGUI(const std::string& windowName, bool& windowOpen);
+		void DisplayGUI(const std::string& windowName);
 		ParticleDescription GetParticleDescription();
 
 		void DrawWorldSpaceUI();

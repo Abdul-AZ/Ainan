@@ -32,4 +32,3 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 #define STARTING_BROWSER_DIRECTORY "C:\\"
-#define PI 3.14159f

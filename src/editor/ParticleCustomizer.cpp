@@ -19,8 +19,8 @@ namespace Ainan {
 		for (int32_t i = 0; i < c_CircleVertexCount; i++)
 		{
 			float angle = i * degreesBetweenVertices;
-			vertices[i].x = (float)cos(angle * (PI / 180.0));
-			vertices[i].y = (float)sin(angle * (PI / 180.0));
+			vertices[i].x = (float)cos(angle * (glm::pi<float>() / 180.0));
+			vertices[i].y = (float)sin(angle * (glm::pi<float>() / 180.0));
 
 			if (i == c_CircleVertexCount - 1)
 				continue;
@@ -88,13 +88,11 @@ namespace Ainan {
 		}
 	}
 
-	void ParticleCustomizer::DisplayGUI(const std::string& windowName, bool& windowOpen)
+	void ParticleCustomizer::DisplayGUI(const std::string& windowName)
 	{
-		ImGui::SetNextWindowSizeConstraints(ImVec2(575.0f, 500.0f), ImVec2(std::numeric_limits<float>().max(), std::numeric_limits<float>().max()));
-		ImGui::Begin((windowName.size() > 0) ? (windowName + "##" +  std::to_string(ImGui::GetID(this))).c_str() : "No Name", &windowOpen, ImGuiWindowFlags_NoSavedSettings);
-
+		ImGui::NextColumn();
 		ImGui::Text("Spawn\n Mode");
-		ImGui::SameLine();
+		ImGui::NextColumn();
 		if (ImGui::BeginCombo("##Spawn Mode", GetModeAsText(Mode).c_str())) 
 		{
 			{
@@ -134,71 +132,76 @@ namespace Ainan {
 
 		m_TextureCustomizer.DisplayGUI();
 
-		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
 		if (ImGui::TreeNode("Emission")) 
 		{
-
+			auto spacing = ImGui::GetCursorPosY();
 			ImGui::Text("Particles\nPer Second: ");
-			ImGui::SameLine();
+			ImGui::NextColumn();
+			ImGui::SetCursorPosY(spacing);
 			ImGui::DragFloat("##Particles\nPer Second: ", &m_ParticlesPerSecond, 1.0f, 0.1f, 1000.0f);
 
+			ImGui::NextColumn();
 			ImGui::TreePop();
 		}
 
 		if (Mode == SpawnMode::SpawnOnPoint) 
 		{
-			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
 			if (ImGui::TreeNode("Position"))
 			{
-
 				ImGui::Text("Starting Position:");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat2("##Starting Position:", &m_SpawnPosition.x, c_ObjectPositionDragControlSpeed);
 
+				ImGui::NextColumn();
 				ImGui::TreePop();
 			}
 		}
 		else if (Mode == SpawnMode::SpawnOnLine)
 		{
-			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
 			if (ImGui::TreeNode("Position"))
 			{
-
+				auto spacing = ImGui::GetCursorPosY();
 				ImGui::Text("Line Position: ");
-				ImGui::SameLine();
-				float xPos = ImGui::GetCursorPosX();
+				ImGui::NextColumn();
+				ImGui::SetCursorPosY(spacing);
 				ImGui::DragFloat2("##Line Position: ", &m_SpawnPosition.x, 0.001f);
 
+				ImGui::NextColumn();
 				ImGui::Text("Line Length: ");
-				ImGui::SameLine();
-				ImGui::SetCursorPosX(xPos);
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Line Length: ", &m_LineLength, 0.001f);
 
+				ImGui::NextColumn();
 				ImGui::Text("Line Rotation :");
-				ImGui::SameLine();
-				ImGui::SetCursorPosX(xPos);
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Line Rotation: ", &m_LineAngle, 1.0f, 0.0f, 360.0f);
 
+				ImGui::NextColumn();
 				ImGui::TreePop();
 			}
 		}
 		else if (Mode == SpawnMode::SpawnOnCircle || Mode == SpawnMode::SpawnInsideCircle)
 		{
-			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
 			if (ImGui::TreeNode("Position"))
 			{
+				auto spacing = ImGui::GetCursorPosY();
 				ImGui::Text("Circle Position: ");
-				ImGui::SameLine();
-				float xPos = ImGui::GetCursorPosX();
+				ImGui::NextColumn();
+				ImGui::SetCursorPosY(spacing);
 				ImGui::DragFloat2("##Circle Position: ", &m_SpawnPosition.x, 0.001f);
 
+				ImGui::NextColumn();
 				ImGui::Text("Circle Radius: ");
-				ImGui::SameLine();
-				ImGui::SetCursorPosX(xPos);
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Circle Radius: ", &m_CircleRadius, 0.001f);
 
 				m_CircleRadius = std::clamp(m_CircleRadius, 0.001f, 10000.0f);
 
+				ImGui::NextColumn();
 				ImGui::TreePop();
 			}
 		}
@@ -209,9 +212,6 @@ namespace Ainan {
 		m_LifetimeCustomizer.DisplayGUI();
 		m_ScaleCustomizer.DisplayGUI();
 		m_ForceCustomizer.DisplayGUI();
-
-		Renderer::RegisterWindowThatCanCoverViewport();
-		ImGui::End();
 	}
 
 	ParticleDescription ParticleCustomizer::GetParticleDescription()
@@ -255,7 +255,7 @@ namespace Ainan {
 		{
 			std::uniform_real_distribution<float> dest(0.0f, 1.0f);
 			float r = m_CircleRadius * sqrt(dest(mt));
-			float theta = dest(mt) * 2 * PI; //in radians
+			float theta = dest(mt) * 2 * glm::pi<float>(); //in radians
 			particleDesc.Position = glm::vec2(m_SpawnPosition.x + r * cos(theta), m_SpawnPosition.y + r * sin(theta));
 			break;
 		}

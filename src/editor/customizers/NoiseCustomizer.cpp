@@ -17,27 +17,27 @@ namespace Ainan {
 		Renderer::DestroyTexture(NoisePreviewTexture);
 	}
 
-#define SET_GUI_POS_INPUT() ImGui::SameLine();\
-		ImGui::SetCursorPosX(NOISE_WINDOW_INPUT_GUI_START_X)
-
 	void NoiseCustomizer::DisplayGUI()
 	{
-		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
 		if (ImGui::TreeNode("Noise"))
 		{
+			auto spacing = ImGui::GetCursorPosY();
 			ImGui::Text("Enabled: ");
-			SET_GUI_POS_INPUT();
+			ImGui::NextColumn();
+			ImGui::SetCursorPosY(spacing);
 			ImGui::Checkbox("##Enabled:", &m_NoiseEnabled);
 
 			if (m_NoiseEnabled) 
 			{
-
+				ImGui::NextColumn();
 				ImGui::Text("Strength: ");
-				SET_GUI_POS_INPUT();
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Strength: ", &m_NoiseStrength, 0.5f, 0.0f);
 
+				ImGui::NextColumn();
 				ImGui::Text("Frequency: ");
-				SET_GUI_POS_INPUT();
+				ImGui::NextColumn();
 				if (ImGui::DragFloat("##Frequency: ", &m_NoiseFrequency, 0.001f, 0.0f, 1.0f))
 				{
 					NoiseLibrary.SetFrequency(m_NoiseFrequency);
@@ -46,8 +46,9 @@ namespace Ainan {
 
 				ImGui::Spacing();
 
+				ImGui::NextColumn();
 				ImGui::Text("Noise\nApply Target: ");
-				SET_GUI_POS_INPUT();
+				ImGui::NextColumn();
 
 				if (ImGui::BeginCombo("##Noise nApply Target: ", NoiseApplyTargetStr(NoiseTarget)))
 				{
@@ -83,12 +84,13 @@ namespace Ainan {
 						}
 					}
 
+					ImGui::NextColumn();
 					ImGui::EndCombo();
 				}
 
-
+				ImGui::NextColumn();
 				ImGui::Text("Noise\nInterpolation Mode: ");
-				SET_GUI_POS_INPUT();
+				ImGui::NextColumn();
 
 				if (ImGui::BeginCombo("##Noise Interpolation Mode: ", NoiseInterpolationModeStr(NoiseInterpolationMode)))
 				{
@@ -133,12 +135,14 @@ namespace Ainan {
 
 				ImGui::Spacing();
 
+				ImGui::NextColumn();
 				ImGui::Text("Noise Preview: ");
-				SET_GUI_POS_INPUT();
+				ImGui::NextColumn();
 				ImGui::Image((void*)NoisePreviewTexture.GetTextureID(), ImVec2(128, 128),
 					ImVec2(0,0), ImVec2(1,1),ImVec4(1, 1, 1, 1), ImVec4(0.9, 0.9, 0.9, 1));
 			}
 
+			ImGui::NextColumn();
 			ImGui::TreePop();
 		}
 	}

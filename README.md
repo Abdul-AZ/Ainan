@@ -39,3 +39,4 @@ Also, feel free to contact me through Email.
 * [glslcc](https://github.com/septag/glslcc)
 * [spdlog](https://github.com/gabime/spdlog)
 * [libav](https://libav.org)
+* [assimp](https://www.assimp.org/)

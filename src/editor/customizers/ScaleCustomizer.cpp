@@ -6,30 +6,33 @@ namespace Ainan {
 
 	void ScaleCustomizer::DisplayGUI()
 	{
-		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
 		if (ImGui::TreeNode("Scale"))
 		{
-
 			ImGui::Text("Starting Scale");
 
+			auto spacing = ImGui::GetCursorPosY();
 			ImGui::Text("Random Between 2 Numbers");
-			ImGui::SameLine();
+			ImGui::NextColumn();
+			ImGui::SetCursorPosY(spacing);
 			ImGui::Checkbox("Random Between 2 Numbers", &m_RandomScale);
+			ImGui::NextColumn();
 
 			if (m_RandomScale)
 			{
 				ImGui::Text("Minimum Scale: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Minimum Scale: ", &m_MinScale, c_ObjectScaleDragControlSpeed);
 
+				ImGui::NextColumn();
 				ImGui::Text("Maximum Scale: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Maximum Scale: ", &m_MaxScale, c_ObjectScaleDragControlSpeed);
 			}
 			else
 			{
 				ImGui::Text("Scale: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Scale: ", &m_DefinedScale, c_ObjectScaleDragControlSpeed);
 			}
 
@@ -47,15 +50,18 @@ namespace Ainan {
 			ImGui::Spacing();
 			ImGui::Spacing();
 
+			ImGui::NextColumn();
 			ImGui::Text("Scale Over Time");
+			ImGui::NextColumn();
 
 			//m_Interpolator.DisplayGUI("Scale Over Time Mode");
 			DisplayInterpolationTypeSelector(m_InterpolationType, InterpolationSelectorFlags::None, this);
 
 			if (m_InterpolationType != InterpolationType::Fixed)
 			{
+				ImGui::NextColumn();
 				ImGui::Text("End Scale: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat("##End Scale: ", &m_EndScale, 0.1f);
 			}
 
@@ -63,9 +69,13 @@ namespace Ainan {
 			if (m_EndScale < 0.0f)
 				m_EndScale = 0.0f;
 
+			ImGui::NextColumn();
+			ImGui::Text("Curve: ");
+			ImGui::NextColumn();
 			m_Curve.Type = m_InterpolationType;
 			m_Curve.DisplayInCurrentWindow({ 100,75 });
 
+			ImGui::NextColumn();
 			ImGui::TreePop();
 		}
 	}

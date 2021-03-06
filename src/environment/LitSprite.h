@@ -11,7 +11,7 @@ namespace Ainan {
 		LitSprite();
 		~LitSprite();
 
-		virtual void DisplayGUI() override;
+		virtual void DisplayGuiControls() override;
 		virtual void Draw() override;
 		int32_t GetAllowedGizmoOperation(ImGuizmo::OPERATION operation) override;
 
@@ -30,7 +30,6 @@ namespace Ainan {
 		UniformBuffer m_UniformBuffer;
 		glm::vec2 m_Position = glm::vec2(0.0f, 0.0f);
 		LitSpriteUniformBuffer m_UniformBufferData;
-		ObjSpace Space = OBJ_SPACE_2D;
 	};
 
 }

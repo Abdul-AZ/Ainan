@@ -22,3 +22,6 @@
 [submodule "ImGuizmo"]
 	path = submodules/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "assimp"]
+	path = submodules/assimp
+	url = https://github.com/assimp/assimp.git

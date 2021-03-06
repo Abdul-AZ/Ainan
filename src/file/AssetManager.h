@@ -6,6 +6,7 @@
 
 namespace Ainan {
 
+	//TODO add refresh functionality
 	class AssetManager
 	{
 	public:
@@ -14,13 +15,16 @@ namespace Ainan {
 
 		static void DisplayGUI();
 
-		static std::vector<std::filesystem::path> GetAll2DTextures();
 		static std::string ReadEntireTextFile(const std::string& path);
 	public:
 		//this a path to the environment directory
 		static std::filesystem::path s_EnvironmentDirectory;
 		//this a path to the directory the asset browser is in (always inside the environment direcory)
 		static std::filesystem::path s_CurrentDirectory;
+
+		//for ease of access
+		static std::vector<std::filesystem::path> Images;
+		static std::vector<std::filesystem::path> Models;
 	};
 
 	void BrowserWindowSizeCallback(ImGuiSizeCallbackData* data);

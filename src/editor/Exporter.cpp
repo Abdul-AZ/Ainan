@@ -13,12 +13,10 @@ extern "C"
 
 namespace Ainan {
 
-	//TODO use environment directory instead of default
 	Exporter::Exporter() :
 		Camera(ProjectionMode::Orthographic)
 	{
 		memset(m_OutlineVertices.data(), 0, m_OutlineVertices.size() * sizeof(glm::vec2));
-
 
 		VertexLayout layout(1);
 		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
@@ -102,7 +100,7 @@ namespace Ainan {
 			if (obj->Type == RadialLightType)
 			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				Renderer::AddRadialLight(light->Model[3], light->Color, light->Intensity);
+				Renderer::AddRadialLight(light->ModelMatrix[3], light->Color, light->Intensity);
 			}
 			else if (obj->Type == SpotLightType)
 			{
@@ -112,8 +110,8 @@ namespace Ainan {
 				glm::vec3 translation;
 				glm::vec3 skew;
 				glm::vec4 perspective;
-				glm::decompose(light->Model, scale, rotation, translation, skew, perspective);
-				Renderer::AddSpotLight(light->Model[3], light->Color, glm::eulerAngles(rotation).z, light->InnerCutoff, light->OuterCutoff, light->Intensity);
+				glm::decompose(light->ModelMatrix, scale, rotation, translation, skew, perspective);
+				Renderer::AddSpotLight(light->ModelMatrix[3], light->Color, glm::eulerAngles(rotation).z, light->InnerCutoff, light->OuterCutoff, light->Intensity);
 			}
 		}
 

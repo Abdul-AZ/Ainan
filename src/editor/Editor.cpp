@@ -19,6 +19,7 @@ namespace Ainan
 		m_StopButtonTexture = Renderer::CreateTexture(Image::LoadFromFile("res/StopButton.png"));
 		m_SpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Sprite.png", TextureFormat::RGBA));
 		m_LitSpriteIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/LitSprite.png", TextureFormat::RGBA));
+		m_MeshIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Model.png", TextureFormat::RGBA));
 		m_ParticleSystemIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/ParticleSystem.png", TextureFormat::RGBA));
 		m_RadialLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/RadialLight.png", TextureFormat::RGBA));
 		m_SpotLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
@@ -42,6 +43,7 @@ namespace Ainan
 		Renderer::DestroyTexture(m_StopButtonTexture);
 		Renderer::DestroyTexture(m_SpriteIconTexture);
 		Renderer::DestroyTexture(m_LitSpriteIconTexture);
+		Renderer::DestroyTexture(m_MeshIconTexture);
 		Renderer::DestroyTexture(m_ParticleSystemIconTexture);
 		Renderer::DestroyTexture(m_RadialLightIconTexture);
 		Renderer::DestroyTexture(m_SpotLightIconTexture);
@@ -536,10 +538,11 @@ namespace Ainan
 				m_Env->Name = m_EnvironmentCreateName;
 
 				if (m_IncludeStarterAssets)
-					std::filesystem::copy("res\\StarterAssets", m_EnvironmentCreateFolderPath + "\\StarterAssets");
+					std::filesystem::copy("res\\StarterAssets", m_EnvironmentCreateFolderPath + "\\StarterAssets", std::filesystem::copy_options::recursive);
 				m_EnvironmentFolderPath = m_EnvironmentCreateFolderPath;
 
 				m_State = State_EditorMode;
+				AssetManager::Init(m_EnvironmentFolderPath.u8string());
 				OnEnvironmentLoad();
 			}
 		}
@@ -575,7 +578,7 @@ namespace Ainan
 			if (obj->Type == RadialLightType)
 			{
 				RadialLight* light = static_cast<RadialLight*>(obj.get());
-				Renderer::AddRadialLight(light->Model[3], light->Color, light->Intensity);
+				Renderer::AddRadialLight(light->ModelMatrix[3], light->Color, light->Intensity);
 			}
 			else if (obj->Type == SpotLightType) 
 			{
@@ -585,8 +588,8 @@ namespace Ainan
 				glm::vec3 translation;
 				glm::vec3 skew;
 				glm::vec4 perspective;
-				glm::decompose(light->Model, scale, rotation, translation, skew, perspective);
-				Renderer::AddSpotLight(light->Model[3], light->Color, glm::eulerAngles(rotation).z, light->InnerCutoff, light->OuterCutoff, light->Intensity);
+				glm::decompose(light->ModelMatrix, scale, rotation, translation, skew, perspective);
+				Renderer::AddSpotLight(light->ModelMatrix[3], light->Color, glm::eulerAngles(rotation).z, light->InnerCutoff, light->OuterCutoff, light->Intensity);
 			}
 		}
 
@@ -624,64 +627,47 @@ namespace Ainan
 			if (m_ShowGrid)
 				m_Grid.Draw(m_Camera);
 
-			//Render world space gui here because we need camera information for that
-			for (pEnvironmentObject& obj : m_Env->Objects)
+			if (m_ShowObjectIcons)
 			{
-				auto mutexPtr = obj->GetMutex();
-				std::lock_guard lock(*mutexPtr);
-
-				const float scale = 0.1f;
-				const glm::vec2 position = glm::vec2(obj->Model[3]) - glm::vec2(scale, scale) / 2.0f;
-				const glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-
-				switch (obj->Type)
+				for (pEnvironmentObject& obj : m_Env->Objects)
 				{
-				case ParticleSystemType:
-					Renderer::DrawQuad(position, color, scale, m_ParticleSystemIconTexture);
-					if (obj->Selected)
+					const float scale = 0.1f;
+					const glm::vec2 position = glm::vec2(obj->ModelMatrix[3]) - glm::vec2(scale, scale) / 2.0f;
+					const glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+
+					switch (obj->Type)
 					{
-						ParticleSystem* ps = (ParticleSystem*)obj.get();
-						ps->Customizer.DrawWorldSpaceUI();
+					case ParticleSystemType:
+						Renderer::DrawQuad(position, color, scale, m_ParticleSystemIconTexture);
+						if (obj->Selected)
+						{
+							ParticleSystem* ps = (ParticleSystem*)obj.get();
+							ps->Customizer.DrawWorldSpaceUI();
+						}
+						break;
+
+					case RadialLightType:
+						Renderer::DrawQuad(position, color, scale, m_RadialLightIconTexture);
+						break;
+
+					case SpotLightType:
+						Renderer::DrawQuad(position, color, scale, m_SpotLightIconTexture);
+						break;
+
+					case SpriteType:
+						Renderer::DrawQuad(position, color, scale, m_SpriteIconTexture);
+						break;
+
+					case LitSpriteType:
+						Renderer::DrawQuad(position, color, scale, m_LitSpriteIconTexture);
+						break;
+
+					case ModelType:
+						Renderer::DrawQuad(position, color, scale, m_MeshIconTexture);
+						break;
 					}
-					break;
-
-				case RadialLightType:
-					Renderer::DrawQuad(position, color, scale, m_RadialLightIconTexture);
-					break;
-
-				case SpotLightType:
-					Renderer::DrawQuad(position, color, scale, m_SpotLightIconTexture);
-					break;
-
-				case SpriteType:
-					Renderer::DrawQuad(position, color, scale, m_SpriteIconTexture);
-					break;
-
-				case LitSpriteType:
-					Renderer::DrawQuad(position, color, scale, m_LitSpriteIconTexture);
-					break;
 				}
 			}
-
-			for (pEnvironmentObject& obj : m_Env->Objects)
-				if (obj->Selected)
-				{
-					Renderer::SetBlendMode(RenderingBlendMode::Overlay);
-					//draw object position gizmo
-
-					//m_Gizmo.Draw(obj->GetPositionRef(), m_ViewportWindow, m_Camera);
-
-					//if particle system needs to edit a force target (a world point), use a gimzo for it
-					if (obj->Type == EnvironmentObjectType::ParticleSystemType)
-					{
-						auto ps = static_cast<ParticleSystem*>(obj.get());
-						if (ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName != "");
-						if (ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].Type == Force::RelativeForce);
-								//m_Gizmo.Draw(&ps->Customizer.m_ForceCustomizer.m_Forces[ps->Customizer.m_ForceCustomizer.m_CurrentSelectedForceName].RF_Target,
-									//m_ViewportWindow,
-									//m_Camera);
-					}
-				}
 
 			m_Exporter.DrawOutline();
 		}
@@ -698,108 +684,107 @@ namespace Ainan
 		DisplayObjectInspecterGUI();
 		DisplayProfilerGUI();
 		DisplayPreferencesGUI();
+		DisplayPropertiesGUI();
 		m_AppStatusWindow.DisplayGUI();
 
 		//Settings window
-		ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
-
-		if (ImGui::TreeNode("Blend Settings:"))
+		if (m_EnvironmentSettingsWindowOpen)
 		{
-			ImGui::Text("Mode");
-			ImGui::SameLine();
-			if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
+			ImGui::Begin("Settings", &m_EnvironmentSettingsWindowOpen);
+
+			if (ImGui::TreeNode("Blend Settings:"))
 			{
-				{
-					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
-					if (ImGui::Selectable("Additive", &is_Active)) {
-
-						ImGui::SetItemDefaultFocus();
-						m_Env->BlendMode = RenderingBlendMode::Additive;
-
-						Renderer::SetBlendMode(m_Env->BlendMode);
-					}
-				}
-
-				{
-					bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
-					if (ImGui::Selectable("Screen", &is_Active)) {
-
-						ImGui::SetItemDefaultFocus();
-						m_Env->BlendMode = RenderingBlendMode::Screen;
-
-						Renderer::SetBlendMode(m_Env->BlendMode);
-					}
-				}
-				ImGui::EndCombo();
-
-			}
-
-			ImGui::TreePop();
-		}
-		ImGui::Text("Show Grid");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(100.0f);
-		ImGui::Checkbox("##Show Grid", &m_ShowGrid);
-		if (m_ShowGrid)
-		{
-			ImGui::Text("Grid Orientation");
-			ImGui::SameLine();
-			ImGui::SetCursorPosX(100.0f);
-
-			if (ImGui::BeginCombo("##Grid Orientation", Grid::GridPlaneToStr(m_Grid.Orientation)))
-			{
-				{
-					bool selected = m_Grid.Orientation == Grid::XY;
-					if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XY), &selected))
-						m_Grid.Orientation = Grid::XY;
-				}
-
-				{
-					bool selected = m_Grid.Orientation == Grid::XZ;
-					if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XZ), &selected))
-						m_Grid.Orientation = Grid::XZ;
-				}
-
-				{
-					bool selected = m_Grid.Orientation == Grid::YZ;
-					if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::YZ), &selected))
-						m_Grid.Orientation = Grid::YZ;
-				}
-
-				ImGui::EndCombo();
-			}
-		}
-
-		ImGui::Text("Blur");
-		ImGui::SameLine();
-		ImGui::SetCursorPosX(100.0f);
-		ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
-
-		if (m_Env->BlurEnabled) {
-			if (ImGui::TreeNode("Blur Settings: ")) {
-
-				ImGui::Text("Blur Radius: ");
+				ImGui::Text("Mode");
 				ImGui::SameLine();
-				ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
+				if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
+				{
+					{
+						bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
+						if (ImGui::Selectable("Additive", &is_Active)) {
+
+							ImGui::SetItemDefaultFocus();
+							m_Env->BlendMode = RenderingBlendMode::Additive;
+
+							Renderer::SetBlendMode(m_Env->BlendMode);
+						}
+					}
+
+					{
+						bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
+						if (ImGui::Selectable("Screen", &is_Active)) {
+
+							ImGui::SetItemDefaultFocus();
+							m_Env->BlendMode = RenderingBlendMode::Screen;
+
+							Renderer::SetBlendMode(m_Env->BlendMode);
+						}
+					}
+					ImGui::EndCombo();
+
+				}
 
 				ImGui::TreePop();
 			}
-		}
+			ImGui::Text("Show Object Icons");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(125.0f);
+			ImGui::Checkbox("##Show Object Icons", &m_ShowObjectIcons);
 
-		Renderer::RegisterWindowThatCanCoverViewport();
-		ImGui::End();
+			ImGui::Text("Show Grid");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(100.0f);
+			ImGui::Checkbox("##Show Grid", &m_ShowGrid);
+			if (m_ShowGrid)
+			{
+				ImGui::Text("Grid Orientation");
+				ImGui::SameLine();
+				ImGui::SetCursorPosX(100.0f);
+
+				if (ImGui::BeginCombo("##Grid Orientation", Grid::GridPlaneToStr(m_Grid.Orientation)))
+				{
+					{
+						bool selected = m_Grid.Orientation == Grid::XY;
+						if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XY), &selected))
+							m_Grid.Orientation = Grid::XY;
+					}
+
+					{
+						bool selected = m_Grid.Orientation == Grid::XZ;
+						if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XZ), &selected))
+							m_Grid.Orientation = Grid::XZ;
+					}
+
+					{
+						bool selected = m_Grid.Orientation == Grid::YZ;
+						if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::YZ), &selected))
+							m_Grid.Orientation = Grid::YZ;
+					}
+
+					ImGui::EndCombo();
+				}
+			}
+
+			ImGui::Text("Blur");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(100.0f);
+			ImGui::Checkbox("##Blur", &m_Env->BlurEnabled);
+
+			if (m_Env->BlurEnabled)
+			{
+				if (ImGui::TreeNode("Blur Settings: "))
+				{
+					ImGui::Text("Blur Radius: ");
+					ImGui::SameLine();
+					ImGui::DragFloat("##Blur Radius: ", &m_Env->BlurRadius, 0.01f, 0.0f, 5.0f);
+
+					ImGui::TreePop();
+				}
+			}
+			ImGui::End();
+		}
 
 		m_Exporter.DisplayGUI();
-
-		for (pEnvironmentObject& obj : m_Env->Objects)
-		{
-			auto mutexPtr = obj->GetMutex();
-			std::lock_guard lock(*mutexPtr);
-			obj->DisplayGUI();
-		}
-
 		InputManager::DisplayGUI();
-
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFramebuffer);
 
 		static glm::mat4 cube(1.0f);
@@ -819,7 +804,7 @@ namespace Ainan
 				if (obj->Selected)
 				{
 					ImGuizmo::Manipulate(glm::value_ptr(m_Camera.ViewMatrix), glm::value_ptr(m_Camera.ProjectionMatrix),
-						(ImGuizmo::OPERATION)obj->GetAllowedGizmoOperation(m_GizmoOperation), ImGuizmo::MODE::WORLD, glm::value_ptr(obj->Model));
+						(ImGuizmo::OPERATION)obj->GetAllowedGizmoOperation(m_GizmoOperation), ImGuizmo::MODE::WORLD, glm::value_ptr(obj->ModelMatrix));
 					break;
 				}
 			}
@@ -828,8 +813,6 @@ namespace Ainan
 
 	void Editor::OnEnvironmentLoad()
 	{
-		AssetManager::Init(m_EnvironmentFolderPath.u8string());
-
 		if (m_Preferences.WindowMaximized)
 			Window::Maximize();
 		else
@@ -883,7 +866,7 @@ namespace Ainan
 
 			if (ImGui::BeginMenu("Edit")) {
 
-				if (ImGui::MenuItem("Clear Particle Systems"))
+				if (ImGui::MenuItem("Delete All Objects"))
 					m_Env->Objects.clear();
 
 
@@ -892,12 +875,12 @@ namespace Ainan
 
 			if (ImGui::BeginMenu("Window")) 
 			{
-
+				ImGui::MenuItem("Properties", nullptr, &m_PropertiesWindowOpen);
 				ImGui::MenuItem("Environment Controls", nullptr, &m_EnvironmentControlsWindowOpen);
 				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
-				ImGui::MenuItem("General Settings", nullptr, &m_EnvironmentSettingsWindowOpen);
+				ImGui::MenuItem("Settings", nullptr, &m_EnvironmentSettingsWindowOpen);
 				ImGui::MenuItem("Profiler", nullptr, &m_ProfilerWindowOpen);
-				ImGui::MenuItem("ExportMode Settings", nullptr, &m_Exporter.SettingsWindowOpen);
+				ImGui::MenuItem("Exporter", nullptr, &m_Exporter.m_ExporterWindowOpen);
 
 				ImGui::EndMenu();
 			}
@@ -1063,6 +1046,40 @@ namespace Ainan
 		ImGui::End();
 	}
 
+	void Editor::DisplayPropertiesGUI()
+	{
+		if (m_PropertiesWindowOpen == false)
+			return;
+
+		ImGui::Begin("Properties", &m_PropertiesWindowOpen);
+
+		//find selected object
+		pEnvironmentObject* selectedObj = nullptr;
+		for (auto& obj : m_Env->Objects)
+		{
+			if (obj->Selected)
+			{
+				selectedObj = &obj;
+				break;
+			}
+		}
+
+		//render controls if there is an object selected
+		if (selectedObj != nullptr)
+		{
+			ImGui::Text(selectedObj->get()->m_Name.c_str());
+			ImGui::SameLine(ImGui::GetWindowSize().x - 100);
+			ImGui::Text(EnvironmentObjectTypeToString(selectedObj->get()->Type).c_str());
+			ImGui::Separator();
+			ImGui::Spacing();
+			ImGui::BeginColumns("Controls", 2);
+			selectedObj->get()->DisplayGuiControls();
+			ImGui::EndColumns();
+		}
+
+		ImGui::End();
+	}
+
 	void Editor::Stop()
 	{
 		m_State = State_EditorMode;
@@ -1133,9 +1150,6 @@ namespace Ainan
 				//show menu when right clicking
 				if (ImGui::BeginPopupContextItem("Object Popup"))
 				{
-					if (ImGui::Selectable("Edit"))
-						m_Env->Objects[i]->EditorOpen = !m_Env->Objects[i]->EditorOpen;
-
 					if (ImGui::Selectable("Delete")) {
 						m_Env->Objects[i]->ToBeDeleted = true;
 					}
@@ -1178,6 +1192,10 @@ namespace Ainan
 				case SpotLightType:
 					icon = (void*)m_SpotLightIconTexture.GetTextureID();
 					break;
+
+				case ModelType:
+					icon = (void*)m_MeshIconTexture.GetTextureID();
+					break;
 				}
 				//display the image in the same line
 				ImGui::SameLine();
@@ -1190,26 +1208,6 @@ namespace Ainan
 				ImGui::SameLine();
 				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + ImGui::GetItemRectSize().y / 4.0f);
 				ImGui::Text(m_Env->Objects[i]->m_Name.c_str());
-
-				//display particle system buttons only if it is selected
-				if (m_Env->Objects[i]->Selected)
-				{
-					if (ImGui::Button("Edit"))
-						m_Env->Objects[i]->EditorOpen = !m_Env->Objects[i]->EditorOpen;
-
-					ImGui::SameLine();
-					if (ImGui::Button("Delete"))
-						m_Env->Objects[i]->ToBeDeleted = true;
-
-					ImGui::SameLine();
-					if (ImGui::Button("Rename"))
-						m_Env->Objects[i]->RenameTextOpen = !m_Env->Objects[i]->RenameTextOpen;
-
-					ImGui::SameLine();
-
-					if (ImGui::Button("Find"))
-						FocusCameraOnObject(*m_Env->Objects[i]);
-				}
 
 				ImGui::Spacing();
 
@@ -1259,6 +1257,12 @@ namespace Ainan
 				bool selected = m_AddObjectWindowObjectType == LitSpriteType;
 				if (ImGui::Selectable(EnvironmentObjectTypeToString(LitSpriteType).c_str(), &selected))
 					m_AddObjectWindowObjectType = LitSpriteType;
+			}
+
+			{
+				bool selected = m_AddObjectWindowObjectType == ModelType;
+				if (ImGui::Selectable(EnvironmentObjectTypeToString(ModelType).c_str(), &selected))
+					m_AddObjectWindowObjectType = ModelType;
 			}
 
 			{
@@ -1351,7 +1355,7 @@ namespace Ainan
 
 	void Editor::FocusCameraOnObject(EnvironmentObjectInterface& object)
 	{
-		m_Camera.SetPosition(glm::vec3(object.Model[3][0], object.Model[3][1], m_Camera.Position.z));
+		m_Camera.SetPosition(glm::vec3(object.ModelMatrix[3][0], object.ModelMatrix[3][1], m_Camera.Position.z));
 	}
 
 	void Editor::AddEnvironmentObject(EnvironmentObjectType type, const std::string& name)
@@ -1366,36 +1370,43 @@ namespace Ainan
 		{
 			auto ps = std::make_unique<ParticleSystem>();
 			obj.reset(((EnvironmentObjectInterface*)(ps.release())));
+			break;
 		}
-		break;
-
-		case RadialLightType:
-		{
-			auto light = std::make_unique<RadialLight>();
-			obj.reset(((EnvironmentObjectInterface*)(light.release())));
-		}
-		break;
-
-		case SpotLightType:
-		{
-			auto light = std::make_unique<SpotLight>();
-			obj.reset(((EnvironmentObjectInterface*)(light.release())));
-		}
-		break;
 
 		case SpriteType:
 		{
 			auto sprite = std::make_unique<Sprite>();
 			obj.reset(((EnvironmentObjectInterface*)(sprite.release())));
+			break;
 		}
-		break;
+
+		case ModelType:
+		{
+			auto mesh = std::make_unique<Model>();
+			obj.reset(((EnvironmentObjectInterface*)(mesh.release())));
+			break;
+		}
 
 		case LitSpriteType:
 		{
 			auto sprite = std::make_unique<LitSprite>();
 			obj.reset(((EnvironmentObjectInterface*)(sprite.release())));
+			break;
 		}
-		break;
+
+		case RadialLightType:
+		{
+			auto light = std::make_unique<RadialLight>();
+			obj.reset(((EnvironmentObjectInterface*)(light.release())));
+			break;
+		}
+
+		case SpotLightType:
+		{
+			auto light = std::make_unique<SpotLight>();
+			obj.reset(((EnvironmentObjectInterface*)(light.release())));
+			break;
+		}
 		}
 
 		obj->m_Name = name;

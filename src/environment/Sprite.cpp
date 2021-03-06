@@ -5,8 +5,8 @@ namespace Ainan {
 	Sprite::Sprite()
 	{
 		Type = SpriteType;
+		Space = OBJ_SPACE_2D;
 		m_Name = "Sprite";
-		EditorOpen = false;
 
 		Image img = Image::LoadFromFile("res/CheckerBoard.png");
 
@@ -31,12 +31,12 @@ namespace Ainan {
 		glm::vec3 translation;
 		glm::vec3 skew;
 		glm::vec4 perspective;
-		glm::decompose(Model, scale, rotation, translation, skew, perspective);
+		glm::decompose(ModelMatrix, scale, rotation, translation, skew, perspective);
 
 		//workaround for having one scale value
-		Model = glm::scale(Model, (1.0f / scale));
+		ModelMatrix = glm::scale(ModelMatrix, (1.0f / scale));
 		float scaleAverage = (scale.x + scale.y + scale.z) / 3.0f;
-		Model = glm::scale(Model, glm::vec3(scaleAverage));
+		ModelMatrix = glm::scale(ModelMatrix, glm::vec3(scaleAverage));
 
 		if (Space == OBJ_SPACE_2D)
 		{
@@ -44,15 +44,13 @@ namespace Ainan {
 		}
 	}
 
-	void Sprite::DisplayGUI()
+	void Sprite::DisplayGuiControls()
 	{
-		if (!EditorOpen)
-			return;
+		DisplayTransformationControls();
 
-		ImGui::PushID(this);
-
-		ImGui::Begin((m_Name + "##" + std::to_string(ImGui::GetID(this))).c_str(), &EditorOpen, ImGuiWindowFlags_NoSavedSettings);
-
+		ImGui::NextColumn();
+		ImGui::Text("Space: ");
+		ImGui::NextColumn();
 		if (ImGui::BeginCombo("##Space: ", ObjSpaceToStr(Space)))
 		{
 			{
@@ -70,20 +68,19 @@ namespace Ainan {
 			ImGui::EndCombo();
 		}
 
+		ImGui::NextColumn();
 		ImGui::Text("Texture: ");
-		ImGui::SameLine();
-		ImGui::Image((void*)m_Texture.GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
+		ImGui::NextColumn();
 
 		if (ImGui::BeginCombo("##Texture: ", m_TexturePath == "" ? "None" : m_TexturePath.filename().u8string().c_str()))
 		{
-			auto textures = AssetManager::GetAll2DTextures();
 			bool selected = false;
 			if (ImGui::Selectable("None", &selected))
 			{
 				LoadTextureFromFile("res/CheckerBoard.png");
 				m_TexturePath = "";
 			}
-			for (auto& tex : textures)
+			for (auto& tex : AssetManager::Images)
 			{
 				std::string textureFileName = std::filesystem::path(tex).filename().u8string();
 				if (ImGui::Selectable(textureFileName.c_str(), &selected))
@@ -99,48 +96,15 @@ namespace Ainan {
 			ImGui::EndCombo();
 		}
 
-		ImGui::Spacing();
+		ImGui::NextColumn();
+		ImGui::Text("Texture Preview: ");
+		ImGui::NextColumn();
+		ImGui::Image((void*)m_Texture.GetTextureID(), ImVec2(100, 100), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1, 1, 1, 1), ImVec4(1, 1, 1, 1));
 
-		glm::vec3 scale;
-		glm::quat rotation;
-		glm::vec3 translation;
-		glm::vec3 skew;
-		glm::vec4 perspective;
-		glm::decompose(Model, scale, rotation, translation, skew, perspective);
-
-		ImGui::Text("Position: ");
-		ImGui::SameLine();
-		ImGui::DragFloat2("##Position: ", &Model[3][0], c_ObjectPositionDragControlSpeed);
-
-		ImGui::Text("Scale: ");
-		ImGui::SameLine();
-		float scaleAverage = (scale.x + scale.y + scale.z) / 3.0f;
-		if (ImGui::DragFloat("##Scale: ", &scaleAverage, c_ObjectScaleDragControlSpeed))
-		{
-			Model = glm::scale(Model, (1.0f / scale));
-			Model = glm::scale(Model, glm::vec3(scaleAverage));
-		}
-
-		ImGui::Text("Rotation: ");
-		ImGui::SameLine();
-		float rotEular = glm::eulerAngles(rotation).z * 180.0f / PI;
-		if (ImGui::DragFloat("##Rotation: ", &rotEular, c_ObjectRotationDragControlSpeed))
-		{
-			//reconstruct model with new rotation
-			Model = glm::mat4(1.0f);
-			Model = glm::translate(Model, translation);
-			Model = glm::rotate(Model, rotEular * PI / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
-			Model = glm::scale(Model, scale);
-		}
-
+		ImGui::NextColumn();
 		ImGui::Text("Tint: ");
-		ImGui::SameLine();
+		ImGui::NextColumn();
 		ImGui::ColorEdit4("##Tint: ", &Tint.r);
-		
-		Renderer::RegisterWindowThatCanCoverViewport();
-		ImGui::End();
-
-		ImGui::PopID();
 	}
 
 	int32_t Sprite::GetAllowedGizmoOperation(ImGuizmo::OPERATION operation)
@@ -167,10 +131,7 @@ namespace Ainan {
 	{
 		Renderer::DestroyTexture(m_Texture);
 
-		Image img = Image::LoadFromFile(path);
-
-		if (img.Format == TextureFormat::R)
-			Image::GrayScaleToRGB(img);
+		Image img = Image::LoadFromFile(path, TextureFormat::RGBA);
 
 		m_Texture = Renderer::CreateTexture(img);
 	}

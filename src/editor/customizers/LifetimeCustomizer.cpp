@@ -8,13 +8,14 @@ namespace Ainan {
 
 	void LifetimeCustomizer::DisplayGUI()
 	{
-		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal);
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
 		if (ImGui::TreeNode("Starting Lifetime"))
 		{
-
 			ImGui::Text("Random Between 2 Numbers");
-			ImGui::SameLine();
+			auto spacing = ImGui::GetCursorPosY();
+			ImGui::NextColumn();
 			ImGui::Checkbox("##Random Between 2 Numbers", &m_RandomLifetime);
+			ImGui::NextColumn();
 
 			if (m_RandomLifetime)
 			{
@@ -22,19 +23,21 @@ namespace Ainan {
 					m_MaxLifetime = m_MinLifetime;
 
 				ImGui::Text("Minimum Lifetime: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Minimum Lifetime : ", &m_MinLifetime, 0.1f);
+				ImGui::NextColumn();
 
 				ImGui::Text("Maximum Lifetime: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Maximum Lifetime : ", &m_MaxLifetime, 0.1f);
 			}
 			else
 			{
 				ImGui::Text("Lifetime: ");
-				ImGui::SameLine();
+				ImGui::NextColumn();
 				ImGui::DragFloat("##Lifetime: ", &m_DefinedLifetime, 0.1f);
 			}
+			ImGui::NextColumn();
 			ImGui::TreePop();
 		}
 

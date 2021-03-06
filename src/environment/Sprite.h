@@ -15,14 +15,13 @@ namespace Ainan {
 
 		virtual void Update(const float deltaTime) override;
 		virtual void Draw() override;
-		virtual void DisplayGUI() override;
+		virtual void DisplayGuiControls() override;
 		int32_t GetAllowedGizmoOperation(ImGuizmo::OPERATION operation) override;
 
 		void LoadTextureFromFile(const std::string& path);
 
 	public:
 		glm::vec4 Tint = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		ObjSpace Space = OBJ_SPACE_2D;
 
 		std::filesystem::path m_TexturePath; //relative to the environment folder
 	private:

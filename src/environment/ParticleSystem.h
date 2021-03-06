@@ -22,7 +22,7 @@ namespace Ainan {
 		void SpawnAllParticlesOnQue(const float& deltaTime);
 		void SpawnParticle(const ParticleDescription& particle);
 		void ClearParticles();
-		void DisplayGUI() override;
+		void DisplayGuiControls() override;
 		int32_t GetAllowedGizmoOperation(ImGuizmo::OPERATION operation) override;
 
 		ParticleSystem(const ParticleSystem& Psystem);
@@ -55,7 +55,6 @@ namespace Ainan {
 		std::vector<float> m_ParticleDrawScaleBuffer;
 		std::vector<glm::vec4> m_ParticleDrawColorBuffer;
 		size_t m_ParticleDrawCount = 0;
-		ObjSpace Space = OBJ_SPACE_2D;
 
 		ParticlesData m_Particles;
 	};

@@ -5,8 +5,6 @@ namespace Ainan {
 	void DisplayInterpolationTypeSelector(InterpolationType& type, InterpolationSelectorFlags flags, void* id)
 	{
 		ImGui::PushID(id);
-		ImGui::Text("Interpolation");
-		ImGui::SameLine();
 		if (ImGui::BeginCombo("##Interpolation", InterpolationTypeToString(type)))
 		{
 			{

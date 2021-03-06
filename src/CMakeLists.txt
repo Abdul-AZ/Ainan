@@ -36,6 +36,7 @@ set(SOURCES_LIST
     "environment/RadialLight.h"                "environment/RadialLight.cpp"
     "environment/SpotLight.h"                  "environment/SpotLight.cpp"
     "environment/Sprite.h"                     "environment/Sprite.cpp"
+    "environment/Model.h"                      "environment/Model.cpp"
 
     "file/AssetManager.h"     "file/AssetManager.cpp"
     "file/FileBrowser.h"      "file/FileBrowser.cpp"
@@ -146,6 +147,7 @@ set(INCLUDE_LIST
     "../submodules/glm" 
     "../submodules/spdlog/include"
     "../submodules/ImGuizmo"
+    "../submodules/assimp/include/assimp"
     "vendor"
     )
 
