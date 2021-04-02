@@ -120,12 +120,6 @@ namespace Ainan {
 		static void DestroyTexture(Texture tex);
 
 		static void FlushQuadBatch();
-
-		//because quad vertices are different in each API depending on if the y axis is pointing up or down
-		//this returns 6 quad vertices that are used to draw a quad WITHOUT using an index buffer
-		static std::array<glm::vec2, 6> GetQuadVertices();								//layout: vec2 position
-		static std::array<std::pair<glm::vec2, glm::vec2>, 6> GetTexturedQuadVertices();//layout: vec2 position vec2 texture_coordinates
-
 		struct RendererData
 		{
 			RendererType API;
