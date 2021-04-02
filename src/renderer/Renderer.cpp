@@ -748,7 +748,6 @@ namespace Ainan {
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::Present;
 		PushCommand(cmd);
-		WaitUntilRendererIdle();
 		CleanupDeletedObjects();
 
 		LastFrameDeltaTime = glfwGetTime() - LastFrameFinishTime;
