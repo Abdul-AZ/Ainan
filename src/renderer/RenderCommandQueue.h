@@ -16,6 +16,7 @@ namespace Ainan {
 		std::queue<RenderCommand> m_InternalQueue;
 		std::condition_variable m_WorkAvailableCV;
 		std::condition_variable m_WorkDoneCV;
+		std::condition_variable m_WorkConsumedCV;
 		std::mutex m_Mutex;
 		bool m_Busy = false;
 	};

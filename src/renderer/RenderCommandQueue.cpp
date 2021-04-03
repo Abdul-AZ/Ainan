@@ -2,8 +2,16 @@
 
 namespace Ainan {
 
+    const int32_t c_MaxQueueSize = 30;
+
 	void RenderCommandQueue::Push(const RenderCommand& cmd)
 	{
+        if (m_InternalQueue.size() >= c_MaxQueueSize)
+        {
+            std::unique_lock<std::mutex> lock(m_Mutex);
+            m_WorkConsumedCV.wait(lock, [this]() { return m_InternalQueue.size() < c_MaxQueueSize; });
+        }
+
 		std::scoped_lock<std::mutex> lock(m_Mutex);
 		m_InternalQueue.push(cmd);
 		m_WorkAvailableCV.notify_one();
@@ -32,6 +40,8 @@ namespace Ainan {
 
             // release lock. run async
             latch.unlock();
+            
+            m_WorkConsumedCV.notify_one();
 
             // run function outside context
             func(cmd);

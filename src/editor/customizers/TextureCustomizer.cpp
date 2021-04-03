@@ -54,7 +54,6 @@ namespace Ainan {
 						if (textureFileName != "Default") 
 						{
 							ParticleTexture = Renderer::CreateTexture(Image::LoadFromFile(tex.u8string()));
-							Renderer::WaitUntilRendererIdle(); //TEMPORARY FIX 
 							
 							UseDefaultTexture = false;
 							m_TexturePath = tex.lexically_relative(AssetManager::s_EnvironmentDirectory).u8string();
