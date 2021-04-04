@@ -213,7 +213,97 @@ namespace Ainan {
 	void ParticleSystem::DisplayGuiControls()
 	{
 		DisplayTransformationControls();
-		Customizer.DisplayGUI(m_Name);
+		
+		ImGui::NextColumn();
+		IMGUI_DROPDOWN_START_USING_COLUMNS("Spawn Mode", GetModeAsText(Customizer.Mode).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(Customizer.Mode, SpawnMode::SpawnOnPoint, GetModeAsText(SpawnMode::SpawnOnPoint).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(Customizer.Mode, SpawnMode::SpawnOnLine, GetModeAsText(SpawnMode::SpawnOnLine).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(Customizer.Mode, SpawnMode::SpawnOnCircle, GetModeAsText(SpawnMode::SpawnOnCircle).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(Customizer.Mode, SpawnMode::SpawnInsideCircle, GetModeAsText(SpawnMode::SpawnInsideCircle).c_str());
+		IMGUI_DROPDOWN_END();
+
+		Customizer.m_TextureCustomizer.DisplayGUI();
+
+		ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
+		if (ImGui::TreeNode("Emission"))
+		{
+			auto spacing = ImGui::GetCursorPosY();
+			ImGui::Text("Particles\nPer Second: ");
+			ImGui::NextColumn();
+			ImGui::SetCursorPosY(spacing);
+			ImGui::DragFloat("##Particles\nPer Second: ", &Customizer.m_ParticlesPerSecond, 1.0f, 0.1f, 1000.0f);
+
+			ImGui::NextColumn();
+			ImGui::TreePop();
+		}
+
+		if (Customizer.Mode == SpawnMode::SpawnOnPoint)
+		{
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
+			if (ImGui::TreeNode("Position"))
+			{
+				ImGui::Text("Starting Position:");
+				ImGui::NextColumn();
+				ImGui::DragFloat2("##Starting Position:", &Customizer.m_SpawnPosition.x, c_ObjectPositionDragControlSpeed);
+
+				ImGui::NextColumn();
+				ImGui::TreePop();
+			}
+		}
+		else if (Customizer.Mode == SpawnMode::SpawnOnLine)
+		{
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
+			if (ImGui::TreeNode("Position"))
+			{
+				auto spacing = ImGui::GetCursorPosY();
+				ImGui::Text("Line Position: ");
+				ImGui::NextColumn();
+				ImGui::SetCursorPosY(spacing);
+				ImGui::DragFloat2("##Line Position: ", &Customizer.m_SpawnPosition.x, 0.001f);
+
+				ImGui::NextColumn();
+				ImGui::Text("Line Length: ");
+				ImGui::NextColumn();
+				ImGui::DragFloat("##Line Length: ", &Customizer.m_LineLength, 0.001f);
+
+				ImGui::NextColumn();
+				ImGui::Text("Line Rotation :");
+				ImGui::NextColumn();
+				ImGui::DragFloat("##Line Rotation: ", &Customizer.m_LineAngle, 1.0f, 0.0f, 360.0f);
+
+				ImGui::NextColumn();
+				ImGui::TreePop();
+			}
+		}
+		else if (Customizer.Mode == SpawnMode::SpawnOnCircle || Customizer.Mode == SpawnMode::SpawnInsideCircle)
+		{
+			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
+			if (ImGui::TreeNode("Position"))
+			{
+				auto spacing = ImGui::GetCursorPosY();
+				ImGui::Text("Circle Position: ");
+				ImGui::NextColumn();
+				ImGui::SetCursorPosY(spacing);
+				ImGui::DragFloat2("##Circle Position: ", &Customizer.m_SpawnPosition.x, 0.001f);
+
+				ImGui::NextColumn();
+				ImGui::Text("Circle Radius: ");
+				ImGui::NextColumn();
+				ImGui::DragFloat("##Circle Radius: ", &Customizer.m_CircleRadius, 0.001f);
+
+				Customizer.m_CircleRadius = std::clamp(Customizer.m_CircleRadius, 0.001f, 10000.0f);
+
+				ImGui::NextColumn();
+				ImGui::TreePop();
+			}
+		}
+
+		Customizer.m_NoiseCustomizer.DisplayGUI();
+		Customizer.m_VelocityCustomizer.DisplayGUI();
+		Customizer.m_ColorCustomizer.DisplayGUI();
+		Customizer.m_LifetimeCustomizer.DisplayGUI();
+		Customizer.m_ScaleCustomizer.DisplayGUI();
+		Customizer.m_ForceCustomizer.DisplayGUI();
 	}
 
 	int32_t ParticleSystem::GetAllowedGizmoOperation(ImGuizmo::OPERATION operation)

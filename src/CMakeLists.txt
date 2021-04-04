@@ -46,7 +46,7 @@ set(SOURCES_LIST
     "renderer/Renderer.h"            "renderer/Renderer.cpp"
     "renderer/RendererAPI.h"
     "renderer/RendererContext.h"
-    "renderer/RenderCommand.h"
+    "renderer/RenderCommand.h"       "renderer/RenderCommand.cpp"
     "renderer/RenderCommandQueue.h"  "renderer/RenderCommandQueue.cpp"
     "renderer/VertexBuffer.h"        "renderer/VertexBuffer.cpp"
     "renderer/IndexBuffer.h"

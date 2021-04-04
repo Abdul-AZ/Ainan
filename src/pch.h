@@ -31,4 +31,29 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
+//imgui dropdown control macro because it causes a lot of repeated code
+#define IMGUI_DROPDOWN_START(name, getCurrentValueStrFunc) \
+		ImGui::Text(name);\
+		ImGui::SameLine(); \
+		if (ImGui::BeginCombo("##" name, getCurrentValueStrFunc)) \
+		{
+//dropdowns that have a column seperator
+#define IMGUI_DROPDOWN_START_USING_COLUMNS(name, getCurrentValueStrFunc) \
+		ImGui::Text(name);\
+		ImGui::NextColumn(); \
+		if (ImGui::BeginCombo("##" name, getCurrentValueStrFunc)) \
+		{
+#define IMGUI_DROPDOWN_SELECTABLE(current, selectable, getSelectableStrFunc) \
+		{\
+			bool is_active = current == selectable;\
+			if (ImGui::Selectable(getSelectableStrFunc, &is_active)) \
+				{\
+				ImGui::SetItemDefaultFocus();\
+				current = selectable;\
+				}\
+		}
+#define IMGUI_DROPDOWN_END() \
+ 			ImGui::EndCombo(); \
+		}
+
 #define STARTING_BROWSER_DIRECTORY "C:\\"

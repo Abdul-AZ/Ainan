@@ -75,36 +75,11 @@ namespace Ainan {
 				ImGui::NextColumn();
 			}
 
-			ImGui::Text("Velocity Limit");
-			ImGui::NextColumn();
-			if (ImGui::BeginCombo("##Velocity Limit", LimitTypeToString(CurrentVelocityLimitType).c_str()))
-			{
-				{
-					bool is_active = CurrentVelocityLimitType == NoLimit;
-					if (ImGui::Selectable(LimitTypeToString(NoLimit).c_str(), &is_active)) {
-						ImGui::SetItemDefaultFocus();
-						CurrentVelocityLimitType = NoLimit;
-					}
-				}
-
-				{
-					bool is_active = CurrentVelocityLimitType == NormalLimit;
-					if (ImGui::Selectable(LimitTypeToString(NormalLimit).c_str(), &is_active)) {
-						ImGui::SetItemDefaultFocus();
-						CurrentVelocityLimitType = NormalLimit;
-					}
-				}
-
-				{
-					bool is_active = CurrentVelocityLimitType == PerAxisLimit;
-					if (ImGui::Selectable(LimitTypeToString(PerAxisLimit).c_str(), &is_active)) {
-						ImGui::SetItemDefaultFocus();
-						CurrentVelocityLimitType = PerAxisLimit;
-					}
-				}
-
-				ImGui::EndCombo();
-			}
+			IMGUI_DROPDOWN_START_USING_COLUMNS("Velocity Limit", LimitTypeToString(CurrentVelocityLimitType).c_str());
+			IMGUI_DROPDOWN_SELECTABLE(CurrentVelocityLimitType, NoLimit, LimitTypeToString(NoLimit).c_str());
+			IMGUI_DROPDOWN_SELECTABLE(CurrentVelocityLimitType, NormalLimit, LimitTypeToString(NormalLimit).c_str());
+			IMGUI_DROPDOWN_SELECTABLE(CurrentVelocityLimitType, PerAxisLimit, LimitTypeToString(PerAxisLimit).c_str());
+			IMGUI_DROPDOWN_END();
 
 			if (CurrentVelocityLimitType == NormalLimit)
 			{

@@ -109,6 +109,9 @@ namespace Ainan {
 		NotSpecified //this will use the current mode it is set on
 	};
 
+	const char* RenderingBlendModeToStr(RenderingBlendMode mode);
+	RenderingBlendMode StrToRenderingBlendMode(std::string str);
+
 	class VertexBuffer;
 	class ShaderProgram;
 	class IndexBuffer;

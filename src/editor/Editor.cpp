@@ -694,34 +694,10 @@ namespace Ainan
 
 			if (ImGui::TreeNode("Blend Settings:"))
 			{
-				ImGui::Text("Mode");
-				ImGui::SameLine();
-				if (ImGui::BeginCombo("##Mode", (m_Env->BlendMode == RenderingBlendMode::Additive) ? "Additive" : "Screen"))
-				{
-					{
-						bool is_Active = m_Env->BlendMode == RenderingBlendMode::Additive;
-						if (ImGui::Selectable("Additive", &is_Active)) {
-
-							ImGui::SetItemDefaultFocus();
-							m_Env->BlendMode = RenderingBlendMode::Additive;
-
-							Renderer::SetBlendMode(m_Env->BlendMode);
-						}
-					}
-
-					{
-						bool is_Active = m_Env->BlendMode == RenderingBlendMode::Screen;
-						if (ImGui::Selectable("Screen", &is_Active)) {
-
-							ImGui::SetItemDefaultFocus();
-							m_Env->BlendMode = RenderingBlendMode::Screen;
-
-							Renderer::SetBlendMode(m_Env->BlendMode);
-						}
-					}
-					ImGui::EndCombo();
-
-				}
+				IMGUI_DROPDOWN_START("Mode", RenderingBlendModeToStr(m_Env->BlendMode));
+				IMGUI_DROPDOWN_SELECTABLE(m_Env->BlendMode, RenderingBlendMode::Additive, RenderingBlendModeToStr(RenderingBlendMode::Additive));
+				IMGUI_DROPDOWN_SELECTABLE(m_Env->BlendMode, RenderingBlendMode::Screen, RenderingBlendModeToStr(RenderingBlendMode::Screen));
+				IMGUI_DROPDOWN_END();
 
 				ImGui::TreePop();
 			}
@@ -736,32 +712,11 @@ namespace Ainan
 			ImGui::Checkbox("##Show Grid", &m_ShowGrid);
 			if (m_ShowGrid)
 			{
-				ImGui::Text("Grid Orientation");
-				ImGui::SameLine();
-				ImGui::SetCursorPosX(100.0f);
-
-				if (ImGui::BeginCombo("##Grid Orientation", Grid::GridPlaneToStr(m_Grid.Orientation)))
-				{
-					{
-						bool selected = m_Grid.Orientation == Grid::XY;
-						if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XY), &selected))
-							m_Grid.Orientation = Grid::XY;
-					}
-
-					{
-						bool selected = m_Grid.Orientation == Grid::XZ;
-						if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::XZ), &selected))
-							m_Grid.Orientation = Grid::XZ;
-					}
-
-					{
-						bool selected = m_Grid.Orientation == Grid::YZ;
-						if (ImGui::Selectable(Grid::GridPlaneToStr(Grid::YZ), &selected))
-							m_Grid.Orientation = Grid::YZ;
-					}
-
-					ImGui::EndCombo();
-				}
+				IMGUI_DROPDOWN_START("Grid Orientation", Grid::GridPlaneToStr(m_Grid.Orientation));
+				IMGUI_DROPDOWN_SELECTABLE(m_Grid.Orientation, Grid::XY, Grid::GridPlaneToStr(Grid::XY));
+				IMGUI_DROPDOWN_SELECTABLE(m_Grid.Orientation, Grid::XZ, Grid::GridPlaneToStr(Grid::XZ));
+				IMGUI_DROPDOWN_SELECTABLE(m_Grid.Orientation, Grid::YZ, Grid::GridPlaneToStr(Grid::YZ));
+				IMGUI_DROPDOWN_END();
 			}
 
 			ImGui::Text("Blur");
@@ -1233,52 +1188,18 @@ namespace Ainan
 		//if we are adding a new object display a window for it's settings
 		ImGui::Begin("Add Object", &m_AddObjectWindowOpen, ImGuiWindowFlags_NoDocking);
 
-		ImGui::Text("NewObjectName");
+		ImGui::Text("New Object Name");
 		ImGui::SameLine();
 		ImGui::InputText("##NewObjectName", &m_AddObjectWindowObjectName);
 
-		ImGui::Text("NewObjectType");
-		ImGui::SameLine();
-		if (ImGui::BeginCombo("##NewObjectType", EnvironmentObjectTypeToString(m_AddObjectWindowObjectType).c_str()))
-		{
-			{
-				bool selected = m_AddObjectWindowObjectType == ParticleSystemType;
-				if (ImGui::Selectable(EnvironmentObjectTypeToString(ParticleSystemType).c_str(), &selected))
-					m_AddObjectWindowObjectType = ParticleSystemType;
-			}
-
-			{
-				bool selected = m_AddObjectWindowObjectType == SpriteType;
-				if (ImGui::Selectable(EnvironmentObjectTypeToString(SpriteType).c_str(), &selected))
-					m_AddObjectWindowObjectType = SpriteType;
-			}
-
-			{
-				bool selected = m_AddObjectWindowObjectType == LitSpriteType;
-				if (ImGui::Selectable(EnvironmentObjectTypeToString(LitSpriteType).c_str(), &selected))
-					m_AddObjectWindowObjectType = LitSpriteType;
-			}
-
-			{
-				bool selected = m_AddObjectWindowObjectType == ModelType;
-				if (ImGui::Selectable(EnvironmentObjectTypeToString(ModelType).c_str(), &selected))
-					m_AddObjectWindowObjectType = ModelType;
-			}
-
-			{
-				bool selected = m_AddObjectWindowObjectType == RadialLightType;
-				if (ImGui::Selectable(EnvironmentObjectTypeToString(RadialLightType).c_str(), &selected))
-					m_AddObjectWindowObjectType = RadialLightType;
-			}
-
-			{
-				bool selected = m_AddObjectWindowObjectType == SpotLightType;
-				if (ImGui::Selectable(EnvironmentObjectTypeToString(SpotLightType).c_str(), &selected))
-					m_AddObjectWindowObjectType = SpotLightType;
-			}
-
-			ImGui::EndCombo();
-		}
+		IMGUI_DROPDOWN_START("New Object Type", EnvironmentObjectTypeToString(m_AddObjectWindowObjectType).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_AddObjectWindowObjectType, ParticleSystemType, EnvironmentObjectTypeToString(ParticleSystemType).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_AddObjectWindowObjectType, SpriteType, EnvironmentObjectTypeToString(SpriteType).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_AddObjectWindowObjectType, LitSpriteType, EnvironmentObjectTypeToString(LitSpriteType).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_AddObjectWindowObjectType, ModelType, EnvironmentObjectTypeToString(ModelType).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_AddObjectWindowObjectType, RadialLightType, EnvironmentObjectTypeToString(RadialLightType).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_AddObjectWindowObjectType, SpotLightType, EnvironmentObjectTypeToString(SpotLightType).c_str());
+		IMGUI_DROPDOWN_END();
 
 		if (ImGui::Button("Add Object"))
 		{
@@ -1864,68 +1785,26 @@ namespace Ainan
 
 		ImGui::Checkbox("Maximize Editor On Load", &m_Preferences.WindowMaximized);
 
-		if (ImGui::BeginCombo("Editor Style", EditorStyleStr(m_Preferences.Style).c_str()))
-		{
-			auto style = EditorStyle::DarkTransparent;
-			bool selected = m_Preferences.Style == style;
-			if (ImGui::Selectable(EditorStyleStr(style).c_str(), &selected))
-			{
-				m_Preferences.Style = style;
-				SetEditorStyle(style);
-			}
+		auto currentStyle = m_Preferences.Style;
+		IMGUI_DROPDOWN_START("Editor Style", EditorStyleStr(m_Preferences.Style).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_Preferences.Style, EditorStyle::DarkTransparent, EditorStyleStr(EditorStyle::DarkTransparent).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_Preferences.Style, EditorStyle::Dark_Gray, EditorStyleStr(EditorStyle::Dark_Gray).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_Preferences.Style, EditorStyle::Dark, EditorStyleStr(EditorStyle::Dark).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_Preferences.Style, EditorStyle::Light, EditorStyleStr(EditorStyle::Light).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_Preferences.Style, EditorStyle::Classic, EditorStyleStr(EditorStyle::Classic).c_str());
+		IMGUI_DROPDOWN_END();
+		//if the style has changed
+		if (m_Preferences.Style != currentStyle)
+			SetEditorStyle(m_Preferences.Style);
 
-			style = EditorStyle::Dark_Gray;
-			selected = m_Preferences.Style == style;
-			if (ImGui::Selectable(EditorStyleStr(style).c_str(), &selected))
-			{
-				m_Preferences.Style = style;
-				SetEditorStyle(style);
-			}
-
-			style = EditorStyle::Dark;
-			selected = m_Preferences.Style == style;
-			if (ImGui::Selectable(EditorStyleStr(style).c_str(), &selected))
-			{
-				m_Preferences.Style = style;
-				SetEditorStyle(style);
-			}
-
-			style = EditorStyle::Light;
-			selected = m_Preferences.Style == style;
-			if (ImGui::Selectable(EditorStyleStr(style).c_str(), &selected))
-			{
-				m_Preferences.Style = style;
-				SetEditorStyle(style);
-			}
-
-			style = EditorStyle::Classic;
-			selected = m_Preferences.Style == style;
-			if (ImGui::Selectable(EditorStyleStr(style).c_str(), &selected))
-			{
-				m_Preferences.Style = style;
-				SetEditorStyle(style);
-			}
-			
-			ImGui::EndCombo();
-		}
-
-		if (ImGui::BeginCombo("Backend", RendererTypeStr(m_Preferences.RenderingBackend).c_str()))
-		{
-			auto backend = RendererType::OpenGL;
-			auto selected = m_Preferences.RenderingBackend == backend;
-
-			if (ImGui::Selectable(RendererTypeStr(backend).c_str(), &selected))
-				m_Preferences.RenderingBackend = backend;
-
+		IMGUI_DROPDOWN_START("Backend", RendererTypeStr(m_Preferences.RenderingBackend).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_Preferences.RenderingBackend, RendererType::OpenGL, RendererTypeStr(RendererType::OpenGL).c_str());
 #ifdef PLATFORM_WINDOWS
-			backend = RendererType::D3D11;
-			selected = m_Preferences.RenderingBackend == backend;
-			if (ImGui::Selectable(RendererTypeStr(backend).c_str(), &selected))
-				m_Preferences.RenderingBackend = backend;
-#endif // PLATFORM_WINDOWS
+		IMGUI_DROPDOWN_SELECTABLE(m_Preferences.RenderingBackend, RendererType::D3D11, RendererTypeStr(RendererType::D3D11).c_str());
+#endif // WIN32
 
-			ImGui::EndCombo();
-		}
+		IMGUI_DROPDOWN_END();
+
 		if (ImGui::IsItemHovered())
 			ImGui::SetTooltip("Backend will change only when the app is restarted");
 

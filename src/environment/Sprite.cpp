@@ -49,24 +49,10 @@ namespace Ainan {
 		DisplayTransformationControls();
 
 		ImGui::NextColumn();
-		ImGui::Text("Space: ");
-		ImGui::NextColumn();
-		if (ImGui::BeginCombo("##Space: ", ObjSpaceToStr(Space)))
-		{
-			{
-				bool selected = Space == OBJ_SPACE_2D;
-				if (ImGui::Selectable(ObjSpaceToStr(OBJ_SPACE_2D), &selected))
-					Space = OBJ_SPACE_2D;
-			}
-
-			{
-				bool selected = Space == OBJ_SPACE_3D;
-				if (ImGui::Selectable(ObjSpaceToStr(OBJ_SPACE_3D), &selected))
-					Space = OBJ_SPACE_3D;
-			}
-
-			ImGui::EndCombo();
-		}
+		IMGUI_DROPDOWN_START_USING_COLUMNS("Space: ", ObjSpaceToStr(Space));
+		IMGUI_DROPDOWN_SELECTABLE(Space, OBJ_SPACE_2D, ObjSpaceToStr(OBJ_SPACE_2D));
+		IMGUI_DROPDOWN_SELECTABLE(Space, OBJ_SPACE_3D, ObjSpaceToStr(OBJ_SPACE_3D));
+		IMGUI_DROPDOWN_END();
 
 		ImGui::NextColumn();
 		ImGui::Text("Texture: ");

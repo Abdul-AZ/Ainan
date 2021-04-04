@@ -146,30 +146,13 @@ namespace Ainan {
 		{
 			ImGui::Begin("Exporter", &m_ExporterWindowOpen);
 
-			ImGui::Text("Export Mode");
-			ImGui::SameLine();
-			if (ImGui::BeginCombo("##Export Mode", GetModeString(m_Mode).c_str()))
-			{
-				bool is_video = m_Mode == Video ? true : false;
-				if (ImGui::Selectable(GetModeString(Video).c_str(), &is_video))
-				{
-					ImGui::SetItemDefaultFocus();
-					m_Mode = Video;
-				}
-
-				bool is_picture = m_Mode == Picture ? true : false;
-				if (ImGui::Selectable(GetModeString(Picture).c_str(), &is_picture))
-				{
-					ImGui::SetItemDefaultFocus();
-					m_Mode = Picture;
-				}
-
-				ImGui::EndCombo();
-			}
+			IMGUI_DROPDOWN_START("Export Mode", GetModeString(m_Mode).c_str());
+			IMGUI_DROPDOWN_SELECTABLE(m_Mode, Video, GetModeString(Video).c_str());
+			IMGUI_DROPDOWN_SELECTABLE(m_Mode, Picture, GetModeString(Picture).c_str());
+			IMGUI_DROPDOWN_END();
 
 			if (m_Mode == ExportMode::Video)
 				DisplayVideoExportSettingsControls();
-
 
 			if (ImGui::TreeNode("ExportMode Camera Settings"))
 			{
@@ -283,33 +266,11 @@ namespace Ainan {
 		ImGui::Begin("Finalize Export", &m_FinalizePictureExportWindowOpen);
 		ImGui::Columns(2);
 
-		ImGui::Text("Image Format");
-		ImGui::SameLine();
-		if (ImGui::BeginCombo("##Image Format", Image::GetFormatString(PictureSettings.Format).c_str()))
-		{
-			bool is_png = PictureSettings.Format == ImageFormat::png ? true : false;
-			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::png).c_str(), &is_png)) {
-
-				ImGui::SetItemDefaultFocus();
-				PictureSettings.Format = ImageFormat::png;
-			}
-
-			bool is_jpeg = PictureSettings.Format == ImageFormat::jpeg ? true : false;
-			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::jpeg).c_str(), &is_jpeg)) {
-
-				ImGui::SetItemDefaultFocus();
-				PictureSettings.Format = ImageFormat::jpeg;
-			}
-
-			bool is_bmp = PictureSettings.Format == ImageFormat::bmp ? true : false;
-			if (ImGui::Selectable(Image::GetFormatString(ImageFormat::bmp).c_str(), &is_bmp)) {
-
-				ImGui::SetItemDefaultFocus();
-				PictureSettings.Format = ImageFormat::bmp;
-			}
-
-			ImGui::EndCombo();
-		}
+		IMGUI_DROPDOWN_START("Image Format", Image::GetFormatString(PictureSettings.Format).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(PictureSettings.Format, ImageFormat::png, Image::GetFormatString(ImageFormat::png).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(PictureSettings.Format, ImageFormat::jpeg, Image::GetFormatString(ImageFormat::jpeg).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(PictureSettings.Format, ImageFormat::bmp, Image::GetFormatString(ImageFormat::bmp).c_str());
+		IMGUI_DROPDOWN_END();
 
 		PictureSettings.ExportTargetLocation.FileExtension = "." + Image::GetFormatString(PictureSettings.Format);
 

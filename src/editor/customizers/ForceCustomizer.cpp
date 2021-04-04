@@ -73,25 +73,11 @@ namespace Ainan {
 			{
 				//display a dropdown displaying the types of forces
 				auto spacing = ImGui::GetCursorPosY();
-				ImGui::Text("Force Type: ");
-				ImGui::NextColumn();
-				ImGui::SetCursorPosY(spacing);
-				if (ImGui::BeginCombo("##Force Type", Force::ForceTypeToString(m_Forces[m_CurrentSelectedForceName].Type)))
-				{
-					{
-						bool isSelected = m_Forces[m_CurrentSelectedForceName].Type == Force::DirectionalForce;
-						if (ImGui::Selectable(Force::ForceTypeToString(Force::DirectionalForce), &isSelected))
-							m_Forces[m_CurrentSelectedForceName].Type = Force::DirectionalForce;
-					}
 
-					{
-						bool isSelected = m_Forces[m_CurrentSelectedForceName].Type == Force::RelativeForce;
-						if (ImGui::Selectable(Force::ForceTypeToString(Force::RelativeForce), &isSelected))
-							m_Forces[m_CurrentSelectedForceName].Type = Force::RelativeForce;
-					}
-
-					ImGui::EndCombo();
-				}
+				IMGUI_DROPDOWN_START_USING_COLUMNS("Force Type", Force::ForceTypeToString(m_Forces[m_CurrentSelectedForceName].Type));
+				IMGUI_DROPDOWN_SELECTABLE(m_Forces[m_CurrentSelectedForceName].Type, Force::DirectionalForce, Force::ForceTypeToString(Force::DirectionalForce));
+				IMGUI_DROPDOWN_SELECTABLE(m_Forces[m_CurrentSelectedForceName].Type, Force::RelativeForce, Force::ForceTypeToString(Force::RelativeForce));
+				IMGUI_DROPDOWN_END();
 
 				ImGui::NextColumn();
 				ImGui::Text("Force Enable: ");

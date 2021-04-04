@@ -47,92 +47,27 @@ namespace Ainan {
 				ImGui::Spacing();
 
 				ImGui::NextColumn();
-				ImGui::Text("Noise\nApply Target: ");
-				ImGui::NextColumn();
+				IMGUI_DROPDOWN_START_USING_COLUMNS("Noise\nApply Target: ", NoiseApplyTargetStr(NoiseTarget));
+				IMGUI_DROPDOWN_SELECTABLE(NoiseTarget, Add_To_Velocity, NoiseApplyTargetStr(Add_To_Velocity));
+				IMGUI_DROPDOWN_SELECTABLE(NoiseTarget, Add_To_Acceleration, NoiseApplyTargetStr(Add_To_Acceleration));
+				IMGUI_DROPDOWN_SELECTABLE(NoiseTarget, Set_Velocity_As_Noise, NoiseApplyTargetStr(Set_Velocity_As_Noise));
+				IMGUI_DROPDOWN_SELECTABLE(NoiseTarget, Set_Acceleration_As_Noise, NoiseApplyTargetStr(Set_Acceleration_As_Noise));
+				IMGUI_DROPDOWN_END();
 
-				if (ImGui::BeginCombo("##Noise nApply Target: ", NoiseApplyTargetStr(NoiseTarget)))
+				ImGui::NextColumn();
+				auto mode = NoiseInterpolationMode;
+				IMGUI_DROPDOWN_START_USING_COLUMNS("Noise\nInterpolation Mode: ", NoiseInterpolationModeStr(NoiseInterpolationMode));
+				IMGUI_DROPDOWN_SELECTABLE(NoiseInterpolationMode, FastNoise::Interp::Quintic, NoiseInterpolationModeStr(FastNoise::Interp::Quintic));
+				IMGUI_DROPDOWN_SELECTABLE(NoiseInterpolationMode, FastNoise::Interp::Hermite, NoiseInterpolationModeStr(FastNoise::Interp::Hermite));
+				IMGUI_DROPDOWN_SELECTABLE(NoiseInterpolationMode, FastNoise::Interp::Linear, NoiseInterpolationModeStr(FastNoise::Interp::Linear));
+				IMGUI_DROPDOWN_END();
+				//if mode changed
+				if (mode != NoiseInterpolationMode)
 				{
-					{
-						bool is_active = NoiseTarget == Add_To_Velocity;
-						if (ImGui::Selectable(NoiseApplyTargetStr(Add_To_Velocity), &is_active)) {
-							ImGui::SetItemDefaultFocus();
-							NoiseTarget = Add_To_Velocity;
-						}
-					}
-
-					{
-						bool is_active = NoiseTarget == Add_To_Acceleration;
-						if (ImGui::Selectable(NoiseApplyTargetStr(Add_To_Acceleration), &is_active)) {
-							ImGui::SetItemDefaultFocus();
-							NoiseTarget = Add_To_Acceleration;
-						}
-					}
-
-					{
-						bool is_active = NoiseTarget == Set_Velocity_As_Noise;
-						if (ImGui::Selectable(NoiseApplyTargetStr(Set_Velocity_As_Noise), &is_active)) {
-							ImGui::SetItemDefaultFocus();
-							NoiseTarget = Set_Velocity_As_Noise;
-						}
-					}
-
-					{
-						bool is_active = NoiseTarget == Set_Acceleration_As_Noise;
-						if (ImGui::Selectable(NoiseApplyTargetStr(Set_Acceleration_As_Noise), &is_active)) {
-							ImGui::SetItemDefaultFocus();
-							NoiseTarget = Set_Acceleration_As_Noise;
-						}
-					}
-
-					ImGui::NextColumn();
-					ImGui::EndCombo();
+					ImGui::SetItemDefaultFocus();
+					NoiseLibrary.SetInterp(NoiseInterpolationMode);
+					UpdateNoiseTex();
 				}
-
-				ImGui::NextColumn();
-				ImGui::Text("Noise\nInterpolation Mode: ");
-				ImGui::NextColumn();
-
-				if (ImGui::BeginCombo("##Noise Interpolation Mode: ", NoiseInterpolationModeStr(NoiseInterpolationMode)))
-				{
-					{
-						auto mode = FastNoise::Interp::Quintic;
-						bool is_active = NoiseInterpolationMode == mode;
-						if (ImGui::Selectable(NoiseInterpolationModeStr(mode), &is_active))
-						{
-							ImGui::SetItemDefaultFocus();
-							NoiseInterpolationMode = mode;
-							NoiseLibrary.SetInterp(mode);
-							UpdateNoiseTex();
-						}
-					}
-
-					{
-						auto mode = FastNoise::Interp::Hermite;
-						bool is_active = NoiseInterpolationMode == mode;
-						if (ImGui::Selectable(NoiseInterpolationModeStr(mode), &is_active))
-						{
-							ImGui::SetItemDefaultFocus();
-							NoiseInterpolationMode = mode;
-							NoiseLibrary.SetInterp(mode);
-							UpdateNoiseTex();
-						}
-					}
-
-					{
-						auto mode = FastNoise::Interp::Linear;
-						bool is_active = NoiseInterpolationMode == mode;
-						if (ImGui::Selectable(NoiseInterpolationModeStr(mode), &is_active))
-						{
-							ImGui::SetItemDefaultFocus();
-							NoiseInterpolationMode = mode;
-							NoiseLibrary.SetInterp(mode);
-							UpdateNoiseTex();
-						}
-					}
-
-					ImGui::EndCombo();
-				}
-
 				ImGui::Spacing();
 
 				ImGui::NextColumn();
