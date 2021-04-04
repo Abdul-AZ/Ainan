@@ -25,6 +25,7 @@ namespace Ainan {
 		static void SetShouldClose();
 		static void SetTitle(const std::string& title);
 
+		static bool IsIconified();
 	public:
 
 		//do NOT modify these ever, use Setxxx functions for that

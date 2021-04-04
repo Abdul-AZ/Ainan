@@ -84,6 +84,7 @@ namespace Ainan {
 		static void ClearScreen();
 
 		static void Present();
+		static void SleepExtraFrametime();
 
 		static void RecreateSwapchain(const glm::vec2& newSwapchainSize);
 

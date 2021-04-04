@@ -194,6 +194,11 @@ namespace Ainan
 		}
 	}
 
+	bool Editor::NeedToPresent()
+	{
+		return (m_RedrawUI > 0 || m_State == EditorState::State_PlayMode) && !Window::IsIconified();
+	}
+
 	void Editor::WorkerThreadLoop()
 	{
 		std::mutex mutex;

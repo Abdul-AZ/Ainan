@@ -25,8 +25,11 @@ int main()
 		editor->Update();
 		InputManager::HandleInput();
 		editor->Draw();
-	
-		Renderer::Present();
+
+		if (editor->NeedToPresent())
+			Renderer::Present();
+		else
+			Renderer::SleepExtraFrametime();
 	}
 	
 	InputManager::Terminate();

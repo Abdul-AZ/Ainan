@@ -168,4 +168,9 @@ namespace Ainan {
 	{
 		glfwSetWindowTitle(Ptr, title.c_str());
 	}
+
+	bool Window::IsIconified()
+	{
+		return glfwGetWindowAttrib(Window::Ptr, GLFW_ICONIFIED);
+	}
 }

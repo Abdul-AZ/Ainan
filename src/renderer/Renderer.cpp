@@ -754,6 +754,13 @@ namespace Ainan {
 		LastFrameFinishTime = glfwGetTime();
 	}
 
+	void Renderer::SleepExtraFrametime()
+	{
+		LastFrameDeltaTime = glfwGetTime() - LastFrameFinishTime;
+		std::this_thread::sleep_for(std::chrono::duration<double>((1 / 60.0) - LastFrameDeltaTime));
+		LastFrameFinishTime = glfwGetTime();
+	}
+
 	void Renderer::RecreateSwapchain(const glm::vec2& newSwapchainSize)
 	{
 		RenderCommand cmd;
