@@ -63,6 +63,8 @@ namespace Ainan {
 		Camera m_Camera;
 		float CameraPitch = 0;
 		float CameraYaw = 90.0f;
+		bool SnappingEnabled = false;
+		float Snap = 1.0f;
 		ViewportWindow m_ViewportWindow;
 		AppStatusWindow m_AppStatusWindow;
 		Exporter m_Exporter;

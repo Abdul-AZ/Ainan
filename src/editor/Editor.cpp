@@ -735,6 +735,18 @@ namespace Ainan
 					ImGui::TreePop();
 				}
 			}
+
+			ImGui::Text("Gizmo Snap");
+			ImGui::SameLine();
+			ImGui::SetCursorPosX(100.0f);
+			ImGui::Checkbox("##Gizmo Snap", &SnappingEnabled);
+			if (SnappingEnabled)
+			{
+				ImGui::Text("Snap Value: ");
+				ImGui::SameLine();
+				ImGui::DragFloat("##Snap Value:", &Snap, 0.05f);
+			}
+
 			ImGui::End();
 		}
 
@@ -758,8 +770,12 @@ namespace Ainan
 			{
 				if (obj->Selected)
 				{
-					ImGuizmo::Manipulate(glm::value_ptr(m_Camera.ViewMatrix), glm::value_ptr(m_Camera.ProjectionMatrix),
-						(ImGuizmo::OPERATION)obj->GetAllowedGizmoOperation(m_GizmoOperation), ImGuizmo::MODE::WORLD, glm::value_ptr(obj->ModelMatrix));
+					float snap[3] = { Snap, Snap, Snap };
+
+					ImGuizmo::Manipulate(
+						glm::value_ptr(m_Camera.ViewMatrix), glm::value_ptr(m_Camera.ProjectionMatrix),
+						(ImGuizmo::OPERATION)obj->GetAllowedGizmoOperation(m_GizmoOperation), ImGuizmo::MODE::WORLD,
+						glm::value_ptr(obj->ModelMatrix), nullptr, SnappingEnabled ? snap : nullptr);
 					break;
 				}
 			}
