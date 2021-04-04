@@ -2,7 +2,7 @@
 
 namespace Ainan {
 
-    const int32_t c_MaxQueueSize = 30;
+    const int32_t c_MaxQueueSize = 10;
 
 	void RenderCommandQueue::Push(const RenderCommand& cmd)
 	{
