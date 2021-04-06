@@ -79,7 +79,7 @@ namespace Ainan {
 	void Exporter::SetSize()
 	{
 		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
-		glm::vec2 size = glm::vec2(Camera.ZoomFactor * aspectRatio, Camera.ZoomFactor);
+		glm::vec2 size = glm::vec2(Camera.m_Camera.GetOrthoZoomFactor() * aspectRatio, Camera.m_Camera.GetOrthoZoomFactor());
 		m_OutlineVertices[0] = m_ExportCameraPosition - (size / 2.0f); //bottom left
 		m_OutlineVertices[1] = m_ExportCameraPosition + glm::vec2(-size.x, size.y) / 2.0f; //top left
 		m_OutlineVertices[2] = m_ExportCameraPosition + (size / 2.0f);     //top right
@@ -88,7 +88,7 @@ namespace Ainan {
 		Camera.Update(0.0f, Renderer::Rdata->CurrentViewport);
 		glm::vec3 reversedPos = glm::vec3(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y, Camera.Position.z);
 
-		Camera.SetPosition(reversedPos);
+		Camera.Position = reversedPos;
 	}
 
 	void Exporter::DrawEnvToExportSurface(Environment& env)
@@ -116,7 +116,7 @@ namespace Ainan {
 		}
 
 		SceneDescription desc;
-		desc.SceneCamera = Camera;
+		desc.SceneCamera = Camera.m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
 		desc.Blur = env.BlurEnabled;
 		desc.BlurRadius = env.BlurRadius;
@@ -180,10 +180,10 @@ namespace Ainan {
 					SetSize();
 				ImGui::PopItemWidth();
 
-				if (ImGui::DragFloat("Zoom Factor", &Camera.ZoomFactor, 1.0f, 0.0f, 5000.0f))
-					SetSize();
-
-				ImGui::Text("Exported Image Resolution: %.0f, %.0f", std::round(Camera.ZoomFactor * (float)m_WidthRatio / m_HeightRatio), Camera.ZoomFactor);
+				//if (ImGui::DragFloat("Zoom Factor", &Camera.ZoomFactor., 1.0f, 0.0f, 5000.0f))
+				//	SetSize();
+				//
+				//ImGui::Text("Exported Image Resolution: %.0f, %.0f", std::round(Camera.ZoomFactor * (float)m_WidthRatio / m_HeightRatio), Camera.ZoomFactor);
 
 				ImGui::TreePop();
 			}

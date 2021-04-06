@@ -12,6 +12,7 @@
 #include "environment/Model.h"
 #include "environment/RadialLight.h"
 #include "environment/SpotLight.h"
+#include "environment/CameraObject.h"
 #include "Exporter.h"
 #include "file/FolderBrowser.h"
 #include "EditorPreferences.h"
@@ -60,9 +61,7 @@ namespace Ainan {
 
 		Environment* m_Env = nullptr;
 		EditorPreferences m_Preferences;
-		Camera m_Camera;
-		float CameraPitch = 0;
-		float CameraYaw = 90.0f;
+		EditorCamera m_Camera;
 		bool SnappingEnabled = false;
 		float Snap = 1.0f;
 		ViewportWindow m_ViewportWindow;
@@ -91,6 +90,7 @@ namespace Ainan {
 		Texture m_ParticleSystemIconTexture;
 		Texture m_SpotLightIconTexture;
 		Texture m_RadialLightIconTexture;
+		Texture m_CameraIconTexture;
 		float m_TimeSincePlayModeStarted = 0.0f;
 		bool m_AddObjectWindowOpen = false;
 		std::string m_AddObjectWindowObjectName = "Example Name";

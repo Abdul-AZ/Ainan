@@ -7,6 +7,7 @@
 #include "SpotLight.h"
 #include "LitSprite.h"
 #include "Model.h"
+#include "CameraObject.h"
 
 using json = nlohmann::json;
 
@@ -28,6 +29,7 @@ namespace Ainan {
 	static void toJson(json& j, const Sprite& sprite, size_t objectOrder);
 	static void toJson(json& j, const LitSprite& sprite, size_t objectOrder);
 	static void toJson(json& j, const Model& model, size_t objectOrder);
+	static void toJson(json& j, const CameraObject& camera, size_t objectOrder);
 
 	bool SaveEnvironment(const Environment& env, std::string path)
 	{
@@ -66,6 +68,10 @@ namespace Ainan {
 
 			case ModelType:
 				toJson(data, *(Model*)env.Objects[i].get(), i);
+				break;
+
+			case CameraType:
+				toJson(data, *(CameraObject*)env.Objects[i].get(), i);
 				break;
 
 			default: //this means we have a type that we haven't implemented how to save it
@@ -223,6 +229,15 @@ namespace Ainan {
 		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(model.ModelMatrix);
 		j[id + "ModelPath"] = model.CurrentModelPath.u8string();
 		j[id + "FlipUVs"] = model.FlipUVs;
+	}
+
+	static void toJson(json& j, const CameraObject& camera, size_t objectOrder)
+	{
+		std::string id = "obj" + std::to_string(objectOrder) + "_";
+
+		j[id + "Type"] = EnvironmentObjectTypeToString(CameraType);
+		j[id + "Name"] = camera.m_Name;
+		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(camera.ModelMatrix);
 	}
 }
 

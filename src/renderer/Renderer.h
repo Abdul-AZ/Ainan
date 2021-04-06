@@ -1,6 +1,6 @@
 #pragma once
 
-#include "editor/Camera.h"
+#include "Camera.h"
 
 #include "RenderCommand.h"
 #include "RenderCommandQueue.h"
@@ -40,7 +40,7 @@ namespace Ainan {
 
 	struct SceneDescription
 	{
-		Camera SceneCamera = {};								   //Required
+		Camera SceneCamera;										   //Required
 		Framebuffer SceneDrawTarget;							   //Required
 		bool Blur = false;										   //Required
 		float BlurRadius = 0.0f;								   //Required if Blur == true

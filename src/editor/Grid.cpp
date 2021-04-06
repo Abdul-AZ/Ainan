@@ -60,7 +60,7 @@ namespace Ainan {
 		Renderer::DestroyUniformBuffer(m_TransformUniformBuffer);
 	}
 
-	void Grid::Draw(const Camera& camera)
+	void Grid::Draw(const EditorCamera& camera)
 	{
 		auto& shader = Renderer::ShaderLibrary()["GridShader"];
 

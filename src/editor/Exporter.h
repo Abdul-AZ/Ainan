@@ -1,6 +1,6 @@
 #pragma once
 
-#include "editor/Camera.h"
+#include "editor/EditorCamera.h"
 #include "file/SaveItemBrowser.h"
 #include "renderer/Renderer.h"
 #include "environment/ParticleSystem.h"
@@ -45,7 +45,7 @@ namespace Ainan {
 		Image* m_ExportTargetImage = nullptr;
 		Texture m_ExportTargetTexture;
 
-		Camera Camera;
+		EditorCamera Camera;
 		RenderSurface m_RenderSurface;
 
 		struct ExportVideoSettings

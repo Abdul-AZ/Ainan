@@ -1,6 +1,6 @@
 #pragma once
 
-#include "editor/Camera.h"
+#include "editor/EditorCamera.h"
 #include "ImGuizmo.h"
 
 namespace Ainan {
@@ -12,7 +12,8 @@ namespace Ainan {
 		RadialLightType,
 		SpotLightType,
 		SpriteType,
-		LitSpriteType
+		LitSpriteType, 
+		CameraType
 	};
 
 	const float c_ObjectPositionDragControlSpeed = 0.1f;
@@ -37,6 +38,7 @@ namespace Ainan {
 		virtual void Update(const float deltaTime) {};
 		virtual void Draw() {};
 		virtual void DisplayGuiControls() {};
+		virtual void OnTransform() {};
 		virtual std::shared_ptr<std::mutex> GetMutex() { return ObjectMutex; };
 
 		virtual ~EnvironmentObjectInterface() {};

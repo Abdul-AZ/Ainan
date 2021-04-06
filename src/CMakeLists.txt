@@ -5,7 +5,6 @@ set(SOURCES_LIST
     "Log.h"  "Log.cpp"
 
     "editor/AppStatusWindow.h"         "editor/AppStatusWindow.cpp"
-    "editor/Camera.h"                  "editor/Camera.cpp"
     "editor/CurveEditor.h"             "editor/CurveEditor.cpp"
     "editor/Editor.h"                  "editor/Editor.cpp"
     "editor/EditorPreferences.h"       "editor/EditorPreferences.cpp"
@@ -18,6 +17,7 @@ set(SOURCES_LIST
     "editor/ParticleCustomizer.h"      "editor/ParticleCustomizer.cpp"
     "editor/ViewportWindow.h"          "editor/ViewportWindow.cpp"
     "editor/Window.h"                  "editor/Window.cpp"
+    "editor/EditorCamera.h"            "editor/EditorCamera.cpp"
 
     "editor/customizers/ColorCustomizer.h"      "editor/customizers/ColorCustomizer.cpp"
     "editor/customizers/ForceCustomizer.h"      "editor/customizers/ForceCustomizer.cpp"
@@ -37,6 +37,7 @@ set(SOURCES_LIST
     "environment/SpotLight.h"                  "environment/SpotLight.cpp"
     "environment/Sprite.h"                     "environment/Sprite.cpp"
     "environment/Model.h"                      "environment/Model.cpp"
+    "environment/CameraObject.h"               "environment/CameraObject.cpp"
 
     "file/AssetManager.h"     "file/AssetManager.cpp"
     "file/FileBrowser.h"      "file/FileBrowser.cpp"
@@ -56,6 +57,7 @@ set(SOURCES_LIST
     "renderer/Rectangle.h"
     "renderer/Framebuffer.h"         "renderer/Framebuffer.cpp"
     "renderer/Image.h"               "renderer/Image.cpp"
+    "renderer/Camera.h"              "renderer/Camera.cpp"
     "renderer/RenderSurface.h"       "renderer/RenderSurface.cpp"
 
     "renderer/opengl/OpenGLRendererAPI.h"      "renderer/opengl/OpenGLRendererAPI.cpp"

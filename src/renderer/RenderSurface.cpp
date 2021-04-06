@@ -1,5 +1,7 @@
 #include "RenderSurface.h"
 
+#include "editor/Window.h"
+
 namespace Ainan {
 
 	RenderSurface::RenderSurface()

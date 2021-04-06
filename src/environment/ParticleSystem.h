@@ -2,7 +2,7 @@
 
 #include "EnvironmentObjectInterface.h"
 #include "editor/Window.h"
-#include "editor/Camera.h"
+#include "editor/EditorCamera.h"
 #include "editor/ParticleCustomizer.h"
 #include "renderer/ShaderProgram.h"
 #include "renderer/Renderer.h"
