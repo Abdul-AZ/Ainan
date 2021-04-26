@@ -2,7 +2,7 @@
 
 #include "renderer/ShaderProgram.h"
 #include "renderer/Renderer.h"
-#include "Camera.h"
+#include "EditorCamera.h"
 #include "Window.h"
 
 namespace Ainan {
@@ -18,7 +18,7 @@ namespace Ainan {
 		};
 		Grid(float unitLength = 100.0f, int32_t numLinesPerAxis = 51);
 		~Grid();
-		void Draw(const Camera& camera);
+		void Draw(const EditorCamera& camera);
 		GridPlane Orientation = XY;
 
 	private:

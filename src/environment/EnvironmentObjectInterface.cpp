@@ -20,7 +20,8 @@ namespace Ainan {
 		{
 			ImGui::Text("Position: ");
 			ImGui::NextColumn();
-			ImGui::DragFloat3("##Position: ", &ModelMatrix[3][0], c_ObjectPositionDragControlSpeed);
+			if (ImGui::DragFloat3("##Position: ", &ModelMatrix[3][0], c_ObjectPositionDragControlSpeed))
+				OnTransform();
 
 			ImGui::NextColumn();
 			ImGui::Text("Rotation: ");
@@ -33,6 +34,7 @@ namespace Ainan {
 				ModelMatrix = glm::translate(ModelMatrix, translation);
 				ModelMatrix = ModelMatrix *  glm::mat4_cast(glm::quat(rotEular * glm::pi<float>() / 180.0f));
 				ModelMatrix = glm::scale(ModelMatrix, scale);
+				OnTransform();
 			}
 
 			ImGui::NextColumn();
@@ -45,13 +47,15 @@ namespace Ainan {
 				ModelMatrix = glm::translate(ModelMatrix, translation);
 				ModelMatrix *= glm::mat4_cast(rotation);
 				ModelMatrix = glm::scale(ModelMatrix, scale);
+				OnTransform();
 			}
 		}
 		else if (Space == OBJ_SPACE_2D)
 		{
 			ImGui::Text("Position: ");
 			ImGui::NextColumn();
-			ImGui::DragFloat2("##Position: ", &ModelMatrix[3][0], c_ObjectPositionDragControlSpeed);
+			if (ImGui::DragFloat2("##Position: ", &ModelMatrix[3][0], c_ObjectPositionDragControlSpeed))
+				OnTransform();
 
 			ImGui::NextColumn();
 			ImGui::Text("Rotation: ");
@@ -64,6 +68,7 @@ namespace Ainan {
 				ModelMatrix = glm::translate(ModelMatrix, translation);
 				ModelMatrix = glm::rotate(ModelMatrix, rotEular * glm::pi<float>() / 180.0f, glm::vec3(0.0f, 0.0f, 1.0f));
 				ModelMatrix = glm::scale(ModelMatrix, scale);
+				OnTransform();
 			}
 
 			ImGui::NextColumn();
@@ -74,6 +79,7 @@ namespace Ainan {
 			{
 				ModelMatrix = glm::scale(ModelMatrix, (1.0f / scale));
 				ModelMatrix = glm::scale(ModelMatrix, glm::vec3(scaleAverage));
+				OnTransform();
 			}
 		}
 		else
@@ -94,6 +100,8 @@ namespace Ainan {
 			return RadialLightType;
 		else if (type == "Spot Light")
 			return SpotLightType;
+		else if (type == "Camera")
+			return CameraType;
 		
 		//we should never reach here
 		AINAN_LOG_ERROR("Invalid object type enum");
@@ -121,6 +129,9 @@ namespace Ainan {
 
 		case SpotLightType:
 			return "Spot Light";
+
+		case CameraType:
+			return "Camera";
 		}
 
 		//we should never reach here

@@ -62,7 +62,7 @@ namespace Ainan {
 		TextureCustomizer m_TextureCustomizer;
 		ForceCustomizer m_ForceCustomizer;
 
-		glm::vec2 m_SpawnPosition = { 0.5f, 0.5f };
+		glm::vec2 m_SpawnPosition = { 0.0f,0.0f };
 
 		//spawn particle on line option
 		float m_LineLength = 0.2f;

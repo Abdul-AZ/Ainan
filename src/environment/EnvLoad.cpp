@@ -6,6 +6,7 @@
 #include "Sprite.h"
 #include "LitSprite.h"
 #include "Model.h"
+#include "CameraObject.h"
 
 using json = nlohmann::json;
 
@@ -22,6 +23,7 @@ namespace Ainan {
 	static void ModelFromJson(Environment* env,json& data, std::string id);
 	static void RadialLightFromJson(Environment* env, json& data, std::string id);
 	static void SpotLightFromJson(Environment* env, json& data, std::string id);
+	static void CameraFromJson(Environment* env, json& data, std::string id);
 	static void SettingsFromJson(Environment* env, json& data);
 
 	Environment* LoadEnvironment(const std::string& path)
@@ -80,6 +82,10 @@ namespace Ainan {
 
 			case ModelType:
 				ModelFromJson(env, data, id);
+				break;
+			
+			case CameraType:
+				CameraFromJson(env, data, id);
 				break;
 
 			default:
@@ -268,6 +274,24 @@ namespace Ainan {
 		pEnvironmentObject obj((EnvironmentObjectInterface*)(model.release()));
 		env->Objects.push_back(std::move(obj));
 	}
+
+	void CameraFromJson(Environment* env, json& data, std::string id)
+	{
+		//get data
+		auto projMode = StrToProjectionMode(data[id + "ProjMode"].get<std::string>());
+		auto aspectRatio = JSON_ARRAY_TO_VEC2(data[id + "AspectRatio"].get<std::vector<float>>());
+		auto modelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
+		auto name = data[id + "Name"].get<std::string>();
+
+		//create camera
+		std::unique_ptr<CameraObject> camera = std::make_unique<CameraObject>();
+
+		camera->Init(name, modelMatrix, aspectRatio, projMode);
+
+		pEnvironmentObject obj((EnvironmentObjectInterface*)(camera.release()));
+		env->Objects.push_back(std::move(obj));
+	}
+
 }
 
 #undef JSON_ARRAY_TO_VEC4

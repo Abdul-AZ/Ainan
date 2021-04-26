@@ -4,7 +4,7 @@ namespace Ainan
 {
 	Editor::Editor():
 		m_LoadEnvironmentBrowser(STARTING_BROWSER_DIRECTORY, "Load Environment"),
-		m_Grid(1.0f),
+		m_Grid(1.0f, 201),
 		m_Preferences(EditorPreferences::LoadFromDefaultPath())
 	{
 		m_LoadEnvironmentBrowser.Filter.push_back(".env");
@@ -22,6 +22,7 @@ namespace Ainan
 		m_MeshIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Model.png", TextureFormat::RGBA));
 		m_ParticleSystemIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/ParticleSystem.png", TextureFormat::RGBA));
 		m_RadialLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/RadialLight.png", TextureFormat::RGBA));
+		m_CameraIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Camera.png", TextureFormat::RGBA));
 		m_SpotLightIconTexture = Renderer::CreateTexture(Image::LoadFromFile("res/SpotLight.png", TextureFormat::RGBA));
 
 		UpdateTitle();
@@ -34,6 +35,7 @@ namespace Ainan
 		}
 
 		m_GPUMemAllocated = Renderer::GetUsedGPUMemory();
+		m_Camera.CalculateViewMatrix();
 	}
 
 	Editor::~Editor()
@@ -47,6 +49,7 @@ namespace Ainan
 		Renderer::DestroyTexture(m_ParticleSystemIconTexture);
 		Renderer::DestroyTexture(m_RadialLightIconTexture);
 		Renderer::DestroyTexture(m_SpotLightIconTexture);
+		Renderer::DestroyTexture(m_CameraIconTexture);
 
 		delete m_Env;
 		m_Preferences.SaveToDefaultPath();
@@ -575,6 +578,11 @@ namespace Ainan
 	{
 		m_RenderSurface.SurfaceFramebuffer.Bind();
 		Renderer::ClearScreen();
+		Camera camera;
+		if (m_Camera.PreviewCamera)
+			camera = m_Camera.PreviewCamera->GetCamera();
+		else
+			camera = m_Camera.m_Camera;
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
@@ -599,7 +607,7 @@ namespace Ainan
 		}
 
 		SceneDescription desc;
-		desc.SceneCamera = m_Camera;
+		desc.SceneCamera = camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
 		desc.Blur = m_Env->BlurEnabled;
 		desc.BlurRadius = m_Env->BlurRadius;
@@ -617,7 +625,7 @@ namespace Ainan
 
 		//draw the UI as a different scene on top of the environment scene
 		SceneDescription descUI;
-		descUI.SceneCamera = m_Camera;
+		descUI.SceneCamera = camera;
 		descUI.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
 		descUI.Blur = false;
 		descUI.BlurRadius = 0;
@@ -670,11 +678,18 @@ namespace Ainan
 					case ModelType:
 						Renderer::DrawQuad(position, color, scale, m_MeshIconTexture);
 						break;
+
+					case CameraType:
+						Renderer::DrawQuad(position, color, scale, m_CameraIconTexture);
+						if (obj->Selected)
+						{
+							CameraObject* camera = (CameraObject*)obj.get();
+							camera->DrawFrustum();
+						}
+						break;
 					}
 				}
 			}
-
-			m_Exporter.DrawOutline();
 		}
 		Renderer::EndScene();
 		//revert to the scene rendering mode
@@ -755,12 +770,12 @@ namespace Ainan
 			ImGui::End();
 		}
 
-		m_Exporter.DisplayGUI();
+		m_Exporter.DisplayGUI(*m_Env);
 		InputManager::DisplayGUI();
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFramebuffer);
 
 		static glm::mat4 cube(1.0f);
-		if (m_Camera.Mode == ProjectionMode::Orthographic)
+		if (m_Camera.m_Camera.GetProjectionMode() == ProjectionMode::Orthographic)
 			ImGuizmo::SetOrthographic(true);
 		else
 			ImGuizmo::SetOrthographic(false);
@@ -776,11 +791,16 @@ namespace Ainan
 				if (obj->Selected)
 				{
 					float snap[3] = { Snap, Snap, Snap };
+					auto view = m_Camera.m_Camera.GetViewMatrix();
+					auto proj = m_Camera.m_Camera.GetProjectionMatrix();
 
-					ImGuizmo::Manipulate(
-						glm::value_ptr(m_Camera.ViewMatrix), glm::value_ptr(m_Camera.ProjectionMatrix),
+					if (ImGuizmo::Manipulate(
+						glm::value_ptr(view), glm::value_ptr(proj),
 						(ImGuizmo::OPERATION)obj->GetAllowedGizmoOperation(m_GizmoOperation), ImGuizmo::MODE::WORLD,
-						glm::value_ptr(obj->ModelMatrix), nullptr, SnappingEnabled ? snap : nullptr);
+						glm::value_ptr(obj->ModelMatrix), nullptr, SnappingEnabled ? snap : nullptr))
+					{
+						obj->OnTransform();
+					}
 					break;
 				}
 			}
@@ -1014,9 +1034,17 @@ namespace Ainan
 			m_Exporter.OpenExporterWindow();
 
 		ImGui::SameLine(ImGui::GetWindowSize().x - 250);
-		ImGui::RadioButton("Orthographic", (int32_t*)&m_Camera.Mode, (int32_t)ProjectionMode::Orthographic);
+		ProjectionMode mode = m_Camera.m_Camera.GetProjectionMode();
+		ImGui::RadioButton("Orthographic", (int32_t*)&mode, (int32_t)ProjectionMode::Orthographic);
 		ImGui::SameLine();
-		ImGui::RadioButton("Perspective", (int32_t*)&m_Camera.Mode, (int32_t)ProjectionMode::Perspective);
+		ImGui::RadioButton("Perspective", (int32_t*)&mode, (int32_t)ProjectionMode::Perspective);
+		if (mode != m_Camera.m_Camera.GetProjectionMode())
+		{
+			if (mode == ProjectionMode::Orthographic)
+				m_Camera.m_Camera.SetOrtho();
+			else if(mode == ProjectionMode::Perspective)
+				m_Camera.m_Camera.SetPersp();
+		}
 
 		Renderer::RegisterWindowThatCanCoverViewport();
 		ImGui::End();
@@ -1051,6 +1079,20 @@ namespace Ainan
 			ImGui::BeginColumns("Controls", 2);
 			selectedObj->get()->DisplayGuiControls();
 			ImGui::EndColumns();
+			if (selectedObj->get()->Type == EnvironmentObjectType::CameraType)
+			{
+				if (ImGui::Button("View Camera Viewport", ImVec2(-1, 0)))
+				{
+					CameraObject* camera = static_cast<CameraObject*>(selectedObj->get());
+					m_Camera.PreviewCamera = camera;
+					std::stringstream messageString;
+
+					messageString << std::fixed << std::setprecision(2);
+					messageString << "Previewing Camera (" << camera->m_Name << "), Move camera to return to normal";
+
+					m_AppStatusWindow.SetText(messageString.str(), 100);
+				}
+			}
 		}
 
 		ImGui::End();
@@ -1172,6 +1214,10 @@ namespace Ainan
 				case ModelType:
 					icon = (void*)m_MeshIconTexture.GetTextureID();
 					break;
+
+				case CameraType:
+					icon = (void*)m_CameraIconTexture.GetTextureID();
+					break;
 				}
 				//display the image in the same line
 				ImGui::SameLine();
@@ -1220,6 +1266,7 @@ namespace Ainan
 		IMGUI_DROPDOWN_SELECTABLE(m_AddObjectWindowObjectType, ModelType, EnvironmentObjectTypeToString(ModelType).c_str());
 		IMGUI_DROPDOWN_SELECTABLE(m_AddObjectWindowObjectType, RadialLightType, EnvironmentObjectTypeToString(RadialLightType).c_str());
 		IMGUI_DROPDOWN_SELECTABLE(m_AddObjectWindowObjectType, SpotLightType, EnvironmentObjectTypeToString(SpotLightType).c_str());
+		IMGUI_DROPDOWN_SELECTABLE(m_AddObjectWindowObjectType, CameraType, EnvironmentObjectTypeToString(CameraType).c_str());
 		IMGUI_DROPDOWN_END();
 
 		if (ImGui::Button("Add Object"))
@@ -1297,7 +1344,8 @@ namespace Ainan
 
 	void Editor::FocusCameraOnObject(EnvironmentObjectInterface& object)
 	{
-		m_Camera.SetPosition(glm::vec3(object.ModelMatrix[3][0], object.ModelMatrix[3][1], m_Camera.Position.z));
+		m_Camera.Position = glm::vec3(object.ModelMatrix[3][0], object.ModelMatrix[3][1], m_Camera.Position.z);
+		m_Camera.CalculateViewMatrix();
 	}
 
 	void Editor::AddEnvironmentObject(EnvironmentObjectType type, const std::string& name)
@@ -1349,6 +1397,16 @@ namespace Ainan
 			obj.reset(((EnvironmentObjectInterface*)(light.release())));
 			break;
 		}
+
+		case CameraType:
+		{
+			auto camera = std::make_unique<CameraObject>();
+			obj.reset(((EnvironmentObjectInterface*)(camera.release())));
+			break;
+		}
+
+		default:
+			AINAN_LOG_FATAL("Unknown object type requested");
 		}
 
 		obj->m_Name = name;
@@ -1415,11 +1473,11 @@ namespace Ainan
 				}
 
 				//reset camera
-				m_Camera.Position = c_CameraStartingPosition;
 				m_Camera.CameraForward = c_CameraStartingForwardDirection;
-				CameraPitch = 0.0f;
-				CameraYaw = 90.0f;
-				m_Camera.CalculateMatrices();
+				m_Camera.CameraPitch = 0.0f;
+				m_Camera.CameraYaw = 90.0f;
+				m_Camera.Position = c_CameraStartingPosition;
+				m_Camera.CalculateViewMatrix();
 			});
 
 		//shortcut cut to use in all the mapped buttons
@@ -1445,14 +1503,19 @@ namespace Ainan
 					return;
 
 				//move the camera's position
-				if (m_Camera.Mode == ProjectionMode::Orthographic)
+				if (m_Camera.m_Camera.GetProjectionMode() == ProjectionMode::Orthographic)
 				{
 					glm::vec3 cameraRight = glm::normalize(glm::cross(m_Camera.CameraUp, m_Camera.CameraForward));
 					glm::vec3 cameraUp = glm::cross(m_Camera.CameraForward, cameraRight);
-					m_Camera.SetPosition(m_Camera.Position + cameraUp * m_Camera.ZoomFactor * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor);
+					m_Camera.Position = m_Camera.Position + cameraUp * m_Camera.m_Camera.GetOrthoZoomFactor() * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor;
 				}
 				else
-					m_Camera.SetPosition(m_Camera.Position + m_Camera.CameraForward * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
+					m_Camera.Position = m_Camera.Position + m_Camera.CameraForward * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor;
+
+				//recalculate camera matrix
+				m_Camera.CalculateViewMatrix();
+				//stop camera preview if there is one
+				m_Camera.PreviewCamera = nullptr;
 
 				//display text in the bottom right of the screen stating the new position of the camera
 				displayCameraPosFunc();
@@ -1465,15 +1528,17 @@ namespace Ainan
 			{
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
-				if (m_Camera.Mode == ProjectionMode::Orthographic)
+				if (m_Camera.m_Camera.GetProjectionMode() == ProjectionMode::Orthographic)
 				{
 					glm::vec3 cameraRight = glm::normalize(glm::cross(m_Camera.CameraUp, m_Camera.CameraForward));
 					glm::vec3 cameraDown = -glm::cross(m_Camera.CameraForward, cameraRight);
 
-					m_Camera.SetPosition(m_Camera.Position + cameraDown * m_Camera.ZoomFactor * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor);
+					m_Camera.Position = m_Camera.Position + cameraDown * m_Camera.m_Camera.GetOrthoZoomFactor() * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor;
 				}
 				else
-					m_Camera.SetPosition(m_Camera.Position - m_Camera.CameraForward * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
+					m_Camera.Position = m_Camera.Position - m_Camera.CameraForward * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor;
+				m_Camera.CalculateViewMatrix();
+				m_Camera.PreviewCamera = nullptr;
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1484,12 +1549,14 @@ namespace Ainan
 					return;
 				glm::vec3 cameraRight = glm::normalize(glm::cross(m_Camera.CameraUp, m_Camera.CameraForward));
 
-				if (m_Camera.Mode == ProjectionMode::Orthographic)
-					m_Camera.SetPosition(m_Camera.Position + cameraRight * m_Camera.ZoomFactor * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor);
+				if (m_Camera.m_Camera.GetProjectionMode() == ProjectionMode::Orthographic)
+					m_Camera.Position = m_Camera.Position + cameraRight * m_Camera.m_Camera.GetOrthoZoomFactor() * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor;
 				else
 				{
-					m_Camera.SetPosition(m_Camera.Position + cameraRight * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
+					m_Camera.Position = m_Camera.Position + cameraRight * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor;
 				}
+				m_Camera.CalculateViewMatrix();
+				m_Camera.PreviewCamera = nullptr;
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1500,12 +1567,14 @@ namespace Ainan
 					return;
 				glm::vec3 cameraLeft = -glm::normalize(glm::cross(m_Camera.CameraUp, m_Camera.CameraForward));
 
-				if (m_Camera.Mode == ProjectionMode::Orthographic)
-					m_Camera.SetPosition(m_Camera.Position + cameraLeft * m_Camera.ZoomFactor * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor);
+				if (m_Camera.m_Camera.GetProjectionMode() == ProjectionMode::Orthographic)
+					m_Camera.Position = m_Camera.Position + cameraLeft * m_Camera.m_Camera.GetOrthoZoomFactor() * (float)LastFrameDeltaTime * c_CameraOrthoMoveSpeedFactor;
 				else
 				{
-					m_Camera.SetPosition(m_Camera.Position + cameraLeft * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
+					m_Camera.Position = m_Camera.Position + cameraLeft * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor;
 				}
+				m_Camera.CalculateViewMatrix();
+				m_Camera.PreviewCamera = nullptr;
 				displayCameraPosFunc();
 			},
 			GLFW_REPEAT);
@@ -1515,10 +1584,12 @@ namespace Ainan
 				if (m_ViewportWindow.IsFocused == false || mods != 0)
 					return;
 
-				if (m_Camera.Mode != ProjectionMode::Perspective)
+				if (m_Camera.m_Camera.GetProjectionMode() != ProjectionMode::Perspective)
 					return;
 
-				m_Camera.SetPosition(m_Camera.Position + glm::vec3(0.0f, 1.0f, 0.0f) * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
+				m_Camera.Position = m_Camera.Position + glm::vec3(0.0f, 1.0f, 0.0f) * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor;
+				m_Camera.CalculateViewMatrix();
+				m_Camera.PreviewCamera = nullptr;
 
 				displayCameraPosFunc();
 			},
@@ -1529,10 +1600,12 @@ namespace Ainan
 				if (m_ViewportWindow.IsFocused == false)
 					return;
 
-				if (m_Camera.Mode != ProjectionMode::Perspective)
+				if (m_Camera.m_Camera.GetProjectionMode() != ProjectionMode::Perspective)
 					return;
 
-				m_Camera.SetPosition(m_Camera.Position + glm::vec3(0.0f, -1.0f, 0.0f) * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor);
+				m_Camera.Position = m_Camera.Position + glm::vec3(0.0f, -1.0f, 0.0f) * (float)LastFrameDeltaTime * c_CameraPerspMoveSpeedFactor;
+				m_Camera.CalculateViewMatrix();
+				m_Camera.PreviewCamera = nullptr;
 
 				displayCameraPosFunc();
 			},
@@ -1557,19 +1630,24 @@ namespace Ainan
 		InputManager::m_ScrollHandlers.push_back([this](double xoffset, double yoffset)
 			{
 				//we don't want to zoom if the focus is not set on the viewport
-				if (m_ViewportWindow.IsHovered == false || m_ViewportWindow.IsFocused == false || m_Camera.Mode == ProjectionMode::Perspective)
+				if (m_ViewportWindow.IsHovered == false || m_ViewportWindow.IsFocused == false || m_Camera.m_Camera.GetProjectionMode() == ProjectionMode::Perspective)
 					return;
 
+				float zoom = m_Camera.m_Camera.GetOrthoZoomFactor();
 				//change zoom factor
-				m_Camera.ZoomFactor -= yoffset * 2.0f;
+				zoom -= yoffset * 2.0f;
 				//clamp zoom factor
-				m_Camera.ZoomFactor = std::clamp(m_Camera.ZoomFactor, c_CameraZoomFactorMin, c_CameraZoomFactorMax);
+				zoom = std::clamp(zoom, c_CameraZoomFactorMin, c_CameraZoomFactorMax);
+
+				//set zoom factor
+				m_Camera.m_Camera.SetOrtho(USE_CURRENT_VALUE, zoom);
+				m_Camera.PreviewCamera = nullptr;
 
 				//display the new zoom factor in the bottom left of the screen
 				std::stringstream stream;
 				stream << std::setprecision(0);
 				stream << "Zoom ";
-				stream << (int)(c_CameraZoomFactorDefault * 100.0f / m_Camera.ZoomFactor);
+				stream << (int)(c_CameraZoomFactorDefault * 100.0f / m_Camera.m_Camera.GetOrthoZoomFactor());
 				stream << "%%";
 
 				m_AppStatusWindow.SetText(stream.str());
@@ -1578,15 +1656,16 @@ namespace Ainan
 		InputManager::RegisterMouseKey(GLFW_MOUSE_BUTTON_MIDDLE, "Change Camera Zoom to Default", [this](int32_t mods)
 			{
 				//we don't want to zoom if the focus is not set on the viewport
-				if (m_ViewportWindow.IsHovered == false)
+				if (m_ViewportWindow.IsHovered == false || m_Camera.m_Camera.GetProjectionMode() != ProjectionMode::Orthographic)
 					return;
 
-				m_Camera.ZoomFactor = c_CameraZoomFactorDefault;
+				m_Camera.m_Camera.SetOrtho(USE_CURRENT_VALUE, c_CameraZoomFactorDefault);
+				m_Camera.PreviewCamera = nullptr;
 				//display the new zoom factor in the bottom left of the screen
 				std::stringstream stream;
 				stream << std::setprecision(0);
 				stream << "Zoom ";
-				stream << (int)(c_CameraZoomFactorDefault * 100.0f / m_Camera.ZoomFactor);
+				stream << (int)(c_CameraZoomFactorDefault * 100.0f / c_CameraZoomFactorDefault);
 				stream << "%%";
 
 				m_AppStatusWindow.SetText(stream.str());
@@ -1594,19 +1673,21 @@ namespace Ainan
 
 		InputManager::RegisterMouseKey(GLFW_MOUSE_BUTTON_RIGHT, "Hold to rotate camera while in Perspective mode", [this](int32_t mods)
 			{
-				if (m_ViewportWindow.IsHovered && m_Camera.Mode == ProjectionMode::Perspective && (InputManager::MouseDelta.x != 0 || InputManager::MouseDelta.y != 0))
+				if (m_ViewportWindow.IsHovered && m_Camera.m_Camera.GetProjectionMode() == ProjectionMode::Perspective && (InputManager::MouseDelta.x != 0 || InputManager::MouseDelta.y != 0))
 				{
-					CameraYaw -= LastFrameDeltaTime * InputManager::MouseDelta.x * 50.f;
-					CameraPitch -= LastFrameDeltaTime * InputManager::MouseDelta.y * 50.f;
-					if (CameraPitch > 89.0f)
-						CameraPitch = 89.0f;
+					m_Camera.CameraYaw -= LastFrameDeltaTime * InputManager::MouseDelta.x * 50.f;
+					m_Camera.CameraPitch -= LastFrameDeltaTime * InputManager::MouseDelta.y * 50.f;
+					m_Camera.CameraPitch = std::clamp(m_Camera.CameraPitch, -89.0f, 89.0f);
 
 					glm::vec3 direction;
-					direction.x = cos(glm::radians(CameraYaw)) * cos(glm::radians(CameraPitch));
-					direction.y = sin(glm::radians(CameraPitch));
-					direction.z = sin(glm::radians(CameraYaw)) * cos(glm::radians(CameraPitch));
+					direction.x = cos(glm::radians(m_Camera.CameraYaw)) * cos(glm::radians(m_Camera.CameraPitch));
+					direction.y = sin(glm::radians(m_Camera.CameraPitch));
+					direction.z = sin(glm::radians(m_Camera.CameraYaw)) * cos(glm::radians(m_Camera.CameraPitch));
 					m_Camera.CameraForward = glm::normalize(direction);
-					m_Camera.CalculateMatrices();
+					m_Camera.CalculateViewMatrix();
+					if(m_Camera.PreviewCamera)
+						m_AppStatusWindow.SetText("Ready");
+					m_Camera.PreviewCamera = nullptr;
 				}
 			});
 	}

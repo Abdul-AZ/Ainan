@@ -2,7 +2,7 @@
 
 #include "EnvironmentObjectInterface.h"
 #include "editor/Window.h"
-#include "editor/Camera.h"
+#include "editor/EditorCamera.h"
 #include "editor/ParticleCustomizer.h"
 #include "renderer/ShaderProgram.h"
 #include "renderer/Renderer.h"
@@ -19,6 +19,7 @@ namespace Ainan {
 
 		void Update(const float deltaTime) override;
 		void Draw() override;
+		void OnTransform() override;
 		void SpawnAllParticlesOnQue(const float& deltaTime);
 		void SpawnParticle(const ParticleDescription& particle);
 		void ClearParticles();

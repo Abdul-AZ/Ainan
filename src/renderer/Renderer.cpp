@@ -378,7 +378,7 @@ namespace Ainan {
 	{
 		//clear previous frame's lights
 		Rdata->CurrentSceneDescription = desc;
-		Rdata->SceneBufferData.CurrentViewProjection = desc.SceneCamera.ProjectionMatrix * desc.SceneCamera.ViewMatrix;
+		Rdata->SceneBufferData.CurrentViewProjection = desc.SceneCamera.GetViewProjectionMatrix();
 		Rdata->CurrentNumberOfDrawCalls = 0;
 		Rdata->RadialLightSubmissionCount = 0;
 		Rdata->SpotLightSubmissionCount = 0;

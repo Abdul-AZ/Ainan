@@ -1,5 +1,7 @@
 #include "Grid.h"
 
+#include "environment/CameraObject.h"
+
 namespace Ainan {
 
 	Grid::Grid(float unitLength, int32_t numLinesPerAxis) : 
@@ -60,12 +62,24 @@ namespace Ainan {
 		Renderer::DestroyUniformBuffer(m_TransformUniformBuffer);
 	}
 
-	void Grid::Draw(const Camera& camera)
+	void Grid::Draw(const EditorCamera& camera)
 	{
 		auto& shader = Renderer::ShaderLibrary()["GridShader"];
 
 		glm::mat4 model(1.0f);
 		glm::vec3 pos(0.0f);
+
+		glm::vec3 cameraPos(1.0f);
+		if (camera.PreviewCamera)
+		{
+			glm::vec3 scale;
+			glm::quat rotation;
+			glm::vec3 skew;
+			glm::vec4 perspective;
+			glm::decompose(camera.PreviewCamera->ModelMatrix, scale, rotation, cameraPos, skew, perspective);
+		}
+		else
+			cameraPos = camera.Position;
 
 		switch (Orientation)
 		{
