@@ -28,9 +28,12 @@ namespace Ainan {
 		void SetPersp(float aspectRatio = USE_CURRENT_VALUE, float fov = USE_CURRENT_VALUE,
 					  float nearClip = USE_CURRENT_VALUE, float farClip = USE_CURRENT_VALUE);
 		void SetAspectRatio(float aspectRatio);
+		void SetFOV(float fov);
 		void SetViewMatrix(const glm::mat4& view);
 		
 		float GetOrthoZoomFactor() const { return m_OrthographicZoom; };
+		float GetFOV() const { return m_FOV; };
+		float GetAspectRatio() const { return m_AspectRatio; };
 		glm::mat4 GetViewProjectionMatrix() const { return m_ViewProjectionMatrix; };
 		glm::mat4 GetViewMatrix() const { return m_ViewMatrix; };
 		glm::mat4 GetProjectionMatrix() const { return m_ProjectionMatrix; };

@@ -16,6 +16,8 @@ namespace Ainan {
 	const glm::vec3 c_CameraStartingPosition = glm::vec3(0.0f, 0.0f, -10.0f);
 	const glm::vec3 c_CameraStartingForwardDirection = glm::vec3(0.0f, 0.0f, 1.0f);
 
+	class CameraObject;
+
 	class EditorCamera
 	{
 	public:
@@ -32,6 +34,7 @@ namespace Ainan {
 
 	public:
 		Camera m_Camera;
+		CameraObject* PreviewCamera = nullptr;
 		glm::vec3 Position = c_CameraStartingPosition;
 		glm::vec3 CameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 		glm::vec3 CameraForward = c_CameraStartingForwardDirection;

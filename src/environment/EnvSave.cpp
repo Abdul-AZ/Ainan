@@ -238,6 +238,8 @@ namespace Ainan {
 		j[id + "Type"] = EnvironmentObjectTypeToString(CameraType);
 		j[id + "Name"] = camera.m_Name;
 		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(camera.ModelMatrix);
+		j[id + "ProjMode"] = ProjectionModeToStr(camera.GetCamera().GetProjectionMode());
+		j[id + "AspectRatio"] = VEC2_TO_JSON_ARRAY(camera.m_AspectRatio);
 	}
 }
 

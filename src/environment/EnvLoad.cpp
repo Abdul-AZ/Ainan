@@ -277,14 +277,18 @@ namespace Ainan {
 
 	void CameraFromJson(Environment* env, json& data, std::string id)
 	{
+		//get data
+		auto projMode = StrToProjectionMode(data[id + "ProjMode"].get<std::string>());
+		auto aspectRatio = JSON_ARRAY_TO_VEC2(data[id + "AspectRatio"].get<std::vector<float>>());
+		auto modelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
+		auto name = data[id + "Name"].get<std::string>();
+
 		//create camera
-		std::unique_ptr<CameraObject> model = std::make_unique<CameraObject>();
+		std::unique_ptr<CameraObject> camera = std::make_unique<CameraObject>();
 
-		//populate with data
-		model->m_Name = data[id + "Name"].get<std::string>();
-		model->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
+		camera->Init(name, modelMatrix, aspectRatio, projMode);
 
-		pEnvironmentObject obj((EnvironmentObjectInterface*)(model.release()));
+		pEnvironmentObject obj((EnvironmentObjectInterface*)(camera.release()));
 		env->Objects.push_back(std::move(obj));
 	}
 

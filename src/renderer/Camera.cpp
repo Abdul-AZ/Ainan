@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Camera.h"
 
 namespace Ainan {
 	
@@ -68,6 +69,13 @@ namespace Ainan {
 		else
 			AINAN_LOG_FATAL("Unknown projection mode is set");
 
+		CalculateViewProjection();
+	}
+
+	void Camera::SetFOV(float fov)
+	{
+		m_FOV = fov;
+		CalculatePerspProjection();
 		CalculateViewProjection();
 	}
 

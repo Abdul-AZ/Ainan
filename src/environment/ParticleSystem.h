@@ -19,6 +19,7 @@ namespace Ainan {
 
 		void Update(const float deltaTime) override;
 		void Draw() override;
+		void OnTransform() override;
 		void SpawnAllParticlesOnQue(const float& deltaTime);
 		void SpawnParticle(const ParticleDescription& particle);
 		void ClearParticles();

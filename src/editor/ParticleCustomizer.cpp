@@ -8,8 +8,8 @@ namespace Ainan {
 		mt(std::random_device{}())
 	{
 		VertexLayout layout(1);
-		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
-		m_LineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 2, layout, Renderer::ShaderLibrary()["LineShader"], true);
+		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec3);
+		m_LineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec3) * 2, layout, Renderer::ShaderLibrary()["LineShader"], true);
 
 		glm::vec2 vertices[c_CircleVertexCount];
 		uint32_t indecies[c_CircleVertexCount * 2 - 2];
@@ -160,13 +160,13 @@ namespace Ainan {
 	{
 		if (Mode == SpawnMode::SpawnOnLine)
 		{
-			glm::vec2 offset = m_LineLength * glm::vec2(cos(glm::radians(m_LineAngle)), sin(glm::radians(m_LineAngle)));
+			glm::vec3 offset = m_LineLength * glm::vec3(cos(glm::radians(m_LineAngle)), sin(glm::radians(m_LineAngle)), 0.0f);
 
-			std::array<glm::vec2, 2> vertices;
-			vertices[0] = (m_SpawnPosition + offset);
-			vertices[1] = (m_SpawnPosition - offset);
+			std::array<glm::vec3, 2> vertices;
+			vertices[0] = (glm::vec3(m_SpawnPosition.x, m_SpawnPosition.y, 0.0f) + offset);
+			vertices[1] = (glm::vec3(m_SpawnPosition.x, m_SpawnPosition.y, 0.0f) - offset);
 
-			m_LineVertexBuffer.UpdateData(0, sizeof(glm::vec2) * 2, vertices.data());
+			m_LineVertexBuffer.UpdateData(0, sizeof(glm::vec3) * 2, vertices.data());
 
 			auto& shader = Renderer::ShaderLibrary()["LineShader"];
 			shader.BindUniformBuffer(m_SpawnAreaColorUniformBuffer, 1, RenderingStage::FragmentShader);

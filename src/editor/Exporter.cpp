@@ -14,19 +14,10 @@ extern "C"
 namespace Ainan {
 
 	Exporter::Exporter() :
-		Camera(ProjectionMode::Orthographic)
+		m_Camera(ProjectionMode::Orthographic, glm::mat4(1.0f), 16.0f / 9.0f)
 	{
 		memset(m_OutlineVertices.data(), 0, m_OutlineVertices.size() * sizeof(glm::vec2));
 
-		VertexLayout layout(1);
-		layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
-		m_OutlineVertexBuffer = Renderer::CreateVertexBuffer(nullptr, sizeof(glm::vec2) * 8, layout, Renderer::ShaderLibrary()["LineShader"], true);
-
-		layout[0] = VertexLayoutElement("u_Color", 0, ShaderVariableType::Vec4);
-		m_OutlineUniformBuffer = Renderer::CreateUniformBuffer("ObjectColor", 1, layout);
-		m_OutlineUniformBuffer.UpdateData((void*)&c_OutlineColor, sizeof(glm::vec4));
-
-		SetSize();
 		VideoSettings.ExportTargetLocation.m_FileName = "Example Name";
 		VideoSettings.ExportTargetLocation.FileExtension = ".mp4";
 
@@ -37,8 +28,6 @@ namespace Ainan {
 
 	Exporter::~Exporter()
 	{
-		Renderer::DestroyVertexBuffer(m_OutlineVertexBuffer);
-		Renderer::DestroyUniformBuffer(m_OutlineUniformBuffer);
 		if (m_ExportTargetTexture.IsValid())
 			Renderer::DestroyTexture(m_ExportTargetTexture);
 	}
@@ -55,45 +44,9 @@ namespace Ainan {
 			ExportVideo(editor);
 	}
 
-	void Exporter::DrawOutline()
-	{
-		if (!m_DrawExportCamera)
-			return;
-
-		std::array<glm::vec2, 8> vertices =
-		{
-			m_OutlineVertices[0], m_OutlineVertices[1], //bottom left to top left
-			m_OutlineVertices[1], m_OutlineVertices[2], //top left to top right
-			m_OutlineVertices[2], m_OutlineVertices[3], //top right to bottom right
-			m_OutlineVertices[3], m_OutlineVertices[0]  //bottom right to bottom left
-		};
-
-		m_OutlineVertexBuffer.UpdateData(0, sizeof(glm::vec2) * 8, vertices.data());
-
-		auto& shader = Renderer::ShaderLibrary()["LineShader"];
-		shader.BindUniformBuffer(m_OutlineUniformBuffer, 1, RenderingStage::FragmentShader);
-
-		Renderer::Draw(m_OutlineVertexBuffer, shader, Primitive::Lines,  8);
-	}
-
-	void Exporter::SetSize()
-	{
-		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
-		glm::vec2 size = glm::vec2(Camera.m_Camera.GetOrthoZoomFactor() * aspectRatio, Camera.m_Camera.GetOrthoZoomFactor());
-		m_OutlineVertices[0] = m_ExportCameraPosition - (size / 2.0f); //bottom left
-		m_OutlineVertices[1] = m_ExportCameraPosition + glm::vec2(-size.x, size.y) / 2.0f; //top left
-		m_OutlineVertices[2] = m_ExportCameraPosition + (size / 2.0f);     //top right
-		m_OutlineVertices[3] = m_ExportCameraPosition + glm::vec2(size.x, -size.y) / 2.0f; //bottom right
-
-		Camera.Update(0.0f, Renderer::Rdata->CurrentViewport);
-		glm::vec3 reversedPos = glm::vec3(-m_ExportCameraPosition.x, -m_ExportCameraPosition.y, Camera.Position.z);
-
-		Camera.Position = reversedPos;
-	}
-
 	void Exporter::DrawEnvToExportSurface(Environment& env)
 	{
-		Camera.Update(0.0f, { 0, 0, 16, 9 });
+		m_Camera.SetAspectRatio(16.0f / 9.0f);
 
 		for (pEnvironmentObject& obj : env.Objects)
 		{
@@ -116,14 +69,13 @@ namespace Ainan {
 		}
 
 		SceneDescription desc;
-		desc.SceneCamera = Camera.m_Camera;
+		desc.SceneCamera = ExportCamera->GetCamera();
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
 		desc.Blur = env.BlurEnabled;
 		desc.BlurRadius = env.BlurRadius;
 		Renderer::BeginScene(desc);
-		float aspectRatio = (float)m_WidthRatio / m_HeightRatio;
 		float width = 1920;
-		float height = width / aspectRatio;
+		float height = width / desc.SceneCamera.GetAspectRatio();
 		m_RenderSurface.SetSize(glm::ivec2(width, std::round(height / 2.0f) * 2.0f));
 		m_RenderSurface.SurfaceFramebuffer.Bind();
 		Renderer::ClearScreen();
@@ -139,55 +91,62 @@ namespace Ainan {
 		m_ExportTargetImage = m_RenderSurface.SurfaceFramebuffer.ReadPixels();
 	}
 
-	void Exporter::DisplayGUI()
+	void Exporter::DisplayGUI(Environment& env)
 	{
 		ImGui::PushID(this);
 		if (m_ExporterWindowOpen)
 		{
 			ImGui::Begin("Exporter", &m_ExporterWindowOpen);
 
+			//get all the camers
+			std::vector<CameraObject*> cameras;
+			for (size_t i = 0; i < env.Objects.size(); i++)
+			{
+				if (env.Objects[i]->Type == CameraType)
+				{
+					cameras.push_back((CameraObject*)env.Objects[i].get());
+				}
+			}
+
+			//display an empty dropdown if there isn't any cameras
+			if (cameras.size() == 0)
+			{
+				IMGUI_DROPDOWN_START("Camera", "There are no cameras in the Environment");
+				IMGUI_DROPDOWN_END();
+			}
+			else
+			{
+				//get the name of the currently selected camera from the object pool so that we are sure it isn't deleted
+				std::string selectedObjName = "";
+				for (size_t i = 0; i < cameras.size(); i++)
+				{
+					if (ExportCamera == cameras[i])
+					{
+						selectedObjName = ExportCamera->m_Name;
+						break;
+					}
+				}
+				
+				//if we couldn't find the camera make sure that we remove our pointer to it
+				if (selectedObjName == "")
+					ExportCamera = nullptr;
+
+				IMGUI_DROPDOWN_START("Camera", selectedObjName.c_str());
+				for (size_t i = 0; i < cameras.size(); i++)
+				{
+					IMGUI_DROPDOWN_SELECTABLE(ExportCamera, cameras[i], cameras[i]->m_Name.c_str());
+				}
+				IMGUI_DROPDOWN_END();
+			}
+
 			IMGUI_DROPDOWN_START("Export Mode", GetModeString(m_Mode).c_str());
 			IMGUI_DROPDOWN_SELECTABLE(m_Mode, Video, GetModeString(Video).c_str());
 			IMGUI_DROPDOWN_SELECTABLE(m_Mode, Picture, GetModeString(Picture).c_str());
 			IMGUI_DROPDOWN_END();
 
+
 			if (m_Mode == ExportMode::Video)
 				DisplayVideoExportSettingsControls();
-
-			if (ImGui::TreeNode("ExportMode Camera Settings"))
-			{
-				ImGui::Text("Draw ExportMode Camera Outline");
-				ImGui::SameLine();
-				ImGui::Checkbox("##Draw ExportMode Camera Outline", &m_DrawExportCamera);
-
-				//update position if any of these are changed, using SetSize().
-
-				ImGui::Text("Position");
-				ImGui::SameLine();
-				ImGui::SetCursorPosX(100);
-				if (ImGui::DragFloat2("##Position", &m_ExportCameraPosition.x, 0.01f))
-					SetSize();
-
-				ImGui::Text("Ratio: ");
-				ImGui::SameLine();
-				ImGui::PushItemWidth(30.0f);
-				if (ImGui::DragInt("##WidthRatio", &m_WidthRatio, 0.1))
-					SetSize();
-				ImGui::SameLine();
-				ImGui::Text(" : ");
-				ImGui::SameLine();
-				if (ImGui::DragInt("##HeightRatio", &m_HeightRatio, 0.1))
-					SetSize();
-				ImGui::PopItemWidth();
-
-				//if (ImGui::DragFloat("Zoom Factor", &Camera.ZoomFactor., 1.0f, 0.0f, 5000.0f))
-				//	SetSize();
-				//
-				//ImGui::Text("Exported Image Resolution: %.0f, %.0f", std::round(Camera.ZoomFactor * (float)m_WidthRatio / m_HeightRatio), Camera.ZoomFactor);
-
-				ImGui::TreePop();
-			}
-
 			{
 				ImGui::Text("Capture After :");
 
@@ -355,7 +314,6 @@ namespace Ainan {
 			Renderer::ImGuiNewFrame();
 			ImGuiWrapper::BeginGlobalDocking(true);
 			DisplayProgressBarWindow(operationIndex, operationCount, fraction);
-			editor.DrawUI();
 			ImGuiWrapper::EndGlobalDocking();
 			Renderer::ImGuiEndFrame(true);
 			Renderer::Present();
@@ -364,7 +322,7 @@ namespace Ainan {
 		while (editor.m_TimeSincePlayModeStarted < ExportStartTime)
 		{
 			editor.Update();
-			updateUI(1,2, editor.m_TimeSincePlayModeStarted / ExportStartTime);
+			updateUI(1, 2, editor.m_TimeSincePlayModeStarted / ExportStartTime);
 		}
 
 		DrawEnvToExportSurface(*editor.m_Env);

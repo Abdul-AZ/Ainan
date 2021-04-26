@@ -1,5 +1,7 @@
 #include "EditorCamera.h"
 
+#include "environment/CameraObject.h"
+
 namespace Ainan {
 
 	EditorCamera::EditorCamera(ProjectionMode mode) :

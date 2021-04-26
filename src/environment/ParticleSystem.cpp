@@ -31,6 +31,7 @@ namespace Ainan {
 		{
 			DefaultTexture = Renderer::CreateTexture(Image::LoadFromFile("res/Circle.png"));
 		}
+		Customizer.m_SpawnPosition = ModelMatrix[3];
 	}
 
 	ParticleSystem::~ParticleSystem()
@@ -42,7 +43,6 @@ namespace Ainan {
 
 	void ParticleSystem::Update(const float deltaTime)
 	{
-		Customizer.m_SpawnPosition = ModelMatrix[3];
 		SpawnAllParticlesOnQue(deltaTime);
 
 		ActiveParticleCount = 0;
@@ -158,6 +158,11 @@ namespace Ainan {
 
 	}
 
+	void ParticleSystem::OnTransform()
+	{
+		Customizer.m_SpawnPosition = ModelMatrix[3];
+	}
+
 	void ParticleSystem::SpawnParticle(const ParticleDescription& particle)
 	{
 		//go through all the particles
@@ -237,31 +242,13 @@ namespace Ainan {
 			ImGui::TreePop();
 		}
 
-		if (Customizer.Mode == SpawnMode::SpawnOnPoint)
-		{
-			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
-			if (ImGui::TreeNode("Position"))
-			{
-				ImGui::Text("Starting Position:");
-				ImGui::NextColumn();
-				ImGui::DragFloat2("##Starting Position:", &Customizer.m_SpawnPosition.x, c_ObjectPositionDragControlSpeed);
-
-				ImGui::NextColumn();
-				ImGui::TreePop();
-			}
-		}
-		else if (Customizer.Mode == SpawnMode::SpawnOnLine)
+		if (Customizer.Mode == SpawnMode::SpawnOnLine)
 		{
 			ImGui::SeparatorEx(ImGuiSeparatorFlags_Horizontal | ImGuiSeparatorFlags_SpanAllColumns);
 			if (ImGui::TreeNode("Position"))
 			{
 				auto spacing = ImGui::GetCursorPosY();
-				ImGui::Text("Line Position: ");
-				ImGui::NextColumn();
-				ImGui::SetCursorPosY(spacing);
-				ImGui::DragFloat2("##Line Position: ", &Customizer.m_SpawnPosition.x, 0.001f);
 
-				ImGui::NextColumn();
 				ImGui::Text("Line Length: ");
 				ImGui::NextColumn();
 				ImGui::DragFloat("##Line Length: ", &Customizer.m_LineLength, 0.001f);
@@ -281,12 +268,7 @@ namespace Ainan {
 			if (ImGui::TreeNode("Position"))
 			{
 				auto spacing = ImGui::GetCursorPosY();
-				ImGui::Text("Circle Position: ");
-				ImGui::NextColumn();
-				ImGui::SetCursorPosY(spacing);
-				ImGui::DragFloat2("##Circle Position: ", &Customizer.m_SpawnPosition.x, 0.001f);
 
-				ImGui::NextColumn();
 				ImGui::Text("Circle Radius: ");
 				ImGui::NextColumn();
 				ImGui::DragFloat("##Circle Radius: ", &Customizer.m_CircleRadius, 0.001f);
