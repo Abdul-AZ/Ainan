@@ -265,7 +265,8 @@ namespace Ainan {
 
 	void Exporter::DisplayProgressBarWindow(int32_t operationNum, int32_t operationCount, float fraction)
 	{
-		ImGui::SetNextWindowPosCenter(ImGuiCond_Always);
+		//set position be in the centre of the screen
+		ImGui::SetNextWindowPos(ImVec2(Window::FramebufferSize.x, Window::FramebufferSize.y) / 2, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
 		ImGui::SetNextWindowSize(ImVec2(400, 75));
 		ImGui::Begin("Exporting...", 0, ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoResize);
 		ImGui::Text("Operation %i of %i", operationNum, operationCount);

@@ -73,6 +73,7 @@ set(IMGUI_SOURCE_FILES
     "../submodules/imgui/imgui_demo.cpp"
     "../submodules/imgui/imgui_draw.cpp"
     "../submodules/imgui/imgui_widgets.cpp"
+    "../submodules/imgui/imgui_tables.cpp"
     "../submodules/imgui/misc/cpp/imgui_stdlib.cpp"
     "../submodules/imgui/imgui_internal.h"
 
@@ -81,6 +82,7 @@ set(IMGUI_SOURCE_FILES
 
 list(APPEND DEFINITIONS_LIST
     IMGUI_DEFINE_MATH_OPERATORS=1
+    GLFW_INCLUDE_NONE=1
     )
 
 set(SHADER_FILES)

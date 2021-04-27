@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Camera.h"
-
 #include "RenderCommand.h"
 #include "RenderCommandQueue.h"
 #include "RendererAPI.h"
@@ -12,6 +11,7 @@
 #include "Framebuffer.h"
 #include "Rectangle.h"
 #include "UniformBuffer.h"
+#include <GLFW/glfw3.h>
 
 namespace Ainan {
 

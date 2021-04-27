@@ -9,7 +9,7 @@ void Ainan::AppStatusWindow::DisplayGUI()
 				 ImGuiWindowFlags_NoMove;
 
 	ImGui::SetNextWindowSize(ImVec2(200, 200));
-	ImGui::PushStyleColor(ImGuiCol_ChildWindowBg, ImVec4(0 / 255.0f, 122 / 255.0f, 204 / 255.0f, 255 / 255.0f));
+	ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0 / 255.0f, 122 / 255.0f, 204 / 255.0f, 255 / 255.0f));
 	ImGui::Begin("##AppStatusWindow", nullptr, flags);
 	ImGui::SetCursorPosY(ImGui::GetCursorPosY() - 2.25f);
 	ImGui::PopStyleColor();

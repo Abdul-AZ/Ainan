@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GLFW/glfw3.h>
 #include "renderer/Rectangle.h"
 #include "renderer/RendererAPI.h"
 

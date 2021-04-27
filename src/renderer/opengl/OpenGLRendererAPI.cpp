@@ -1,7 +1,6 @@
-#include <glad/glad.h>
+#include "OpenGLRendererAPI.h"
 
 #include "renderer/Renderer.h"
-#include "OpenGLRendererAPI.h"
 #include "editor/Window.h"
 #include <GLFW/glfw3.h>
 #include "file/AssetManager.h" //for reading shader files

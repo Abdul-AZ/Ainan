@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glad/glad.h>
+
 #include "renderer/RendererAPI.h"
 #include "renderer/ShaderProgram.h"
 #include "renderer/IndexBuffer.h"
@@ -7,8 +9,6 @@
 #include "renderer/Rectangle.h"
 
 #include "OpenGLRendererContext.h"
-
-#include <glad/glad.h>
 
 namespace Ainan {
 	namespace OpenGL {
