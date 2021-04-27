@@ -874,7 +874,42 @@ namespace Ainan {
 			viewport->PlatformHandleRaw = glfwGetWin32Window(data->Window);
 			glfwSetWindowPos(data->Window, (int)viewport->Pos.x, (int)viewport->Pos.y);
 
-			// Install callbacks
+			///////////////// Install callbacks
+
+			//install scroll callback
+			glfwSetScrollCallback(data->Window, [](GLFWwindow* window, double x, double y)
+				{
+					ImGuiIO& io = ImGui::GetIO();
+					io.MouseWheelH += (float)x;
+					io.MouseWheel += (float)y;
+				});
+
+			//install keycallback
+			auto imguiKeyCallback = [](GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods)
+			{
+				ImGuiIO& io = ImGui::GetIO();
+				if (action == GLFW_PRESS)
+					io.KeysDown[key] = true;
+				if (action == GLFW_RELEASE)
+					io.KeysDown[key] = false;
+
+				// Modifiers are not reliable across systems
+				io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
+				io.KeyShift = io.KeysDown[GLFW_KEY_LEFT_SHIFT] || io.KeysDown[GLFW_KEY_RIGHT_SHIFT];
+				io.KeyAlt = io.KeysDown[GLFW_KEY_LEFT_ALT] || io.KeysDown[GLFW_KEY_RIGHT_ALT];
+				io.KeySuper = io.KeysDown[GLFW_KEY_LEFT_SUPER] || io.KeysDown[GLFW_KEY_RIGHT_SUPER];
+			};
+			glfwSetKeyCallback(data->Window, imguiKeyCallback);
+
+			//install char callback
+			auto imguiCharCallback = [](GLFWwindow* window, uint32_t c)
+			{
+				ImGuiIO& io = ImGui::GetIO();
+				if (c > 0 && c < 0x10000)
+					io.AddInputCharacter((uint16_t)c);
+			};
+			glfwSetCharCallback(data->Window, imguiCharCallback);
+
 			glfwSetWindowCloseCallback(data->Window, [](GLFWwindow* window)
 				{
 					if (ImGuiViewport* viewport = ImGui::FindViewportByPlatformHandle(window))
