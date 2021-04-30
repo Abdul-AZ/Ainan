@@ -1,5 +1,6 @@
 #pragma once
 
+#include "UUID.h"
 #include "editor/EditorCamera.h"
 #include "ImGuizmo.h"
 
@@ -47,6 +48,7 @@ namespace Ainan {
 		glm::mat4 ModelMatrix = glm::mat4(1.0f);
 		ObjSpace Space = OBJ_SPACE_3D;
 		std::string m_Name;
+		UUID ID;
 		bool RenameTextOpen = false;
 		bool Selected = false;
 		int Order = 0; //this should ONLY be used and edited by the Environment class and NOT be used by inherited classes.

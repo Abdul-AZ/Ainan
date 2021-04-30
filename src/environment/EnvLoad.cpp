@@ -109,6 +109,7 @@ namespace Ainan {
 
 		//populate with data
 
+		ps->ID.FromString(data[id + "UUID"].get<std::string>());
 		ps->m_Name = data[id + "Name"].get<std::string>();
 		ps->Customizer.Mode = GetTextAsMode(data[id + "Mode"].get<std::string>());
 		ps->Customizer.m_ParticlesPerSecond = data[id + "ParticlesPerSecond"].get<float>();
@@ -193,6 +194,7 @@ namespace Ainan {
 		std::unique_ptr<RadialLight> light = std::make_unique<RadialLight>();
 
 		//populate with data
+		light->ID.FromString(data[id + "UUID"].get<std::string>());
 		light->m_Name = data[id + "Name"].get <std::string>();
 		light->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		light->Color = JSON_ARRAY_TO_VEC4(data[id + "Color"].get<std::vector<float>>());
@@ -209,6 +211,7 @@ namespace Ainan {
 		std::unique_ptr<SpotLight> light = std::make_unique<SpotLight>();
 
 		//populate with data
+		light->ID.FromString(data[id + "UUID"].get<std::string>());
 		light->m_Name = data[id + "Name"].get <std::string>();
 		light->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		light->Color = JSON_ARRAY_TO_VEC4(data[id + "Color"].get<std::vector<float>>());
@@ -227,6 +230,7 @@ namespace Ainan {
 		std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
 
 		//populate with data
+		sprite->ID.FromString(data[id + "UUID"].get<std::string>());
 		sprite->m_Name = data[id + "Name"].get<std::string>();
 		sprite->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		sprite->Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
@@ -245,6 +249,7 @@ namespace Ainan {
 		std::unique_ptr<LitSprite> sprite = std::make_unique<LitSprite>();
 
 		//populate with data
+		sprite->ID.FromString(data[id + "UUID"].get<std::string>());
 		sprite->m_Name = data[id + "Name"].get<std::string>();
 		sprite->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		sprite->m_Position = JSON_ARRAY_TO_VEC2(data[id + "Position"].get<std::vector<float>>());
@@ -264,6 +269,7 @@ namespace Ainan {
 		std::unique_ptr<Model> model = std::make_unique<Model>();
 
 		//populate with data
+		model->ID.FromString(data[id + "UUID"].get<std::string>());
 		model->m_Name = data[id + "Name"].get<std::string>();
 		model->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		model->CurrentModelPath = data[id + "ModelPath"].get<std::string>();
@@ -287,6 +293,7 @@ namespace Ainan {
 		std::unique_ptr<CameraObject> camera = std::make_unique<CameraObject>();
 
 		camera->Init(name, modelMatrix, aspectRatio, projMode);
+		camera->ID.FromString(data[id + "UUID"].get<std::string>());
 
 		pEnvironmentObject obj((EnvironmentObjectInterface*)(camera.release()));
 		env->Objects.push_back(std::move(obj));

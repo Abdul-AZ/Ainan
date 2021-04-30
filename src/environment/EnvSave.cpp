@@ -100,7 +100,8 @@ namespace Ainan {
 	void toJson(json& j, const ParticleSystem& ps, size_t objectOrder)
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
-
+		
+		j[id + "UUID"] = ps.ID.GetAsUUIDString();
 		j[id + "Type"] = EnvironmentObjectTypeToString(ParticleSystemType).c_str();
 		j[id + "Name"] = ps.m_Name;
 		j[id + "Mode"] = GetModeAsText(ps.Customizer.Mode);
@@ -173,6 +174,7 @@ namespace Ainan {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
+		j[id + "UUID"] = light.ID.GetAsUUIDString();
 		j[id + "Type"] = EnvironmentObjectTypeToString(RadialLightType);
 		j[id + "Name"] = light.m_Name;
 		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(light.ModelMatrix);
@@ -184,6 +186,7 @@ namespace Ainan {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
+		j[id + "UUID"] = light.ID.GetAsUUIDString();
 		j[id + "Type"] = EnvironmentObjectTypeToString(SpotLightType);
 		j[id + "Name"] = light.m_Name;
 		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(light.ModelMatrix);
@@ -197,6 +200,7 @@ namespace Ainan {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
+		j[id + "UUID"] = sprite.ID.GetAsUUIDString();
 		j[id + "Type"] = EnvironmentObjectTypeToString(SpriteType);
 		j[id + "Name"] = sprite.m_Name;
 		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(sprite.ModelMatrix);
@@ -209,6 +213,7 @@ namespace Ainan {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
+		j[id + "UUID"] = sprite.ID.GetAsUUIDString();
 		j[id + "Type"] = EnvironmentObjectTypeToString(LitSpriteType);
 		j[id + "Name"] = sprite.m_Name;
 		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(sprite.ModelMatrix);
@@ -224,6 +229,7 @@ namespace Ainan {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
+		j[id + "UUID"] = model.ID.GetAsUUIDString();
 		j[id + "Type"] = EnvironmentObjectTypeToString(ModelType);
 		j[id + "Name"] = model.m_Name;
 		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(model.ModelMatrix);
@@ -235,6 +241,7 @@ namespace Ainan {
 	{
 		std::string id = "obj" + std::to_string(objectOrder) + "_";
 
+		j[id + "UUID"] = camera.ID.GetAsUUIDString();
 		j[id + "Type"] = EnvironmentObjectTypeToString(CameraType);
 		j[id + "Name"] = camera.m_Name;
 		j[id + "ModelMatrix"] = MAT4_TO_JSON_ARRAY(camera.ModelMatrix);

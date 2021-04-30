@@ -1,5 +1,6 @@
 #pragma once
 
+#include "environment/UUID.h"
 #include "ViewportWindow.h"
 #include "AppStatusWindow.h"
 #include "Grid.h"
@@ -120,6 +121,7 @@ namespace Ainan {
 		uint32_t m_GPUMemAllocated = 0;
 		int32_t m_DrawCalls = 0;
 		uint32_t FrameCounter = 0; //advances by 1 on every update iteration. when it reaches c_ApplicationFramerate, it goes back to 0.
+		std::mt19937 m_RandomNumberGenerator;
 
 	private:
 		void WorkerThreadLoop();

@@ -28,6 +28,7 @@ set(SOURCES_LIST
     "editor/customizers/VelocityCustomizer.h"   "editor/customizers/VelocityCustomizer.cpp"
 
     "environment/Environment.h"
+    "environment/UUID.h"                       "environment/UUID.cpp"
     "environment/EnvironmentObjectInterface.h" "environment/EnvironmentObjectInterface.cpp"
     "environment/EnvLoad.cpp"
     "environment/EnvSave.cpp"

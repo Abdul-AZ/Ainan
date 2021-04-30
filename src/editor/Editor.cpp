@@ -7,6 +7,10 @@ namespace Ainan
 		m_Grid(1.0f, 201),
 		m_Preferences(EditorPreferences::LoadFromDefaultPath())
 	{
+		{
+			std::random_device device;
+			m_RandomNumberGenerator.seed(device());
+		}
 		m_LoadEnvironmentBrowser.Filter.push_back(".env");
 		m_LoadEnvironmentBrowser.OnCloseWindow = []() 
 		{
@@ -1410,6 +1414,7 @@ namespace Ainan
 		}
 
 		obj->m_Name = name;
+		obj->ID.Generate(m_RandomNumberGenerator);
 
 		//display text that we created the object (for 2 seconds)
 		m_AppStatusWindow.SetText("Created Object : \"" + obj->m_Name + '"' + " of Type : \"" + EnvironmentObjectTypeToString(obj->Type) + '"', 2.0f);
