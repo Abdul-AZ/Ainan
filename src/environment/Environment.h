@@ -9,6 +9,10 @@ namespace Ainan
 	//all data stored in this class is saved and loaded, it is basically the project filetype in Ainan
 	struct Environment
 	{
+		//returns the index in of the object in Objects
+		//returns -1 if the object is not found
+		int32_t FindObjectByID(const UUID& id);
+
 		//metadata
 		std::string Name;
 

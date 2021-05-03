@@ -40,7 +40,7 @@ namespace Ainan {
 		Texture m_ExportTargetTexture;
 
 		Camera m_Camera;
-		CameraObject* ExportCamera = nullptr;
+		UUID ExportCameraID;
 		RenderSurface m_RenderSurface;
 
 		struct ExportVideoSettings

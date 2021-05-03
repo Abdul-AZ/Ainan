@@ -69,7 +69,12 @@ namespace Ainan {
 		}
 
 		SceneDescription desc;
-		desc.SceneCamera = ExportCamera->GetCamera();
+		int32_t index = env.FindObjectByID(ExportCameraID);
+		if (index == -1)
+			AINAN_LOG_FATAL("Cannot find export camera");
+
+		CameraObject* cameraObj = (CameraObject*)env.Objects[index].get();
+		desc.SceneCamera = cameraObj->m_Camera;
 		desc.SceneDrawTarget = m_RenderSurface.SurfaceFramebuffer;
 		desc.Blur = env.BlurEnabled;
 		desc.BlurRadius = env.BlurRadius;
@@ -118,23 +123,16 @@ namespace Ainan {
 			{
 				//get the name of the currently selected camera from the object pool so that we are sure it isn't deleted
 				std::string selectedObjName = "";
-				for (size_t i = 0; i < cameras.size(); i++)
+				int32_t index = env.FindObjectByID(ExportCameraID);
+				if (index != -1)
 				{
-					if (ExportCamera == cameras[i])
-					{
-						selectedObjName = ExportCamera->m_Name;
-						break;
-					}
+					selectedObjName = env.Objects[index]->m_Name;
 				}
-				
-				//if we couldn't find the camera make sure that we remove our pointer to it
-				if (selectedObjName == "")
-					ExportCamera = nullptr;
 
 				IMGUI_DROPDOWN_START("Camera", selectedObjName.c_str());
 				for (size_t i = 0; i < cameras.size(); i++)
 				{
-					IMGUI_DROPDOWN_SELECTABLE(ExportCamera, cameras[i], cameras[i]->m_Name.c_str());
+					IMGUI_DROPDOWN_SELECTABLE(ExportCameraID, cameras[i]->ID, cameras[i]->m_Name.c_str());
 				}
 				IMGUI_DROPDOWN_END();
 			}
@@ -173,7 +171,8 @@ namespace Ainan {
 			ImGui::SetCursorPosX(ImGui::GetWindowSize().x / 2.0f - ExportButtonWidth / 2.0f);
 			if (ImGui::Button("Export", ImVec2(ExportButtonWidth, ExportButtonHeight)))
 			{
-				m_ExporterScheduled = true;
+				if(ExportCameraID != UUID())
+					m_ExporterScheduled = true;
 			}
 
 			Renderer::RegisterWindowThatCanCoverViewport();
