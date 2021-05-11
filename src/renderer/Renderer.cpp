@@ -43,7 +43,8 @@ namespace Ainan {
 		{ "ImageShader"         , "shaders/Image"         , "shaders/Image"          },
 		{ "QuadBatchShader"     , "shaders/QuadBatch"     , "shaders/QuadBatch"      },
 		{ "LitSpriteShader"     , "shaders/LitSprite"     , "shaders/LitSprite"      },
-		{ "3DAmbientShader"     , "shaders/3DAmbient"     , "shaders/3DAmbient"      }
+		{ "3DAmbientShader"     , "shaders/3DAmbient"     , "shaders/3DAmbient"      },
+		{ "SkyboxShader"        , "shaders/Skybox"        , "shaders/Skybox"         }
 	};
 
 	void Renderer::Init(RendererType api)
@@ -225,7 +226,7 @@ namespace Ainan {
 		Rdata->QuadBatchVertexBufferDataOrigin = new QuadVertex[c_MaxQuadVerticesPerBatch];
 		Rdata->QuadBatchVertexBufferDataPtr = Rdata->QuadBatchVertexBufferDataOrigin;
 
-		Rdata->WhiteTexture = CreateTexture(glm::vec2(1, 1), TextureFormat::RGBA, nullptr);
+		Rdata->WhiteTexture = CreateTexture(glm::vec2(1, 1), TextureFormat::RGBA, TextureType::Texture2D, nullptr);
 		Rdata->QuadBatchTextures[0] = Rdata->WhiteTexture;
 
 		auto img = std::make_shared<Image>();
@@ -1205,64 +1206,78 @@ namespace Ainan {
 		PushCommand(cmd);
 	}
 
-	Texture Renderer::CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data)
+	static uint32_t s_TextureIdentifierCounter = 1;
+	Texture Renderer::CreateTexture(const glm::vec2& size, TextureFormat format, TextureType type, uint8_t* data)
 	{
-		Image img;
-		img.m_Width = size.x;
-		img.m_Height = size.y;
-		img.Format = format;
-		img.m_Data = data;
-		return CreateTexture(img);
-	}
-
-	Texture Renderer::CreateTexture(Image& img)
-	{
-		static uint32_t s_IdentifierCounter = 1;
 		Texture textureHandle;
-		textureHandle.Identifier = s_IdentifierCounter;
+		textureHandle.Identifier = s_TextureIdentifierCounter;
 		TextureDataView view;
-		view.Format = img.Format;
-		view.Size = { img.m_Width, img.m_Height };
-		Rdata->Textures[s_IdentifierCounter] = view;
+		view.Format = format;
+		view.Size = size;
+		view.Type = type;
+		Rdata->Textures[s_TextureIdentifierCounter] = view;
 
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::CreateTexture;
 		TextureCreationInfo* info = new TextureCreationInfo;
-		info->Size = glm::vec2(img.m_Width, img.m_Height);
-		info->Format = img.Format;
-		int32_t comp = 0;
-		switch (info->Format)
+		info->Size = size;
+		info->Format = format;
+		info->Type = type;
+		int32_t comp = GetBytesPerPixel(info->Format);
+
+		if (data)
 		{
-		case TextureFormat::RGBA:
-			comp = 4;
-			break;
-
-		case TextureFormat::RGB:
-			comp = 3;
-			break;
-
-		case TextureFormat::RG:
-			comp = 2;
-			break;
-
-		case TextureFormat::R:
-			comp = 1;
-			break;
-		default:
-			break;
-		}
-		if (img.m_Data)
-		{
-			info->InitialData = new uint8_t[img.m_Width * img.m_Height * comp];
-			memcpy(info->InitialData, img.m_Data, sizeof(uint8_t) * img.m_Width * img.m_Height * comp);
+			info->InitialData = new uint8_t[size.x * size.y * comp];
+			memcpy(info->InitialData, data, sizeof(uint8_t) * size.x * size.y * comp);
 		}
 		else
 			info->InitialData = nullptr;
 		cmd.CreateTextureProgramCmdDesc.Info = info;
-		cmd.CreateTextureProgramCmdDesc.Output = &Rdata->Textures[s_IdentifierCounter];
+		cmd.CreateTextureProgramCmdDesc.Output = &Rdata->Textures[s_TextureIdentifierCounter];
 
 		PushCommand(cmd);
-		s_IdentifierCounter++;
+		s_TextureIdentifierCounter++;
+		return textureHandle;
+	}
+
+	Texture Renderer::CreateTexture(Image& img)
+	{
+		return CreateTexture({ img.m_Width, img.m_Height }, img.Format, TextureType::Texture2D, img.m_Data);
+	}
+
+	Texture Renderer::CreateCubemapTexture(std::array<Image, 6>& faces)
+	{
+		int32_t comp = GetBytesPerPixel(faces[0].Format);
+		size_t faceDataSize = faces[0].m_Width * faces[0].m_Height * comp;
+		uint8_t* data = new uint8_t[faceDataSize * faces.size()];
+		for (size_t i = 0; i < faces.size(); i++)
+		{
+			if (!faces[i].m_Data)
+				AINAN_LOG_FATAL("Missing data when creating cubemap");
+			memcpy(data + faceDataSize * i, faces[i].m_Data, faceDataSize);
+		}
+
+		Texture textureHandle;
+		textureHandle.Identifier = s_TextureIdentifierCounter;
+		TextureDataView view;
+		view.Format = faces[0].Format;
+		view.Size = glm::vec2{ faces[0].m_Width, faces[0].m_Height };
+		view.Type = TextureType::Cubemap;
+		Rdata->Textures[s_TextureIdentifierCounter] = view;
+
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::CreateTexture;
+		TextureCreationInfo* info = new TextureCreationInfo;
+		info->Size = view.Size;
+		info->Format = view.Format;
+		info->Type = view.Type;
+		info->InitialData = data;
+
+		cmd.CreateTextureProgramCmdDesc.Info = info;
+		cmd.CreateTextureProgramCmdDesc.Output = &Rdata->Textures[s_TextureIdentifierCounter];
+
+		PushCommand(cmd);
+		s_TextureIdentifierCounter++;
 		return textureHandle;
 	}
 

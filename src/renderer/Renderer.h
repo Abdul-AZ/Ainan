@@ -116,8 +116,12 @@ namespace Ainan {
 		static Framebuffer CreateFramebuffer(const glm::vec2& size);
 		static void DestroyFramebuffer(Framebuffer fb);
 
-		static Texture CreateTexture(const glm::vec2& size, TextureFormat format, uint8_t* data = nullptr);
+		static Texture CreateTexture(const glm::vec2& size, TextureFormat format, TextureType type,  uint8_t* data = nullptr);
+		
+		//creates a 2D texture with the image format and size
 		static Texture CreateTexture(Image& img);
+		static Texture CreateCubemapTexture(std::array<Image, 6>& faces);
+		
 		static void DestroyTexture(Texture tex);
 
 		static void FlushQuadBatch();

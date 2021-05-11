@@ -290,7 +290,19 @@ namespace Ainan {
 
 			case RenderCommandType::BindTexture:
 				glActiveTexture(GL_TEXTURE0 + cmd.BindTextureProgramCmdDesc.Slot);
-				glBindTexture(GL_TEXTURE_2D, (uint32_t)cmd.BindTextureProgramCmdDesc.Texture->Identifier);
+				switch (cmd.BindTextureProgramCmdDesc.Texture->Type)
+				{
+				case TextureType::Texture2D:
+					glBindTexture(GL_TEXTURE_2D, (uint32_t)cmd.BindTextureProgramCmdDesc.Texture->Identifier);
+					break;
+
+				case TextureType::Cubemap:
+					glBindTexture(GL_TEXTURE_CUBE_MAP, (uint32_t)cmd.BindTextureProgramCmdDesc.Texture->Identifier);
+					break;
+
+				default:
+					AINAN_LOG_FATAL("Unkown texture type")
+				}
 				break;
 
 			case RenderCommandType::ResizeFramebuffer:
@@ -618,36 +630,64 @@ namespace Ainan {
 			uint32_t textureHandle = 0;
 			glGenTextures(1, &textureHandle);
 
-			glBindTexture(GL_TEXTURE_2D, textureHandle);
-
+			int32_t glInternalFormat = 0;
+			int32_t glFormat = 0;
 			switch (info->Format)
 			{
 			case TextureFormat::RGBA:
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, info->Size.x, info->Size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, info->InitialData);
+				glInternalFormat = GL_RGB8;
+				glFormat = GL_RGBA;
 				break;
 
 			case TextureFormat::RGB:
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, info->Size.x, info->Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, info->InitialData);
+				glInternalFormat = GL_RGB8;
+				glFormat = GL_RGB;
 				break;
 
 			case TextureFormat::RG:
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, info->Size.x, info->Size.y, 0, GL_RG, GL_UNSIGNED_BYTE, info->InitialData);
+				glInternalFormat = GL_RG8;
+				glFormat = GL_RG;
 				break;
 
 			case TextureFormat::R:
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, info->Size.x, info->Size.y, 0, GL_RED, GL_UNSIGNED_BYTE, info->InitialData);
+				glInternalFormat = GL_R8;
+				glFormat = GL_RED;
 				break;
 
 			case TextureFormat::Unspecified:
-				assert(false);
+			default:
+				AINAN_LOG_FATAL("Unknown texture format specified");
 			}
 
-			glGenerateMipmap(GL_TEXTURE_2D);
+			switch (info->Type)
+			{
+			case TextureType::Texture2D:
+				glBindTexture(GL_TEXTURE_2D, textureHandle);
+				glTexImage2D(GL_TEXTURE_2D, 0, glInternalFormat, info->Size.x, info->Size.y, 0, glFormat, GL_UNSIGNED_BYTE, info->InitialData);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glGenerateMipmap(GL_TEXTURE_2D);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				break;
+
+			case TextureType::Cubemap:
+				glBindTexture(GL_TEXTURE_CUBE_MAP, textureHandle);
+				for (uint32_t i = 0; i < 6; i++)
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, info->Size.x, info->Size.y, 0, glFormat, GL_UNSIGNED_BYTE,
+						info->InitialData + (int32_t)i * (int32_t)info->Size.x * (int32_t)info->Size.y * GetBytesPerPixel(info->Format));
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+				break;
+
+			case TextureType::Unspecified:
+			default:
+				AINAN_LOG_FATAL("Unkown texture type specified");
+			}
 
 			output->Identifier = textureHandle;
 			output->Size = info->Size;

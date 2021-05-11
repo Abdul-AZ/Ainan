@@ -122,6 +122,10 @@ namespace Ainan {
 		int32_t m_DrawCalls = 0;
 		uint32_t FrameCounter = 0; //advances by 1 on every update iteration. when it reaches c_ApplicationFramerate, it goes back to 0.
 		std::mt19937 m_RandomNumberGenerator;
+		
+		Texture Skybox;
+		VertexBuffer SkyboxVertexBuffer;
+		UniformBuffer SkyboxUniformBuffer;
 
 	private:
 		void WorkerThreadLoop();

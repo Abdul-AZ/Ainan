@@ -44,7 +44,12 @@ namespace Ainan {
 
 		int comp = 0;
 
-		stbi_set_flip_vertically_on_load(true);
+		//TODO fix this
+		bool flip = true;
+		if (pathAndName.find(".jpg") != pathAndName.npos)
+			flip = false;
+
+		stbi_set_flip_vertically_on_load(flip);
 
 		if(desiredFormat == TextureFormat::RGBA)
 			image.m_Data = stbi_load(pathAndName.c_str(), &image.m_Width, &image.m_Height, &comp, 4);

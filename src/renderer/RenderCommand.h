@@ -62,6 +62,7 @@ namespace Ainan {
 
 	struct TextureCreationInfo
 	{
+		TextureType Type;
 		glm::vec2 Size;
 		TextureFormat Format;
 		uint8_t* InitialData;

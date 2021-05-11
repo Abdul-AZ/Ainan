@@ -8,4 +8,5 @@ set(GLSL_SHADERS
     -v "${GLSL_SHADERS_DIR}/LitSprite.vert" -f "${GLSL_SHADERS_DIR}/LitSprite.frag" -o "${GLSL_SHADERS_DIR}/LitSprite.cso"
     -v "${GLSL_SHADERS_DIR}/QuadBatch.vert" -f "${GLSL_SHADERS_DIR}/QuadBatch.frag" -o "${GLSL_SHADERS_DIR}/QuadBatch.cso"
     -v "${GLSL_SHADERS_DIR}/3DAmbient.vert" -f "${GLSL_SHADERS_DIR}/3DAmbient.frag" -o "${GLSL_SHADERS_DIR}/3DAmbient.cso"
+    -v "${GLSL_SHADERS_DIR}/Skybox.vert" -f "${GLSL_SHADERS_DIR}/Skybox.frag" -o "${GLSL_SHADERS_DIR}/Skybox.cso"
     )

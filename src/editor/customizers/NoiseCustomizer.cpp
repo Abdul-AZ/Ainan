@@ -7,7 +7,7 @@ namespace Ainan {
 
 	NoiseCustomizer::NoiseCustomizer()
 	{
-		NoisePreviewTexture = Renderer::CreateTexture(glm::vec2(NOISE_TEXTURE_SIZE, NOISE_TEXTURE_SIZE), TextureFormat::RGBA, nullptr);
+		NoisePreviewTexture = Renderer::CreateTexture(glm::vec2(NOISE_TEXTURE_SIZE, NOISE_TEXTURE_SIZE), TextureFormat::RGBA, TextureType::Texture2D, nullptr);
 		NoiseLibrary.SetNoiseType(FastNoise::NoiseType::Perlin);
 		UpdateNoiseTex();
 	}
