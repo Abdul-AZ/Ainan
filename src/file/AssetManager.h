@@ -16,6 +16,8 @@ namespace Ainan {
 		static void DisplayGUI();
 
 		static std::string ReadEntireTextFile(const std::string& path);
+		//check if the path is valid and OK to use
+		static bool EvaluateDirectory(const std::filesystem::path& path);
 	public:
 		//this a path to the environment directory
 		static std::filesystem::path s_EnvironmentDirectory;

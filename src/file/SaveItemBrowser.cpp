@@ -51,7 +51,8 @@ namespace Ainan {
 		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetWindowSize().y - 125)))
 		{
 			//check if we can go back
-			if (m_CurrentFolderPath.parent_path() != m_CurrentFolderPath) {
+			if (m_CurrentFolderPath.parent_path() != m_CurrentFolderPath) 
+			{
 				//back button
 				if (ImGui::Button("..")) {
 					m_CurrentFolderPath = m_CurrentFolderPath.parent_path();
@@ -60,11 +61,11 @@ namespace Ainan {
 			}
 			for (const auto& entry : fs::directory_iterator(m_CurrentFolderPath)) 
 			{
-				if (entry.status().type() == fs::file_type::directory) 
+				if (AssetManager::EvaluateDirectory(entry.path()))
 				{
 					//make a button for every directory
-					if (ImGui::Button(entry.path().filename().u8string().c_str())) {
-
+					if (ImGui::Button(entry.path().filename().u8string().c_str())) 
+					{
 						//if button is pressed, enter that directory:
 
 						//if we are in root (eg "C:\", "D:\") we can just append the relative path of the folder

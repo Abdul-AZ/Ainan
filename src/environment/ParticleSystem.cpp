@@ -237,6 +237,9 @@ namespace Ainan {
 			ImGui::NextColumn();
 			ImGui::SetCursorPosY(spacing);
 			ImGui::DragFloat("##Particles\nPer Second: ", &Customizer.m_ParticlesPerSecond, 1.0f, 0.1f, 1000.0f);
+			
+			//limit to 1000
+			Customizer.m_ParticlesPerSecond = std::clamp(Customizer.m_ParticlesPerSecond, 0.1f, 1000.0f);
 
 			ImGui::NextColumn();
 			ImGui::TreePop();

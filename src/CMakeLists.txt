@@ -97,6 +97,7 @@ if(WIN32)
 
     list(APPEND SOURCES_LIST
         "windows/WinMain.cpp"
+        "windows/WindowsFileEvaluator.h"         "windows/WindowsFileEvaluator.cpp"
         "renderer/d3d11/D3D11RendererAPI.h"      "renderer/d3d11/D3D11RendererAPI.cpp"
         "renderer/d3d11/D3D11RendererContext.h"  "renderer/d3d11/D3D11RendererContext.cpp"
         )

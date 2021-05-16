@@ -31,6 +31,7 @@ namespace Ainan {
 		ImGui::SetNextWindowSizeConstraints(ImVec2(BROWSER_WINDOW_WIDTH, BROWSER_MIN_WINDOW_HEIGHT), ImVec2(1000, 1000), BrowserWindowSizeCallback);
 
 		ImGui::Begin(m_WindowName.c_str(), &m_WindowOpen);
+		
 
 		ImGui::Text("Current Directory :");
 		ImGui::SameLine();
@@ -42,7 +43,7 @@ namespace Ainan {
 		ImGui::SameLine();
 		ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), m_CurrentselectedFilePath.u8string().c_str());
 		ImGui::PushItemWidth(-1);
-		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetWindowSize().y - 100))) 
+		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetContentRegionAvail().y - ImGui::GetFrameHeightWithSpacing())))
 		{
 			//check if we can go back
 			if (m_CurrentFolderPath.parent_path() != m_CurrentFolderPath) {
@@ -52,10 +53,14 @@ namespace Ainan {
 					m_InputFolder = m_CurrentFolderPath.u8string();
 				}
 			}
-			for (const auto& entry : fs::directory_iterator(m_CurrentFolderPath)) {
-				if (entry.status().type() == fs::file_type::directory) {
+
+			for (const auto& entry : fs::directory_iterator(m_CurrentFolderPath, fs::directory_options::skip_permission_denied))
+			{
+				if (AssetManager::EvaluateDirectory(entry.path())) 
+				{
 					//make a button for every directory
-					if (ImGui::Button(entry.path().filename().u8string().c_str())) {
+					if (ImGui::Button(entry.path().filename().u8string().c_str())) 
+					{
 						//if button is pressed, enter that directory:
 						
 						//if we are in root (eg "C:\", "D:\") we can just append the relative path of the folder
@@ -78,7 +83,8 @@ namespace Ainan {
 
 					//remove unwanted files if they are filtered 
 					bool inFilter = false;
-					for (std::string& str : Filter) {
+					for (std::string& str : Filter) 
+					{
 						if (entry.path().extension() == str) {
 							inFilter = true;
 							break;

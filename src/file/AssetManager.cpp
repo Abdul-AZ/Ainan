@@ -1,8 +1,12 @@
 #include "AssetManager.h"
 
 #include "renderer/Renderer.h"
-
 #include "assimp/Importer.hpp"
+
+
+#ifdef PLATFORM_WINDOWS
+#include "windows/WindowsFileEvaluator.h"
+#endif
 
 namespace Ainan 
 {
@@ -94,6 +98,27 @@ namespace Ainan
 		fclose(file);
 
 		return file_content;
+	}
+
+	bool AssetManager::EvaluateDirectory(const std::filesystem::path& path)
+	{
+		using namespace std::filesystem;
+		std::error_code err;;
+		auto stat = status(path, err);
+		if (err)
+			return false;
+
+		if (!exists(stat))
+			return false;
+		if (!is_directory(stat))
+			return false;
+
+#ifdef PLATFORM_WINDOWS
+		if(!WinEvaluateDirectory(path))
+			return false;
+#endif
+
+		return true;
 	}
 
 	void BrowserWindowSizeCallback(ImGuiSizeCallbackData* data)

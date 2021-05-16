@@ -33,16 +33,18 @@ namespace Ainan {
 		ImGui::Text("Current Directory :");
 		auto flags = ImGuiInputTextFlags_::ImGuiInputTextFlags_EnterReturnsTrue;
 
-		if (ImGui::InputText("##empty", &m_InputFolder, flags)) {
+		if (ImGui::InputText("##empty", &m_InputFolder, flags)) 
+		{
 			if (fs::exists(m_InputFolder))
 				SelectedFolder = m_InputFolder;
 		}
 
 		ImGui::PushItemWidth(-1);
-		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetWindowSize().y - 100))) {
-
+		if (ImGui::ListBoxHeader("##empty", ImVec2(-1, ImGui::GetWindowSize().y - 100))) 
+		{
 			//check if we can go back
-			if (SelectedFolder.parent_path() != SelectedFolder) {
+			if (SelectedFolder.parent_path() != SelectedFolder) 
+			{
 				//back button
 				if (ImGui::Button("..")) {
 					SelectedFolder = SelectedFolder.parent_path();
@@ -50,9 +52,10 @@ namespace Ainan {
 				}
 			}
 
-			for (const auto& entry : fs::directory_iterator(SelectedFolder)) {
-				if (entry.status().type() == fs::file_type::directory) {
-
+			for (const auto& entry : fs::directory_iterator(SelectedFolder)) 
+			{
+				if (AssetManager::EvaluateDirectory(entry.path()))
+				{
 					bool is_selected = (SelectedFolder == entry.path());
 					if (ImGui::Selectable(entry.path().filename().u8string().c_str(), &is_selected))
 						SelectedFolder = entry.path();
