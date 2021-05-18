@@ -91,12 +91,12 @@ namespace Ainan
 
 		std::array<Image, 6> faces = 
 		{
-			faces[0] = Image::LoadFromFile("res/right.jpg", TextureFormat::RGBA),
-			faces[1] = Image::LoadFromFile("res/left.jpg", TextureFormat::RGBA),
-			faces[2] = Image::LoadFromFile("res/top.jpg", TextureFormat::RGBA),
-			faces[3] = Image::LoadFromFile("res/bottom.jpg", TextureFormat::RGBA),
-			faces[5] = Image::LoadFromFile("res/front.jpg", TextureFormat::RGBA),
-			faces[4] = Image::LoadFromFile("res/back.jpg", TextureFormat::RGBA),
+			faces[0] = Image::LoadFromFile("res/StarterAssets/skybox_right.png", TextureFormat::RGBA, false),
+			faces[1] = Image::LoadFromFile("res/StarterAssets/skybox_left.png", TextureFormat::RGBA, false),
+			faces[2] = Image::LoadFromFile("res/StarterAssets/skybox_top.png", TextureFormat::RGBA, false),
+			faces[3] = Image::LoadFromFile("res/StarterAssets/skybox_bottom.png", TextureFormat::RGBA, false),
+			faces[5] = Image::LoadFromFile("res/StarterAssets/skybox_front.png", TextureFormat::RGBA, false),
+			faces[4] = Image::LoadFromFile("res/StarterAssets/skybox_back.png", TextureFormat::RGBA, false),
 		};
 		
 		Skybox = Renderer::CreateCubemapTexture(faces);

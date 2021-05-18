@@ -55,7 +55,7 @@ namespace Ainan {
 		Image() = default;
 		~Image();
 
-		static Image LoadFromFile(const std::string& pathAndName, TextureFormat desiredFormat = TextureFormat::Unspecified);
+		static Image LoadFromFile(const std::string& pathAndName, TextureFormat desiredFormat = TextureFormat::Unspecified, bool flip = true);
 		void SaveToFile(const std::string& pathAndName, const ImageFormat& format);
 
 		Image(const Image& image);

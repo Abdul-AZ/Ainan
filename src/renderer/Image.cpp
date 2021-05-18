@@ -38,16 +38,11 @@ namespace Ainan {
 			delete[] m_Data;
 	}
 
-	Image Image::LoadFromFile(const std::string& pathAndName, TextureFormat desiredFormat)
+	Image Image::LoadFromFile(const std::string& pathAndName, TextureFormat desiredFormat, bool flip)
 	{
 		Image image;
 
 		int comp = 0;
-
-		//TODO fix this
-		bool flip = true;
-		if (pathAndName.find(".jpg") != pathAndName.npos)
-			flip = false;
 
 		stbi_set_flip_vertically_on_load(flip);
 
