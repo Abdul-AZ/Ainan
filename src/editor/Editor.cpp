@@ -116,6 +116,10 @@ namespace Ainan
 
 	Editor::~Editor()
 	{
+		Renderer::DestroyTexture(Skybox);
+		Renderer::DestroyVertexBuffer(SkyboxVertexBuffer);
+		Renderer::DestroyUniformBuffer(SkyboxUniformBuffer);
+
 		Renderer::DestroyTexture(m_PlayButtonTexture);
 		Renderer::DestroyTexture(m_PauseButtonTexture);
 		Renderer::DestroyTexture(m_StopButtonTexture);
@@ -689,13 +693,17 @@ namespace Ainan
 		desc.BlurRadius = m_Env->BlurRadius;
 		Renderer::BeginScene(desc);
 
-		//remove translation and keep rotation
-		glm::mat4 u_ViewProjection = camera.GetProjectionMatrix() * glm::mat4(glm::mat3(camera.GetViewMatrix()));
-		SkyboxUniformBuffer.UpdateData(&u_ViewProjection, sizeof(u_ViewProjection));
-		
-		Renderer::ShaderLibrary()["SkyboxShader"].BindTexture(Skybox, 0, RenderingStage::FragmentShader);
-		Renderer::ShaderLibrary()["SkyboxShader"].BindUniformBuffer(SkyboxUniformBuffer, 1, RenderingStage::VertexShader);
-		Renderer::Draw(SkyboxVertexBuffer, Renderer::ShaderLibrary()["SkyboxShader"], Primitive::Triangles, 36);
+		//render skybox if in perspective projection
+		if (camera.GetProjectionMode() == ProjectionMode::Perspective)
+		{
+			//remove translation and keep rotation
+			glm::mat4 u_ViewProjection = camera.GetProjectionMatrix() * glm::mat4(glm::mat3(camera.GetViewMatrix()));
+			SkyboxUniformBuffer.UpdateData(&u_ViewProjection, sizeof(u_ViewProjection));
+
+			Renderer::ShaderLibrary()["SkyboxShader"].BindTexture(Skybox, 0, RenderingStage::FragmentShader);
+			Renderer::ShaderLibrary()["SkyboxShader"].BindUniformBuffer(SkyboxUniformBuffer, 1, RenderingStage::VertexShader);
+			Renderer::Draw(SkyboxVertexBuffer, Renderer::ShaderLibrary()["SkyboxShader"], Primitive::Triangles, 36);
+		}
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
