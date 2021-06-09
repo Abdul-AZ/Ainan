@@ -29,6 +29,7 @@ set(SOURCES_LIST
 
     "environment/Environment.h"                "environment/Environment.cpp"
     "environment/UUID.h"                       "environment/UUID.cpp"
+    "environment/Skybox.h"                     "environment/Skybox.cpp"
     "environment/EnvironmentObjectInterface.h" "environment/EnvironmentObjectInterface.cpp"
     "environment/EnvLoad.cpp"
     "environment/EnvSave.cpp"

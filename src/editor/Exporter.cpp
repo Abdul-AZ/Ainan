@@ -84,6 +84,9 @@ namespace Ainan {
 		m_RenderSurface.SetSize(glm::ivec2(width, std::round(height / 2.0f) * 2.0f));
 		m_RenderSurface.SurfaceFramebuffer.Bind();
 		Renderer::ClearScreen();
+		//render skybox if in perspective projection
+		if (desc.SceneCamera.GetProjectionMode() == ProjectionMode::Perspective)
+			env.EnvSkybox.Draw(desc.SceneCamera);
 		for (pEnvironmentObject& obj : env.Objects)
 			obj->Draw();
 

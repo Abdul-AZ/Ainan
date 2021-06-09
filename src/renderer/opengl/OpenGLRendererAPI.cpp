@@ -698,40 +698,63 @@ namespace Ainan {
 
 		void OpenGLRendererAPI::UpdateTextureNew(const RenderCommand& cmd)
 		{
-			glBindTexture(GL_TEXTURE_2D, cmd.UpdateTextureCmdDesc.Texture->Identifier);
 			uint32_t width = cmd.UpdateTextureCmdDesc.Width;
 			uint32_t height = cmd.UpdateTextureCmdDesc.Height;
 			void* data = cmd.UpdateTextureCmdDesc.Data;
 
+			int32_t glInternalFormat = 0;
+			int32_t glFormat = 0;
 			switch (cmd.UpdateTextureCmdDesc.Format)
 			{
-				case TextureFormat::RGBA:
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-					break;
+			case TextureFormat::RGBA:
+				glInternalFormat = GL_RGB8;
+				glFormat = GL_RGBA;
+				break;
 
-				case TextureFormat::RGB:
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-					break;
+			case TextureFormat::RGB:
+				glInternalFormat = GL_RGB8;
+				glFormat = GL_RGB;
+				break;
 
-				case TextureFormat::RG:
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_RG8, width, height, 0, GL_RG, GL_UNSIGNED_BYTE, data);
-					break;
+			case TextureFormat::RG:
+				glInternalFormat = GL_RG8;
+				glFormat = GL_RG;
+				break;
 
-				case TextureFormat::R:
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, data);
-					break;
+			case TextureFormat::R:
+				glInternalFormat = GL_R8;
+				glFormat = GL_RED;
+				break;
 
-				case TextureFormat::Unspecified:
-					assert(false);
+			case TextureFormat::Unspecified:
+			default:
+				AINAN_LOG_FATAL("Unknown texture format specified");
 			}
 
-			glGenerateMipmap(GL_TEXTURE_2D);
+			switch (cmd.UpdateTextureCmdDesc.Texture->Type)
+			{
+			case TextureType::Texture2D:
+				glBindTexture(GL_TEXTURE_2D, cmd.UpdateTextureCmdDesc.Texture->Identifier);
+				glTexImage2D(GL_TEXTURE_2D, 0, glInternalFormat, width, height, 0, glFormat, GL_UNSIGNED_BYTE, data);
+				glGenerateMipmap(GL_TEXTURE_2D);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				break;
 
+			case TextureType::Cubemap:
+				glBindTexture(GL_TEXTURE_CUBE_MAP, cmd.UpdateTextureCmdDesc.Texture->Identifier);
+				for (uint32_t i = 0; i < 6; i++)
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, glInternalFormat, width, height, 0, glFormat, GL_UNSIGNED_BYTE,
+						(uint8_t*)data + (int32_t)i * width * height * GetBytesPerPixel(cmd.UpdateTextureCmdDesc.Format));
+				break;
+
+			case TextureType::Unspecified:
+			default:
+				AINAN_LOG_FATAL("Unkown texture type specified");
+			}
 			delete[] data;
 		}
 

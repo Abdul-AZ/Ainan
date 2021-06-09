@@ -4,9 +4,8 @@
 
 namespace Ainan
 {
-	void Texture::SetImage(std::shared_ptr<Image> image)
+	void Texture::UpdateData(std::shared_ptr<Image> image)
 	{
-		//Misc1 size to be interpreted as glm::vec2, Misc2 is Format and Extradata is a heap allocated array that will be freed by delete[]
 		RenderCommand cmd;
 		cmd.Type = RenderCommandType::UpdateTexture;
 		cmd.UpdateTextureCmdDesc.Texture = &Renderer::Rdata->Textures[Identifier];
@@ -36,6 +35,25 @@ namespace Ainan
 		}
 		cmd.UpdateTextureCmdDesc.Data = new uint8_t[image->m_Width * image->m_Height * comp];
 		memcpy(cmd.UpdateTextureCmdDesc.Data, image->m_Data, sizeof(uint8_t) * image->m_Width * image->m_Height * comp);
+
+		Renderer::PushCommand(cmd);
+	}
+
+	void Texture::UpdateData(std::array<Image, 6> images)
+	{
+		assert(Renderer::Rdata->Textures[Identifier].Type == TextureType::Cubemap);
+
+		RenderCommand cmd;
+		cmd.Type = RenderCommandType::UpdateTexture;
+		cmd.UpdateTextureCmdDesc.Texture = &Renderer::Rdata->Textures[Identifier];
+		cmd.UpdateTextureCmdDesc.Width = images[0].m_Width;
+		cmd.UpdateTextureCmdDesc.Height = images[0].m_Height;
+		cmd.UpdateTextureCmdDesc.Format = images[0].Format;
+		int32_t bpp = GetBytesPerPixel(images[0].Format);
+		cmd.UpdateTextureCmdDesc.Data = new uint8_t[images[0].m_Width * images[0].m_Height * bpp * images.size()];
+		for (size_t i = 0; i < images.size(); i++)
+			memcpy((uint8_t*)cmd.UpdateTextureCmdDesc.Data + i * images[0].m_Width * images[0].m_Height * bpp, images[i].m_Data,
+				sizeof(uint8_t) * images[0].m_Width * images[0].m_Height * bpp);
 
 		Renderer::PushCommand(cmd);
 	}

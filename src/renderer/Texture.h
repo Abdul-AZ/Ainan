@@ -23,7 +23,8 @@ namespace Ainan {
 			return Identifier != std::numeric_limits<uint32_t>::max();
 		}
 
-		void SetImage(std::shared_ptr<Image> image);
+		void UpdateData(std::shared_ptr<Image> image);
+		void UpdateData(std::array<Image, 6> images); //used in cubemaps
 
 		//used by ImGui
 		uint64_t GetTextureID();

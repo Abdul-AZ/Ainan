@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EnvironmentObjectInterface.h"
+#include "Skybox.h"
 #include "renderer/Renderer.h"
 
 namespace Ainan
@@ -18,6 +19,9 @@ namespace Ainan
 
 		//all the objects in the environement
 		std::vector<std::unique_ptr<EnvironmentObjectInterface>> Objects;
+
+		//background
+		Skybox EnvSkybox;
 
 		//post-processing data
 		RenderingBlendMode BlendMode = RenderingBlendMode::Additive;

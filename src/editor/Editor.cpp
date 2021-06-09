@@ -40,86 +40,10 @@ namespace Ainan
 
 		m_GPUMemAllocated = Renderer::GetUsedGPUMemory();
 		m_Camera.CalculateViewMatrix();
-
-
-		//TEMP CODE
-
-		float skyboxVertices[] = {
-			// positions          
-			-1.0f,  1.0f, -1.0f,
-			-1.0f, -1.0f, -1.0f,
-			 1.0f, -1.0f, -1.0f,
-			 1.0f, -1.0f, -1.0f,
-			 1.0f,  1.0f, -1.0f,
-			-1.0f,  1.0f, -1.0f,
-
-			-1.0f, -1.0f,  1.0f,
-			-1.0f, -1.0f, -1.0f,
-			-1.0f,  1.0f, -1.0f,
-			-1.0f,  1.0f, -1.0f,
-			-1.0f,  1.0f,  1.0f,
-			-1.0f, -1.0f,  1.0f,
-
-			 1.0f, -1.0f, -1.0f,
-			 1.0f, -1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f, -1.0f,
-			 1.0f, -1.0f, -1.0f,
-
-			-1.0f, -1.0f,  1.0f,
-			-1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			 1.0f, -1.0f,  1.0f,
-			-1.0f, -1.0f,  1.0f,
-
-			-1.0f,  1.0f, -1.0f,
-			 1.0f,  1.0f, -1.0f,
-			 1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			-1.0f,  1.0f,  1.0f,
-			-1.0f,  1.0f, -1.0f,
-
-			-1.0f, -1.0f, -1.0f,
-			-1.0f, -1.0f,  1.0f,
-			 1.0f, -1.0f, -1.0f,
-			 1.0f, -1.0f, -1.0f,
-			-1.0f, -1.0f,  1.0f,
-			 1.0f, -1.0f,  1.0f
-		};
-
-		std::array<Image, 6> faces = 
-		{
-			faces[0] = Image::LoadFromFile("res/StarterAssets/skybox_right.png", TextureFormat::RGBA, false),
-			faces[1] = Image::LoadFromFile("res/StarterAssets/skybox_left.png", TextureFormat::RGBA, false),
-			faces[2] = Image::LoadFromFile("res/StarterAssets/skybox_top.png", TextureFormat::RGBA, false),
-			faces[3] = Image::LoadFromFile("res/StarterAssets/skybox_bottom.png", TextureFormat::RGBA, false),
-			faces[5] = Image::LoadFromFile("res/StarterAssets/skybox_front.png", TextureFormat::RGBA, false),
-			faces[4] = Image::LoadFromFile("res/StarterAssets/skybox_back.png", TextureFormat::RGBA, false),
-		};
-		
-		Skybox = Renderer::CreateCubemapTexture(faces);
-		VertexLayout layout =
-		{
-			VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec3)
-		};
-		SkyboxVertexBuffer = Renderer::CreateVertexBuffer(skyboxVertices, sizeof(skyboxVertices),
-			layout, Renderer::ShaderLibrary()["SkyboxShader"]);
-
-		layout =
-		{
-			VertexLayoutElement("POSITION", 0, ShaderVariableType::Mat4)
-		};
-		SkyboxUniformBuffer = Renderer::CreateUniformBuffer("SkyboxTransform", 1, layout);
 	}
 
 	Editor::~Editor()
 	{
-		Renderer::DestroyTexture(Skybox);
-		Renderer::DestroyVertexBuffer(SkyboxVertexBuffer);
-		Renderer::DestroyUniformBuffer(SkyboxUniformBuffer);
-
 		Renderer::DestroyTexture(m_PlayButtonTexture);
 		Renderer::DestroyTexture(m_PauseButtonTexture);
 		Renderer::DestroyTexture(m_StopButtonTexture);
@@ -695,15 +619,7 @@ namespace Ainan
 
 		//render skybox if in perspective projection
 		if (camera.GetProjectionMode() == ProjectionMode::Perspective)
-		{
-			//remove translation and keep rotation
-			glm::mat4 u_ViewProjection = camera.GetProjectionMatrix() * glm::mat4(glm::mat3(camera.GetViewMatrix()));
-			SkyboxUniformBuffer.UpdateData(&u_ViewProjection, sizeof(u_ViewProjection));
-
-			Renderer::ShaderLibrary()["SkyboxShader"].BindTexture(Skybox, 0, RenderingStage::FragmentShader);
-			Renderer::ShaderLibrary()["SkyboxShader"].BindUniformBuffer(SkyboxUniformBuffer, 1, RenderingStage::VertexShader);
-			Renderer::Draw(SkyboxVertexBuffer, Renderer::ShaderLibrary()["SkyboxShader"], Primitive::Triangles, 36);
-		}
+			m_Env->EnvSkybox.Draw(camera);
 
 		for (pEnvironmentObject& obj : m_Env->Objects)
 		{
@@ -798,6 +714,7 @@ namespace Ainan
 		DisplayPreferencesGUI();
 		DisplayPropertiesGUI();
 		m_AppStatusWindow.DisplayGUI();
+		m_Env->EnvSkybox.DisplayGUI();
 
 		//Settings window
 		if (m_EnvironmentSettingsWindowOpen)
@@ -964,6 +881,7 @@ namespace Ainan
 			if (ImGui::BeginMenu("Window")) 
 			{
 				ImGui::MenuItem("Properties", nullptr, &m_PropertiesWindowOpen);
+				ImGui::MenuItem("Skybox", nullptr, &m_Env->EnvSkybox.SkyboxWindowOpen);
 				ImGui::MenuItem("Environment Controls", nullptr, &m_EnvironmentControlsWindowOpen);
 				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
 				ImGui::MenuItem("Settings", nullptr, &m_EnvironmentSettingsWindowOpen);

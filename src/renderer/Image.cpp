@@ -75,6 +75,28 @@ namespace Ainan {
 		return image;
 	}
 
+	Image Image::FromColor(const glm::vec4& color, TextureFormat format, const glm::vec2 size)
+	{
+		Image image;
+		int32_t bpp = GetBytesPerPixel(format);
+		uint8_t uintColor[4] =
+		{
+			color.r * 255,
+			color.g * 255,
+			color.b * 255,
+			color.a * 255
+		};
+
+		image.m_Data = new uint8_t[bpp * size.x * size.y];
+		for (size_t i = 0; i < size.x * size.y; i++)
+			memcpy(&image.m_Data[i * bpp], uintColor, bpp);
+		
+		image.Format = format;
+		image.m_Width = size.x;
+		image.m_Height = size.y;
+		return image;
+	}
+
 	void Image::SaveToFile(const std::string& path, const ImageFormat& format)
 	{
 		uint32_t comp = GetBytesPerPixel(Format);

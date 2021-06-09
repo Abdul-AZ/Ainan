@@ -1137,25 +1137,111 @@ namespace Ainan {
 
 		void D3D11RendererAPI::UpdateTexture(const RenderCommand& cmd)
 		{
-			ID3D11Texture2D* stagingTexture;
-			D3D11_TEXTURE2D_DESC desc{};
-			desc.Width = cmd.UpdateTextureCmdDesc.Width;
-			desc.Height = cmd.UpdateTextureCmdDesc.Height;
-			desc.SampleDesc.Count = 1;
-			//TODO pass dynamic parameter
-			desc.Usage = D3D11_USAGE_STAGING;
-			desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-			desc.ArraySize = 1;
-			desc.MipLevels = 1;
-			desc.Format = D3DFormat(cmd.UpdateTextureCmdDesc.Format);
+			switch (cmd.UpdateTextureCmdDesc.Texture->Type)
+			{
+			case TextureType::Texture2D:
+			{
+				ID3D11Texture2D* stagingTexture;
+				D3D11_TEXTURE2D_DESC desc{};
+				desc.Width = cmd.UpdateTextureCmdDesc.Width;
+				desc.Height = cmd.UpdateTextureCmdDesc.Height;
+				desc.SampleDesc.Count = 1;
+				desc.Usage = D3D11_USAGE_STAGING;
+				desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+				desc.ArraySize = 1;
+				desc.MipLevels = 1;
+				desc.Format = D3DFormat(cmd.UpdateTextureCmdDesc.Format);
 
-			D3D11_SUBRESOURCE_DATA subresource{};
-			subresource.pSysMem = cmd.UpdateTextureCmdDesc.Data;
-			subresource.SysMemPitch = desc.Width * sizeof(uint8_t) * GetBytesPerPixel(cmd.UpdateTextureCmdDesc.Format);
-			ASSERT_D3D_CALL(Context.Device->CreateTexture2D(&desc, &subresource, &stagingTexture));
-			Context.DeviceContext->CopyResource((ID3D11Texture2D*)cmd.UpdateTextureCmdDesc.Texture->Identifier, stagingTexture);
-			stagingTexture->Release();
+				D3D11_SUBRESOURCE_DATA subresource{};
+				subresource.pSysMem = cmd.UpdateTextureCmdDesc.Data;
+				subresource.SysMemPitch = desc.Width * sizeof(uint8_t) * GetBytesPerPixel(cmd.UpdateTextureCmdDesc.Format);
+				ASSERT_D3D_CALL(Context.Device->CreateTexture2D(&desc, &subresource, &stagingTexture));
+				Context.DeviceContext->CopyResource((ID3D11Texture2D*)cmd.UpdateTextureCmdDesc.Texture->Identifier, stagingTexture);
+				stagingTexture->Release();
+				break;
+			}
 
+			case TextureType::Cubemap:
+				//if the new texture is a different size, recreate the whole texture
+				if (cmd.UpdateTextureCmdDesc.Texture->Size != glm::vec2((int)cmd.UpdateTextureCmdDesc.Width, (int)cmd.UpdateTextureCmdDesc.Height))
+				{
+					((ID3D11SamplerState*)cmd.UpdateTextureCmdDesc.Texture->Sampler)->Release();
+					((ID3D11ShaderResourceView*)cmd.UpdateTextureCmdDesc.Texture->View)->Release();
+					((ID3D11Texture2D*)cmd.UpdateTextureCmdDesc.Texture->Identifier)->Release();
+					
+					D3D11_TEXTURE2D_DESC desc{};
+					desc.Width = cmd.UpdateTextureCmdDesc.Width;
+					desc.Height = cmd.UpdateTextureCmdDesc.Height;
+					desc.SampleDesc.Count = 1;
+					//TODO pass dynamic parameter
+					desc.Usage = D3D11_USAGE_DEFAULT;
+					desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+					desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+					desc.ArraySize = 6;
+					desc.MipLevels = 1;
+					desc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+					desc.Format = D3DFormat(cmd.UpdateTextureCmdDesc.Format);
+
+					D3D11_SUBRESOURCE_DATA subresources[6];
+					memset(subresources, 0, sizeof(subresources));
+					const int32_t bpp = GetBytesPerPixel(cmd.UpdateTextureCmdDesc.Format);
+					for (size_t i = 0; i < 6; i++)
+					{
+						subresources[i].pSysMem = (uint8_t*)cmd.UpdateTextureCmdDesc.Data + i * bpp * (int32_t)desc.Width * (int32_t)desc.Height;
+						subresources[i].SysMemPitch = desc.Width * sizeof(uint8_t) * bpp;
+					}
+					ASSERT_D3D_CALL(Context.Device->CreateTexture2D(&desc, subresources, (ID3D11Texture2D**)&cmd.UpdateTextureCmdDesc.Texture->Identifier));
+
+					D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+					viewDesc.Format = desc.Format;
+					viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBE;
+					viewDesc.TextureCube.MostDetailedMip = 0;
+					viewDesc.TextureCube.MipLevels = 1;
+					ASSERT_D3D_CALL(Context.Device->CreateShaderResourceView((ID3D11Resource*)cmd.UpdateTextureCmdDesc.Texture->Identifier, &viewDesc, (ID3D11ShaderResourceView**)&cmd.UpdateTextureCmdDesc.Texture->View));
+
+					D3D11_SAMPLER_DESC samplerDesc{};
+					samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+					samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+					samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+					samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+					samplerDesc.MaxAnisotropy = 1;
+					samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+					samplerDesc.BorderColor[3] = 1.0f;
+					samplerDesc.MaxLOD = 1.0f;
+
+					ASSERT_D3D_CALL(Context.Device->CreateSamplerState(&samplerDesc, (ID3D11SamplerState**)&cmd.UpdateTextureCmdDesc.Texture->Sampler));
+				}
+				//otherwise, make a staging texture and copy it
+				else
+				{
+					ID3D11Texture2D* stagingTexture;
+					D3D11_TEXTURE2D_DESC desc{};
+					desc.Width = cmd.UpdateTextureCmdDesc.Width;
+					desc.Height = cmd.UpdateTextureCmdDesc.Height;
+					desc.SampleDesc.Count = 1;
+					desc.Usage = D3D11_USAGE_STAGING;
+					desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+					desc.ArraySize = 6;
+					desc.MipLevels = 1;
+					desc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+					desc.Format = D3DFormat(cmd.UpdateTextureCmdDesc.Format);
+
+					D3D11_SUBRESOURCE_DATA subresources[6];
+					memset(subresources, 0, sizeof(subresources));
+					const int32_t bpp = GetBytesPerPixel(cmd.UpdateTextureCmdDesc.Texture->Format);
+					for (size_t i = 0; i < 6; i++)
+					{
+						subresources[i].pSysMem = (uint8_t*)cmd.UpdateTextureCmdDesc.Data + i * bpp * desc.Width * desc.Height;
+						subresources[i].SysMemPitch = desc.Width * sizeof(uint8_t) * bpp;
+					}
+
+					ASSERT_D3D_CALL(Context.Device->CreateTexture2D(&desc, subresources, &stagingTexture));
+					Context.DeviceContext->CopyResource((ID3D11Texture2D*)cmd.UpdateTextureCmdDesc.Texture->Identifier, stagingTexture);
+					stagingTexture->Release();
+				}
+				break;
+			}
+			
 			cmd.UpdateTextureCmdDesc.Texture->Size = { cmd.UpdateTextureCmdDesc.Width , cmd.UpdateTextureCmdDesc.Height };
 			delete[] cmd.UpdateTextureCmdDesc.Data;
 		}

@@ -235,7 +235,7 @@ namespace Ainan {
 		img->Format = TextureFormat::RGBA;
 		img->m_Data = new uint8_t[4];
 		memset(img->m_Data, (uint8_t)255, 4);
-		Rdata->QuadBatchTextures[0].SetImage(img);
+		Rdata->QuadBatchTextures[0].UpdateData(img);
 		Rdata->QuadBatchTextureSlotsUsed = 1;
 
 		for (size_t i = 0; i < c_MaxQuadTexturesPerBatch; i++)

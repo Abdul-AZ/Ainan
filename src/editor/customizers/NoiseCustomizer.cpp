@@ -144,7 +144,7 @@ namespace Ainan {
 		}
 
 		//send image to the gpu
-		NoisePreviewTexture.SetImage(img);
+		NoisePreviewTexture.UpdateData(img);
 	}
 }
 

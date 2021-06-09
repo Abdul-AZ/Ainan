@@ -56,8 +56,10 @@ namespace Ainan {
 		~Image();
 
 		static Image LoadFromFile(const std::string& pathAndName, TextureFormat desiredFormat = TextureFormat::Unspecified, bool flip = true);
+		static Image FromColor(const glm::vec4& color, TextureFormat format, const glm::vec2 size);
 		void SaveToFile(const std::string& pathAndName, const ImageFormat& format);
 
+		Image(Image& image);
 		Image(const Image& image);
 		Image operator=(const Image& image);
 
