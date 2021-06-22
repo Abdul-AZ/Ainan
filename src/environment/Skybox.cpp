@@ -29,9 +29,15 @@ namespace Ainan {
 		return SkyMode::FlatColor;
 	}
 
-	Skybox::Skybox()
+	void Skybox::Init(SkyMode mode, glm::vec4 color, std::array<std::filesystem::path, 6> paths)
 	{
-		float skyboxVertices[] = 
+		m_Mode = mode;
+		m_SkyboxColor = color;
+		m_TexturePaths = paths;
+
+		Initilized = true;
+
+		float skyboxVertices[] =
 		{
 			// positions          
 			-1.0f,  1.0f, -1.0f,
@@ -79,12 +85,12 @@ namespace Ainan {
 
 		std::array<Image, 6> faces =
 		{
-			faces[0] = Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
-			faces[1] = Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
-			faces[2] = Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
-			faces[3] = Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
-			faces[5] = Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
-			faces[4] = Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
+			faces[0] = Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1028, 1028)),
+			faces[1] = Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1028, 1028)),
+			faces[2] = Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1028, 1028)),
+			faces[3] = Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1028, 1028)),
+			faces[5] = Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1028, 1028)),
+			faces[4] = Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1028, 1028)),
 		};
 
 		m_Cubemap = Renderer::CreateCubemapTexture(faces);
@@ -100,6 +106,8 @@ namespace Ainan {
 			VertexLayoutElement("POSITION", 0, ShaderVariableType::Mat4)
 		};
 		m_UniformBuffer = Renderer::CreateUniformBuffer("SkyboxTransform", 1, layout);
+		
+		SendDataToGPU();
 	}
 
 	void Skybox::Draw(const Camera& camera)
@@ -131,16 +139,7 @@ namespace Ainan {
 		{
 			if (ImGui::ColorEdit4("SkyboxColor", &m_SkyboxColor.r))
 			{
-				std::array<Image, 6> faces =
-				{
-					Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
-					Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
-					Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
-					Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
-					Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
-					Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028))
-				};
-				m_Cubemap.UpdateData(faces);
+				SendDataToGPU();
 			}
 		}
 		else if (m_Mode == SkyMode::CubemapTexture)
@@ -156,6 +155,7 @@ namespace Ainan {
 						if (ImGui::Selectable("None", &selected))
 						{
 							path = "";
+							SendDataToGPU();
 						}
 					}
 
@@ -167,75 +167,7 @@ namespace Ainan {
 						if (ImGui::Selectable(textureFileName.c_str(), &selected))
 						{
 							path = imagePath;
-							
-							//TODO remove this hacky way of calculating the biggest dimensions and load the images only once
-							int32_t biggestWidth = 0;
-							int32_t biggestHeight = 0;
-							{
-								Image faces[6] =
-								{
-										m_TexturePaths[0] == "" ?
-										Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
-										Image::LoadFromFile(m_TexturePaths[0].u8string(), TextureFormat::RGBA),
-
-										m_TexturePaths[1] == "" ?
-										Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
-										Image::LoadFromFile(m_TexturePaths[1].u8string(), TextureFormat::RGBA),
-
-										m_TexturePaths[2] == "" ?
-										Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
-										Image::LoadFromFile(m_TexturePaths[2].u8string(), TextureFormat::RGBA),
-
-										m_TexturePaths[3] == "" ?
-										Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
-										Image::LoadFromFile(m_TexturePaths[3].u8string(), TextureFormat::RGBA),
-
-										m_TexturePaths[4] == "" ?
-										Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
-										Image::LoadFromFile(m_TexturePaths[4].u8string(), TextureFormat::RGBA),
-
-										m_TexturePaths[5] == "" ?
-										Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
-										Image::LoadFromFile(m_TexturePaths[5].u8string(), TextureFormat::RGBA)
-								};
-
-								for (size_t i = 0; i < 6; i++)
-								{
-									if (faces[i].m_Width > biggestWidth)
-										biggestWidth = faces[i].m_Width;
-									if (faces[i].m_Height > biggestHeight)
-										biggestHeight = faces[i].m_Height;
-								}
-							}
-
-							std::array<Image, 6> faces
-							{
-							m_TexturePaths[0] == "" ?
-									Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
-									Image::LoadFromFile(m_TexturePaths[0].u8string(), TextureFormat::RGBA),
-
-								m_TexturePaths[1] == "" ?
-								Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
-								Image::LoadFromFile(m_TexturePaths[1].u8string(), TextureFormat::RGBA),
-
-								m_TexturePaths[2] == "" ?
-								Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
-								Image::LoadFromFile(m_TexturePaths[2].u8string(), TextureFormat::RGBA),
-
-								m_TexturePaths[3] == "" ?
-								Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
-								Image::LoadFromFile(m_TexturePaths[3].u8string(), TextureFormat::RGBA),
-
-								m_TexturePaths[4] == "" ?
-								Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
-								Image::LoadFromFile(m_TexturePaths[4].u8string(), TextureFormat::RGBA),
-
-								m_TexturePaths[5] == "" ?
-								Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
-								Image::LoadFromFile(m_TexturePaths[5].u8string(), TextureFormat::RGBA)
-							};
-
-							m_Cubemap.UpdateData(faces);
+							SendDataToGPU();
 						}
 					}
 
@@ -248,7 +180,6 @@ namespace Ainan {
 			displayDropDown(m_TexturePaths[3], "Top");
 			displayDropDown(m_TexturePaths[4], "Front");
 			displayDropDown(m_TexturePaths[5], "Back");
-
 		}
 
 		ImGui::End();
@@ -256,8 +187,100 @@ namespace Ainan {
 
 	Skybox::~Skybox()
 	{
-		Renderer::DestroyTexture(m_Cubemap);
-		Renderer::DestroyVertexBuffer(m_VertexBuffer);
-		Renderer::DestroyUniformBuffer(m_UniformBuffer);
+		if (Initilized)
+		{
+			Renderer::DestroyTexture(m_Cubemap);
+			Renderer::DestroyVertexBuffer(m_VertexBuffer);
+			Renderer::DestroyUniformBuffer(m_UniformBuffer);
+		}
+	}
+
+	void Skybox::SendDataToGPU()
+	{
+		if (m_Mode == SkyMode::FlatColor)
+		{
+			std::array<Image, 6> faces =
+			{
+				Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
+				Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
+				Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
+				Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
+				Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028)),
+				Image::FromColor(m_SkyboxColor, TextureFormat::RGBA, glm::vec2(1028, 1028))
+			};
+			m_Cubemap.UpdateData(faces);
+		}
+		else if (m_Mode == SkyMode::CubemapTexture)
+		{
+
+			//TODO remove this hacky way of calculating the biggest dimensions and load the images only once
+			int32_t biggestWidth = 0;
+			int32_t biggestHeight = 0;
+			{
+				Image faces[6] =
+				{
+						m_TexturePaths[0] == "" ?
+						Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
+						Image::LoadFromFile(m_TexturePaths[0].u8string(), TextureFormat::RGBA),
+
+						m_TexturePaths[1] == "" ?
+						Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
+						Image::LoadFromFile(m_TexturePaths[1].u8string(), TextureFormat::RGBA),
+
+						m_TexturePaths[2] == "" ?
+						Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
+						Image::LoadFromFile(m_TexturePaths[2].u8string(), TextureFormat::RGBA),
+
+						m_TexturePaths[3] == "" ?
+						Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
+						Image::LoadFromFile(m_TexturePaths[3].u8string(), TextureFormat::RGBA),
+
+						m_TexturePaths[4] == "" ?
+						Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
+						Image::LoadFromFile(m_TexturePaths[4].u8string(), TextureFormat::RGBA),
+
+						m_TexturePaths[5] == "" ?
+						Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(1, 1)) :
+						Image::LoadFromFile(m_TexturePaths[5].u8string(), TextureFormat::RGBA)
+				};
+
+				for (size_t i = 0; i < 6; i++)
+				{
+					if (faces[i].m_Width > biggestWidth)
+						biggestWidth = faces[i].m_Width;
+					if (faces[i].m_Height > biggestHeight)
+						biggestHeight = faces[i].m_Height;
+				}
+			}
+
+			std::array<Image, 6> faces
+			{
+			m_TexturePaths[0] == "" ?
+					Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
+					Image::LoadFromFile(m_TexturePaths[0].u8string(), TextureFormat::RGBA),
+
+				m_TexturePaths[1] == "" ?
+				Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
+				Image::LoadFromFile(m_TexturePaths[1].u8string(), TextureFormat::RGBA),
+
+				m_TexturePaths[2] == "" ?
+				Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
+				Image::LoadFromFile(m_TexturePaths[2].u8string(), TextureFormat::RGBA),
+
+				m_TexturePaths[3] == "" ?
+				Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
+				Image::LoadFromFile(m_TexturePaths[3].u8string(), TextureFormat::RGBA),
+
+				m_TexturePaths[4] == "" ?
+				Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
+				Image::LoadFromFile(m_TexturePaths[4].u8string(), TextureFormat::RGBA),
+
+				m_TexturePaths[5] == "" ?
+				Image::FromColor(glm::vec4(0, 0, 0, 0), TextureFormat::RGBA, glm::vec2(biggestWidth, biggestHeight)) :
+				Image::LoadFromFile(m_TexturePaths[5].u8string(), TextureFormat::RGBA)
+			};
+
+			m_Cubemap.UpdateData(faces);
+		}
 	}
 }

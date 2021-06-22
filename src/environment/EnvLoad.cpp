@@ -49,7 +49,7 @@ namespace Ainan {
 
 		SettingsFromJson(env, data);
 
-		int32_t objectCount = data["objectCount"].get<int>();
+		int32_t objectCount = data["ObjectCount"].get<int>();
 
 		for (size_t i = 0; i < objectCount; i++)
 		{
@@ -93,6 +93,14 @@ namespace Ainan {
 				break;
 			}
 		}
+
+		SkyMode mode = SkyModeFromStr(data["SkyboxMode"].get<std::string>());
+		glm::vec4 color = JSON_ARRAY_TO_VEC4(data["SkyboxColor"].get<std::vector<float>>());
+		std::array<std::filesystem::path, 6> paths;
+		for (size_t i = 0; i < paths.size(); i++)
+			paths[i] = data["SkyboxTexturePath" + std::to_string(i)].get<std::string>();
+		env->EnvSkybox.Init(mode, color, paths);
+
 		return env;
 	}
 

@@ -548,6 +548,7 @@ namespace Ainan
 
 				m_Env = new Environment;
 				m_Env->Name = m_EnvironmentCreateName;
+				m_Env->EnvSkybox.Init();
 
 				if (m_IncludeStarterAssets)
 					std::filesystem::copy("res\\StarterAssets", m_EnvironmentCreateFolderPath + "\\StarterAssets", std::filesystem::copy_options::recursive);

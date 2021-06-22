@@ -38,7 +38,7 @@ namespace Ainan {
 		data["EnvironmentName"] = env.Name;
 
 		//serialize inspector objects count int
-		data["objectCount"] = env.Objects.size();
+		data["ObjectCount"] = env.Objects.size();
 
 		//serialize inspector objects
 		for (size_t i = 0; i < env.Objects.size(); i++)
@@ -80,8 +80,15 @@ namespace Ainan {
 			}
 		}
 
+		//blur data
 		data["BlurEnabled"] = env.BlurEnabled;
 		data["BlurRadius"] = env.BlurRadius;
+
+		//skybox data
+		data["SkyboxMode"] = SkyModeStr(env.EnvSkybox.m_Mode);
+		data["SkyboxColor"] = VEC4_TO_JSON_ARRAY(env.EnvSkybox.m_SkyboxColor);
+		for (size_t i = 0; i < env.EnvSkybox.m_TexturePaths.size(); i++)
+			data["SkyboxTexturePath" + std::to_string(i)] = env.EnvSkybox.m_TexturePaths[i].u8string();
 
 		std::string jsonString = data.dump(4);
 
