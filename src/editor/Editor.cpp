@@ -784,15 +784,25 @@ namespace Ainan
 		InputManager::DisplayGUI();
 		m_ViewportWindow.DisplayGUI(m_RenderSurface.SurfaceFramebuffer);
 
-		static glm::mat4 cube(1.0f);
+		//render gizmo
+		
+		//set projection mode
 		if (m_Camera.m_Camera.GetProjectionMode() == ProjectionMode::Orthographic)
 			ImGuizmo::SetOrthographic(true);
 		else
 			ImGuizmo::SetOrthographic(false);
-		ImGuizmo::SetRect(m_ViewportWindow.WindowPosition.x, m_ViewportWindow.WindowPosition.y, m_ViewportWindow.WindowSize.x, m_ViewportWindow.WindowSize.y);
 
-		ImGuiIO& io = ImGui::GetIO();
-		ImGuizmo::SetDrawlist(ImGui::GetOverlayDrawList());
+		//set draw list to be the one on top of everything else
+		ImGuizmo::SetDrawlist(m_ViewportWindow.WindowDrawList);
+
+		//get the size information of the viewport
+		auto& position = m_ViewportWindow.WindowPosition;
+		auto& size = m_ViewportWindow.WindowSize;
+		auto titlebarHeight = ImGui::GetFrameHeightWithSpacing();
+
+		//set viewport boundries so that the gizmo is not drawn outside the viewport
+		m_ViewportWindow.WindowDrawList->PushClipRect(ImVec2{ position.x, position.y + titlebarHeight }, ImVec2{ position.x + size.x, position.y + size.y });
+		ImGuizmo::SetRect(position.x, position.y + titlebarHeight, size.x, size.y - titlebarHeight);
 
 		if (m_State == EditorState::State_EditorMode)
 		{
@@ -815,6 +825,7 @@ namespace Ainan
 				}
 			}
 		}
+		m_ViewportWindow.WindowDrawList->PopClipRect();
 	}
 
 	void Editor::OnEnvironmentLoad()

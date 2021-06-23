@@ -49,6 +49,7 @@ namespace Ainan {
 		ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(), ImVec2(Window::Size.x, Window::Size.y), ImGui::ColorConvertFloat4ToU32(ImVec4(0, 0, 0, 1)));
 		ImGui::Image(fb.GetTextureID(), ImVec2(RenderViewport.Width, RenderViewport.Height), uv0, uv1);
 
+		WindowDrawList = ImGui::GetWindowDrawList();
 		DrawEnvImGuiCmd = *ImGui::GetWindowDrawList();
 		pDrawEnvImGuiCmd = &DrawEnvImGuiCmd;
 

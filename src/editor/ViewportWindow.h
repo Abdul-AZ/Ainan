@@ -22,6 +22,8 @@ namespace Ainan {
 		glm::vec2 WindowSize = glm::vec2(0.0f, 0.0f);
 		glm::vec2 WindowContentRegionSize = glm::vec2(0.0f, 0.0f);
 
+		ImDrawList* WindowDrawList;
+
 		ImDrawList DrawEnvImGuiCmd;
 		ImDrawList* pDrawEnvImGuiCmd;
 	};
