@@ -9,7 +9,7 @@ layout(binding = 0) uniform sampler2D u_Textures[16];
 
 void main()
 {
-    int tex = int(Texture);
+    int tex = int(round(Texture));
     FragColor = vec4(0,0,0,0);
 
     switch(tex)

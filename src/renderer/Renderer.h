@@ -32,7 +32,7 @@ namespace Ainan {
 	//used internally for batch rendering
 	struct QuadVertex 
 	{
-		glm::vec2 Position;
+		glm::vec3 Position;
 		glm::vec4 Color;
 		float Texture;
 		glm::vec2 TextureCoordinates;
@@ -65,7 +65,7 @@ namespace Ainan {
 		static void WaitUntilRendererIdle();
 
 		//position is in world coordinates
-		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, Texture texture);
+		static void DrawQuad(glm::vec3 position, glm::vec4 color, float scale, Texture texture);
 		static void DrawQuad(glm::vec2 position, glm::vec4 color, float scale, float rotationInRadians, Texture texture);
 		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int32_t count, Texture texture);
 

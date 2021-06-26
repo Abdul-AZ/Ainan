@@ -197,7 +197,7 @@ namespace Ainan {
 		//setup batch renderer
 		{
 			VertexLayout layout(4);
-			layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
+			layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec3);
 			layout[1] = VertexLayoutElement("NORMAL", 0, ShaderVariableType::Vec4);
 			layout[2] = VertexLayoutElement("TEXCOORD", 0, ShaderVariableType::Float);
 			layout[3] = VertexLayoutElement("TEXCOORD", 1, ShaderVariableType::Vec2);
@@ -445,7 +445,7 @@ namespace Ainan {
 		Rdata->CommandQueue.WaitUntilIdle();
 	}
 
-	void Renderer::DrawQuad(glm::vec2 position, glm::vec4 color, float scale, Texture texture)
+	void Renderer::DrawQuad(glm::vec3 position, glm::vec4 color, float scale, Texture texture)
 	{
 		if ((Rdata->QuadBatchVertexBufferDataPtr - Rdata->QuadBatchVertexBufferDataOrigin) / sizeof(QuadVertex) > 4 ||
 			Rdata->QuadBatchTextureSlotsUsed == c_MaxQuadTexturesPerBatch)
@@ -476,25 +476,30 @@ namespace Ainan {
 			}
 		}
 
-		Rdata->QuadBatchVertexBufferDataPtr->Position = position;
+		glm::mat4 model = glm::translate(glm::translate(glm::mat4(1.0f), position), glm::vec3(scale));
+		glm::mat4 modelView = Rdata->CurrentSceneDescription.SceneCamera.GetViewMatrix() * model;
+		glm::vec3 right = glm::vec3(modelView[0][0], modelView[1][0], modelView[2][0]);
+		glm::vec3 up = glm::vec3(modelView[0][1], modelView[1][1], modelView[2][1]);
+
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + (-right - up) / 2.0f;
 		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
 		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
 		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(0.0f, 1.0f) * scale;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + (-right + up) / 2.0f;
 		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
 		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
 		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 1.0f) * scale;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + (right + up) / 2.0f;
 		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
 		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
 		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->QuadBatchVertexBufferDataPtr->Position = position + glm::vec2(1.0f, 0.0f) * scale;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = position + (+right - up) / 2.0f;
 		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
 		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
@@ -541,25 +546,25 @@ namespace Ainan {
 		glm::vec2 relPosV2 = glm::vec2((+distance) * cosine - (+distance) * sine, (+distance) * sine + (+distance) * cosine);
 		glm::vec2 relPosV3 = glm::vec2((+distance) * cosine - (-distance) * sine, (+distance) * sine + (-distance) * cosine);
 
-		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV0;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = glm::vec3(position + relPosV0, 0.0f);
 		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
 		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
 		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV1;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = glm::vec3(position + relPosV1, 0.0f);
 		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
 		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
 		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV2;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = glm::vec3(position + relPosV2, 0.0f);
 		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
 		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
 		Rdata->QuadBatchVertexBufferDataPtr++;
 
-		Rdata->QuadBatchVertexBufferDataPtr->Position = position + relPosV3;
+		Rdata->QuadBatchVertexBufferDataPtr->Position = glm::vec3(position + relPosV3, 0.0f);
 		Rdata->QuadBatchVertexBufferDataPtr->Color = color;
 		Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 		Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
@@ -601,25 +606,25 @@ namespace Ainan {
 
 		for (size_t i = 0; i < count; i++)
 		{
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Position = glm::vec3( position[i], 0.0f);
 			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
 			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 0.0f };
 			Rdata->QuadBatchVertexBufferDataPtr++;
 
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(0.0f, 1.0f) * scale[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Position =  glm::vec3(position[i] + glm::vec2(0.0f, 1.0f) * scale[i], 0.0f);
 			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
 			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 0.0f, 1.0f };
 			Rdata->QuadBatchVertexBufferDataPtr++;
 
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 1.0f) * scale[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Position = glm::vec3(position[i] + glm::vec2(1.0f, 1.0f) * scale[i], 0.0f);
 			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
 			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 1.0f };
 			Rdata->QuadBatchVertexBufferDataPtr++;
 
-			Rdata->QuadBatchVertexBufferDataPtr->Position = position[i] + glm::vec2(1.0f, 0.0f) * scale[i];
+			Rdata->QuadBatchVertexBufferDataPtr->Position = glm::vec3(position[i] + glm::vec2(1.0f, 0.0f) * scale[i], 0.0f);
 			Rdata->QuadBatchVertexBufferDataPtr->Color = color[i];
 			Rdata->QuadBatchVertexBufferDataPtr->Texture = textureSlot;
 			Rdata->QuadBatchVertexBufferDataPtr->TextureCoordinates = { 1.0f, 0.0f };
