@@ -42,9 +42,9 @@ namespace Ainan {
 		struct ParticlesData
 		{
 			std::vector<bool> IsActive;
-			std::vector<glm::vec2> Position;
-			std::vector<glm::vec2> Velocity;
-			std::vector<glm::vec2> Acceleration;
+			std::vector<glm::vec3> Position;
+			std::vector<glm::vec3> Velocity;
+			std::vector<glm::vec3> Acceleration;
 			std::vector<float> StartScale;
 			std::vector<float> EndScale;
 			std::vector<float> LifeTime;
@@ -52,7 +52,7 @@ namespace Ainan {
 		};
 
 		//buffers for rendering data
-		std::vector<glm::vec2> m_ParticleDrawTranslationBuffer;
+		std::vector<glm::vec3> m_ParticleDrawTranslationBuffer;
 		std::vector<float> m_ParticleDrawScaleBuffer;
 		std::vector<glm::vec4> m_ParticleDrawColorBuffer;
 		size_t m_ParticleDrawCount = 0;

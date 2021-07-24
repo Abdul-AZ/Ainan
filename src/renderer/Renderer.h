@@ -68,7 +68,7 @@ namespace Ainan {
 		static void DrawQuad(glm::vec3 position, glm::vec4 color, float scale, Texture texture);
 		static void DrawQuad(glm::vec3 position, glm::vec4 color, float scale, float rotationInRadians, Texture texture);
 		static void DrawQuad(glm::mat4 orientation, glm::vec4 color, Texture texture);
-		static void DrawQuadv(glm::vec2* position, glm::vec4* color, float* scale, int32_t count, Texture texture);
+		static void DrawQuadv(glm::vec3* position, glm::vec4* color, float* scale, int32_t count, Texture texture);
 
 		static void Draw(VertexBuffer vertexBuffer, ShaderProgram shader, Primitive primitive, int32_t vertexCount);
 

@@ -24,9 +24,9 @@ namespace Ainan {
 
 	struct ParticleDescription
 	{
-		glm::vec2 Position;
-		glm::vec2 Velocity;
-		glm::vec2 Acceleration;
+		glm::vec3 Position;
+		glm::vec3 Velocity;
+		glm::vec3 Acceleration;
 		float StartScale;
 		float EndScale;
 		float LifeTime;
@@ -62,7 +62,7 @@ namespace Ainan {
 		TextureCustomizer m_TextureCustomizer;
 		ForceCustomizer m_ForceCustomizer;
 
-		glm::vec2 m_SpawnPosition = { 0.0f,0.0f };
+		glm::vec3 m_SpawnPosition = { 0.0f, 0.0f, 0.0f };
 
 		//spawn particle on line option
 		float m_LineLength = 0.2f;

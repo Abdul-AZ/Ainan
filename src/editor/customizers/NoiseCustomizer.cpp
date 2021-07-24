@@ -82,41 +82,45 @@ namespace Ainan {
 		}
 	}
 
-	void NoiseCustomizer::ApplyNoise(glm::vec2& pos, glm::vec2& velocity, glm::vec2& acceleration, uint32_t index)
+	void NoiseCustomizer::ApplyNoise(glm::vec3& pos, glm::vec3& velocity, glm::vec3& acceleration, uint32_t index)
 	{
 		if (m_NoiseEnabled == false)
 			return;
 
 		//this is so that the noise is different in every particle
-		glm::vec2 noiseInput = pos + (float)index * glm::vec2(100, 100);
+		glm::vec3 noiseInput = pos + (float)index * glm::vec3(100, 100, 100);
 
 		switch (NoiseTarget)
 		{
 		case Add_To_Velocity:
 			velocity.x += GetNoise(noiseInput) * m_NoiseStrength;
-			velocity.y += GetNoise(-noiseInput) * m_NoiseStrength;
+			velocity.y += GetNoise(noiseInput + glm::vec3(1000)) * m_NoiseStrength;
+			velocity.z += GetNoise(noiseInput + glm::vec3(2000)) * m_NoiseStrength;
 			return;
 
 		case Add_To_Acceleration:
 			acceleration.x += GetNoise(noiseInput) * m_NoiseStrength;
-			acceleration.y += GetNoise(-noiseInput) * m_NoiseStrength;
+			acceleration.y += GetNoise(noiseInput + glm::vec3(1000)) * m_NoiseStrength;
+			acceleration.z += GetNoise(noiseInput + glm::vec3(2000)) * m_NoiseStrength;
 			return;
 
-		case Ainan::NoiseCustomizer::Set_Velocity_As_Noise:
+		case NoiseCustomizer::Set_Velocity_As_Noise:
 			velocity.x = GetNoise(noiseInput) * m_NoiseStrength;
-			velocity.y = GetNoise(-noiseInput) * m_NoiseStrength;
+			velocity.y = GetNoise(noiseInput + glm::vec3(1000)) * m_NoiseStrength;
+			velocity.z = GetNoise(noiseInput + glm::vec3(2000)) * m_NoiseStrength;
 			return;
 
-		case Ainan::NoiseCustomizer::Set_Acceleration_As_Noise:
+		case NoiseCustomizer::Set_Acceleration_As_Noise:
 			acceleration.x = GetNoise(noiseInput) * m_NoiseStrength;
-			acceleration.y = GetNoise(-noiseInput) * m_NoiseStrength;
+			acceleration.y = GetNoise(noiseInput + glm::vec3(1000)) * m_NoiseStrength;
+			acceleration.z = GetNoise(noiseInput + glm::vec3(2000)) * m_NoiseStrength;
 			return;
 		}
 	}
 
-	float NoiseCustomizer::GetNoise(const glm::vec2& pos)
+	float NoiseCustomizer::GetNoise(const glm::vec3& pos)
 	{
-		return NoiseLibrary.GetNoise(pos.x, pos.y);
+		return NoiseLibrary.GetNoise(pos.x, pos.y, pos.z);
 	}
 
 	void NoiseCustomizer::UpdateNoiseTex()

@@ -7,7 +7,7 @@ namespace Ainan {
 	ParticleSystem::ParticleSystem()
 	{
 		Type = EnvironmentObjectType::ParticleSystemType;
-		Space = OBJ_SPACE_2D;
+		Space = OBJ_SPACE_3D;
 
 		m_Name = "Particle System";
 
@@ -59,8 +59,8 @@ namespace Ainan {
 				//add forces to the particle
 				for (auto& force : Customizer.m_ForceCustomizer.m_Forces)
 				{
-					if (force.second.Enabled) 
-						m_Particles.Acceleration[i] += force.second.GetEffect(m_Particles.Position[i]) * deltaTime;
+					if (force.second.Enabled)
+						m_Particles.Acceleration[i] += glm::vec3(force.second.GetEffect(m_Particles.Position[i]) * deltaTime, 0.0f);
 				}
 
 				//update particle speed, lifetime etc
@@ -86,7 +86,7 @@ namespace Ainan {
 						if (length > velocityCustomizer.m_MaxNormalVelocityLimit ||
 							length < velocityCustomizer.m_MinNormalVelocityLimit)
 						{
-							glm::vec2 direction = glm::normalize(m_Particles.Velocity[i]);
+							glm::vec3 direction = glm::normalize(m_Particles.Velocity[i]);
 							length = std::clamp(length, velocityCustomizer.m_MinNormalVelocityLimit, velocityCustomizer.m_MaxNormalVelocityLimit);
 							m_Particles.Velocity[i] = length * direction;
 						}
@@ -96,6 +96,7 @@ namespace Ainan {
 					{
 						m_Particles.Velocity[i].x = std::clamp(m_Particles.Velocity[i].x, velocityCustomizer.m_MinPerAxisVelocityLimit.x, velocityCustomizer.m_MaxPerAxisVelocityLimit.x);
 						m_Particles.Velocity[i].y = std::clamp(m_Particles.Velocity[i].y, velocityCustomizer.m_MinPerAxisVelocityLimit.y, velocityCustomizer.m_MaxPerAxisVelocityLimit.y);
+						m_Particles.Velocity[i].z = std::clamp(m_Particles.Velocity[i].z, velocityCustomizer.m_MinPerAxisVelocityLimit.z, velocityCustomizer.m_MaxPerAxisVelocityLimit.z);
 					}
 				}
 

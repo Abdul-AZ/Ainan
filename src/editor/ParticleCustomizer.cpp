@@ -112,7 +112,7 @@ namespace Ainan {
 			float x = m_SpawnPosition.x + t * m_LineLength * cos(glm::radians(m_LineAngle));
 			float y = m_SpawnPosition.x + t * m_LineLength * sin(glm::radians(m_LineAngle));
 
-			particleDesc.Position = glm::vec2(x, y);
+			particleDesc.Position = glm::vec3(x, y, 0.0f);
 			break;
 		}
 
@@ -125,7 +125,7 @@ namespace Ainan {
 			float x = m_SpawnPosition.x + m_CircleRadius * cos(angle);
 			float y = m_SpawnPosition.y + m_CircleRadius * sin(angle);
 
-			particleDesc.Position = glm::vec2(x, y);
+			particleDesc.Position = glm::vec3(x, y, 0.0f);
 			break;
 		}
 
@@ -134,7 +134,7 @@ namespace Ainan {
 			std::uniform_real_distribution<float> dest(0.0f, 1.0f);
 			float r = m_CircleRadius * sqrt(dest(mt));
 			float theta = dest(mt) * 2 * glm::pi<float>(); //in radians
-			particleDesc.Position = glm::vec2(m_SpawnPosition.x + r * cos(theta), m_SpawnPosition.y + r * sin(theta));
+			particleDesc.Position = glm::vec3(m_SpawnPosition.x + r * cos(theta), m_SpawnPosition.y + r * sin(theta), 0.0f);
 			break;
 		}
 		}

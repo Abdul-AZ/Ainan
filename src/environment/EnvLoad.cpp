@@ -121,7 +121,7 @@ namespace Ainan {
 		ps->m_Name = data[id + "Name"].get<std::string>();
 		ps->Customizer.Mode = GetTextAsMode(data[id + "Mode"].get<std::string>());
 		ps->Customizer.m_ParticlesPerSecond = data[id + "ParticlesPerSecond"].get<float>();
-		ps->Customizer.m_SpawnPosition = JSON_ARRAY_TO_VEC2(data[id + "SpawnPosition"].get<std::vector<float>>());
+		ps->Customizer.m_SpawnPosition = JSON_ARRAY_TO_VEC3(data[id + "SpawnPosition"].get<std::vector<float>>());
 		ps->Customizer.m_LineLength = data[id + "LineLength"].get<float>();
 		ps->Customizer.m_LineAngle = data[id + "LineAngle"].get<float>();
 		ps->Customizer.m_CircleRadius = data[id + "CircleRadius"].get<float>();
@@ -147,14 +147,14 @@ namespace Ainan {
 
 		//Velocity data
 		ps->Customizer.m_VelocityCustomizer.m_RandomVelocity = data[id + "IsStartingVelocityRandom"].get<bool>();
-		ps->Customizer.m_VelocityCustomizer.m_DefinedVelocity = JSON_ARRAY_TO_VEC2(data[id + "DefinedVelocity"].get<std::vector<float>>());
-		ps->Customizer.m_VelocityCustomizer.m_MinVelocity = JSON_ARRAY_TO_VEC2(data[id + "MinVelocity"].get<std::vector<float>>());
-		ps->Customizer.m_VelocityCustomizer.m_MaxVelocity = JSON_ARRAY_TO_VEC2(data[id + "MaxVelocity"].get<std::vector<float>>());
+		ps->Customizer.m_VelocityCustomizer.m_DefinedVelocity = JSON_ARRAY_TO_VEC3(data[id + "DefinedVelocity"].get<std::vector<float>>());
+		ps->Customizer.m_VelocityCustomizer.m_MinVelocity = JSON_ARRAY_TO_VEC3(data[id + "MinVelocity"].get<std::vector<float>>());
+		ps->Customizer.m_VelocityCustomizer.m_MaxVelocity = JSON_ARRAY_TO_VEC3(data[id + "MaxVelocity"].get<std::vector<float>>());
 		ps->Customizer.m_VelocityCustomizer.CurrentVelocityLimitType =  StringToLimitType(data[id + "VelocityLimitType"].get<std::string>());
 		ps->Customizer.m_VelocityCustomizer.m_MinNormalVelocityLimit = data[id + "MinNormalVelocityLimit"].get<float>();
 		ps->Customizer.m_VelocityCustomizer.m_MaxNormalVelocityLimit = data[id + "MaxNormalVelocityLimit"].get<float>();
-		ps->Customizer.m_VelocityCustomizer.m_MinPerAxisVelocityLimit = JSON_ARRAY_TO_VEC2(data[id + "MinPerAxisVelocityLimit"].get<std::vector<float>>());
-		ps->Customizer.m_VelocityCustomizer.m_MaxPerAxisVelocityLimit = JSON_ARRAY_TO_VEC2(data[id + "MaxPerAxisVelocityLimit"].get<std::vector<float>>());
+		ps->Customizer.m_VelocityCustomizer.m_MinPerAxisVelocityLimit = JSON_ARRAY_TO_VEC3(data[id + "MinPerAxisVelocityLimit"].get<std::vector<float>>());
+		ps->Customizer.m_VelocityCustomizer.m_MaxPerAxisVelocityLimit = JSON_ARRAY_TO_VEC3(data[id + "MaxPerAxisVelocityLimit"].get<std::vector<float>>());
 
 		//Noise data
 		ps->Customizer.m_NoiseCustomizer.m_NoiseEnabled = data[id + "NoiseEnabled"].get<bool>();

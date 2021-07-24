@@ -113,7 +113,7 @@ namespace Ainan {
 		j[id + "Name"] = ps.m_Name;
 		j[id + "Mode"] = GetModeAsText(ps.Customizer.Mode);
 		j[id + "ParticlesPerSecond"] = ps.Customizer.m_ParticlesPerSecond;
-		j[id + "SpawnPosition"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_SpawnPosition);
+		j[id + "SpawnPosition"] = VEC3_TO_JSON_ARRAY(ps.Customizer.m_SpawnPosition);
 		j[id + "LineLength"] = ps.Customizer.m_LineLength;
 		j[id + "LineAngle"] = ps.Customizer.m_LineAngle;
 		j[id + "CircleRadius"] = ps.Customizer.m_CircleRadius;
@@ -139,14 +139,14 @@ namespace Ainan {
 
 		//Velocity data
 		j[id + "IsStartingVelocityRandom"] = ps.Customizer.m_VelocityCustomizer.m_RandomVelocity;
-		j[id + "DefinedVelocity"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_DefinedVelocity);
-		j[id + "MinVelocity"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MinVelocity);
-		j[id + "MaxVelocity"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MaxVelocity);
+		j[id + "DefinedVelocity"] = VEC3_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_DefinedVelocity);
+		j[id + "MinVelocity"] = VEC3_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MinVelocity);
+		j[id + "MaxVelocity"] = VEC3_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MaxVelocity);
 		j[id + "VelocityLimitType"] = LimitTypeToString(ps.Customizer.m_VelocityCustomizer.CurrentVelocityLimitType);
 		j[id + "MinNormalVelocityLimit"] = ps.Customizer.m_VelocityCustomizer.m_MinNormalVelocityLimit;
 		j[id + "MaxNormalVelocityLimit"] = ps.Customizer.m_VelocityCustomizer.m_MaxNormalVelocityLimit;
-		j[id + "MinPerAxisVelocityLimit"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MinPerAxisVelocityLimit);
-		j[id + "MaxPerAxisVelocityLimit"] = VEC2_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MaxPerAxisVelocityLimit);
+		j[id + "MinPerAxisVelocityLimit"] = VEC3_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MinPerAxisVelocityLimit);
+		j[id + "MaxPerAxisVelocityLimit"] = VEC3_TO_JSON_ARRAY(ps.Customizer.m_VelocityCustomizer.m_MaxPerAxisVelocityLimit);
 
 		//Noise data
 		j[id + "NoiseEnabled"] = ps.Customizer.m_NoiseCustomizer.m_NoiseEnabled;

@@ -14,8 +14,8 @@ namespace Ainan {
 		~NoiseCustomizer();
 		void DisplayGUI();
 
-		void ApplyNoise(glm::vec2& pos, glm::vec2& velocity, glm::vec2& acceleration, uint32_t index = 0);
-		float GetNoise(const glm::vec2& pos);
+		void ApplyNoise(glm::vec3& pos, glm::vec3& velocity, glm::vec3& acceleration, uint32_t index = 0);
+		float GetNoise(const glm::vec3& pos);
 
 		enum NoiseApplyTarget
 		{

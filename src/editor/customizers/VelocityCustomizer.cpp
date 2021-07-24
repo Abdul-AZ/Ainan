@@ -57,21 +57,24 @@ namespace Ainan {
 				if (m_MaxVelocity.y < m_MinVelocity.y)
 					m_MaxVelocity.y = m_MinVelocity.y;
 
+				if (m_MaxVelocity.z < m_MinVelocity.z)
+					m_MaxVelocity.z = m_MinVelocity.z;
+
 				ImGui::Text("Minimum Velocity: ");
 				ImGui::NextColumn();
 				float xPos = ImGui::GetCursorPosX();
-				ImGui::DragFloat2("##Minimum Velocity : ", &m_MinVelocity.x);
+				ImGui::DragFloat3("##Minimum Velocity : ", &m_MinVelocity.x);
 				ImGui::NextColumn();
 				ImGui::Text("Maximum Velocity: ");
 				ImGui::NextColumn();
-				ImGui::DragFloat2("##Maximum Velocity : ", &m_MaxVelocity.x);
+				ImGui::DragFloat3("##Maximum Velocity : ", &m_MaxVelocity.x);
 				ImGui::NextColumn();
 			}
 			else
 			{
 				ImGui::Text("Velocity: ");
 				ImGui::NextColumn();
-				ImGui::DragFloat2("##Velocity: ", &m_DefinedVelocity.x);
+				ImGui::DragFloat3("##Velocity: ", &m_DefinedVelocity.x);
 				ImGui::NextColumn();
 			}
 
@@ -84,12 +87,12 @@ namespace Ainan {
 			if (CurrentVelocityLimitType == NormalLimit)
 			{
 				ImGui::NextColumn();
-				ImGui::Text("Minimum Velocity\n Length: ");
+				ImGui::Text("Minimum Velocity\n Magnitude: ");
 				ImGui::NextColumn();
 				ImGui::DragFloat("##Minimum Velocity\n Length: ", &m_MinNormalVelocityLimit);
 
 				ImGui::NextColumn();
-				ImGui::Text("Maximum Velocity\n Length: ");
+				ImGui::Text("Maximum Velocity\n Magnitude: ");
 				ImGui::NextColumn();
 				ImGui::DragFloat("##Maximum Velocity\n Length: ", &m_MaxNormalVelocityLimit);
 
@@ -102,12 +105,12 @@ namespace Ainan {
 				ImGui::NextColumn();
 				ImGui::Text("Minimum Velocity: ");
 				ImGui::NextColumn();
-				ImGui::DragFloat2("##Minimum Velocity: ", &m_MinPerAxisVelocityLimit.x);
+				ImGui::DragFloat3("##Minimum Velocity: ", &m_MinPerAxisVelocityLimit.x);
 
 				ImGui::NextColumn();
 				ImGui::Text("Maximum Velocity: ");
 				ImGui::NextColumn();
-				ImGui::DragFloat2("##Maximum Velocity: ", &m_MaxPerAxisVelocityLimit.x);
+				ImGui::DragFloat3("##Maximum Velocity: ", &m_MaxPerAxisVelocityLimit.x);
 
 				//clamp eveything so that the maximum is always bigger than the minimum and the opposite
 				m_MinPerAxisVelocityLimit.x = std::clamp(m_MinPerAxisVelocityLimit.x, -100000.0f, m_MaxPerAxisVelocityLimit.x);
@@ -121,18 +124,21 @@ namespace Ainan {
 		}
 	}
 
-	glm::vec2 VelocityCustomizer::GetVelocity()
+	glm::vec3 VelocityCustomizer::GetVelocity()
 	{
-
-		if (m_RandomVelocity) {
+		if (m_RandomVelocity)
+		{
 			if (m_MinVelocity.x > m_MaxVelocity.x)
 				m_MinVelocity.x = m_MaxVelocity.x;
 			if (m_MinVelocity.y > m_MaxVelocity.y)
 				m_MinVelocity.y = m_MaxVelocity.y;
+			if (m_MinVelocity.z > m_MaxVelocity.z)
+				m_MinVelocity.z = m_MaxVelocity.z;
 
 			std::uniform_real_distribution<float> dist_velocity_x(m_MinVelocity.x, m_MaxVelocity.x);
 			std::uniform_real_distribution<float> dist_velocity_y(m_MinVelocity.y, m_MaxVelocity.y);
-			return glm::vec2(dist_velocity_x(mt), dist_velocity_y(mt));
+			std::uniform_real_distribution<float> dist_velocity_z(m_MinVelocity.z, m_MaxVelocity.z);
+			return glm::vec3(dist_velocity_x(mt), dist_velocity_y(mt), dist_velocity_z(mt));
 		}
 		else
 			return m_DefinedVelocity;
