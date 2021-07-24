@@ -242,7 +242,6 @@ namespace Ainan {
 		sprite->m_Name = data[id + "Name"].get<std::string>();
 		sprite->ModelMatrix = JSON_ARRAY_TO_MAT4(data[id + "ModelMatrix"].get<std::vector<float>>());
 		sprite->Tint = JSON_ARRAY_TO_VEC4(data[id + "Tint"].get<std::vector<float>>());
-		sprite->Space = StrToObjSpace(data[id + "Space"].get<std::string>().c_str());
 		sprite->m_TexturePath = data[id + "TexturePath"].get<std::string>();
 		if(sprite->m_TexturePath != "")
 			sprite->LoadTextureFromFile(AssetManager::s_EnvironmentDirectory.u8string() + "\\" + sprite->m_TexturePath.u8string());

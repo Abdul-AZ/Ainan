@@ -653,7 +653,7 @@ namespace Ainan
 			{
 				for (pEnvironmentObject& obj : m_Env->Objects)
 				{
-					const float scale = 0.5f;
+					const float scale = 0.25f;
 					const glm::vec3 position = glm::vec3(obj->ModelMatrix[3]);
 					const glm::vec4 color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
