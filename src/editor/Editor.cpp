@@ -816,7 +816,7 @@ namespace Ainan
 
 					if (ImGuizmo::Manipulate(
 						glm::value_ptr(view), glm::value_ptr(proj),
-						(ImGuizmo::OPERATION)obj->GetAllowedGizmoOperation(m_GizmoOperation), ImGuizmo::MODE::WORLD,
+						(ImGuizmo::OPERATION)obj->GetAllowedGizmoOperation(m_GizmoOperation), ImGuizmo::MODE::LOCAL,
 						glm::value_ptr(obj->ModelMatrix), nullptr, SnappingEnabled ? snap : nullptr))
 					{
 						obj->OnTransform();
