@@ -15,6 +15,8 @@
 
 namespace Ainan {
 
+	class Editor;
+
 	class Exporter 
 	{
 		enum ExportMode

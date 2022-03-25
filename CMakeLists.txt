@@ -51,6 +51,7 @@ set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 add_subdirectory_with_folder(assimp "submodules/assimp")
 list(APPEND STATIC_LIBRARIES assimp)
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 #link with ffmpeg
 if(WIN32)
 	list(APPEND STATIC_LIBRARIES "${PROJECT_SOURCE_DIR}/lib/avcodec.lib")
@@ -67,7 +68,8 @@ if(WIN32)
 	list(APPEND STATIC_LIBRARIES "secur32.lib")
 	list(APPEND STATIC_LIBRARIES "ws2_32.lib")
 else()
-	message(FATAL_ERROR "Can't link with ffmpeg on platform")
+	find_package(FFmpeg REQUIRED)
+	list(APPEND STATIC_LIBRARIES ${FFMPEG_LIBRARIES})
 endif()
 
 add_subdirectory("src")

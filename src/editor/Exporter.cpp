@@ -1,13 +1,19 @@
 #include "Exporter.h"
 
+//#ifdef PLATFORM_WINDOWS
 extern "C"
 {
+//#endif
+
 #include <libavformat/avformat.h>
 #include <libavformat/avio.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
+
+//#ifdef PLATFORM_WINDOWS
 }
+//#endif
 
 #include "Editor.h"
 

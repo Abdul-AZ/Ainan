@@ -8,51 +8,51 @@ namespace Ainan {
 		if (ImGui::BeginCombo("##Interpolation", InterpolationTypeToString(type)))
 		{
 			{
-				bool is_Active = type == Fixed;
-				if (ImGui::Selectable(InterpolationTypeToString(Fixed), &is_Active)) {
+				bool is_Active = type == InterpolationType::Fixed;
+				if (ImGui::Selectable(InterpolationTypeToString(InterpolationType::Fixed), &is_Active)) {
 
 					ImGui::SetItemDefaultFocus();
-					type = Fixed;
+					type = InterpolationType::Fixed;
 				}
 			}
 
 			if (!(bool)((int)flags & (int)InterpolationSelectorFlags::NoLinearMode))
 			{
-				bool is_Active = type == Linear;
-				if (ImGui::Selectable(InterpolationTypeToString(Linear), &is_Active)) {
+				bool is_Active = type == InterpolationType::Linear;
+				if (ImGui::Selectable(InterpolationTypeToString(InterpolationType::Linear), &is_Active)) {
 
 					ImGui::SetItemDefaultFocus();
-					type = Linear;
+					type = InterpolationType::Linear;
 				}
 			}
 
 			if (!(bool)((int)flags & (int)InterpolationSelectorFlags::NoCubicMode))
 			{
-				bool is_Active = type == Cubic;
-				if (ImGui::Selectable(InterpolationTypeToString(Cubic), &is_Active)) {
+				bool is_Active = type == InterpolationType::Cubic;
+				if (ImGui::Selectable(InterpolationTypeToString(InterpolationType::Cubic), &is_Active)) {
 
 					ImGui::SetItemDefaultFocus();
-					type = Cubic;
+					type = InterpolationType::Cubic;
 				}
 			}
 
 			if (!(bool)((int)flags & (int)InterpolationSelectorFlags::NoSmoothstepMode))
 			{
-				bool is_Active = type == Smoothstep;
-				if (ImGui::Selectable(InterpolationTypeToString(Smoothstep), &is_Active)) {
+				bool is_Active = type == InterpolationType::Smoothstep;
+				if (ImGui::Selectable(InterpolationTypeToString(InterpolationType::Smoothstep), &is_Active)) {
 
 					ImGui::SetItemDefaultFocus();
-					type = Smoothstep;
+					type = InterpolationType::Smoothstep;
 				}
 			}
 
 			if (!(bool)((int)flags & (int)InterpolationSelectorFlags::NoCustomMode))
 			{
-				bool is_Active = type == Custom;
-				if (ImGui::Selectable(InterpolationTypeToString(Custom), &is_Active)) {
+				bool is_Active = type == InterpolationType::Custom;
+				if (ImGui::Selectable(InterpolationTypeToString(InterpolationType::Custom), &is_Active)) {
 
 					ImGui::SetItemDefaultFocus();
-					type = Custom;
+					type = InterpolationType::Custom;
 				}
 			}
 

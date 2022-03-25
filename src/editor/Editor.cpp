@@ -1,5 +1,6 @@
 #include "Editor.h"
 
+#define STARTING_BROWSER_DIRECTORY "/"
 namespace Ainan 
 {
 	Editor::Editor():

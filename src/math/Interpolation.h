@@ -6,7 +6,7 @@
 
 namespace Ainan {
 
-	enum InterpolationType
+	enum class InterpolationType
 	{
 		Fixed,
 		Linear,
@@ -39,23 +39,23 @@ namespace Ainan {
 		{
 			switch (interpolationType)
 			{
-			case Ainan::Fixed:
+			case InterpolationType::Fixed:
 				return start;
 				break;
 
-			case Ainan::Linear:
+			case InterpolationType::Linear:
 				return Linear(start, end, t);
 				break;
 
-			case Ainan::Cubic:
+			case InterpolationType::Cubic:
 				return Cubic(start, end, t);
 				break;
 
-			case Ainan::Smoothstep:
+			case InterpolationType::Smoothstep:
 				return Smoothstep(start, end, t);
 				break;
 
-			case Ainan::Custom:
+			case InterpolationType::Custom:
 			default:
 
 				assert(false);

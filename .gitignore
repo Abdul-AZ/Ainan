@@ -9,4 +9,6 @@ output
 *.sln
 *.cso
 *.info
+.ccls-cache
+tags
 build

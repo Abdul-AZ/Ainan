@@ -36,18 +36,18 @@ namespace Ainan {
 	{
 		switch (Type)
 		{
-		case Fixed:
+		case InterpolationType::Fixed:
 			break;
-		case Linear:
+		case InterpolationType::Linear:
 			ImGui::PlotLines("End Point", linearWrapper, nullptr, 100, 0, nullptr, 3.402823466e+38F, 3.402823466e+38F, { size.x, size.y });
 			break;
-		case Cubic:
+		case InterpolationType::Cubic:
 			ImGui::PlotLines("End Point", cubicWrapper, nullptr, 100, 0, nullptr, 3.402823466e+38F, 3.402823466e+38F, { size.x, size.y });
 			break;
-		case Smoothstep:
+		case InterpolationType::Smoothstep:
 			ImGui::PlotLines("End Point", smoothStepWrapper, nullptr, 100, 0, nullptr, 3.402823466e+38F, 3.402823466e+38F, { size.x, size.y });
 			break;
-		case Custom:
+		case InterpolationType::Custom:
 			DrawCustomCurve();
 		default:
 			break;

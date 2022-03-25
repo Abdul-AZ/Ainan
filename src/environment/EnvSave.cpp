@@ -92,9 +92,10 @@ namespace Ainan {
 
 		std::string jsonString = data.dump(4);
 
-		FILE* file = (FILE*)1;
-		auto error = fopen_s(&file, path.c_str(), "w");
-		if (error == 0) {
+		FILE* file = (FILE*)0;
+		file = fopen(path.c_str(), "w");
+		if (file) 
+		{
 			fwrite(jsonString.c_str(), 1, jsonString.size(), file);
 			fclose(file);
 		}

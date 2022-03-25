@@ -87,7 +87,7 @@ namespace Ainan {
 			color.a * 255
 		};
 
-		image.m_Data = new uint8_t[bpp * size.x * size.y];
+		image.m_Data = new uint8_t[(uint32_t)(bpp * size.x * size.y)];
 		for (size_t i = 0; i < size.x * size.y; i++)
 			memcpy(&image.m_Data[i * bpp], uintColor, bpp);
 		
@@ -115,6 +115,16 @@ namespace Ainan {
 		m_Data = new unsigned char[m_Width * m_Height * GetBytesPerPixel(Format)];
 		memcpy(m_Data, image.m_Data, m_Width * m_Height * GetBytesPerPixel(Format) * sizeof(unsigned char));
 	}
+
+	Image::Image(Image& image)
+	{
+		m_Width = image.m_Width;
+		m_Height = image.m_Height;
+		Format = image.Format;
+		m_Data = new unsigned char[m_Width * m_Height * GetBytesPerPixel(Format)];
+		memcpy(m_Data, image.m_Data, m_Width * m_Height * GetBytesPerPixel(Format) * sizeof(unsigned char));
+	}
+
 
 	Image Image::operator=(const Image& image)
 	{

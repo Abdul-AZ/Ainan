@@ -16,6 +16,8 @@
 #include <atomic>
 #include <numeric>
 #include <limits>
+#include <thread>
+#include <condition_variable>
 
 #define GLM_FORCE_LEFT_HANDED 1
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE 1
@@ -54,4 +56,8 @@
  			ImGui::EndCombo(); \
 		}
 
+#ifdef PLATFORM_WINDOWS
 #define STARTING_BROWSER_DIRECTORY "C:\\"
+else
+#define STARTING_BROWSER_DIRECTORY "/"
+#endif

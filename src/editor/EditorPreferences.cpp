@@ -26,7 +26,7 @@ namespace Ainan {
 	EditorPreferences EditorPreferences::LoadFromDefaultPath()
 	{
 		FILE* file;
-		fopen_s(&file, c_DefaultPreferencesPath, "r");
+		file = fopen(c_DefaultPreferencesPath, "r");
 
 		EditorPreferences preferences = Default();
 
@@ -75,7 +75,7 @@ namespace Ainan {
 		std::string jsonStr = SerializeIntoJson();
 
 		FILE* file;
-		fopen_s(&file, c_DefaultPreferencesPath, "w");
+		file = fopen(c_DefaultPreferencesPath, "w");
 
 		if (file)
 		{

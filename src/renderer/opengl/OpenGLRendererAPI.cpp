@@ -598,7 +598,7 @@ namespace Ainan {
 
 			img->m_Width = (uint32_t)buffer->Size.x;
 			img->m_Height = (uint32_t)buffer->Size.y;
-			img->m_Data = new uint8_t[buffer->Size.x * buffer->Size.y * 4];
+			img->m_Data = new uint8_t[(uint32_t)(buffer->Size.x * buffer->Size.y * 4)];
 			img->Format = TextureFormat::RGBA;
 
 			glBindFramebuffer(GL_FRAMEBUFFER, buffer->Identifier);

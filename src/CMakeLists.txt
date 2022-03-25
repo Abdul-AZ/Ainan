@@ -85,6 +85,7 @@ set(IMGUI_SOURCE_FILES
 list(APPEND DEFINITIONS_LIST
     IMGUI_DEFINE_MATH_OPERATORS=1
     GLFW_INCLUDE_NONE=1
+	_CRT_SECURE_NO_WARNINGS=1
     )
 
 set(SHADER_FILES)
@@ -146,7 +147,7 @@ if(WIN32)
 endif()
 
 
-set(INCLUDE_LIST
+list(APPEND INCLUDE_LIST
     "."
     "../submodules/imgui"
     "../submodules/imgui/examples"
@@ -164,5 +165,7 @@ set_source_files_properties(${GENERATED_SHADER_FILES} PROPERTIES GENERATED TRUE)
 target_precompile_headers(Core PRIVATE "pch.h")
 target_include_directories(Core PRIVATE ${INCLUDE_LIST})
 target_compile_definitions(Core PRIVATE ${DEFINITIONS_LIST})
+target_compile_options(Core PRIVATE -fpermissive)
+message(${STATIC_LIBRARIES})
 target_link_libraries(Core ${STATIC_LIBRARIES})
 set_target_properties(Core PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

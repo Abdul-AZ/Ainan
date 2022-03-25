@@ -10,11 +10,11 @@ namespace Ainan {
 #define X(name) case(name): return #name;
 		switch (e)
 		{
-			X(Fixed)
-			X(Linear)
-			X(Cubic)
-			X(Smoothstep)
-			X(Custom)
+			X(InterpolationType::Fixed)
+			X(InterpolationType::Linear)
+			X(InterpolationType::Cubic)
+			X(InterpolationType::Smoothstep)
+			X(InterpolationType::Custom)
 		}
 #undef X
 		return "";

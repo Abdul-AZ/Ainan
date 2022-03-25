@@ -1,4 +1,5 @@
 #include "editor/Window.h"
+#include "editor/Exporter.h"
 #include "editor/Editor.h"
 #include "editor/EditorPreferences.h"
 #include "renderer/Renderer.h"

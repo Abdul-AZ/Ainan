@@ -4,17 +4,32 @@
 #include "ImGuizmo.h"
 #include <GLFW/glfw3.h>
 #include <glm/gtx/rotate_vector.hpp>
+#include "editor/Window.h"
+
+void* getPlatformNativeWindow(GLFWwindow* win);
 
 #ifdef PLATFORM_WINDOWS
-
 #include "d3d11/D3D11RendererAPI.h"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
+void* getPlatformNativeWindow(GLFWwindow* win)
+{
+	return (uint64_t*)glfwGetWin32Window(win);
+}
 #undef max
 
+#else
+#define GLFW_EXPOSE_NATIVE_X11
+#include <GLFW/glfw3native.h>
+
+void* getPlatformNativeWindow(GLFWwindow* win)
+{
+	return (uint64_t*)glfwGetX11Window(win);
+}
 #endif // PLATFORM_WINDOWS
+
 
 bool WantUpdateMonitors = true;
 
@@ -264,7 +279,7 @@ namespace Ainan {
 				};
 				break;
 			}
-
+#ifdef PLATFORM_WINDOWS
 			case RendererType::D3D11:
 			{
 				quadVertices =
@@ -279,6 +294,7 @@ namespace Ainan {
 				};
 				break;
 			}
+#endif
 			}
 			VertexLayout layout(2);
 			layout[0] = VertexLayoutElement("POSITION", 0, ShaderVariableType::Vec2);
@@ -946,7 +962,7 @@ namespace Ainan {
 			data->Window = glfwCreateWindow((int)viewport->Size.x, (int)viewport->Size.y, "No Title Yet", NULL, share_window);
 			data->WindowOwned = true;
 			viewport->PlatformHandle = (void*)data->Window;
-			viewport->PlatformHandleRaw = glfwGetWin32Window(data->Window);
+			viewport->PlatformHandleRaw = getPlatformNativeWindow(data->Window);
 			glfwSetWindowPos(data->Window, (int)viewport->Pos.x, (int)viewport->Pos.y);
 
 			///////////////// Install callbacks
@@ -1301,7 +1317,7 @@ namespace Ainan {
 
 		if (data)
 		{
-			info->InitialData = new uint8_t[size.x * size.y * comp];
+			info->InitialData = new uint8_t[(uint32_t)(size.x * size.y * comp)];
 			memcpy(info->InitialData, data, sizeof(uint8_t) * size.x * size.y * comp);
 		}
 		else
@@ -1316,6 +1332,12 @@ namespace Ainan {
 
 	Texture Renderer::CreateTexture(Image& img)
 	{
+		return CreateTexture({ img.m_Width, img.m_Height }, img.Format, TextureType::Texture2D, img.m_Data);
+	}
+
+	Texture Renderer::CreateTexture(Image&& rimg)
+	{
+		Image img = rimg;
 		return CreateTexture({ img.m_Width, img.m_Height }, img.Format, TextureType::Texture2D, img.m_Data);
 	}
 

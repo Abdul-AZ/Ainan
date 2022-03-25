@@ -124,7 +124,7 @@ namespace Ainan {
 
 				//use the t value to get the scale of the particle using it's not using a Custom Curve
 				float scale = 0.0f;
-				if (Customizer.m_ScaleCustomizer.m_InterpolationType != Custom)
+				if (Customizer.m_ScaleCustomizer.m_InterpolationType != InterpolationType::Custom)
 				{
 					scale = 
 						Interpolation::Interporpolate(Customizer.m_ScaleCustomizer.m_InterpolationType,

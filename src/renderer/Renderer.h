@@ -120,6 +120,7 @@ namespace Ainan {
 		static Texture CreateTexture(const glm::vec2& size, TextureFormat format, TextureType type,  uint8_t* data = nullptr);
 		
 		//creates a 2D texture with the image format and size
+		static Texture CreateTexture(Image&& img);
 		static Texture CreateTexture(Image& img);
 		static Texture CreateCubemapTexture(std::array<Image, 6>& faces);
 		
