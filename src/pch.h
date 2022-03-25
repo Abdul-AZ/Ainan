@@ -56,8 +56,4 @@
  			ImGui::EndCombo(); \
 		}
 
-#ifdef PLATFORM_WINDOWS
-#define STARTING_BROWSER_DIRECTORY "C:\\"
-else
-#define STARTING_BROWSER_DIRECTORY "/"
-#endif
+

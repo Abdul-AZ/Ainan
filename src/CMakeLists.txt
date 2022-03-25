@@ -95,6 +95,7 @@ if(WIN32)
 
     list(APPEND DEFINITIONS_LIST
         PLATFORM_WINDOWS=1
+		STARTING_BROWSER_DIRECTORY="C:\\"
         )
 
     list(APPEND SOURCES_LIST
@@ -144,6 +145,10 @@ if(WIN32)
     source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES_LIST})
     source_group("shaders" FILES ${SHADER_FILES})
     source_group("compiled shaders" FILES ${GENERATED_SHADER_FILES})
+else()
+	list(APPEND DEFINITIONS_LIST
+		STARTING_BROWSER_DIRECTORY="/"
+        )
 endif()
 
 
@@ -158,7 +163,6 @@ list(APPEND INCLUDE_LIST
     "../submodules/assimp/include/assimp"
     "vendor"
     )
-
 
 add_executable(Core WIN32 ${SOURCES_LIST} ${IMGUI_SOURCE_FILES} ${SHADER_FILES} ${GENERATED_SHADER_FILES})
 set_source_files_properties(${GENERATED_SHADER_FILES} PROPERTIES GENERATED TRUE)

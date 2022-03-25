@@ -2,7 +2,6 @@
 
 #include "renderer/Renderer.h"
 
-#define STARTING_BROWSER_DIRECTORY "/"
 namespace Ainan {
 
 	namespace fs = std::filesystem;
