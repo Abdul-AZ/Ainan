@@ -1,4 +1,4 @@
-![Windows Build](https://github.com/AbdullrahmanAlzeidi/Ainan/workflows/Windows%20Build/badge.svg)
+![CircleCI](https://img.shields.io/circleci/build/gh/AbdullrahmanAlzeidi/Ainan/master?label=All%20Platform%20Build&logo=circleci)
 # Ainan
 Ainan is a visual effects and motion graphics making application mainly targeting game developers.
 
