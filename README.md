@@ -4,8 +4,9 @@ Ainan is a visual effects and motion graphics making application mainly targetin
 
 # Supported Platforms
 
-At the moment it only runs on windows.
-There are plans for linux and mac support.
+The project current only works on Windows. Experimental support for archlinux is under development and is integrated in CI.
+
+There are plans to support more linux distributions and possiby even mac at some point. However this is not the focus currently.
 
 # Building the Project
 The project is built using [CMake](https://cmake.org/) with the usual CMake workflow.
