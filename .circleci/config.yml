@@ -1,0 +1,31 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@2.3.0
+
+jobs:
+  windows-build:
+    executor: win/default
+    steps:
+      - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
+      - run: choco install cmake -y
+      - run: $env:Path+=";$Env:ProgramFiles\CMake\bin"; cmake "Visual Studio 16 2019" .
+      - run: msbuild Ainan.sln 
+      
+  archlinux-build:
+    docker:
+    - image: archlinux:latest
+    steps:
+      - checkout
+      - run: pacman -Sy --noconfirm git cmake gcc make xorg-server ffmpeg libxrandr libxinerama libxi
+      - run: git submodule sync
+      - run: git submodule update --init
+      - run: mkdir build && cd build && cmake .. && make
+
+workflows:
+  build:
+    jobs:
+      - windows-build
+      - archlinux-build
