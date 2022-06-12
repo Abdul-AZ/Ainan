@@ -18,10 +18,11 @@ namespace Ainan
 
     void* Framebuffer::GetTextureID()
     {
+#ifdef PLATFORM_WINDOWS
         //TODO clean this
         if(Renderer::Rdata->API == RendererType::D3D11)
             return (void*)Renderer::Rdata->Framebuffers[Identifier].ResourceIdentifier;
-
+#endif
         return (void*)Renderer::Rdata->Framebuffers[Identifier].TextureIdentifier;
     }
 

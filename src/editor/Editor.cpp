@@ -32,12 +32,6 @@ namespace Ainan
 		UpdateTitle();
 		SetEditorStyle(m_Preferences.Style);
 
-		//initlize worker threads
-		for (auto& thread : WorkerThreads)
-		{
-			thread = std::thread([this]() { WorkerThreadLoop(); });
-		}
-
 		m_GPUMemAllocated = Renderer::GetUsedGPUMemory();
 		m_Camera.CalculateViewMatrix();
 	}
@@ -57,14 +51,6 @@ namespace Ainan
 
 		delete m_Env;
 		m_Preferences.SaveToDefaultPath();
-
-		//terminate worker threads
-		DestroyThreads = true;
-		StartUpdating.notify_all();
-		for (auto& thread : WorkerThreads)
-		{
-			thread.join();
-		}
 	}
 
 	void Editor::Update()
@@ -206,44 +192,6 @@ namespace Ainan
 		return (m_RedrawUI > 0 || m_State == EditorState::State_PlayMode) && !Window::IsIconified();
 	}
 
-	void Editor::WorkerThreadLoop()
-	{
-		std::mutex mutex;
-		while (true)
-		{
-			{
-				std::unique_lock<std::mutex> lock(mutex);
-				using namespace std::chrono_literals;
-				StartUpdating.wait_for(lock, 3ms);
-			}
-
-			if (DestroyThreads)
-				break;
-
-			while (true)
-			{
-				EnvironmentObjectInterface* obj = nullptr;
-
-				{
-					std::lock_guard lock(UpdateMutex);
-					if (UpdateQueue.size() > 0)
-					{
-						obj = UpdateQueue.front();
-						UpdateQueue.pop();
-					}
-					else 
-					{
-						FinishedUpdating.notify_all();
-						break;
-					}
-				}
-				auto mutexPtr = obj->GetMutex();
-				std::lock_guard lock(*mutexPtr);
-				obj->Update(m_SimulationDeltaTime);
-			}
-		}
-	}
-
 	void Editor::Update_EditorMode(float deltaTime)
 	{
 		m_Camera.Update(deltaTime, m_ViewportWindow.RenderViewport);
@@ -276,21 +224,12 @@ namespace Ainan
 		m_AppStatusWindow.Update(deltaTime);
 
 		{
+			for (auto& obj : m_Env->Objects)
 			{
-				std::lock_guard lock(UpdateMutex);
-				for (auto& obj : m_Env->Objects)
-				{
-					UpdateQueue.push(obj.get());
-				}
+				m_WorkerThreads.QueueCommand([this, &obj]() { obj->Update(m_SimulationDeltaTime); });
 			}
-			StartUpdating.notify_all();
 		}
-		{
-			static std::mutex mutex;
-			std::unique_lock<std::mutex> lock(mutex);
-			using namespace std::chrono_literals;
-			FinishedUpdating.wait_for(lock, 3ms);
-		}
+		m_WorkerThreads.WaitAll();
 
 		//go through all the objects (regular and not a range based loop because we want to use std::vector::erase())
 		for (int i = 0; i < m_Env->Objects.size(); i++) 

@@ -19,8 +19,10 @@
 #include "file/FolderBrowser.h"
 #include "EditorPreferences.h"
 #include "ImGuizmo.h"
+#include "ThreadPool.h"
 
 namespace Ainan {
+
 	bool SaveEnvironment(const Environment& env, std::string path);
 	Environment* LoadEnvironment(const std::string& path);
 
@@ -111,21 +113,15 @@ namespace Ainan {
 		bool m_IncludeStarterAssets = false;
 		bool m_ShouldDeleteEnv = false;
 
-		std::array<std::thread, 4> WorkerThreads;
-		std::queue<EnvironmentObjectInterface*> UpdateQueue;
-		std::mutex UpdateMutex;
-		std::condition_variable StartUpdating;
-		std::condition_variable FinishedUpdating;
-		std::atomic_bool DestroyThreads = false;
 		float m_SimulationDeltaTime = 0.0f; //change in simulation time
 		int32_t m_AverageFPS = 0;
 		uint32_t m_GPUMemAllocated = 0;
 		int32_t m_DrawCalls = 0;
 		uint32_t FrameCounter = 0; //advances by 1 on every update iteration. when it reaches c_ApplicationFramerate, it goes back to 0.
 		std::mt19937 m_RandomNumberGenerator;
-	private:
-		void WorkerThreadLoop();
 
+		ThreadPool m_WorkerThreads = ThreadPool(8); //TODO add specifying number of worker threads
+	private:
 		//methods based on editor state
 		void Update_EditorMode(float deltaTime);
 		void Update_PlayMode(float deltaTime);

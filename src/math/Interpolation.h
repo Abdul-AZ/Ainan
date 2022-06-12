@@ -17,13 +17,13 @@ namespace Ainan {
 
 	static InterpolationType StringToInterpolationType(const std::string& type)
 	{
-		if (type == "Fixed")
+		if (type == "InterpolationType::Fixed")
 			return InterpolationType::Fixed;
-		else if (type == "Linear")
+		else if (type == "InterpolationType::Linear")
 			return InterpolationType::Linear;
-		else if (type == "Cubic")
+		else if (type == "InterpolationType::Cubic")
 			return InterpolationType::Cubic;
-		else if (type == "Smoothstep")
+		else if (type == "InterpolationType::Smoothstep")
 			return InterpolationType::Smoothstep;
 		else
 		{

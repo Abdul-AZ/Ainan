@@ -18,6 +18,7 @@ set(SOURCES_LIST
     "editor/ViewportWindow.h"          "editor/ViewportWindow.cpp"
     "editor/Window.h"                  "editor/Window.cpp"
     "editor/EditorCamera.h"            "editor/EditorCamera.cpp"
+    "editor/ThreadPool.h"              "editor/ThreadPool.cpp"
 
     "editor/customizers/ColorCustomizer.h"      "editor/customizers/ColorCustomizer.cpp"
     "editor/customizers/ForceCustomizer.h"      "editor/customizers/ForceCustomizer.cpp"
