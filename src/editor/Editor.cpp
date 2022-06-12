@@ -528,7 +528,7 @@ namespace Ainan
 		else
 			camera = m_Camera.m_Camera;
 
-		for (pEnvironmentObject& obj : m_Env->Objects)
+		for (auto& obj : m_Env->Objects)
 		{
 			auto mutexPtr = obj->GetMutex();
 
@@ -561,7 +561,7 @@ namespace Ainan
 		if (camera.GetProjectionMode() == ProjectionMode::Perspective)
 			m_Env->EnvSkybox.Draw(camera);
 
-		for (pEnvironmentObject& obj : m_Env->Objects)
+		for (auto& obj : m_Env->Objects)
 		{
 			auto mutexPtr = obj->GetMutex();
 			std::lock_guard lock(*mutexPtr);
@@ -590,7 +590,7 @@ namespace Ainan
 
 			if (m_ShowObjectIcons)
 			{
-				for (pEnvironmentObject& obj : m_Env->Objects)
+				for (auto& obj : m_Env->Objects)
 				{
 					const float scale = 0.25f;
 					const glm::vec3 position = glm::vec3(obj->ModelMatrix[3]);
@@ -1019,7 +1019,7 @@ namespace Ainan
 		ImGui::Begin("Properties", &m_PropertiesWindowOpen);
 
 		//find selected object
-		pEnvironmentObject* selectedObj = nullptr;
+		std::unique_ptr<EnvironmentObjectInterface>* selectedObj = nullptr;
 		for (auto& obj : m_Env->Objects)
 		{
 			if (obj->Selected)

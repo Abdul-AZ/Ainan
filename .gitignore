@@ -10,5 +10,6 @@ output
 *.cso
 *.info
 .ccls-cache
+compile_commands.json
 tags
 build

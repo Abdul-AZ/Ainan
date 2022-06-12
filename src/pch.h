@@ -18,6 +18,7 @@
 #include <limits>
 #include <thread>
 #include <condition_variable>
+#include <cstdint>
 
 #define GLM_FORCE_LEFT_HANDED 1
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE 1
