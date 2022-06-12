@@ -5,28 +5,17 @@ cmake_policy(SET CMP0077 NEW)
 
 project(Ainan)
 
-#define a new add_subdirectory function so that we have a cleaner solution explorer window in visual studio by using folders
-################
+#define a new function to add projects and put them in a folder in the visual studio solution explorer
 set_property(GLOBAL PROPERTY USE_FOLDERS TRUE)
-define_property(
-    TARGET
-    PROPERTY FOLDER
-    INHERITED
-    BRIEF_DOCS "Set the folder name."
-    FULL_DOCS  "Use to organize targets in an IDE."
-)
+include("cmake/add_subdirectory_with_folder.cmake")
 
-function(add_subdirectory_with_folder _folder_name _folder)
-    add_subdirectory(${_folder} ${ARGN})
-    set_property(DIRECTORY "${_folder}" PROPERTY FOLDER "${_folder_name}")
-endfunction()
-#################
-
-##setup glfw
+#setup glfw
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 add_subdirectory_with_folder(glfw "submodules/glfw")
+set_target_properties(glfw PROPERTIES FOLDER glfw) #annoying workaround because glfw sets its own GLFW3 folder in visual studio
 set(STATIC_LIBRARIES glfw)
 
 ##setup glslcc (shader cross-compiler)

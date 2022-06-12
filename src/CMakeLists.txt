@@ -1,87 +1,14 @@
-
-set(SOURCES_LIST
+add_executable(Core WIN32     
     "main.cpp"
     "pch.h"  "pch.cpp"
     "Log.h"  "Log.cpp"
+)
 
-    "editor/AppStatusWindow.h"         "editor/AppStatusWindow.cpp"
-    "editor/CurveEditor.h"             "editor/CurveEditor.cpp"
-    "editor/Editor.h"                  "editor/Editor.cpp"
-    "editor/EditorPreferences.h"       "editor/EditorPreferences.cpp"
-    "editor/EditorStyles.h"            "editor/EditorStyles.cpp"
-    "editor/Exporter.h"                "editor/Exporter.cpp"
-    "editor/Grid.h"                    "editor/Grid.cpp"
-    "editor/ImGuiWrapper.h"            "editor/ImGuiWrapper.cpp"
-    "editor/InputManager.h"            "editor/InputManager.cpp"
-    "editor/InterpolationSelector.h"   "editor/InterpolationSelector.cpp"
-    "editor/ParticleCustomizer.h"      "editor/ParticleCustomizer.cpp"
-    "editor/ViewportWindow.h"          "editor/ViewportWindow.cpp"
-    "editor/Window.h"                  "editor/Window.cpp"
-    "editor/EditorCamera.h"            "editor/EditorCamera.cpp"
-    "editor/ThreadPool.h"              "editor/ThreadPool.cpp"
-
-    "editor/customizers/ColorCustomizer.h"      "editor/customizers/ColorCustomizer.cpp"
-    "editor/customizers/ForceCustomizer.h"      "editor/customizers/ForceCustomizer.cpp"
-    "editor/customizers/LifetimeCustomizer.h"   "editor/customizers/LifetimeCustomizer.cpp"
-    "editor/customizers/NoiseCustomizer.h"      "editor/customizers/NoiseCustomizer.cpp"
-    "editor/customizers/ScaleCustomizer.h"      "editor/customizers/ScaleCustomizer.cpp"
-    "editor/customizers/TextureCustomizer.h"    "editor/customizers/TextureCustomizer.cpp"
-    "editor/customizers/VelocityCustomizer.h"   "editor/customizers/VelocityCustomizer.cpp"
-
-    "environment/Environment.h"                "environment/Environment.cpp"
-    "environment/UUID.h"                       "environment/UUID.cpp"
-    "environment/Skybox.h"                     "environment/Skybox.cpp"
-    "environment/EnvironmentObjectInterface.h" "environment/EnvironmentObjectInterface.cpp"
-    "environment/EnvLoad.cpp"
-    "environment/EnvSave.cpp"
-    "environment/LitSprite.h"                  "environment/LitSprite.cpp"
-    "environment/ParticleSystem.h"             "environment/ParticleSystem.cpp"
-    "environment/RadialLight.h"                "environment/RadialLight.cpp"
-    "environment/SpotLight.h"                  "environment/SpotLight.cpp"
-    "environment/Sprite.h"                     "environment/Sprite.cpp"
-    "environment/Model.h"                      "environment/Model.cpp"
-    "environment/CameraObject.h"               "environment/CameraObject.cpp"
-
-    "file/AssetManager.h"     "file/AssetManager.cpp"
-    "file/FileBrowser.h"      "file/FileBrowser.cpp"
-    "file/FolderBrowser.h"    "file/FolderBrowser.cpp"
-    "file/SaveItemBrowser.h"  "file/SaveItemBrowser.cpp"
-
-    "renderer/Renderer.h"            "renderer/Renderer.cpp"
-    "renderer/RendererAPI.h"
-    "renderer/RendererContext.h"
-    "renderer/RenderCommand.h"       "renderer/RenderCommand.cpp"
-    "renderer/RenderCommandQueue.h"  "renderer/RenderCommandQueue.cpp"
-    "renderer/VertexBuffer.h"        "renderer/VertexBuffer.cpp"
-    "renderer/IndexBuffer.h"
-    "renderer/UniformBuffer.h"       "renderer/UniformBuffer.cpp"
-    "renderer/ShaderProgram.h"       "renderer/ShaderProgram.cpp"
-    "renderer/Texture.h"             "renderer/Texture.cpp"
-    "renderer/Rectangle.h"
-    "renderer/Framebuffer.h"         "renderer/Framebuffer.cpp"
-    "renderer/Image.h"               "renderer/Image.cpp"
-    "renderer/Camera.h"              "renderer/Camera.cpp"
-    "renderer/RenderSurface.h"       "renderer/RenderSurface.cpp"
-
-    "renderer/opengl/OpenGLRendererAPI.h"      "renderer/opengl/OpenGLRendererAPI.cpp"
-    "renderer/opengl/OpenGLRendererContext.h"  "renderer/opengl/OpenGLRendererContext.cpp"
-
-    "vendor/glad/glad.h"            "vendor/glad/glad.cpp"
-    "vendor/stb/stb_image.h"        "vendor/stb/stb_image.cpp"
-    "vendor/stb/stb_image_write.h"  "vendor/stb/stb_image_write.cpp"
-    )
-
-set(IMGUI_SOURCE_FILES
-    "../submodules/imgui/imgui.cpp"
-    "../submodules/imgui/imgui_demo.cpp"
-    "../submodules/imgui/imgui_draw.cpp"
-    "../submodules/imgui/imgui_widgets.cpp"
-    "../submodules/imgui/imgui_tables.cpp"
-    "../submodules/imgui/misc/cpp/imgui_stdlib.cpp"
-    "../submodules/imgui/imgui_internal.h"
-
-    "../submodules/ImGuizmo/ImGuizmo.cpp"
-    )
+add_subdirectory("vendor")
+add_subdirectory("editor")
+add_subdirectory("file")
+add_subdirectory("renderer")
+add_subdirectory("environment")
 
 list(APPEND DEFINITIONS_LIST
     IMGUI_DEFINE_MATH_OPERATORS=1
@@ -99,7 +26,7 @@ if(WIN32)
 		STARTING_BROWSER_DIRECTORY="C:\\\\"
         )
 
-    list(APPEND SOURCES_LIST
+    target_sources(Core PUBLIC
         "windows/WinMain.cpp"
         "windows/WindowsFileEvaluator.h"         "windows/WindowsFileEvaluator.cpp"
         "renderer/d3d11/D3D11RendererAPI.h"      "renderer/d3d11/D3D11RendererAPI.cpp"
@@ -143,7 +70,8 @@ if(WIN32)
     endwhile()
 
     #generate visual studio filters
-    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES_LIST})
+    get_target_property(MY_PROJECT_SOURCES Core SOURCES)
+    source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${MY_PROJECT_SOURCES})
     source_group("shaders" FILES ${SHADER_FILES})
     source_group("compiled shaders" FILES ${GENERATED_SHADER_FILES})
 else()
@@ -152,8 +80,20 @@ else()
         )
 endif()
 
+#Add imgui files after making the visual studio file filters because they are outside the src directory
+target_sources(Core PUBLIC
+                    "../submodules/imgui/imgui.cpp"
+                    "../submodules/imgui/imgui_demo.cpp"
+                    "../submodules/imgui/imgui_draw.cpp"
+                    "../submodules/imgui/imgui_widgets.cpp"
+                    "../submodules/imgui/imgui_tables.cpp"
+                    "../submodules/imgui/misc/cpp/imgui_stdlib.cpp"
+                    "../submodules/imgui/imgui_internal.h"
 
-list(APPEND INCLUDE_LIST
+                    "../submodules/ImGuizmo/ImGuizmo.cpp"
+)
+
+target_include_directories(Core PRIVATE 
     "."
     "../submodules/imgui"
     "../submodules/imgui/examples"
@@ -163,12 +103,11 @@ list(APPEND INCLUDE_LIST
     "../submodules/ImGuizmo"
     "../submodules/assimp/include/assimp"
     "vendor"
-    )
+)
 
-add_executable(Core WIN32 ${SOURCES_LIST} ${IMGUI_SOURCE_FILES} ${SHADER_FILES} ${GENERATED_SHADER_FILES})
+target_sources(Core PUBLIC ${SHADER_FILES} ${GENERATED_SHADER_FILES})
 set_source_files_properties(${GENERATED_SHADER_FILES} PROPERTIES GENERATED TRUE)
 target_precompile_headers(Core PRIVATE "pch.h")
-target_include_directories(Core PRIVATE ${INCLUDE_LIST})
 target_compile_definitions(Core PRIVATE ${DEFINITIONS_LIST})
 target_compile_options(Core PRIVATE -fpermissive)
 target_link_libraries(Core ${STATIC_LIBRARIES})
