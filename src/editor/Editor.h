@@ -20,6 +20,7 @@
 #include "EditorPreferences.h"
 #include "ImGuizmo.h"
 #include "ThreadPool.h"
+#include "Profiler.h"
 
 namespace Ainan {
 
@@ -43,13 +44,6 @@ namespace Ainan {
 			State_EditorMode,  //this means we are in the normal enviornment editor
 			State_PlayMode,    //this means that the environment is being simulated/run
 			State_PauseMode    //this means that there is a pause in simulation and can be resumed to where it was stopped
-		};
-
-		enum class Profiler
-		{
-			ParticleProfiler,
-			PlaymodeProfiler,
-			RenderingProfiler
 		};
 
 	public:
@@ -77,7 +71,6 @@ namespace Ainan {
 		bool m_PropertiesWindowOpen = true;
 		bool m_EnvironmentControlsWindowOpen = true;
 		bool m_ObjectInspectorWindowOpen = true;
-		bool m_ProfilerWindowOpen = true;
 		bool m_EnvironmentSettingsWindowOpen = true;
 		bool m_PreferencesWindowOpen = false;
 		bool m_ShowGrid = true;
@@ -100,8 +93,7 @@ namespace Ainan {
 		std::string m_AddObjectWindowObjectName = "Example Name";
 		EnvironmentObjectType m_AddObjectWindowObjectType = SpriteType;
 		std::clock_t m_TimeStart = 0, m_TimeEnd = 0;
-		std::array<float, 120> m_DeltaTimeHistory;
-		Profiler m_ActiveProfiler = Profiler::RenderingProfiler;
+		Profiler m_Profiler;
 		ImGuizmo::OPERATION m_GizmoOperation = ImGuizmo::OPERATION::TRANSLATE;
 
 		float m_SimulationSpeedFactor = 1.0f;
@@ -149,7 +141,6 @@ namespace Ainan {
 		void FocusCameraOnObject(EnvironmentObjectInterface& object);
 		void AddEnvironmentObject(EnvironmentObjectType type, const std::string& name);
 		void RegisterEnvironmentInputKeys();
-		void DisplayProfilerGUI();
 		void DisplayPreferencesGUI();
 		void UpdateTitle();
 

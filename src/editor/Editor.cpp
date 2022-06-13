@@ -248,15 +248,8 @@ namespace Ainan
 		if (Window::WindowSizeChangedSinceLastFrame)
 			m_RenderSurface.SetSize(Window::FramebufferSize);
 
-		//this stuff is used for the profiler
-		m_TimeSincePlayModeStarted += deltaTime;
-
 		//save delta time for the profiler
-
-		//move everything back
-		std::memmove(m_DeltaTimeHistory.data(), m_DeltaTimeHistory.data() + 1, (m_DeltaTimeHistory.size() - 1) * sizeof(float));
-		//register the new time
-		m_DeltaTimeHistory[m_DeltaTimeHistory.size() - 1] = LastFrameDeltaTime;
+		m_Profiler.RegisterTimeStep(m_SimulationDeltaTime, deltaTime);
 	}
 
 	void Editor::Update_PauseMode(float deltaTime)
@@ -650,7 +643,7 @@ namespace Ainan
 		AssetManager::DisplayGUI();
 		DisplayEnvironmentControlsGUI();
 		DisplayObjectInspecterGUI();
-		DisplayProfilerGUI();
+		m_Profiler.DisplayGUI();
 		DisplayPreferencesGUI();
 		DisplayPropertiesGUI();
 		m_AppStatusWindow.DisplayGUI();
@@ -778,8 +771,6 @@ namespace Ainan
 		m_RenderSurface.SetSize(Window::FramebufferSize);
 		RegisterEnvironmentInputKeys();
 
-		std::memset(m_DeltaTimeHistory.data(), 0, m_DeltaTimeHistory.size() * sizeof(float));
-
 		UpdateTitle();
 	}
 
@@ -836,7 +827,7 @@ namespace Ainan
 				ImGui::MenuItem("Environment Controls", nullptr, &m_EnvironmentControlsWindowOpen);
 				ImGui::MenuItem("Object Inspector", nullptr, &m_ObjectInspectorWindowOpen);
 				ImGui::MenuItem("Settings", nullptr, &m_EnvironmentSettingsWindowOpen);
-				ImGui::MenuItem("Profiler", nullptr, &m_ProfilerWindowOpen);
+				ImGui::MenuItem("Profiler", nullptr, &m_Profiler.WindowOpen);
 				ImGui::MenuItem("Exporter", nullptr, &m_Exporter.m_ExporterWindowOpen);
 
 				ImGui::EndMenu();
@@ -1088,9 +1079,7 @@ namespace Ainan
 	void Editor::PlayMode()
 	{
 		m_State = State_PlayMode;
-		//reset profiler
-		m_TimeSincePlayModeStarted = 0.0f;
-		std::memset(m_DeltaTimeHistory.data(), 0, m_DeltaTimeHistory.size() * sizeof(float));
+		m_Profiler.Reset();
 	}
 
 	void Editor::DisplayObjectInspecterGUI()
@@ -1652,192 +1641,6 @@ namespace Ainan
 					m_Camera.PreviewCamera = nullptr;
 				}
 			});
-	}
-
-	void Editor::DisplayProfilerGUI()
-	{
-		if (!m_ProfilerWindowOpen || m_State != State_PlayMode)
-			return;
-
-		ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
-		ImGui::Begin("Profiler", &m_ProfilerWindowOpen, ImGuiWindowFlags_NoDocking);
-
-		ImVec4 activeColor = { 0.6f,0.6f,0.6f,1.0f };
-		ImVec4 inactiveColor = { 0.2f,0.2f,0.2f,1.0f };
-
-		{
-			if (m_ActiveProfiler == Profiler::RenderingProfiler)
-				ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
-			else
-				ImGui::PushStyleColor(ImGuiCol_Button, inactiveColor);
-
-			if (ImGui::Button("Rendering"))
-				m_ActiveProfiler = Profiler::RenderingProfiler;
-
-			ImGui::PopStyleColor();
-		}
-
-		ImGui::SameLine();
-
-		{
-			if (m_ActiveProfiler == Profiler::ParticleProfiler)
-				ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
-			else
-				ImGui::PushStyleColor(ImGuiCol_Button, inactiveColor);
-
-			if (ImGui::Button("Particles"))
-				m_ActiveProfiler = Profiler::ParticleProfiler;
-
-			ImGui::PopStyleColor();
-		}
-
-		ImGui::SameLine();
-
-		{
-			if (m_ActiveProfiler == Profiler::PlaymodeProfiler)
-				ImGui::PushStyleColor(ImGuiCol_Button, activeColor);
-			else
-				ImGui::PushStyleColor(ImGuiCol_Button, inactiveColor);
-
-			if (ImGui::Button("Environment"))
-				m_ActiveProfiler = Profiler::PlaymodeProfiler;
-
-			ImGui::PopStyleColor();
-		}
-
-		ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 10.0f);
-
-		switch (m_ActiveProfiler)
-		{
-		case Profiler::RenderingProfiler:
-		{
-			ImGui::Text("Draw Calls: ");
-			ImGui::SameLine();
-			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(m_DrawCalls).c_str());
-			ImGui::SameLine();
-
-			//update framerate every 30 frames
-			static int32_t frameCounter = 1;
-			if (frameCounter % 30 == 0)
-			{
-				//calculate fps when we dont have uninitilized values
-				if (std::find(m_DeltaTimeHistory.begin(), m_DeltaTimeHistory.end(), 0.0f) == m_DeltaTimeHistory.end())
-					m_AverageFPS = std::round(1.0f / (std::accumulate(m_DeltaTimeHistory.begin(), m_DeltaTimeHistory.end(), 0.0f) / m_DeltaTimeHistory.size()));
-				else
-					m_AverageFPS = 0;
-				frameCounter = 1;
-			}
-			frameCounter++;
-
-			ImGui::Text("        FPS: ");
-			ImGui::SameLine();
-			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, std::to_string(m_AverageFPS).c_str());
-
-			if (ImGui::IsItemHovered()) {
-				ImGui::BeginTooltip();
-				ImGui::SetTooltip("NOTE: Frame rates do not exceed 60,\nthis is theoretical FPS given the time per frame");
-				ImGui::EndTooltip();
-			}
-
-			ImGui::PlotLines("Frame Time(s)", m_DeltaTimeHistory.data(), m_DeltaTimeHistory.size(),
-				0, 0, 0.0f, 0.025f, ImVec2(0, 50));
-
-			ImGui::Text("Textures: ");
-			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->Textures.size()).c_str());
-
-			ImGui::SameLine();
-			ImGui::Text("   VBO(s): ");
-			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->VertexBuffers.size()).c_str());
-
-			ImGui::SameLine();
-			ImGui::Text("   EBO(s): ");
-			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->IndexBuffers.size()).c_str());
-
-			ImGui::SameLine();
-			ImGui::Text("   UBO(s): ");
-			ImGui::SameLine();
-			ImGui::Text(std::to_string(Renderer::Rdata->UniformBuffers.size()).c_str());
-
-			bool displayTooltip = false;
-			ImGui::SameLine();
-			ImGui::Text("   Used GPU Memory: ");
-			displayTooltip |= ImGui::IsItemHovered();
-			ImGui::SameLine();
-			ImGui::Text(std::to_string(m_GPUMemAllocated / (1024 * 1024)).c_str());
-			displayTooltip |= ImGui::IsItemHovered();
-			ImGui::SameLine();
-			ImGui::Text("Mb");
-			displayTooltip |= ImGui::IsItemHovered();
-
-			if(displayTooltip)
-				ImGui::SetTooltip((std::to_string(m_GPUMemAllocated / (1024)) + " KB").c_str());
-		}
-		break;
-
-		case Profiler::ParticleProfiler:
-		{
-			ImGui::Text("Global Particle Count :");
-			ImGui::SameLine();
-
-			uint32_t activeParticleCount = 0;
-			for (pEnvironmentObject& obj : m_Env->Objects)
-			{
-				auto mutexPtr = obj->GetMutex();
-				std::lock_guard lock(*mutexPtr);
-				//if object is a particle system
-				if (obj->Type == EnvironmentObjectType::ParticleSystemType)
-				{
-					//cast it to a particle system pointer
-					ParticleSystem* ps = static_cast<ParticleSystem*>(obj.get());
-
-					//increment active particles by how many particles are active in this particle system
-					activeParticleCount += ps->ActiveParticleCount;
-				}
-			}
-			ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, std::to_string(activeParticleCount).c_str());
-
-			ImGui::Separator();
-
-			for (pEnvironmentObject& pso : m_Env->Objects)
-			{
-				auto mutexPtr = pso->GetMutex();
-				std::lock_guard lock(*mutexPtr);
-				if (pso->Type == EnvironmentObjectType::ParticleSystemType)
-				{
-					ParticleSystem* ps = static_cast<ParticleSystem*>(pso.get());
-
-					ImGui::Text((pso->m_Name + ":").c_str());
-					ImGui::SameLine();
-					ImGui::Text("Particle Count = ");
-					ImGui::SameLine();
-					ImGui::TextColored({ 0.0f, 1.0f, 0.0f, 1.0f }, std::to_string(ps->ActiveParticleCount).c_str());
-					ImGui::Separator();
-				}
-
-				ImGui::Spacing();
-			}
-
-		}
-		break;
-
-		case Profiler::PlaymodeProfiler:
-		{
-			//this is to control how many decimal points we want to display
-			std::stringstream stream;
-			//we want 3 decimal places
-			stream << std::setprecision(3) << m_TimeSincePlayModeStarted;
-			ImGui::Text("Time Since PlayMode Mode Started :");
-			ImGui::SameLine();
-			ImGui::TextColored({ 0.0f,0.8f,0.0f,1.0f }, stream.str().c_str());
-		}
-		break;
-		}
-
-		Renderer::RegisterWindowThatCanCoverViewport();
-		ImGui::End();
 	}
 
 	void Editor::DisplayPreferencesGUI()

@@ -11,6 +11,7 @@ target_sources(Core PUBLIC
     "InputManager.h"            "InputManager.cpp"
     "InterpolationSelector.h"   "InterpolationSelector.cpp"
     "ParticleCustomizer.h"      "ParticleCustomizer.cpp"
+    "Profiler.h"                "Profiler.cpp"
     "ViewportWindow.h"          "ViewportWindow.cpp"
     "Window.h"                  "Window.cpp"
     "EditorCamera.h"            "EditorCamera.cpp"
